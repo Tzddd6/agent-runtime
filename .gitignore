@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+.mypy_cache/
+
+# 密钥与本地配置（绝对不能提交）
+.env
+.env.*
+!.env.example
+*.local.json
+config.local.*
+secrets.*
+*.pem
+*.key
+*.p8
+*_key
+id_rsa*
+id_ed25519*
+
+# 运行产物
+logs/
+*.log
+*.pid
+*.tar.gz
+results/
+
+# 系统
+.DS_Store
+Thumbs.db
