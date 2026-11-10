@@ -1,0 +1,37 @@
+import contextlib, io, json, os, subprocess, sys, time
+from pathlib import Path
+project=Path(__file__).resolve().parents[1]
+if sys.platform != 'linux' or os.geteuid() == 0:
+ raise SystemExit('需要在 Linux 上通过 User=普通用户、Delegate=yes 的临时服务运行')
+os.chdir(project)
+sys.path.insert(0,str(project))
+print('PLATFORM',sys.version,flush=True)
+ret=subprocess.run([sys.executable,'-m','unittest','-v'])
+if ret.returncode:raise SystemExit(ret.returncode)
+relative=Path('/proc/self/cgroup').read_text().strip().split('0::',1)[1].splitlines()[0]
+root=Path('/sys/fs/cgroup')/relative.lstrip('/')
+print('DELEGATED_ROOT',root,flush=True)
+control=root/'control'
+control.mkdir(exist_ok=True)
+(control/'cgroup.procs').write_text(str(os.getpid()))
+(root/'cgroup.subtree_control').write_text('+cpu +memory +pids')
+attempts=root/'attempts'
+attempts.mkdir(exist_ok=True)
+(attempts/'cgroup.subtree_control').write_text('+cpu +memory +pids')
+env=dict(os.environ,AGENTRT_TEST_CGROUP=str(attempts))
+ret=subprocess.run([sys.executable,'-m','unittest','-v','test_extended.ExtendedTests.test_linux_cgroup_oom'],env=env)
+if ret.returncode:raise SystemExit(ret.returncode)
+from agent_runtime.runtime import run
+start=time.monotonic()
+with contextlib.redirect_stdout(io.StringIO()):
+ states,events=run([{'id':'cpu_smoke','action':'command','timeout':12,'resources':{'cpu_milli':200,'memory_bytes':134217728},'argv':[sys.executable,'-c','import time; end=time.monotonic()+2\nwhile time.monotonic()<end: pass']}],cgroup_root=str(attempts),output_dir=project/'runs')
+elapsed=time.monotonic()-start
+usage=dict(line.split() for line in events[-1]['usage']['cpu.stat'].splitlines())
+ratio=int(usage['usage_usec'])/1e6/elapsed
+assert states['cpu_smoke']=='succeeded',states
+assert 0 < ratio < 0.40,ratio
+assert int(usage['nr_throttled'])>0,usage
+assert not list(attempts.iterdir()) or all(not p.is_dir() for p in attempts.iterdir())
+report={'states':states,'wall_seconds':elapsed,'cpu_core_ratio':ratio,'cpu_stat':usage,'oom_test':'passed','enforcement':'cgroup_v2','runtime_user':os.getuid()}
+(project/'runs/linux-validation-latest.json').write_text(json.dumps(report,indent=2))
+print('LINUX_VALIDATION',json.dumps(report),flush=True)
