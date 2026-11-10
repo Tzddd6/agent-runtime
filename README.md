@@ -66,3 +66,8 @@ python -m unittest -v
 - AIOS: LLM Agent Operating System
 - 多 Agent 框架：LangGraph / AutoGen / CrewAI
 - Linux 调度器（CFS / EEVDF）与 cgroup v2 容器资源管理
+
+
+## v0.2 初版（2026-11-10）
+
+新增模块化 Runtime、动态 DAG、资源准入、有限重试、上下文对象、严格 cgroup 后端。运行方式及验证边界见 [运行指南](docs/运行指南-v0.2.md)。
