@@ -1,0 +1,29 @@
+{
+  "job": "ab675a698c4841978e5b892d3feaac33",
+  "status": "succeeded",
+  "states": {
+    "planner": "succeeded",
+    "analyzer": "succeeded",
+    "tester": "succeeded",
+    "indexer": "succeeded",
+    "reviewer": "succeeded"
+  },
+  "budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "enforcement": "cgroup_v2",
+  "sample_count": 44,
+  "max_sampled_worker_cpu_cores": 1.394091368330066,
+  "max_sampled_worker_memory_bytes": 100020224,
+  "final_reserved": {
+    "cpu_milli": 0,
+    "memory_bytes": 0,
+    "pids": 0
+  },
+  "residual_attempts": 0,
+  "paid_model_calls": 0,
+  "key_retained": true,
+  "history_restored_count": 20
+}

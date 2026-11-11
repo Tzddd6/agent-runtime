@@ -13,6 +13,32 @@ def number(path):
         return None
 
 
+def effective_limits(root,boundary=Path('/sys/fs/cgroup')):
+    """Read ancestor ceilings; reservations remain ceilings, not guarantees."""
+    root,boundary=Path(root).resolve(),Path(boundary).resolve()
+    if root!=boundary and boundary not in root.parents:raise ValueError('cgroup outside mount')
+    cpu=[];memory=[];pids=[]
+    for node in (root,*root.parents):
+        try:
+            quota,period=(node/'cpu.max').read_text().split()
+            if quota!='max' and int(period)>0:cpu.append(int(quota)/int(period))
+        except (OSError,ValueError):pass
+        try:
+            text=(node/'cpuset.cpus.effective').read_text().strip()
+            count=0
+            for part in text.split(',') if text else []:
+                ends=part.split('-');count+=int(ends[-1])-int(ends[0])+1
+            if count>0:cpu.append(count)
+        except (OSError,ValueError):pass
+        for name,values in [('memory.max',memory),('pids.max',pids)]:
+            value=number(node/name)
+            if value is not None:values.append(value)
+        if node==boundary:break
+    return {'cpu_limit_cores':min(cpu) if cpu else None,
+            'memory_limit_bytes':min(memory) if memory else None,
+            'pids_limit':min(pids) if pids else None,'limits_scope':'ancestors'}
+
+
 class CgroupSampler:
     def __init__(self):
         self.previous = {}
@@ -75,13 +101,11 @@ class MachineSampler:
             except (OSError, ValueError, KeyError, IndexError):
                 pass
             service = self.cgroups.sample(self.service)
-            service.update(cpu_limit_cores=None, memory_limit_bytes=None)
+            service.update(cpu_limit_cores=None, memory_limit_bytes=None,pids_limit=None)
             if self.service:
                 try:
-                    quota, period = (self.service/'cpu.max').read_text().split()
-                    if quota != 'max':service['cpu_limit_cores']=int(quota)/int(period)
-                    service['memory_limit_bytes']=number(self.service/'memory.max')
-                except (OSError,ValueError,ZeroDivisionError):
+                    service.update(effective_limits(self.service))
+                except (OSError,ValueError):
                     pass
             self.cached = {'host':host,'service':service,'time':time.time()}
             self.sampled = now

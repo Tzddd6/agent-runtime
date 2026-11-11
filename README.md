@@ -1,6 +1,8 @@
-# Agent Runtime v0.5 开发版
+# Agent Runtime v0.6 开发版
 
 本项目对应 OS 功能挑战 proj3，与 ICT 算子竞赛无关。Python 3.9+，仅用标准库。
+
+v0.6 完成执行与控制面的再次审查：统一三种调度策略的决策/监控路径，解析祖先 cgroup、cpuset 及进程限额，持久保存最近运行索引；服务中断只恢复观测，不自动重跑模型。新版网页按协作流程、资源监控、任务拓扑和结果记录分视图，提供历史筛选、任务诊断、源码对照和记录导出。使用与本次验收见 [v0.6 审查与升级说明](docs/架构审查与界面升级-v0.6.md)。
 
 v0.4 新增类似任务管理器的实时资源视图：整机与服务用量、实际/预留曲线、任务与 PID、等待原因、依赖图、Attempt 时间线，以及上下文缓存指标。新增老化资源准入、AIOS 启发的 LRU-2 JSON 缓存和 AutoGen 风格的限轮评审。使用方法、论文出处与实测边界见 docs/运行指南-v0.4.md。
 
@@ -35,6 +37,7 @@ python3 -m agent_runtime.web --host 127.0.0.1 --port 18881
 - web.py：浏览器提交、状态、事件、取消和内存中的模型配置。
 - project_workflow.py：三个固定项目的七阶段修复 DAG、实际测试与最终语义判定。
 - model_broker.py：独立内存凭据服务、全局调用槽与付费提交去重。
+- job_store.py：原子写入的有界运行索引与中断标记，仅恢复观测，不恢复执行。
 - worker.py：echo/sleep/fail/command 动作。command 接收 argv 字符串数组，不启用 shell，仅允许受信任配置，不能直接执行模型生成命令。
 - __main__.py：CLI，保留原有 run/validate 导入兼容。
 

@@ -143,11 +143,11 @@ def validate_patch(raw,project='pricing'):
         raise ValueError('source exceeds source limit')
     try:tree=ast.parse(source,filename=spec['file'])
     except (SyntaxError,ValueError,RecursionError,MemoryError) as exc:
-        raise ValueError('invalid pricing.py syntax') from exc
+        raise ValueError('invalid '+spec['file']+' syntax') from exc
     nodes=list(ast.walk(tree))
     allowed=ALLOWED+(ast.Attribute,) if text_project else ALLOWED
     if len(nodes)>700 or any(not isinstance(node,allowed) for node in nodes):
-        raise ValueError('source is outside the allowed pure-integer subset')
+        raise ValueError('source is outside the allowed fixed-project Python subset')
     if len(tree.body)!=3 or any(not isinstance(node,ast.FunctionDef) for node in tree.body):
         raise ValueError('module must contain exactly the three specified functions')
     if {node.name for node in tree.body}!=set(signatures):

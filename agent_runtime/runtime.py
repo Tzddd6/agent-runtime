@@ -234,7 +234,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 return scheduler.choose(ready,used,
                     busy_agents={t.get('agent',t['id']) for _,t,_ in running.values()},
                     slots_available=max_workers-len(running))
-            if policy=='aging_fit':choose()
+            choose()
             for task in list(tasks):
                 key = task['id']
                 if states[key] != 'waiting':
@@ -250,7 +250,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key, 'unschedulable', reason='单任务请求超过总预算')
                     continue
                 agent = task.get('agent', key)
-                if policy=='aging_fit' and choose().task_id!=key:
+                if choose().task_id!=key:
                     continue
                 busy = any(t.get('agent', t['id']) == agent for _, t, _ in running.values())
                 if busy or len(running) >= max_workers or any(used[k] + limits[k] > budget[k] for k in budget):

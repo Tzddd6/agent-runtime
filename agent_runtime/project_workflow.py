@@ -98,6 +98,7 @@ def project_view(project,events,states,budget=None):
     for key,label in [('baseline','原始失败'),('analyze','问题分析'),('test_plan','测试设计'),
                       ('repair','生成补丁'),('validate','真实测试'),('review','独立评审'),('gate','最终结论')]:
         state=states.get(key,'waiting')
+        if key not in states and any(s=='interrupted' for s in states.values()):state='interrupted'
         if key not in states and any(s=='cancelled' for s in states.values()):state='cancelled'
         elif key not in states and any(s in ('failed','timeout','skipped','unschedulable') for s in states.values()):state='skipped'
         if key in ('review','gate') and isinstance(validation,dict) and not validation.get('success'):

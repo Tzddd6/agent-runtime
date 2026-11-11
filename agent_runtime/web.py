@@ -14,11 +14,12 @@ from urllib.parse import urlparse
 from .runtime import run
 from .telemetry import MachineSampler
 from .model_gateway import ModelError
+from .job_store import JobStore
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
 LOGGER = logging.getLogger(__name__)
-RECOVERY_MESSAGE = '执行资源回收状态未确认，已暂停新任务和模型配置；请管理员检查日志与残留进程/cgroup，确认回收后重启本项目服务'
+RECOVERY_MESSAGE = '执行资源回收状态未确认，已暂停新任务和模型配置；请管理员检查日志与残留进程/cgroup，确认回收并归档隔离索引后重启本项目服务'
 
 
 class Controller:
@@ -29,8 +30,13 @@ class Controller:
         self.csrf = secrets.token_urlsafe(32)
         self.lock = threading.Lock()
         self.jobs = {}
+        self.store=JobStore(self.root)
         self.machine = MachineSampler(cgroup_root)
         self.recovery_required = False
+        self.storage_warning=False
+        for job in self.store.load():
+            self.jobs[job['id']]=job
+            if job['status']=='recovery_required':self.recovery_required=True
         self.model_broker = None
         if os.environ.get('AGENTRT_MODEL_BROKER_URL'):
             from .model_broker import BrokerClient
@@ -50,7 +56,9 @@ class Controller:
         memory=1024**3
         if service['memory_limit_bytes'] is not None:
             memory=min(memory,max(1,service['memory_limit_bytes']-128*1024**2))
-        return {'cpu_milli':cpu,'memory_bytes':memory,'pids':128}
+        pids=128
+        if service.get('pids_limit') is not None:pids=min(pids,max(1,service['pids_limit']-16))
+        return {'cpu_milli':cpu,'memory_bytes':memory,'pids':pids}
 
     def submit(self, value):
         preset = value.get('preset')
@@ -107,6 +115,7 @@ class Controller:
                    'workers':workers,'policy':policy,'budget':budget,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key}
             if preset=='engineering':job['project']=project
+            self.store.save(job) # Persist the sole submission intent before starting any Worker.
             self.jobs[key] = job
             # 内存索引保留最近 20 次，磁盘结果保留供团队管理。
             for old in list(self.jobs)[:-20]:
@@ -138,6 +147,7 @@ class Controller:
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe)
                 with self.lock:
+                    job['final_states']=states
                     semantic=True
                     if preset=='engineering':
                         from .project_workflow import project_view
@@ -155,19 +165,24 @@ class Controller:
             finally:
                 with self.lock:
                     job['finished']=time.time()
+                    try:self.store.save(job)
+                    except (OSError,ValueError):
+                        self.storage_warning=True
+                        LOGGER.exception('Console index write failed for job %s; execution result retained in memory',key)
 
         threading.Thread(target=execute,daemon=True).start()
         return key
 
     def snapshot(self):
         with self.lock:
-            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history')} for j in self.jobs.values()]
+            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history','final_states')} for j in self.jobs.values()]
             recovery_required = self.recovery_required
         info=self.model_info()
         machine=self.machine.sample()
         return {'jobs':list(reversed(jobs)), 'csrf':self.csrf,
                 'model_configured':info['configured'],'model':info['model'],
                 'model_available':info['available'],'fixed_budget':True,
+                'storage_warning':self.storage_warning,'history_persistent':True,
                 'enforcement':'cgroup_v2' if self.cgroup_root else 'admission_only',
                 'recovery_required':recovery_required,
                 'recovery_message':RECOVERY_MESSAGE if recovery_required else '',
@@ -194,16 +209,19 @@ class Controller:
                 try:events.append(json.loads(line))
                 except ValueError:pass
         monitor=result.get('monitor')
-        watermark=monitor.get('event_sequence') if monitor else None
+        watermark=monitor.get('event_sequence') if monitor and result['status'] in ('running','cancelling') else None
         if type(watermark) is int:
             # The observer may lag the journal: only return events belonging to
             # this snapshot, never combine a new terminal event with old usage.
             events=[event for event in events if type(event.get('sequence')) is int
                     and event['sequence']<=watermark]
         result['events']=events[-100:]
-        result['states']=({task['id']:task['state'] for task in monitor.get('tasks',[])}
-                          if monitor and type(watermark) is int
-                          else {e['task_id']:e['state'] for e in events})
+        final_states=result.pop('final_states',None)
+        result['states']=(final_states or
+            {task['id']:task['state'] for task in monitor.get('tasks',[])}) if monitor and type(watermark) is int else (
+            final_states or {e['task_id']:e['state'] for e in events})
+        if result['status']=='interrupted':
+            result['states']={k:('interrupted' if v in ('waiting','running') else v) for k,v in result['states'].items()}
         if result.get('preset')=='engineering':
             from .project_workflow import project_view
             result['engineering']=project_view(result['project'],events,result['states'],result['budget'])
@@ -212,6 +230,10 @@ class Controller:
 
 def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
     class Handler(BaseHTTPRequestHandler):
+        def setup(self):
+            self.request.settimeout(6)
+            super().setup()
+
         def log_message(self,*args):pass
 
         def respond(self, code, value, kind='application/json; charset=utf-8'):
@@ -236,7 +258,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             path=urlparse(self.path).path
             if path=='/':
                 self.respond(200,(Path(__file__).parent/'static/index.html').read_text(encoding='utf-8'),'text/html; charset=utf-8')
-            elif path in ('/static/console.js','/static/console.css'):
+            elif path in ('/static/console.js','/static/console.css','/static/workspace.css'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())

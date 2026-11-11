@@ -1,7 +1,9 @@
 'use strict';
 let csrf='', selected=null, polling=false, offline=true, recoveryRequired=false, currentDetail=null;
+let currentView='workflow',viewJob=null,allJobs=[],inspectedTask=null,phaseSignature='';
 const $=id=>document.getElementById(id);
 const names={running:'运行中',succeeded:'成功',failed:'失败',waiting:'等待',timeout:'超时',skipped:'已跳过',unschedulable:'预算不足',cancelled:'已停止',cancelling:'停止中',recovery_required:'待管理员恢复'};
+names.interrupted='已中断';
 const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审',engineering:'Python 项目修复'};
 const palette=['#109a8c','#5d8dcc','#c79d52','#957bb7','#5fa0a6','#c17c8b','#709563'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
@@ -55,7 +57,67 @@ function renderMachine(machine={}){
   $('updated').textContent=finite(machine.time)?'采样 '+new Date(machine.time*1000).toLocaleTimeString():'等待采样';
 }
 
-function renderJobs(jobs){const list=$('jobs');list.replaceChildren();$('jobCount').textContent=jobs.length+' 次';if(!jobs.length)list.append(empty('暂无运行记录',true));for(const job of jobs){const button=node('button',null,'job'+(selected===job.id?' selected':''));button.type='button';const row=node('div',null,'job-row');const projectLabel={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};const title=job.preset==='engineering'?'项目修复 · '+(projectLabel[job.project]||job.project||'受控项目'):scenes[job.preset]||job.preset;row.append(node('span',title),badge(job.status));button.append(row,node('span',job.id.slice(0,10)+' · '+new Date(job.created*1000).toLocaleTimeString(),'mono'));button.onclick=async()=>{selected=job.id;await refresh()};list.append(button)}}
+function jobTitle(job){const labels={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};return job.preset==='engineering'?'项目修复 · '+(labels[job.project]||job.project||'受控项目'):scenes[job.preset]||job.preset}
+function selectRun(id){
+  selected=id;currentDetail=null;inspectedTask=null;
+  $('selectedTitle').textContent='正在读取运行…';$('selectedStatus').textContent='读取中';$('selectedStatus').className='badge waiting';
+  $('exportRun').disabled=true;$('engineeringPanel').hidden=true;$('answer').hidden=true;$('cancel').hidden=true;
+  $('runFacts').replaceChildren(node('span','正在同步该运行的实际状态…'));
+  $('jobId').textContent='正在读取运行 '+id.slice(0,10);
+  $('selectedDescription').textContent='等待该运行的实际状态返回';
+  renderAllocations({stale:true});renderCharts(null,[]);renderContext(null);renderTasks([],[],true);renderDependencies([]);
+  renderTimeline({events:[],created:Date.now()/1000,status:'waiting'});
+  $('events').textContent='正在读取记录…';showView(currentView);
+}
+function renderJobs(jobs){
+  allJobs=jobs;const list=$('jobs');list.replaceChildren();$('jobCount').textContent=jobs.length+' 次';
+  const search=($('jobSearch')?.value||'').trim().toLowerCase(),filter=$('jobFilter')?.value||'all';
+  const visible=jobs.filter(j=>(!search||(jobTitle(j)+' '+j.id).toLowerCase().includes(search))&&
+    (filter==='all'||filter==='active'&&['running','cancelling'].includes(j.status)||filter===j.status));
+  if(!visible.length)list.append(empty(jobs.length?'没有符合条件的记录':'暂无运行记录',true));
+  for(const job of visible){const button=node('button',null,'job'+(selected===job.id?' selected':''));button.type='button';
+    const row=node('div',null,'job-row');row.append(node('span',jobTitle(job)),badge(job.status));
+    button.append(row,node('span',job.id.slice(0,10)+' · '+new Date(job.created*1000).toLocaleTimeString()+(job.restored?' · 历史':''),'mono'));
+    button.onclick=async()=>{selectRun(job.id);await refresh()};list.append(button)}
+}
+
+function showView(view){
+  if(!['workflow','resources','tasks','logs'].includes(view))return;currentView=view;
+  for(const el of document.querySelectorAll?.('[data-view]')||[]){const active=el.dataset.view===view;
+    if(el.getAttribute('role')==='tab'){el.setAttribute('aria-selected',String(active));el.tabIndex=active?0:-1}
+    else el.classList.toggle('active',active)}
+  for(const pane of document.querySelectorAll?.('[data-pane]')||[]){
+    pane.hidden=!pane.dataset.pane.split(' ').includes(view)||
+      pane.id==='engineeringPanel'&&currentDetail?.preset!=='engineering'||
+      pane.id==='workflowEmpty'&&currentDetail?.preset==='engineering'||
+      pane.id==='answer'&&!(currentDetail?.events||[]).some(e=>e.state==='succeeded'&&e.result)||
+      pane.id==='taskInspector'&&!inspectedTask;
+  }
+}
+function renderOverview(job){
+  if(!$('selectedTitle'))return;
+  $('selectedTitle').textContent=jobTitle(job);$('selectedStatus').textContent=names[job.status]||job.status;
+  $('selectedStatus').className='badge '+job.status;
+  $('selectedDescription').textContent=job.id+' · '+(job.policy||'—')+' · '+job.workers+' Worker';
+  const states=Object.values(job.states||{}),done=states.filter(x=>x==='succeeded').length;
+  const end=job.finished||job.monitor?.time||Date.now()/1000;
+  const usage=job.engineering?.usage||{};const facts=[['执行耗时',number(Math.max(0,end-job.created),1)+' s'],
+    ['任务完成',done+' / '+states.length],['模型调用',job.engineering?String(job.engineering.model_calls):String((job.events||[]).filter(e=>e.result?.model_call).length)],
+    ['输入 / 输出 token',finite(usage.prompt_tokens)?usage.prompt_tokens+' / '+usage.completion_tokens:'—']];
+  const box=$('runFacts');box.replaceChildren();for(const [label,value] of facts){const card=node('div',null,'run-fact');card.append(node('small',label),node('strong',value));box.append(card)}
+  $('historyState').textContent=job.restored?'已从磁盘恢复 · 不会自动重跑':'运行索引已保存 · 原始产物保留';
+  $('exportRun').disabled=false;
+}
+function renderInspector(){
+  if(!inspectedTask||!currentDetail)return;
+  const row=taskRows(currentDetail).find(t=>t.id===inspectedTask);
+  if(!row){inspectedTask=null;return}
+  $('inspectorTitle').textContent=row.id+' / '+(row.agent||row.id);
+  $('inspectorMeta').textContent=(names[row.state]||row.state)+' · '+(row.wait_reason||'无等待')+' · 依赖：'+((row.depends_on||[]).join('、')||'无');
+  const event=[...(currentDetail.events||[])].reverse().find(e=>e.task_id===row.id&&e.state!=='running');
+  $('inspectorBody').textContent=formatResult({resources:row.resources,metrics:row.metrics,
+    error:event?.error||event?.reason||null,output:event?.output||null,result:event?.result?.result??null});
+}
 
 function renderAllocations(monitor){const box=$('allocations');box.replaceChildren();if(!monitor){box.append(empty('正在等待 Runtime 的资源账本'));return}const rows=monitor.tasks||[],running=monitor.stale?[]:rows.filter(t=>t.state==='running');const specs=[['CPU 预留','cpu_milli',v=>number(v/1000,2)+' 核'],['内存预留','memory_bytes',bytes],['PIDs 预留','pids',v=>String(v)],['Worker 槽位','slots',v=>String(v)]];for(const [label,key,format] of specs){const reserved=monitor.stale?null:(key==='slots'?monitor.slots_used:monitor.reserved?.[key]),budget=key==='slots'?monitor.slots_total:monitor.budget?.[key];const card=node('div');const head=node('div',null,'allocation-head');head.append(node('span',label),node('span',finite(reserved)&&finite(budget)&&budget>0?Math.round(reserved/budget*100)+'%':'—'));const value=node('div',finite(reserved)?format(reserved):'—','allocation-value');value.append(node('small',' / '+(finite(budget)?format(budget):'—')));const track=node('div',null,'allocation-track');if(finite(budget)&&budget>0){for(const task of running){const amount=key==='slots'?1:task.resources?.[key];if(!finite(amount))continue;const segment=node('i');segment.style.width=Math.max(0,Math.min(100,amount/budget*100))+'%';segment.style.background=colorFor(task.id);segment.title=task.id+'：'+format(amount);track.append(segment)}}card.append(head,value,track,node('div',monitor.stale?'采样失效 · 分配状态未知':(key==='slots'?'正在占用 / 并发上限':'调度器账本 · 不是实际消耗'),'allocation-sub'));box.append(card)}}
 
@@ -81,7 +143,7 @@ function chart(container,history,actual,reserved,budget,format,color){
 function renderCharts(monitor,history){const latest=history[history.length-1]||{};$('cpuReadout').textContent=monitor?.stale?'— · 采样已失效':(finite(latest.cpu_cores)?number(latest.cpu_cores,2)+' 核实际':'实际 —');$('memoryReadout').textContent=monitor?.stale?'— · 采样已失效':bytes(latest.memory_bytes)+' 实际';chart('cpuChart',history,f=>f.cpu_cores,f=>finite(f.reserved?.cpu_milli)?f.reserved.cpu_milli/1000:null,monitor?.budget?.cpu_milli/1000,v=>number(v,2)+' 核','#078681');chart('memoryChart',history,f=>f.memory_bytes,f=>f.reserved?.memory_bytes,monitor?.budget?.memory_bytes,bytes,'#4f94be');const span=history.length>1?number(history[history.length-1].time-history[0].time,1)+' 秒记录':'等待采样';$('cpuRange').textContent=(monitor?.stale?'最后记录 · ':'')+span;$('memoryRange').textContent=(monitor?.stale?'最后记录 · ':'')+span;let note='曲线属于选中的工作流；顶部指标属于整机或整个 Runtime 服务。';if(monitor&&monitor.enforcement!=='cgroup_v2')note+=' 当前仅资源准入，Worker 的 OS 实际用量未采集。';if(monitor?.scheduling?.draining_task_id)note+=' 老化保护：为 '+monitor.scheduling.draining_task_id+' 等待资源释放。';if(monitor?.stale)note='采样已失效，资源回收状态需管理员确认。图表仅保留最后记录，当前资源用量与预留状态未知。';$('sampleNote').className=monitor?.stale?'hint stale-warning':'hint';$('sampleNote').textContent=note}
 
 function taskRows(job){if(job.monitor?.tasks?.length)return job.monitor.tasks;return Object.entries(job.states||{}).map(([id,state])=>{const events=(job.events||[]).filter(e=>e.task_id===id),last=events[events.length-1]||{},start=[...events].reverse().find(e=>e.state==='running')||{};return{id,agent:last.agent||id,state,attempt:last.attempt||0,pid:state==='running'?start.pid:null,resources:start.resources||{},metrics:{},depends_on:[],wait_reason:''}})}
-function renderTasks(rows,events,stale=false){const box=$('tasks');box.replaceChildren();$('taskCount').textContent=rows.length+' 个任务 · '+(stale?'最后快照，非实时':rows.filter(t=>t.state==='running').length+' 个运行中');if(!rows.length){box.append(empty('等待 Runtime 建立任务图'));return}const table=node('table'),head=node('tr');for(const title of ['任务 / Agent','状态 / 等待原因','Attempt / PID','CPU 实际 / 配额','内存实际 / 配额','进程数'])head.append(node('th',title));const thead=node('thead');thead.append(head);table.append(thead);const body=node('tbody');for(const task of rows){const row=node('tr'),identity=node('td'),state=node('td'),process=node('td'),cpu=node('td'),memory=node('td'),pids=node('td');const marker=node('i',null,'task-color');marker.style.background=colorFor(task.id);identity.append(marker,node('span',task.id,'task-name'),node('small',task.agent||task.id));state.append(badge(task.state));if(task.wait_reason)state.append(node('small',task.wait_reason));const start=[...events].reverse().find(e=>e.task_id===task.id&&e.state==='running'&&e.attempt===task.attempt);process.append(node('span','第 '+(task.attempt||0)+' 次'),node('small',(task.pid||start?.pid)?'PID '+(task.pid||start.pid):'尚未分配 PID'));const metrics=stale?{...task.metrics,cpu_cores:null,memory_bytes:null,pids:null}:(task.metrics||{}),limits=task.resources||{};cpu.append(node('span',finite(metrics.cpu_cores)?number(metrics.cpu_cores,2)+' 核':'—'),node('small','配额 '+(finite(limits.cpu_milli)?number(limits.cpu_milli/1000,2)+' 核':'—')));const live=task.state==='running',terminal=['failed','timeout','skipped','unschedulable','cancelled','succeeded'].includes(task.state);memory.append(node('span',bytes(live?metrics.memory_bytes:(terminal?metrics.memory_peak_bytes:null))),node('small',(terminal?'峰值 / 配额 ':'配额 ')+bytes(limits.memory_bytes)));pids.append(node('span',finite(metrics.pids)?metrics.pids:'—'),node('small','配额 '+(finite(limits.pids)?limits.pids:'—')));if(finite(metrics.cpu_total_seconds))cpu.title='累计 CPU '+number(metrics.cpu_total_seconds,3)+' 秒；节流周期 '+(metrics.throttled_periods??'—');row.append(identity,state,process,cpu,memory,pids);body.append(row)}table.append(body);box.append(table)}
+function renderTasksBase(rows,events,stale=false){const box=$('tasks');box.replaceChildren();$('taskCount').textContent=rows.length+' 个任务 · '+(stale?'最后快照，非实时':rows.filter(t=>t.state==='running').length+' 个运行中');if(!rows.length){box.append(empty('等待 Runtime 建立任务图'));return}const table=node('table'),head=node('tr');for(const title of ['任务 / Agent','状态 / 等待原因','Attempt / PID','CPU 实际 / 配额','内存实际 / 配额','进程数'])head.append(node('th',title));const thead=node('thead');thead.append(head);table.append(thead);const body=node('tbody');for(const task of rows){const row=node('tr'),identity=node('td'),state=node('td'),process=node('td'),cpu=node('td'),memory=node('td'),pids=node('td');const marker=node('i',null,'task-color');marker.style.background=colorFor(task.id);identity.append(marker,node('span',task.id,'task-name'),node('small',task.agent||task.id));state.append(badge(task.state));if(task.wait_reason)state.append(node('small',task.wait_reason));const start=[...events].reverse().find(e=>e.task_id===task.id&&e.state==='running'&&e.attempt===task.attempt);process.append(node('span','第 '+(task.attempt||0)+' 次'),node('small',(task.pid||start?.pid)?'PID '+(task.pid||start.pid):'尚未分配 PID'));const metrics=stale?{...task.metrics,cpu_cores:null,memory_bytes:null,pids:null}:(task.metrics||{}),limits=task.resources||{};cpu.append(node('span',finite(metrics.cpu_cores)?number(metrics.cpu_cores,2)+' 核':'—'),node('small','配额 '+(finite(limits.cpu_milli)?number(limits.cpu_milli/1000,2)+' 核':'—')));const live=task.state==='running',terminal=['failed','timeout','skipped','unschedulable','cancelled','succeeded'].includes(task.state);memory.append(node('span',bytes(live?metrics.memory_bytes:(terminal?metrics.memory_peak_bytes:null))),node('small',(terminal?'峰值 / 配额 ':'配额 ')+bytes(limits.memory_bytes)));pids.append(node('span',finite(metrics.pids)?metrics.pids:'—'),node('small','配额 '+(finite(limits.pids)?limits.pids:'—')));if(finite(metrics.cpu_total_seconds))cpu.title='累计 CPU '+number(metrics.cpu_total_seconds,3)+' 秒；节流周期 '+(metrics.throttled_periods??'—');row.append(identity,state,process,cpu,memory,pids);body.append(row)}table.append(body);box.append(table)}
 
 function dependencyLevels(rows){const map=new Map(rows.map(row=>[row.id,row])),memo=new Map();function level(id,seen=new Set()){if(memo.has(id))return memo.get(id);if(seen.has(id))return 0;seen.add(id);const deps=(map.get(id)?.depends_on||[]).filter(dep=>map.has(dep));const value=deps.length?1+Math.max(...deps.map(dep=>level(dep,new Set(seen)))):0;memo.set(id,value);return value}return rows.map(row=>({row,level:level(row.id)}))}
 function renderDependencies(rows){const box=$('dependencyGraph');box.replaceChildren();if(!rows.length){box.append(empty('暂无任务图',true));return}const levels=dependencyLevels(rows),max=Math.max(...levels.map(item=>item.level));for(let level=0;level<=max;level++){const column=node('div',null,'dependency-column');for(const {row} of levels.filter(item=>item.level===level)){const card=node('div',null,'dependency-node '+row.state);card.append(node('strong',row.id),badge(row.state));card.append(node('p',(row.depends_on||[]).length?'依赖：'+row.depends_on.join('、'):'入口任务'));if(row.state==='waiting'&&row.wait_reason)card.append(node('p',row.wait_reason));column.append(card)}box.append(column)}}
@@ -120,7 +182,7 @@ function renderEngineering(job){
   if(panel.hidden)return;
   const data=engineering||{},stale=Boolean(job.monitor?.stale),project=data.project||job.project||'pricing';
   const labels={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};
-  $('engineeringTitle').textContent=data.title||'Python 项目修复 · '+(labels[project]||project);
+  $('engineeringTitle').textContent='Python 项目修复 · '+(labels[project]||project);
   const validation=data.validation,verdict=data.verdict;
   const semanticFailure=validation?.success===false||verdict?.accepted===false;
   const success=verdict?.accepted===true&&validation?.success===true;
@@ -129,7 +191,11 @@ function renderEngineering(job){
   $('engineeringOutcome').className='badge '+(stale?'waiting':success?'succeeded':semanticFailure||job.status==='failed'?'failed':job.status);
   const phases=Array.isArray(data.phases)?data.phases:[];
   const defaults=[['baseline','原始失败'],['analyze','问题分析'],['test_plan','测试设计'],['repair','模型补丁'],['validate','真实测试'],['review','最终评审'],['gate','结果确认']];
-  const box=$('engineeringPhases');box.replaceChildren();
+  const box=$('engineeringPhases');
+  const signature=JSON.stringify([job.id,phases,job.states]);
+  if(signature!==phaseSignature){
+  const expanded=new Set([...(box.querySelectorAll?.('details[open]')||[])].map(e=>e.id));
+  box.replaceChildren();
   for(const [id,label] of defaults){
     const phase=phases.find(p=>p.id===id)||{};
     const state=phase.status||job.states?.[id]||'waiting';
@@ -137,8 +203,10 @@ function renderEngineering(job){
     const card=node('div',null,'repair-phase '+(allowed.includes(state)?state:'waiting'));
     const head=node('div',null,'repair-phase-head');head.append(node('strong',phase.label||label),badge(state));card.append(head);
     if(id==='baseline')card.append(node('small','确认缺陷，不要求原版通过'));
-    if(phase.details!=null){const details=node('details',null,'repair-phase-details');details.append(node('summary','查看阶段记录'),node('pre',typeof phase.details==='string'?phase.details:formatResult(phase.details)));card.append(details)}
+    if(phase.details!=null){const details=node('details',null,'repair-phase-details');details.id='phase-'+id;details.open=expanded.has(details.id);details.append(node('summary','查看阶段记录'),node('pre',typeof phase.details==='string'?phase.details:formatResult(phase.details)));card.append(details)}
     box.append(card);
+  }
+  phaseSignature=signature;
   }
   renderCheckGroup('engineeringBaseline','修复前 · 预期失败',data.baseline,true);
   renderCheckGroup('engineeringValidation','修复后 · 真实检查',validation);
@@ -147,7 +215,7 @@ function renderEngineering(job){
   else if(verdict&&typeof verdict==='object'){
     decision.append(node('strong',verdict.accepted===true?'最终评审接受':verdict.accepted===false?'最终评审未接受':'最终评审已返回'));
     if(verdict.reason)decision.append(node('p',verdict.reason));
-  }else decision.append(node('span',semanticFailure?'验证未通过，停止后续付费调用':'等待真实测试和最终评审结果'));
+  }else decision.append(node('span',semanticFailure?(validation?.error||'真实测试未通过，已停止后续付费调用'):'等待真实测试和最终评审结果'));
   decision.className='repair-verdict '+(success?'check-pass':semanticFailure?'check-fail':'');
   $('engineeringCalls').textContent='模型调用 '+(finite(data.model_calls)?data.model_calls:'—')+' / '+(finite(data.call_limit)?data.call_limit:4);
   const usage=data.usage||{};$('engineeringTokens').textContent='输入 / 输出 token：'+(finite(usage.prompt_tokens)?usage.prompt_tokens:'—')+' / '+(finite(usage.completion_tokens)?usage.completion_tokens:'—');
@@ -155,9 +223,10 @@ function renderEngineering(job){
   const source=typeof data.patch_source==='string'?data.patch_source:typeof validation?.source==='string'?validation.source:'';
   $('engineeringPatch').hidden=!source;$('engineeringSource').textContent=source;
   $('engineeringHash').textContent=data.source_sha256||validation?.source_sha256||'';
+  if($('engineeringOriginal'))$('engineeringOriginal').textContent=data.original_source||'—';
 }
 
-function renderDetail(job){currentDetail=job;renderEngineering(job);$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
+function renderDetailBase(job){currentDetail=job;renderEngineering(job);$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
 
 function markOffline(message){
   offline=true;
@@ -188,18 +257,40 @@ async function refresh(){
     if(!selected&&state.jobs.length)selected=state.jobs[0].id;
     if(selected&&!state.jobs.some(job=>job.id===selected))selected=state.jobs[0]?.id||null;
     renderJobs(state.jobs);
-    if(selected)renderDetail(await api('jobs/'+selected));
+    if(selected){const target=selected;const detail=await api('jobs/'+target);if(target===selected)renderDetail(detail)}
+    if(state.storage_warning)$('notice').textContent='运行索引写入失败，当前结果仍在内存中，请导出记录并检查磁盘。';
     if(recoveryRequired){$('notice').textContent=state.recovery_message||'资源回收状态未确认，请管理员检查后恢复服务';$('cancel').disabled=true}
     else if($('notice').textContent.includes('当前资源读数未知'))$('notice').textContent='';
   }catch(error){markOffline(error.message)}finally{polling=false}
 }
 
+function renderTasks(rows,events,stale=false){
+  const filter=$('taskFilter')?.value||'all';
+  const visible=rows.filter(t=>filter==='all'||filter==='failed'&&['failed','timeout','unschedulable'].includes(t.state)||t.state===filter);
+  renderTasksBase(visible,events,stale);
+  const nodes=$('tasks').querySelectorAll?.('tbody tr')||[];
+  [...nodes].forEach((row,index)=>{const task=visible[index];row.classList.toggle('selected-task',task.id===inspectedTask);row.tabIndex=0;row.setAttribute('aria-label','查看任务 '+task.id);
+    row.onclick=()=>{inspectedTask=task.id;renderInspector();showView('tasks');$('taskInspector').scrollIntoView?.({block:'nearest',behavior:'smooth'})};row.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();row.onclick()}}});
+}
+function renderDetail(job){
+  const changed=viewJob!==job.id;
+  if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':'resources';phaseSignature=''}
+  renderDetailBase(job);renderOverview(job);renderInspector();showView(currentView);
+}
 function initialize(){
+  for(const el of document.querySelectorAll('[data-view]'))el.onclick=e=>{e.preventDefault();showView(el.dataset.view)};
+  for(const tab of document.querySelectorAll('[role=tab]'))tab.onkeydown=e=>{const order=['workflow','resources','tasks','logs'];let index=order.indexOf(currentView);
+    if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();index=e.key==='Home'?0:e.key==='End'?3:(index+(e.key==='ArrowRight'?1:3))%4;showView(order[index]);$('tab-'+order[index]).focus()}};
+  $('jobSearch').oninput=()=>renderJobs(allJobs);$('jobFilter').onchange=()=>renderJobs(allJobs);
+  $('taskFilter').onchange=()=>{if(currentDetail)renderTasks(taskRows(currentDetail),currentDetail.events||[],Boolean(currentDetail.monitor?.stale))};
+  $('closeInspector').onclick=()=>{inspectedTask=null;showView('tasks')};
+  $('viewResources').onclick=()=>showView('resources');
+  $('exportRun').onclick=()=>{if(!currentDetail)return;const blob=new Blob([JSON.stringify(currentDetail,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='agentrt-'+currentDetail.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
   $('preset').onchange=updateScene;
   if($('project'))$('project').onchange=updateScene;
   $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到模型服务内存':'已清除密钥';await refresh()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
-  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selected=result.id;await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
+  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selectRun(result.id);await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
   $('cancel').onclick=async()=>{if(!selected||offline||recoveryRequired)return;try{await api('jobs/'+selected+'/cancel',{});await refresh()}catch(error){$('notice').textContent=error.message}};
-  updateScene();$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);
+  updateScene();showView('workflow');$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);
 }
 if(typeof document!=='undefined'&&document.getElementById('form'))initialize();
