@@ -1,0 +1,58 @@
+{
+  "states": {
+    "cpu_smoke": "succeeded"
+  },
+  "wall_seconds": 2.2144071149996307,
+  "cpu_core_ratio": 0.2040347490484266,
+  "cpu_stat": {
+    "usage_usec": "451816",
+    "user_usec": "445980",
+    "system_usec": "5836",
+    "nr_periods": "22",
+    "nr_throttled": "22",
+    "throttled_usec": "1738987",
+    "nr_bursts": "0",
+    "burst_usec": "0"
+  },
+  "oom_test": "passed",
+  "enforcement": "cgroup_v2",
+  "runtime_user": 1001,
+  "regular_discovered": 80,
+  "regular_passed": 73,
+  "regular_skipped": 7,
+  "strict_tests_passed": 6,
+  "document_pipeline": {
+    "plan": "succeeded",
+    "analyze": "succeeded",
+    "index": "succeeded",
+    "review": "succeeded"
+  },
+  "ipc": {
+    "send": "succeeded",
+    "receive": "succeeded"
+  },
+  "pids_test": "passed",
+  "descendant_cleanup": "passed",
+  "timeout_retry_cleanup": "passed",
+  "live_measurements": "passed",
+  "platform": "6.6.0-159.4.20.174.oe2403sp4.x86_64",
+  "python": "3.11.6 (main, Jun 24 2026, 00:37:42) [GCC 12.3.1 (openEuler 12.3.1-110.oe2403sp4)]",
+  "context_stats": {
+    "puts": 2,
+    "unique_objects": 1,
+    "logical_bytes": 17288,
+    "stored_bytes": 4743,
+    "cache_hits": 1,
+    "cache_misses": 1,
+    "cache_evictions": 0,
+    "cache_invalidations": 0,
+    "cache_bypasses": 0,
+    "cache_bytes": 8644,
+    "disk_reads": 1,
+    "disk_read_bytes": 4743,
+    "cache_entries": 1,
+    "cache_limit_bytes": 8388608,
+    "cache_limit_entries": 1024,
+    "cache_policy": "lru2"
+  }
+}

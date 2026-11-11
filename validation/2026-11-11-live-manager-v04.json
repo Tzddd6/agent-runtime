@@ -1,0 +1,31 @@
+{
+  "job_id": "b72fff64afcf4a3f8413d9bbf85f14d8",
+  "workflow_id": "9a2632bb8dc84f1ba6c41803f31d4f3c",
+  "status": "succeeded",
+  "enforcement": "cgroup_v2",
+  "samples": 44,
+  "max_measured_cpu_cores": 1.344682799329298,
+  "max_measured_memory_bytes": 100130816,
+  "wait_reasons": [
+    "排空资源，优先让 indexer 启动",
+    "等待依赖任务",
+    "等待调度",
+    "等待资源预算释放"
+  ],
+  "final_reserved": {
+    "cpu_milli": 0,
+    "memory_bytes": 0,
+    "pids": 0
+  },
+  "sample_sequence": 45,
+  "event_sequence": 10,
+  "all_task_states": {
+    "planner": "succeeded",
+    "analyzer": "succeeded",
+    "tester": "succeeded",
+    "indexer": "succeeded",
+    "reviewer": "succeeded"
+  },
+  "recovery_required": false,
+  "paid_model_calls": 0
+}
