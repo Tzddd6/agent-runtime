@@ -1,0 +1,10 @@
+{
+  "regular_discovered": 131,
+  "regular_passed": 124,
+  "regular_skipped": 7,
+  "strict_tests_passed": 6,
+  "enforcement": "cgroup_v2",
+  "residual_attempts": 0,
+  "paid_model_calls_in_regression": 0,
+  "runtime_uid": 1001
+}

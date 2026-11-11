@@ -124,7 +124,7 @@ class ModelGateway:
         self.lock = threading.Lock()
         self.cancel_event = threading.Event()
         self.connections, self.connection_lock = set(), threading.Lock()
-        if isinstance(client,DeepSeekClient):client.cancel_event=self.cancel_event
+        if hasattr(client,'cancel_event'):client.cancel_event=self.cancel_event
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -192,6 +192,9 @@ class ModelGateway:
 
     @classmethod
     def from_env(cls, log_path):
+        if os.environ.get('AGENTRT_MODEL_BROKER_URL'):
+            from .model_broker import BrokerClient
+            return cls(BrokerClient.from_env(),log_path)
         return cls(DeepSeekClient(os.environ.get('DEEPSEEK_API_KEY'),
             model=os.environ.get('DEEPSEEK_MODEL', 'deepseek-flash')), log_path)
 

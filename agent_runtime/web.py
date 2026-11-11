@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 from .runtime import run
 from .telemetry import MachineSampler
+from .model_gateway import ModelError
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -30,6 +31,26 @@ class Controller:
         self.jobs = {}
         self.machine = MachineSampler(cgroup_root)
         self.recovery_required = False
+        self.model_broker = None
+        if os.environ.get('AGENTRT_MODEL_BROKER_URL'):
+            from .model_broker import BrokerClient
+            self.model_broker=BrokerClient.from_env()
+
+    def model_info(self):
+        if self.model_broker is not None:
+            try:return {**self.model_broker.status(),'available':True}
+            except ModelError:return {'configured':False,'model':self.model_broker.model,'available':False}
+        return {'configured':bool(os.environ.get('DEEPSEEK_API_KEY')),
+                'model':os.environ.get('DEEPSEEK_MODEL','deepseek-flash'),'available':True}
+
+    def resource_budget(self,service):
+        cpu=2000
+        if service['cpu_limit_cores'] is not None:
+            cpu=min(cpu,max(1,int(service['cpu_limit_cores']*1000)))
+        memory=1024**3
+        if service['memory_limit_bytes'] is not None:
+            memory=min(memory,max(1,service['memory_limit_bytes']-128*1024**2))
+        return {'cpu_milli':cpu,'memory_bytes':memory,'pids':128}
 
     def submit(self, value):
         preset = value.get('preset')
@@ -50,6 +71,11 @@ class Controller:
             if not isinstance(text, str) or len(text) > 4000:
                 raise ValueError('文档长度不得超过 4000 字')
             tasks = tasks_for(text)
+        elif preset == 'engineering':
+            from .project_workflow import project_tasks
+            project=value.get('project','pricing')
+            if not isinstance(project,str):raise ValueError('项目类型无效')
+            tasks=project_tasks(project)
         elif preset in ('llm','team','review'):
             prompt = value.get('prompt', '')
             if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 4000:
@@ -71,20 +97,16 @@ class Controller:
                 raise ValueError('已有工作流运行中，请等待结束或停止后再提交')
             # The same lock guards model-config updates: no clear/replace can race
             # between this check and registering the active workflow.
-            if preset in ('llm','team','review') and not os.environ.get('DEEPSEEK_API_KEY'):
-                raise ValueError('服务端尚未配置 DEEPSEEK_API_KEY')
+            if preset in ('llm','team','review','engineering') and not self.model_info()['configured']:
+                raise ValueError('模型服务尚未配置 API 密钥或暂不可用')
             key = uuid.uuid4().hex
             service = self.machine.sample()['service']
-            cpu = workers*1000
-            if service['cpu_limit_cores'] is not None:
-                cpu = min(cpu, max(1,int(service['cpu_limit_cores']*1000)))
-            memory = 1024**3
-            if service['memory_limit_bytes'] is not None:
-                memory = min(memory,max(1,service['memory_limit_bytes']-128*1024**2))
-            budget = {'cpu_milli':cpu,'memory_bytes':memory,'pids':128}
+            # Worker count changes concurrency only; keep the same resource envelope.
+            budget = self.resource_budget(service)
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
                    'workers':workers,'policy':policy,'budget':budget,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key}
+            if preset=='engineering':job['project']=project
             self.jobs[key] = job
             # 内存索引保留最近 20 次，磁盘结果保留供团队管理。
             for old in list(self.jobs)[:-20]:
@@ -112,12 +134,17 @@ class Controller:
 
         def execute():
             try:
-                states, _ = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
+                states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe)
                 with self.lock:
+                    semantic=True
+                    if preset=='engineering':
+                        from .project_workflow import project_view
+                        summary=project_view(project,completed_events,states,budget)
+                        semantic=isinstance(summary['verdict'],dict) and summary['verdict'].get('accepted') is True
                     job['status'] = ('cancelled' if any(s=='cancelled' for s in states.values())
-                                     else 'succeeded' if all(s=='succeeded' for s in states.values()) else 'failed')
+                                     else 'succeeded' if all(s=='succeeded' for s in states.values()) and semantic else 'failed')
             except Exception:
                 LOGGER.exception('Workflow %s exited without confirmed resource release; recovery required', key)
                 with self.lock:
@@ -136,13 +163,15 @@ class Controller:
         with self.lock:
             jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history')} for j in self.jobs.values()]
             recovery_required = self.recovery_required
+        info=self.model_info()
+        machine=self.machine.sample()
         return {'jobs':list(reversed(jobs)), 'csrf':self.csrf,
-                'model_configured':bool(os.environ.get('DEEPSEEK_API_KEY')),
-                'model':os.environ.get('DEEPSEEK_MODEL','deepseek-flash'),
+                'model_configured':info['configured'],'model':info['model'],
+                'model_available':info['available'],'fixed_budget':True,
                 'enforcement':'cgroup_v2' if self.cgroup_root else 'admission_only',
                 'recovery_required':recovery_required,
                 'recovery_message':RECOVERY_MESSAGE if recovery_required else '',
-                'machine':self.machine.sample()}
+                'machine':machine,'budget':self.resource_budget(machine['service'])}
 
     def detail(self, key):
         with self.lock:
@@ -175,6 +204,9 @@ class Controller:
         result['states']=({task['id']:task['state'] for task in monitor.get('tasks',[])}
                           if monitor and type(watermark) is int
                           else {e['task_id']:e['state'] for e in events})
+        if result.get('preset')=='engineering':
+            from .project_workflow import project_view
+            result['engineering']=project_view(result['project'],events,result['states'],result['budget'])
         return result
 
 
@@ -236,7 +268,10 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                             raise ValueError(RECOVERY_MESSAGE)
                         if any(j['status'] in ('running','cancelling') for j in controller.jobs.values()):
                             raise ValueError('请等待运行结束后再更新模型配置')
-                        if key:os.environ['DEEPSEEK_API_KEY']=key
+                        if controller.model_broker is not None:
+                            try:controller.model_broker.configure(key)
+                            except ModelError:raise ValueError('模型服务未确认配置，请检查服务状态') from None
+                        elif key:os.environ['DEEPSEEK_API_KEY']=key
                         else:os.environ.pop('DEEPSEEK_API_KEY',None)
                     self.respond(200,{'configured':bool(key)})
                 elif self.path=='/api/jobs':self.respond(202,{'id':controller.submit(value)})

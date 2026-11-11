@@ -25,17 +25,29 @@
   <div class="workspace">
     <section class="control-column">
       <article class="panel"><div class="panel-title"><h2>启动工作流</h2><span id="runtimeState" class="small-status">就绪</span></div>
-        <form id="form"><label for="preset">任务场景</label><select id="preset"><option value="resources">资源分配 · 实际 CPU 与内存负载</option><option value="dynamic">动态协作 · 并行与失败重试</option><option value="ipc">Agent 通信 · 消息与引用</option><option value="document">文档处理 · 分析、索引、汇总</option><option value="llm">DeepSeek · 模型对话</option><option value="team">DeepSeek · 四 Agent 协作</option><option value="review">DeepSeek · 写作与评审修订</option></select>
+        <form id="form"><label for="preset">任务场景</label><select id="preset"><option value="engineering">Python 项目修复 · 完整测试与评审</option><option value="resources">资源分配 · 实际 CPU 与内存负载</option><option value="dynamic">动态协作 · 并行与失败重试</option><option value="ipc">Agent 通信 · 消息与引用</option><option value="document">文档处理 · 分析、索引、汇总</option><option value="llm">DeepSeek · 模型对话</option><option value="team">DeepSeek · 四 Agent 协作</option><option value="review">DeepSeek · 写作与评审修订</option></select>
+          <div id="projectField" hidden><label for="project">受控项目</label><select id="project"><option value="pricing">金额计算 · 折扣、免邮与退款</option><option value="intervals">时间区间 · 相交、分桶与 TTL</option><option value="text_normalization">文本规范化 · 空白、词数与前缀</option></select><p id="projectDescription" class="hint"></p></div>
           <div class="two"><div><label for="workers">Worker 上限</label><select id="workers"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div><label for="policy">调度策略</label><select id="policy"><option value="resource_fit">资源适配</option><option value="aging_fit">老化资源适配</option><option value="fifo">FIFO 基线</option></select></div></div>
+          <p id="engineeringBudgetNote" class="budget-note">总资源预算固定，Worker 上限只控制并发；实际预算见右侧。</p>
           <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="4000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
           <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
         </form>
-        <details class="model-config"><summary><span>模型配置</span><span id="modelState" class="muted">待配置密钥</span></summary><p class="hint">密钥仅保存在服务内存中，重启后需重新填写。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="输入 API Key"><button id="saveKey" class="secondary">保存密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
+        <details class="model-config"><summary><span>模型配置</span><span id="modelState" class="muted">待配置密钥</span></summary><p class="hint">密钥仅在独立模型服务内存中；模型服务重启后需重填，网页升级不清空。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="输入 API Key"><button id="saveKey" class="secondary">保存密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
       </article>
       <article class="panel history-panel"><div class="panel-title"><h2>最近运行</h2><span id="jobCount" class="muted">0</span></div><div id="jobs"><div class="empty compact">暂无运行记录</div></div></article>
       <div class="reading-note"><b>如何读这张图</b><p><span class="legend-dot actual"></span>实际用量：Linux cgroup 读取</p><p><span class="legend-dot reserved"></span>预留配额：调度器资源账本</p><p>配额代表可用上限，不代表已消耗；“—”表示尚无测量值。</p><p>memory.current 含工具后代、文件缓存及内核记账，不等于主 PID 的 RSS。</p></div>
     </section>
     <div class="monitor-column">
+      <section class="panel engineering-panel" id="engineeringPanel" hidden>
+        <div class="panel-title"><div><div class="eyebrow">CONTROLLED PYTHON REPAIR</div><h2 id="engineeringTitle">Python 项目修复</h2></div><span id="engineeringOutcome" class="badge">等待启动</span></div>
+        <p class="hint">原始失败是预期检查；Worker 完成不等于业务通过。只有真实测试与最终评审通过，才算修复成功。</p>
+        <div id="engineeringPhases" class="engineering-phases"></div>
+        <div class="engineering-summary"><div id="engineeringBaseline" class="repair-checks"></div><div id="engineeringValidation" class="repair-checks"></div></div>
+        <div id="engineeringVerdict" class="repair-verdict"></div>
+        <div class="repair-meta"><span id="engineeringCalls">模型调用 — / 4</span><span id="engineeringTokens">输入 / 输出 token：— / —</span><span id="engineeringBudget">预算：等待分配</span></div>
+        <details id="engineeringPatch" class="repair-patch" hidden><summary><span>模型生成的补丁源码</span><span id="engineeringHash" class="mono"></span></summary><pre id="engineeringSource" class="answer"></pre></details>
+        <p class="hint">仅限三个受控项目；不接受任意仓库或任意代码。失败停止，不自动重提付费调用。</p>
+      </section>
       <section class="panel allocation-panel"><div class="panel-title"><div><h2>工作流资源分配</h2><div class="mono muted" id="jobId">请选择或启动一次运行</div></div><button id="cancel" class="secondary danger" hidden>停止运行</button></div>
         <div class="allocation-grid" id="allocations"><div class="empty">启动后显示 CPU、内存、进程数与 Worker 槽位的预留。</div></div>
         <div class="chart-grid"><div class="chart-box"><div class="chart-heading"><h3>Worker CPU</h3><span id="cpuReadout">—</span></div><div id="cpuChart" class="chart"></div><div class="chart-caption"><span><i class="line-key actual"></i>实际核心数</span><span><i class="line-key reserved"></i>预留核心数</span><span id="cpuRange">等待采样</span></div></div><div class="chart-box"><div class="chart-heading"><h3>Worker 内存</h3><span id="memoryReadout">—</span></div><div id="memoryChart" class="chart"></div><div class="chart-caption"><span><i class="line-key actual blue"></i>实际用量</span><span><i class="line-key reserved"></i>预留配额</span><span id="memoryRange">等待采样</span></div></div></div>

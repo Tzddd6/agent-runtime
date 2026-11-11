@@ -1,0 +1,23 @@
+[Unit]
+Description=Agent Runtime memory-only model broker
+After=network-online.target
+
+[Service]
+Type=simple
+User=tzd
+Group=tzd
+WorkingDirectory=/home/tzd/agent-runtime-repair-20261111
+EnvironmentFile=/home/tzd/.config/agentrt/console.env
+ExecStart=/usr/bin/python3 -m agent_runtime.model_broker
+Restart=on-failure
+RestartSec=3
+CPUQuota=50%
+MemoryMax=512M
+MemorySwapMax=0
+TasksMax=64
+LimitCORE=0
+NoNewPrivileges=yes
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

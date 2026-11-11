@@ -91,6 +91,9 @@ def main():
     elif action == 'review_gate':
         from .conversation import route_review
         output, children = route_review(task)
+    elif action in ('project_baseline','project_validate','project_gate'):
+        from .project_workflow import execute_project_action
+        output, children = execute_project_action(task)
     elif action in ('analyze_text', 'index_text'):
         text = '\n'.join(item['text'] for item in task.get('_contexts', []))
         words = re.findall(r'\w+', text.lower())

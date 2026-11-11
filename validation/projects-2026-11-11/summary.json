@@ -1,0 +1,3199 @@
+{
+  "state": "complete",
+  "evidence_archive": "repair-evidence.zip",
+  "archive_sha256": "56c4eda38b08ed42c4e932f641e255b729827aa717e1f16794c40729fc862ffa",
+  "raw_evidence_committed": false,
+  "planned_runs": 54,
+  "observed_runs": 54,
+  "missing_indices": [],
+  "fixed_budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "protocol_sha256": "149841abf24a414b6567e0e8d832f8fae64f46f6a601292d5a2057466d726887",
+  "prices_cny_per_million": {
+    "input_cache_miss": 2,
+    "input_cache_hit": 0.04,
+    "output": 8
+  },
+  "actual_invoice_fee": null,
+  "overall": {
+    "n": 54,
+    "success_count": 51,
+    "failure_count": 3,
+    "wall_seconds_all": {
+      "n": 54,
+      "median": 7.453152775764465,
+      "min": 6.005514621734619,
+      "max": 24.313994884490967
+    },
+    "wall_seconds_success_only": {
+      "n": 51,
+      "median": 7.491154193878174,
+      "min": 6.005514621734619,
+      "max": 24.313994884490967
+    },
+    "ready_wait_sum_seconds": {
+      "n": 54,
+      "median": 1.0532325506210327,
+      "min": 0.06918859481811523,
+      "max": 7.733224391937256
+    },
+    "worker_cpu_seconds": {
+      "n": 54,
+      "median": 0.49030050000000003,
+      "min": 0.307611,
+      "max": 0.5156000000000001
+    },
+    "max_sampled_worker_memory_bytes": {
+      "n": 54,
+      "median": 10618880.0,
+      "min": 6090752,
+      "max": 17481728
+    },
+    "usage": {
+      "prompt_tokens": 137627,
+      "completion_tokens": 46747,
+      "total_tokens": 184374,
+      "prompt_cache_hit_tokens": 49019,
+      "prompt_cache_miss_tokens": 88608
+    },
+    "model_calls": 213,
+    "usage_complete_count": 54,
+    "failure_classes": {
+      "patch_policy_rejected": 1,
+      "immutable_tests_failed": 2
+    },
+    "estimated_cny": 0.55315276,
+    "all_input_miss_upper_cny": 0.64923
+  },
+  "groups": [
+    {
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 2,
+      "failure_count": 1,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 8.595299005508423,
+        "min": 6.939750671386719,
+        "max": 8.904687404632568
+      },
+      "wall_seconds_success_only": {
+        "n": 2,
+        "median": 8.749993205070496,
+        "min": 8.595299005508423,
+        "max": 8.904687404632568
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.0256035327911377,
+        "min": 2.0078976154327393,
+        "max": 2.46282696723938
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.469329,
+        "min": 0.392221,
+        "max": 0.469736
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 6942720,
+        "min": 6574080,
+        "max": 6983680
+      },
+      "usage": {
+        "prompt_tokens": 7219,
+        "completion_tokens": 2565,
+        "total_tokens": 9784,
+        "prompt_cache_hit_tokens": 2688,
+        "prompt_cache_miss_tokens": 4531
+      },
+      "model_calls": 11,
+      "usage_complete_count": 3,
+      "failure_classes": {
+        "immutable_tests_failed": 1
+      },
+      "estimated_cny": 0.02968952,
+      "all_input_miss_upper_cny": 0.034958
+    },
+    {
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 8.67533802986145,
+        "min": 8.38900899887085,
+        "max": 8.758507251739502
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 8.67533802986145,
+        "min": 8.38900899887085,
+        "max": 8.758507251739502
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.2971408367156982,
+        "min": 2.1903514862060547,
+        "max": 2.415149688720703
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.485,
+        "min": 0.480848,
+        "max": 0.499224
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7401472,
+        "min": 6746112,
+        "max": 8245248
+      },
+      "usage": {
+        "prompt_tokens": 7682,
+        "completion_tokens": 2655,
+        "total_tokens": 10337,
+        "prompt_cache_hit_tokens": 3072,
+        "prompt_cache_miss_tokens": 4610
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.030582879999999996,
+      "all_input_miss_upper_cny": 0.036604
+    },
+    {
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 8.598365545272827,
+        "min": 8.425405025482178,
+        "max": 8.893235206604004
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 8.598365545272827,
+        "min": 8.425405025482178,
+        "max": 8.893235206604004
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.186741352081299,
+        "min": 1.996751308441162,
+        "max": 2.304475784301758
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.47524500000000003,
+        "min": 0.470301,
+        "max": 0.47810199999999997
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7008256,
+        "min": 6610944,
+        "max": 7077888
+      },
+      "usage": {
+        "prompt_tokens": 7714,
+        "completion_tokens": 2686,
+        "total_tokens": 10400,
+        "prompt_cache_hit_tokens": 3072,
+        "prompt_cache_miss_tokens": 4642
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.030894879999999996,
+      "all_input_miss_upper_cny": 0.036916
+    },
+    {
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.392010688781738,
+        "min": 6.005514621734619,
+        "max": 6.3950536251068115
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.392010688781738,
+        "min": 6.005514621734619,
+        "max": 6.3950536251068115
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.09935522079467773,
+        "min": 0.09354972839355469,
+        "max": 0.09938907623291016
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.490172,
+        "min": 0.486183,
+        "max": 0.497878
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16461824,
+        "min": 16437248,
+        "max": 16601088
+      },
+      "usage": {
+        "prompt_tokens": 7717,
+        "completion_tokens": 2692,
+        "total_tokens": 10409,
+        "prompt_cache_hit_tokens": 3072,
+        "prompt_cache_miss_tokens": 4645
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.030948879999999998,
+      "all_input_miss_upper_cny": 0.03697
+    },
+    {
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 7.121995210647583,
+        "min": 6.520200729370117,
+        "max": 7.415151357650757
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 7.121995210647583,
+        "min": 6.520200729370117,
+        "max": 7.415151357650757
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.08759927749633789,
+        "min": 0.08514714241027832,
+        "max": 0.09094071388244629
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.498869,
+        "min": 0.491295,
+        "max": 0.5080479999999999
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16621568,
+        "min": 16592896,
+        "max": 17039360
+      },
+      "usage": {
+        "prompt_tokens": 7708,
+        "completion_tokens": 2655,
+        "total_tokens": 10363,
+        "prompt_cache_hit_tokens": 2048,
+        "prompt_cache_miss_tokens": 5660
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.03264192,
+      "all_input_miss_upper_cny": 0.036656
+    },
+    {
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.489379644393921,
+        "min": 6.183063745498657,
+        "max": 7.0081939697265625
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.489379644393921,
+        "min": 6.183063745498657,
+        "max": 7.0081939697265625
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.08757352828979492,
+        "min": 0.0811305046081543,
+        "max": 0.09833598136901855
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.501759,
+        "min": 0.498442,
+        "max": 0.506844
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 15843328,
+        "min": 15822848,
+        "max": 17350656
+      },
+      "usage": {
+        "prompt_tokens": 7695,
+        "completion_tokens": 2641,
+        "total_tokens": 10336,
+        "prompt_cache_hit_tokens": 2944,
+        "prompt_cache_miss_tokens": 4751
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.030747760000000002,
+      "all_input_miss_upper_cny": 0.036518
+    },
+    {
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 2,
+      "failure_count": 1,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 9.556806802749634,
+        "min": 6.741731882095337,
+        "max": 13.636353254318237
+      },
+      "wall_seconds_success_only": {
+        "n": 2,
+        "median": 11.596580028533936,
+        "min": 9.556806802749634,
+        "max": 13.636353254318237
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.176816940307617,
+        "min": 1.9936037063598633,
+        "max": 2.3138484954833984
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.481962,
+        "min": 0.385317,
+        "max": 0.485441
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7016448,
+        "min": 6090752,
+        "max": 7172096
+      },
+      "usage": {
+        "prompt_tokens": 8339,
+        "completion_tokens": 2724,
+        "total_tokens": 11063,
+        "prompt_cache_hit_tokens": 4224,
+        "prompt_cache_miss_tokens": 4115
+      },
+      "model_calls": 11,
+      "usage_complete_count": 3,
+      "failure_classes": {
+        "immutable_tests_failed": 1
+      },
+      "estimated_cny": 0.03019096,
+      "all_input_miss_upper_cny": 0.03847
+    },
+    {
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 9.323263168334961,
+        "min": 8.395649194717407,
+        "max": 14.752017498016357
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 9.323263168334961,
+        "min": 8.395649194717407,
+        "max": 14.752017498016357
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.508754014968872,
+        "min": 2.001514434814453,
+        "max": 7.206512928009033
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.479314,
+        "min": 0.478643,
+        "max": 0.49429
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7086080,
+        "min": 6676480,
+        "max": 7507968
+      },
+      "usage": {
+        "prompt_tokens": 8693,
+        "completion_tokens": 2596,
+        "total_tokens": 11289,
+        "prompt_cache_hit_tokens": 3072,
+        "prompt_cache_miss_tokens": 5621
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.032132879999999996,
+      "all_input_miss_upper_cny": 0.038154
+    },
+    {
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 14.264446258544922,
+        "min": 8.819510698318481,
+        "max": 14.357290744781494
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 14.264446258544922,
+        "min": 8.819510698318481,
+        "max": 14.357290744781494
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.504849433898926,
+        "min": 1.9983935356140137,
+        "max": 7.733224391937256
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.476885,
+        "min": 0.473153,
+        "max": 0.489539
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7299072,
+        "min": 6148096,
+        "max": 7438336
+      },
+      "usage": {
+        "prompt_tokens": 8941,
+        "completion_tokens": 2812,
+        "total_tokens": 11753,
+        "prompt_cache_hit_tokens": 4096,
+        "prompt_cache_miss_tokens": 4845
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.03234984,
+      "all_input_miss_upper_cny": 0.040378
+    },
+    {
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 7.143370628356934,
+        "min": 6.53981614112854,
+        "max": 7.491154193878174
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 7.143370628356934,
+        "min": 6.53981614112854,
+        "max": 7.491154193878174
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.09059548377990723,
+        "min": 0.08726215362548828,
+        "max": 0.09720993041992188
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.49566,
+        "min": 0.494506,
+        "max": 0.504085
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16424960,
+        "min": 12992512,
+        "max": 16801792
+      },
+      "usage": {
+        "prompt_tokens": 8979,
+        "completion_tokens": 2844,
+        "total_tokens": 11823,
+        "prompt_cache_hit_tokens": 4608,
+        "prompt_cache_miss_tokens": 4371
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.03167832,
+      "all_input_miss_upper_cny": 0.04071
+    },
+    {
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 7.235302686691284,
+        "min": 6.813320159912109,
+        "max": 7.667211055755615
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 7.235302686691284,
+        "min": 6.813320159912109,
+        "max": 7.667211055755615
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.09444165229797363,
+        "min": 0.08849811553955078,
+        "max": 0.09549856185913086
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.494421,
+        "min": 0.491404,
+        "max": 0.495562
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16064512,
+        "min": 16052224,
+        "max": 17018880
+      },
+      "usage": {
+        "prompt_tokens": 8981,
+        "completion_tokens": 2777,
+        "total_tokens": 11758,
+        "prompt_cache_hit_tokens": 4352,
+        "prompt_cache_miss_tokens": 4629
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.03164808,
+      "all_input_miss_upper_cny": 0.040178
+    },
+    {
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.8562912940979,
+        "min": 6.3393354415893555,
+        "max": 6.8649001121521
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.8562912940979,
+        "min": 6.3393354415893555,
+        "max": 6.8649001121521
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.0861825942993164,
+        "min": 0.07992696762084961,
+        "max": 0.08761835098266602
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.5036930000000001,
+        "min": 0.499482,
+        "max": 0.50579
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16064512,
+        "min": 16044032,
+        "max": 17178624
+      },
+      "usage": {
+        "prompt_tokens": 8994,
+        "completion_tokens": 2827,
+        "total_tokens": 11821,
+        "prompt_cache_hit_tokens": 4352,
+        "prompt_cache_miss_tokens": 4642
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.032074080000000005,
+      "all_input_miss_upper_cny": 0.040604
+    },
+    {
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 2,
+      "failure_count": 1,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 8.54135274887085,
+        "min": 7.558540105819702,
+        "max": 8.730780601501465
+      },
+      "wall_seconds_success_only": {
+        "n": 2,
+        "median": 8.636066675186157,
+        "min": 8.54135274887085,
+        "max": 8.730780601501465
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.3918728828430176,
+        "min": 2.376661777496338,
+        "max": 2.4716055393218994
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.487559,
+        "min": 0.307611,
+        "max": 0.499489
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 7094272,
+        "min": 6545408,
+        "max": 7159808
+      },
+      "usage": {
+        "prompt_tokens": 6270,
+        "completion_tokens": 2349,
+        "total_tokens": 8619,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 4990
+      },
+      "model_calls": 11,
+      "usage_complete_count": 3,
+      "failure_classes": {
+        "patch_policy_rejected": 1
+      },
+      "estimated_cny": 0.0288232,
+      "all_input_miss_upper_cny": 0.031332
+    },
+    {
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 9.229754209518433,
+        "min": 8.092791080474854,
+        "max": 9.370412826538086
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 9.229754209518433,
+        "min": 8.092791080474854,
+        "max": 9.370412826538086
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.4092276096343994,
+        "min": 2.2048540115356445,
+        "max": 2.79948091506958
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.485413,
+        "min": 0.477928,
+        "max": 0.4921
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 6967296,
+        "min": 6737920,
+        "max": 7331840
+      },
+      "usage": {
+        "prompt_tokens": 6525,
+        "completion_tokens": 2445,
+        "total_tokens": 8970,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 5245
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.0301012,
+      "all_input_miss_upper_cny": 0.03261
+    },
+    {
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 9.603901624679565,
+        "min": 8.795478343963623,
+        "max": 24.313994884490967
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 9.603901624679565,
+        "min": 8.795478343963623,
+        "max": 24.313994884490967
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 2.69694185256958,
+        "min": 2.3056113719940186,
+        "max": 7.619460105895996
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.47931500000000005,
+        "min": 0.469622,
+        "max": 0.48249600000000004
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 6742016,
+        "min": 6606848,
+        "max": 6905856
+      },
+      "usage": {
+        "prompt_tokens": 6540,
+        "completion_tokens": 2394,
+        "total_tokens": 8934,
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 5772
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.030726720000000003,
+      "all_input_miss_upper_cny": 0.032232
+    },
+    {
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.754796266555786,
+        "min": 6.42256498336792,
+        "max": 6.841302871704102
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.754796266555786,
+        "min": 6.42256498336792,
+        "max": 6.841302871704102
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.09798336029052734,
+        "min": 0.08991432189941406,
+        "max": 0.11286139488220215
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.49728300000000003,
+        "min": 0.483643,
+        "max": 0.49836400000000003
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16601088,
+        "min": 16187392,
+        "max": 16670720
+      },
+      "usage": {
+        "prompt_tokens": 6595,
+        "completion_tokens": 2378,
+        "total_tokens": 8973,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 5315
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.0297052,
+      "all_input_miss_upper_cny": 0.032214
+    },
+    {
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.880602121353149,
+        "min": 6.081419229507446,
+        "max": 7.007572889328003
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.880602121353149,
+        "min": 6.081419229507446,
+        "max": 7.007572889328003
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.08974409103393555,
+        "min": 0.06918859481811523,
+        "max": 0.10728788375854492
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.499838,
+        "min": 0.48958999999999997,
+        "max": 0.5156000000000001
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 16625664,
+        "min": 15888384,
+        "max": 17481728
+      },
+      "usage": {
+        "prompt_tokens": 6539,
+        "completion_tokens": 2348,
+        "total_tokens": 8887,
+        "prompt_cache_hit_tokens": 1408,
+        "prompt_cache_miss_tokens": 5131
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.02910232,
+      "all_input_miss_upper_cny": 0.031862
+    },
+    {
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit",
+      "target_n": 3,
+      "n": 3,
+      "success_count": 3,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 3,
+        "median": 6.315643310546875,
+        "min": 6.284029245376587,
+        "max": 6.979867696762085
+      },
+      "wall_seconds_success_only": {
+        "n": 3,
+        "median": 6.315643310546875,
+        "min": 6.284029245376587,
+        "max": 6.979867696762085
+      },
+      "ready_wait_sum_seconds": {
+        "n": 3,
+        "median": 0.10010981559753418,
+        "min": 0.08638882637023926,
+        "max": 0.10445904731750488
+      },
+      "worker_cpu_seconds": {
+        "n": 3,
+        "median": 0.500063,
+        "min": 0.490429,
+        "max": 0.503993
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 3,
+        "median": 15908864,
+        "min": 15228928,
+        "max": 16273408
+      },
+      "usage": {
+        "prompt_tokens": 6496,
+        "completion_tokens": 2359,
+        "total_tokens": 8855,
+        "prompt_cache_hit_tokens": 1403,
+        "prompt_cache_miss_tokens": 5093
+      },
+      "model_calls": 12,
+      "usage_complete_count": 3,
+      "failure_classes": {},
+      "estimated_cny": 0.029114120000000004,
+      "all_input_miss_upper_cny": 0.031864
+    }
+  ],
+  "runs": [
+    {
+      "index": 0,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 14.752017498016357,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2987,
+        "completion_tokens": 949,
+        "total_tokens": 3936,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2987
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/000/metrics.json",
+        "reports/project-benchmark-20261111/runs/000/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.015259981155395508,
+        "analyze": 0.011840105056762695,
+        "test_plan": 7.13582181930542,
+        "repair": 0.00903010368347168,
+        "validate": 0.008769989013671875,
+        "review": 0.012933015823364258,
+        "gate": 0.012857913970947266
+      },
+      "ready_wait_sum_seconds": 7.206512928009033,
+      "worker_cpu_seconds": 0.49429,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7086080,
+      "estimated_cny": 0.013566,
+      "all_input_miss_upper_cny": 0.013566
+    },
+    {
+      "index": 1,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 7.415151357650757,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2542,
+        "completion_tokens": 888,
+        "total_tokens": 3430,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2542
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/001/metrics.json",
+        "reports/project-benchmark-20261111/runs/001/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.014948844909667969,
+        "analyze": 0.009870529174804688,
+        "test_plan": 0.011918306350708008,
+        "repair": 0.009434223175048828,
+        "validate": 0.015224933624267578,
+        "review": 0.012839555740356445,
+        "gate": 0.016704320907592773
+      },
+      "ready_wait_sum_seconds": 0.09094071388244629,
+      "worker_cpu_seconds": 0.491295,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 17039360,
+      "estimated_cny": 0.012188,
+      "all_input_miss_upper_cny": 0.012188
+    },
+    {
+      "index": 2,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 9.603901624679565,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2174,
+        "completion_tokens": 784,
+        "total_tokens": 2958,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2174
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/002/metrics.json",
+        "reports/project-benchmark-20261111/runs/002/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011095285415649414,
+        "analyze": 0.01705169677734375,
+        "test_plan": 2.6230294704437256,
+        "repair": 0.011688470840454102,
+        "validate": 0.00763249397277832,
+        "review": 0.014847517013549805,
+        "gate": 0.011596918106079102
+      },
+      "ready_wait_sum_seconds": 2.69694185256958,
+      "worker_cpu_seconds": 0.47931500000000005,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6606848,
+      "estimated_cny": 0.01062,
+      "all_input_miss_upper_cny": 0.01062
+    },
+    {
+      "index": 3,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 8.893235206604004,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2602,
+        "completion_tokens": 890,
+        "total_tokens": 3492,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1578
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/003/metrics.json",
+        "reports/project-benchmark-20261111/runs/003/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01188206672668457,
+        "analyze": 0.016269922256469727,
+        "test_plan": 2.113081455230713,
+        "repair": 0.011588811874389648,
+        "validate": 0.014043807983398438,
+        "review": 0.009765386581420898,
+        "gate": 0.010109901428222656
+      },
+      "ready_wait_sum_seconds": 2.186741352081299,
+      "worker_cpu_seconds": 0.47524500000000003,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7008256,
+      "estimated_cny": 0.010316959999999998,
+      "all_input_miss_upper_cny": 0.012324
+    },
+    {
+      "index": 4,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.284029245376587,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2186,
+        "completion_tokens": 803,
+        "total_tokens": 2989,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1802
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/004/metrics.json",
+        "reports/project-benchmark-20261111/runs/004/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.009780645370483398,
+        "analyze": 0.014156579971313477,
+        "test_plan": 0.015952348709106445,
+        "repair": 0.012743711471557617,
+        "validate": 0.009034395217895508,
+        "review": 0.012946605682373047,
+        "gate": 0.011774539947509766
+      },
+      "ready_wait_sum_seconds": 0.08638882637023926,
+      "worker_cpu_seconds": 0.503993,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16273408,
+      "estimated_cny": 0.010043360000000001,
+      "all_input_miss_upper_cny": 0.010796
+    },
+    {
+      "index": 5,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 7.667211055755615,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2977,
+        "completion_tokens": 935,
+        "total_tokens": 3912,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 1697
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/005/metrics.json",
+        "reports/project-benchmark-20261111/runs/005/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010944128036499023,
+        "analyze": 0.010123491287231445,
+        "test_plan": 0.011930704116821289,
+        "repair": 0.020638465881347656,
+        "validate": 0.009008407592773438,
+        "review": 0.014561891555786133,
+        "gate": 0.011291027069091797
+      },
+      "ready_wait_sum_seconds": 0.08849811553955078,
+      "worker_cpu_seconds": 0.495562,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 17018880,
+      "estimated_cny": 0.010925200000000001,
+      "all_input_miss_upper_cny": 0.013434
+    },
+    {
+      "index": 6,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": false,
+      "wall_seconds": 7.558540105819702,
+      "model_calls": 3,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 1819,
+        "completion_tokens": 744,
+        "total_tokens": 2563,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1435
+      },
+      "failure_class": "patch_policy_rejected",
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/006/metrics.json",
+        "reports/project-benchmark-20261111/runs/006/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011176586151123047,
+        "analyze": 0.01708364486694336,
+        "test_plan": 2.416062831878662,
+        "repair": 0.012275218963623047,
+        "validate": 0.015007257461547852
+      },
+      "ready_wait_sum_seconds": 2.4716055393218994,
+      "worker_cpu_seconds": 0.307611,
+      "worker_cpu_terminal_records": 5,
+      "max_sampled_worker_memory_bytes": 6545408,
+      "estimated_cny": 0.00883736,
+      "all_input_miss_upper_cny": 0.00959
+    },
+    {
+      "index": 7,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 14.357290744781494,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2993,
+        "completion_tokens": 937,
+        "total_tokens": 3930,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 1713
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/007/metrics.json",
+        "reports/project-benchmark-20261111/runs/007/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.014955520629882812,
+        "analyze": 0.01790332794189453,
+        "test_plan": 2.4219472408294678,
+        "repair": 0.014891624450683594,
+        "validate": 0.007486820220947266,
+        "review": 0.0161745548248291,
+        "gate": 0.011490345001220703
+      },
+      "ready_wait_sum_seconds": 2.504849433898926,
+      "worker_cpu_seconds": 0.473153,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6148096,
+      "estimated_cny": 0.0109732,
+      "all_input_miss_upper_cny": 0.013482
+    },
+    {
+      "index": 8,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.489379644393921,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2557,
+        "completion_tokens": 879,
+        "total_tokens": 3436,
+        "prompt_cache_hit_tokens": 896,
+        "prompt_cache_miss_tokens": 1661
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/008/metrics.json",
+        "reports/project-benchmark-20261111/runs/008/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.013340950012207031,
+        "analyze": 0.008208990097045898,
+        "test_plan": 0.009940147399902344,
+        "repair": 0.013594627380371094,
+        "validate": 0.013296127319335938,
+        "review": 0.012111186981201172,
+        "gate": 0.01063847541809082
+      },
+      "ready_wait_sum_seconds": 0.0811305046081543,
+      "worker_cpu_seconds": 0.498442,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 17350656,
+      "estimated_cny": 0.010389840000000001,
+      "all_input_miss_upper_cny": 0.012146
+    },
+    {
+      "index": 9,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.8562912940979,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2992,
+        "completion_tokens": 926,
+        "total_tokens": 3918,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 1712
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/009/metrics.json",
+        "reports/project-benchmark-20261111/runs/009/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.0113677978515625,
+        "analyze": 0.009252786636352539,
+        "test_plan": 0.011294841766357422,
+        "repair": 0.013894796371459961,
+        "validate": 0.009260416030883789,
+        "review": 0.014094829559326172,
+        "gate": 0.010761499404907227
+      },
+      "ready_wait_sum_seconds": 0.07992696762084961,
+      "worker_cpu_seconds": 0.5036930000000001,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 17178624,
+      "estimated_cny": 0.0108832,
+      "all_input_miss_upper_cny": 0.013392
+    },
+    {
+      "index": 10,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 8.904687404632568,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2560,
+        "completion_tokens": 883,
+        "total_tokens": 3443,
+        "prompt_cache_hit_tokens": 896,
+        "prompt_cache_miss_tokens": 1664
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/010/metrics.json",
+        "reports/project-benchmark-20261111/runs/010/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.017406702041625977,
+        "analyze": 0.014867067337036133,
+        "test_plan": 1.9378414154052734,
+        "repair": 0.012032032012939453,
+        "validate": 0.009340763092041016,
+        "review": 0.017815113067626953,
+        "gate": 0.016300439834594727
+      },
+      "ready_wait_sum_seconds": 2.0256035327911377,
+      "worker_cpu_seconds": 0.469329,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6574080,
+      "estimated_cny": 0.01042784,
+      "all_input_miss_upper_cny": 0.012184
+    },
+    {
+      "index": 11,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.754796266555786,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2179,
+        "completion_tokens": 787,
+        "total_tokens": 2966,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1795
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/011/metrics.json",
+        "reports/project-benchmark-20261111/runs/011/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011842727661132812,
+        "analyze": 0.014516830444335938,
+        "test_plan": 0.016299962997436523,
+        "repair": 0.015262126922607422,
+        "validate": 0.016177892684936523,
+        "review": 0.013315439224243164,
+        "gate": 0.010568380355834961
+      },
+      "ready_wait_sum_seconds": 0.09798336029052734,
+      "worker_cpu_seconds": 0.49728300000000003,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16187392,
+      "estimated_cny": 0.009901360000000001,
+      "all_input_miss_upper_cny": 0.010654
+    },
+    {
+      "index": 12,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.005514621734619,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2608,
+        "completion_tokens": 900,
+        "total_tokens": 3508,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1584
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/012/metrics.json",
+        "reports/project-benchmark-20261111/runs/012/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01641225814819336,
+        "analyze": 0.012823343276977539,
+        "test_plan": 0.014772891998291016,
+        "repair": 0.013292551040649414,
+        "validate": 0.010853052139282227,
+        "review": 0.01771378517150879,
+        "gate": 0.01348733901977539
+      },
+      "ready_wait_sum_seconds": 0.09935522079467773,
+      "worker_cpu_seconds": 0.490172,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16437248,
+      "estimated_cny": 0.010408959999999998,
+      "all_input_miss_upper_cny": 0.012416
+    },
+    {
+      "index": 13,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 9.229754209518433,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2187,
+        "completion_tokens": 809,
+        "total_tokens": 2996,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1803
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/013/metrics.json",
+        "reports/project-benchmark-20261111/runs/013/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01020503044128418,
+        "analyze": 0.014130592346191406,
+        "test_plan": 2.7261579036712646,
+        "repair": 0.008306026458740234,
+        "validate": 0.013913869857788086,
+        "review": 0.010744810104370117,
+        "gate": 0.016022682189941406
+      },
+      "ready_wait_sum_seconds": 2.79948091506958,
+      "worker_cpu_seconds": 0.4921,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7331840,
+      "estimated_cny": 0.010093360000000001,
+      "all_input_miss_upper_cny": 0.010846
+    },
+    {
+      "index": 14,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 13.636353254318237,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2956,
+        "completion_tokens": 924,
+        "total_tokens": 3880,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1420
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/014/metrics.json",
+        "reports/project-benchmark-20261111/runs/014/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.013083696365356445,
+        "analyze": 0.011635303497314453,
+        "test_plan": 2.240678310394287,
+        "repair": 0.010145425796508789,
+        "validate": 0.009260177612304688,
+        "review": 0.014971256256103516,
+        "gate": 0.014074325561523438
+      },
+      "ready_wait_sum_seconds": 2.3138484954833984,
+      "worker_cpu_seconds": 0.481962,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7016448,
+      "estimated_cny": 0.010293440000000001,
+      "all_input_miss_upper_cny": 0.013304
+    },
+    {
+      "index": 15,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 6.880602121353149,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2176,
+        "completion_tokens": 783,
+        "total_tokens": 2959,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1792
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/015/metrics.json",
+        "reports/project-benchmark-20261111/runs/015/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.015419721603393555,
+        "analyze": 0.017818212509155273,
+        "test_plan": 0.01964735984802246,
+        "repair": 0.012576103210449219,
+        "validate": 0.018222808837890625,
+        "review": 0.01277923583984375,
+        "gate": 0.010824441909790039
+      },
+      "ready_wait_sum_seconds": 0.10728788375854492,
+      "worker_cpu_seconds": 0.48958999999999997,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 15888384,
+      "estimated_cny": 0.00986336,
+      "all_input_miss_upper_cny": 0.010616
+    },
+    {
+      "index": 16,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.53981614112854,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 3020,
+        "completion_tokens": 944,
+        "total_tokens": 3964,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1484
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/016/metrics.json",
+        "reports/project-benchmark-20261111/runs/016/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.012110710144042969,
+        "analyze": 0.01292276382446289,
+        "test_plan": 0.014766454696655273,
+        "repair": 0.010841131210327148,
+        "validate": 0.013368606567382812,
+        "review": 0.011641263961791992,
+        "gate": 0.01494455337524414
+      },
+      "ready_wait_sum_seconds": 0.09059548377990723,
+      "worker_cpu_seconds": 0.494506,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16424960,
+      "estimated_cny": 0.010581440000000001,
+      "all_input_miss_upper_cny": 0.013592
+    },
+    {
+      "index": 17,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 8.758507251739502,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2540,
+        "completion_tokens": 882,
+        "total_tokens": 3422,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1516
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/017/metrics.json",
+        "reports/project-benchmark-20261111/runs/017/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.016529560089111328,
+        "analyze": 0.01580333709716797,
+        "test_plan": 2.3447327613830566,
+        "repair": 0.009856700897216797,
+        "validate": 0.009574651718139648,
+        "review": 0.01089167594909668,
+        "gate": 0.0077610015869140625
+      },
+      "ready_wait_sum_seconds": 2.415149688720703,
+      "worker_cpu_seconds": 0.485,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 8245248,
+      "estimated_cny": 0.01012896,
+      "all_input_miss_upper_cny": 0.012136
+    },
+    {
+      "index": 18,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.183063745498657,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2592,
+        "completion_tokens": 880,
+        "total_tokens": 3472,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1568
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/018/metrics.json",
+        "reports/project-benchmark-20261111/runs/018/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010245800018310547,
+        "analyze": 0.0162508487701416,
+        "test_plan": 0.01835322380065918,
+        "repair": 0.011042356491088867,
+        "validate": 0.008064746856689453,
+        "review": 0.014175653457641602,
+        "gate": 0.009440898895263672
+      },
+      "ready_wait_sum_seconds": 0.08757352828979492,
+      "worker_cpu_seconds": 0.506844,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 15843328,
+      "estimated_cny": 0.010216959999999999,
+      "all_input_miss_upper_cny": 0.012224
+    },
+    {
+      "index": 19,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 8.795478343963623,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2187,
+        "completion_tokens": 794,
+        "total_tokens": 2981,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1803
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/019/metrics.json",
+        "reports/project-benchmark-20261111/runs/019/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.015819549560546875,
+        "analyze": 0.017988920211791992,
+        "test_plan": 2.2249855995178223,
+        "repair": 0.014893531799316406,
+        "validate": 0.007197380065917969,
+        "review": 0.011126041412353516,
+        "gate": 0.013600349426269531
+      },
+      "ready_wait_sum_seconds": 2.3056113719940186,
+      "worker_cpu_seconds": 0.48249600000000004,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6905856,
+      "estimated_cny": 0.00997336,
+      "all_input_miss_upper_cny": 0.010726
+    },
+    {
+      "index": 20,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 9.556806802749634,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2970,
+        "completion_tokens": 945,
+        "total_tokens": 3915,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1434
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/020/metrics.json",
+        "reports/project-benchmark-20261111/runs/020/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.013867378234863281,
+        "analyze": 0.009704113006591797,
+        "test_plan": 1.9238364696502686,
+        "repair": 0.008985042572021484,
+        "validate": 0.013614892959594727,
+        "review": 0.009759187698364258,
+        "gate": 0.01383662223815918
+      },
+      "ready_wait_sum_seconds": 1.9936037063598633,
+      "worker_cpu_seconds": 0.485441,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7172096,
+      "estimated_cny": 0.010489440000000001,
+      "all_input_miss_upper_cny": 0.0135
+    },
+    {
+      "index": 21,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 6.081419229507446,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2171,
+        "completion_tokens": 786,
+        "total_tokens": 2957,
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 1659
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/021/metrics.json",
+        "reports/project-benchmark-20261111/runs/021/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.00761723518371582,
+        "analyze": 0.012168645858764648,
+        "test_plan": 0.01430201530456543,
+        "repair": 0.018095970153808594,
+        "validate": 0.014243602752685547,
+        "review": 0.012987136840820312,
+        "gate": 0.010329484939575195
+      },
+      "ready_wait_sum_seconds": 0.08974409103393555,
+      "worker_cpu_seconds": 0.499838,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16625664,
+      "estimated_cny": 0.00962648,
+      "all_input_miss_upper_cny": 0.01063
+    },
+    {
+      "index": 22,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.3393354415893555,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2974,
+        "completion_tokens": 945,
+        "total_tokens": 3919,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1438
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/022/metrics.json",
+        "reports/project-benchmark-20261111/runs/022/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011554479598999023,
+        "analyze": 0.015074968338012695,
+        "test_plan": 0.017151355743408203,
+        "repair": 0.008070707321166992,
+        "validate": 0.010681629180908203,
+        "review": 0.012755393981933594,
+        "gate": 0.010894060134887695
+      },
+      "ready_wait_sum_seconds": 0.0861825942993164,
+      "worker_cpu_seconds": 0.50579,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16044032,
+      "estimated_cny": 0.01049744,
+      "all_input_miss_upper_cny": 0.013508
+    },
+    {
+      "index": 23,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 8.425405025482178,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2558,
+        "completion_tokens": 897,
+        "total_tokens": 3455,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1534
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/023/metrics.json",
+        "reports/project-benchmark-20261111/runs/023/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.017554759979248047,
+        "analyze": 0.012807130813598633,
+        "test_plan": 2.2189037799835205,
+        "repair": 0.018378734588623047,
+        "validate": 0.013090133666992188,
+        "review": 0.009906530380249023,
+        "gate": 0.013834714889526367
+      },
+      "ready_wait_sum_seconds": 2.304475784301758,
+      "worker_cpu_seconds": 0.470301,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7077888,
+      "estimated_cny": 0.01028496,
+      "all_input_miss_upper_cny": 0.012292
+    },
+    {
+      "index": 24,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 14.264446258544922,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2976,
+        "completion_tokens": 911,
+        "total_tokens": 3887,
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 1696
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/024/metrics.json",
+        "reports/project-benchmark-20261111/runs/024/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01353144645690918,
+        "analyze": 0.013116836547851562,
+        "test_plan": 7.6440722942352295,
+        "repair": 0.018965959548950195,
+        "validate": 0.01919722557067871,
+        "review": 0.009374380111694336,
+        "gate": 0.014966249465942383
+      },
+      "ready_wait_sum_seconds": 7.733224391937256,
+      "worker_cpu_seconds": 0.476885,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7299072,
+      "estimated_cny": 0.010731200000000002,
+      "all_input_miss_upper_cny": 0.01324
+    },
+    {
+      "index": 25,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 6.520200729370117,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2565,
+        "completion_tokens": 874,
+        "total_tokens": 3439,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1541
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/025/metrics.json",
+        "reports/project-benchmark-20261111/runs/025/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.015319347381591797,
+        "analyze": 0.011055707931518555,
+        "test_plan": 0.012854814529418945,
+        "repair": 0.012785911560058594,
+        "validate": 0.008687257766723633,
+        "review": 0.013957500457763672,
+        "gate": 0.012938737869262695
+      },
+      "ready_wait_sum_seconds": 0.08759927749633789,
+      "worker_cpu_seconds": 0.5080479999999999,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16621568,
+      "estimated_cny": 0.01011496,
+      "all_input_miss_upper_cny": 0.012122
+    },
+    {
+      "index": 26,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 9.370412826538086,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2184,
+        "completion_tokens": 845,
+        "total_tokens": 3029,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1800
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/026/metrics.json",
+        "reports/project-benchmark-20261111/runs/026/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011650562286376953,
+        "analyze": 0.01522374153137207,
+        "test_plan": 2.3243753910064697,
+        "repair": 0.014345645904541016,
+        "validate": 0.015908479690551758,
+        "review": 0.013817071914672852,
+        "gate": 0.013906717300415039
+      },
+      "ready_wait_sum_seconds": 2.4092276096343994,
+      "worker_cpu_seconds": 0.485413,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6737920,
+      "estimated_cny": 0.01037536,
+      "all_input_miss_upper_cny": 0.011128
+    },
+    {
+      "index": 27,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 8.67533802986145,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2593,
+        "completion_tokens": 879,
+        "total_tokens": 3472,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1569
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/027/metrics.json",
+        "reports/project-benchmark-20261111/runs/027/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010933637619018555,
+        "analyze": 0.013112306594848633,
+        "test_plan": 2.1171770095825195,
+        "repair": 0.010671377182006836,
+        "validate": 0.015527009963989258,
+        "review": 0.010009765625,
+        "gate": 0.012920379638671875
+      },
+      "ready_wait_sum_seconds": 2.1903514862060547,
+      "worker_cpu_seconds": 0.499224,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7401472,
+      "estimated_cny": 0.01021096,
+      "all_input_miss_upper_cny": 0.012218
+    },
+    {
+      "index": 28,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.841302871704102,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2205,
+        "completion_tokens": 801,
+        "total_tokens": 3006,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1821
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/028/metrics.json",
+        "reports/project-benchmark-20261111/runs/028/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.023809194564819336,
+        "analyze": 0.01277470588684082,
+        "test_plan": 0.019693613052368164,
+        "repair": 0.018019914627075195,
+        "validate": 0.015442371368408203,
+        "review": 0.013849258422851562,
+        "gate": 0.009272336959838867
+      },
+      "ready_wait_sum_seconds": 0.11286139488220215,
+      "worker_cpu_seconds": 0.483643,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16601088,
+      "estimated_cny": 0.01006536,
+      "all_input_miss_upper_cny": 0.010818
+    },
+    {
+      "index": 29,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 6.813320159912109,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 3025,
+        "completion_tokens": 915,
+        "total_tokens": 3940,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1489
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/029/metrics.json",
+        "reports/project-benchmark-20261111/runs/029/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.012300491333007812,
+        "analyze": 0.015145063400268555,
+        "test_plan": 0.016942739486694336,
+        "repair": 0.013653278350830078,
+        "validate": 0.012140274047851562,
+        "review": 0.00897526741027832,
+        "gate": 0.015284538269042969
+      },
+      "ready_wait_sum_seconds": 0.09444165229797363,
+      "worker_cpu_seconds": 0.491404,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16064512,
+      "estimated_cny": 0.010359440000000001,
+      "all_input_miss_upper_cny": 0.01337
+    },
+    {
+      "index": 30,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 8.730780601501465,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2213,
+        "completion_tokens": 779,
+        "total_tokens": 2992,
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 1701
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/030/metrics.json",
+        "reports/project-benchmark-20261111/runs/030/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.008391380310058594,
+        "analyze": 0.015130043029785156,
+        "test_plan": 2.31391978263855,
+        "repair": 0.009625434875488281,
+        "validate": 0.008704423904418945,
+        "review": 0.01092982292175293,
+        "gate": 0.00996088981628418
+      },
+      "ready_wait_sum_seconds": 2.376661777496338,
+      "worker_cpu_seconds": 0.499489,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7094272,
+      "estimated_cny": 0.00965448,
+      "all_input_miss_upper_cny": 0.010658
+    },
+    {
+      "index": 31,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 9.323263168334961,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2818,
+        "completion_tokens": 802,
+        "total_tokens": 3620,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1282
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/031/metrics.json",
+        "reports/project-benchmark-20261111/runs/031/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.017235755920410156,
+        "analyze": 0.010076761245727539,
+        "test_plan": 2.434133291244507,
+        "repair": 0.009841680526733398,
+        "validate": 0.011250019073486328,
+        "review": 0.013927936553955078,
+        "gate": 0.012288570404052734
+      },
+      "ready_wait_sum_seconds": 2.508754014968872,
+      "worker_cpu_seconds": 0.479314,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7507968,
+      "estimated_cny": 0.009041440000000001,
+      "all_input_miss_upper_cny": 0.012052
+    },
+    {
+      "index": 32,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.392010688781738,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2566,
+        "completion_tokens": 883,
+        "total_tokens": 3449,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1542
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/032/metrics.json",
+        "reports/project-benchmark-20261111/runs/032/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01659703254699707,
+        "analyze": 0.01168203353881836,
+        "test_plan": 0.013486862182617188,
+        "repair": 0.013660430908203125,
+        "validate": 0.01954817771911621,
+        "review": 0.015650510787963867,
+        "gate": 0.008764028549194336
+      },
+      "ready_wait_sum_seconds": 0.09938907623291016,
+      "worker_cpu_seconds": 0.486183,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16601088,
+      "estimated_cny": 0.010188959999999999,
+      "all_input_miss_upper_cny": 0.012196
+    },
+    {
+      "index": 33,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 7.143370628356934,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2984,
+        "completion_tokens": 947,
+        "total_tokens": 3931,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1448
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/033/metrics.json",
+        "reports/project-benchmark-20261111/runs/033/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.012458324432373047,
+        "analyze": 0.010795354843139648,
+        "test_plan": 0.014144659042358398,
+        "repair": 0.010178804397583008,
+        "validate": 0.012748003005981445,
+        "review": 0.01053929328918457,
+        "gate": 0.016397714614868164
+      },
+      "ready_wait_sum_seconds": 0.08726215362548828,
+      "worker_cpu_seconds": 0.504085,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16801792,
+      "estimated_cny": 0.01053344,
+      "all_input_miss_upper_cny": 0.013544
+    },
+    {
+      "index": 34,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": false,
+      "wall_seconds": 6.939750671386719,
+      "model_calls": 3,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2108,
+        "completion_tokens": 809,
+        "total_tokens": 2917,
+        "prompt_cache_hit_tokens": 768,
+        "prompt_cache_miss_tokens": 1340
+      },
+      "failure_class": "immutable_tests_failed",
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/034/metrics.json",
+        "reports/project-benchmark-20261111/runs/034/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01057291030883789,
+        "analyze": 0.012789726257324219,
+        "test_plan": 2.4127750396728516,
+        "repair": 0.016077756881713867,
+        "validate": 0.010611534118652344
+      },
+      "ready_wait_sum_seconds": 2.46282696723938,
+      "worker_cpu_seconds": 0.392221,
+      "worker_cpu_terminal_records": 5,
+      "max_sampled_worker_memory_bytes": 6942720,
+      "estimated_cny": 0.00918272,
+      "all_input_miss_upper_cny": 0.010688
+    },
+    {
+      "index": 35,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.979867696762085,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2203,
+        "completion_tokens": 824,
+        "total_tokens": 3027,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1819
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/035/metrics.json",
+        "reports/project-benchmark-20261111/runs/035/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01569080352783203,
+        "analyze": 0.01690673828125,
+        "test_plan": 0.01901388168334961,
+        "repair": 0.015712499618530273,
+        "validate": 0.009262561798095703,
+        "review": 0.01074981689453125,
+        "gate": 0.017122745513916016
+      },
+      "ready_wait_sum_seconds": 0.10445904731750488,
+      "worker_cpu_seconds": 0.490429,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 15908864,
+      "estimated_cny": 0.01024536,
+      "all_input_miss_upper_cny": 0.010998
+    },
+    {
+      "index": 36,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 8.54135274887085,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2238,
+        "completion_tokens": 826,
+        "total_tokens": 3064,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1854
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/036/metrics.json",
+        "reports/project-benchmark-20261111/runs/036/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010897159576416016,
+        "analyze": 0.014164447784423828,
+        "test_plan": 2.3220627307891846,
+        "repair": 0.009328365325927734,
+        "validate": 0.008790016174316406,
+        "review": 0.016782045364379883,
+        "gate": 0.00984811782836914
+      },
+      "ready_wait_sum_seconds": 2.3918728828430176,
+      "worker_cpu_seconds": 0.487559,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7159808,
+      "estimated_cny": 0.010331360000000001,
+      "all_input_miss_upper_cny": 0.011084
+    },
+    {
+      "index": 37,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 8.819510698318481,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2972,
+        "completion_tokens": 964,
+        "total_tokens": 3936,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1436
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/037/metrics.json",
+        "reports/project-benchmark-20261111/runs/037/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010275840759277344,
+        "analyze": 0.016118526458740234,
+        "test_plan": 1.9232566356658936,
+        "repair": 0.01505279541015625,
+        "validate": 0.013190269470214844,
+        "review": 0.009987354278564453,
+        "gate": 0.010512113571166992
+      },
+      "ready_wait_sum_seconds": 1.9983935356140137,
+      "worker_cpu_seconds": 0.489539,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 7438336,
+      "estimated_cny": 0.01064544,
+      "all_input_miss_upper_cny": 0.013656
+    },
+    {
+      "index": 38,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 7.0081939697265625,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2546,
+        "completion_tokens": 882,
+        "total_tokens": 3428,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1522
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/038/metrics.json",
+        "reports/project-benchmark-20261111/runs/038/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011254549026489258,
+        "analyze": 0.017008304595947266,
+        "test_plan": 0.018825292587280273,
+        "repair": 0.01053929328918457,
+        "validate": 0.01327204704284668,
+        "review": 0.0117645263671875,
+        "gate": 0.015671968460083008
+      },
+      "ready_wait_sum_seconds": 0.09833598136901855,
+      "worker_cpu_seconds": 0.501759,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 15822848,
+      "estimated_cny": 0.01014096,
+      "all_input_miss_upper_cny": 0.012148
+    },
+    {
+      "index": 39,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.8649001121521,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 3028,
+        "completion_tokens": 956,
+        "total_tokens": 3984,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1492
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/039/metrics.json",
+        "reports/project-benchmark-20261111/runs/039/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.008643388748168945,
+        "analyze": 0.015256404876708984,
+        "test_plan": 0.01754617691040039,
+        "repair": 0.013726234436035156,
+        "validate": 0.00917196273803711,
+        "review": 0.012830018997192383,
+        "gate": 0.010444164276123047
+      },
+      "ready_wait_sum_seconds": 0.08761835098266602,
+      "worker_cpu_seconds": 0.499482,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16064512,
+      "estimated_cny": 0.01069344,
+      "all_input_miss_upper_cny": 0.013704
+    },
+    {
+      "index": 40,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 8.595299005508423,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2551,
+        "completion_tokens": 873,
+        "total_tokens": 3424,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1527
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/040/metrics.json",
+        "reports/project-benchmark-20261111/runs/040/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01723504066467285,
+        "analyze": 0.01376032829284668,
+        "test_plan": 1.9217371940612793,
+        "repair": 0.0106048583984375,
+        "validate": 0.017315387725830078,
+        "review": 0.009677410125732422,
+        "gate": 0.01756739616394043
+      },
+      "ready_wait_sum_seconds": 2.0078976154327393,
+      "worker_cpu_seconds": 0.469736,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6983680,
+      "estimated_cny": 0.01007896,
+      "all_input_miss_upper_cny": 0.012086
+    },
+    {
+      "index": 41,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.42256498336792,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2211,
+        "completion_tokens": 790,
+        "total_tokens": 3001,
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 1699
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/041/metrics.json",
+        "reports/project-benchmark-20261111/runs/041/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01693892478942871,
+        "analyze": 0.011769771575927734,
+        "test_plan": 0.013561725616455078,
+        "repair": 0.012524843215942383,
+        "validate": 0.007187843322753906,
+        "review": 0.014892816543579102,
+        "gate": 0.013038396835327148
+      },
+      "ready_wait_sum_seconds": 0.08991432189941406,
+      "worker_cpu_seconds": 0.49836400000000003,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16670720,
+      "estimated_cny": 0.009738479999999999,
+      "all_input_miss_upper_cny": 0.010742
+    },
+    {
+      "index": 42,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 6.3950536251068115,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2543,
+        "completion_tokens": 909,
+        "total_tokens": 3452,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1519
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/042/metrics.json",
+        "reports/project-benchmark-20261111/runs/042/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01819920539855957,
+        "analyze": 0.012607812881469727,
+        "test_plan": 0.014385223388671875,
+        "repair": 0.009371280670166016,
+        "validate": 0.010130643844604492,
+        "review": 0.013704538345336914,
+        "gate": 0.015151023864746094
+      },
+      "ready_wait_sum_seconds": 0.09354972839355469,
+      "worker_cpu_seconds": 0.497878,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16461824,
+      "estimated_cny": 0.01035096,
+      "all_input_miss_upper_cny": 0.012358
+    },
+    {
+      "index": 43,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 8.092791080474854,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2154,
+        "completion_tokens": 791,
+        "total_tokens": 2945,
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 1642
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/043/metrics.json",
+        "reports/project-benchmark-20261111/runs/043/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01757049560546875,
+        "analyze": 0.014126062393188477,
+        "test_plan": 2.1251142024993896,
+        "repair": 0.010362386703491211,
+        "validate": 0.0146026611328125,
+        "review": 0.010023117065429688,
+        "gate": 0.013055086135864258
+      },
+      "ready_wait_sum_seconds": 2.2048540115356445,
+      "worker_cpu_seconds": 0.477928,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6967296,
+      "estimated_cny": 0.009632479999999999,
+      "all_input_miss_upper_cny": 0.010636
+    },
+    {
+      "index": 44,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit",
+      "success": false,
+      "wall_seconds": 6.741731882095337,
+      "model_calls": 3,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2413,
+        "completion_tokens": 855,
+        "total_tokens": 3268,
+        "prompt_cache_hit_tokens": 1152,
+        "prompt_cache_miss_tokens": 1261
+      },
+      "failure_class": "immutable_tests_failed",
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/044/metrics.json",
+        "reports/project-benchmark-20261111/runs/044/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.011914730072021484,
+        "analyze": 0.016814231872558594,
+        "test_plan": 2.122781991958618,
+        "repair": 0.014642953872680664,
+        "validate": 0.010663032531738281
+      },
+      "ready_wait_sum_seconds": 2.176816940307617,
+      "worker_cpu_seconds": 0.385317,
+      "worker_cpu_terminal_records": 5,
+      "max_sampled_worker_memory_bytes": 6090752,
+      "estimated_cny": 0.00940808,
+      "all_input_miss_upper_cny": 0.011666
+    },
+    {
+      "index": 45,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 7.007572889328003,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2192,
+        "completion_tokens": 779,
+        "total_tokens": 2971,
+        "prompt_cache_hit_tokens": 512,
+        "prompt_cache_miss_tokens": 1680
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/045/metrics.json",
+        "reports/project-benchmark-20261111/runs/045/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.010846853256225586,
+        "analyze": 0.008114099502563477,
+        "test_plan": 0.009829998016357422,
+        "repair": 0.010637044906616211,
+        "validate": 0.009453058242797852,
+        "review": 0.011189937591552734,
+        "gate": 0.009117603302001953
+      },
+      "ready_wait_sum_seconds": 0.06918859481811523,
+      "worker_cpu_seconds": 0.5156000000000001,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 17481728,
+      "estimated_cny": 0.00961248,
+      "all_input_miss_upper_cny": 0.010616
+    },
+    {
+      "index": 46,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit",
+      "success": true,
+      "wall_seconds": 7.491154193878174,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2975,
+        "completion_tokens": 953,
+        "total_tokens": 3928,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1439
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/046/metrics.json",
+        "reports/project-benchmark-20261111/runs/046/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.009993791580200195,
+        "analyze": 0.01883983612060547,
+        "test_plan": 0.026245832443237305,
+        "repair": 0.01075124740600586,
+        "validate": 0.009629249572753906,
+        "review": 0.010248184204101562,
+        "gate": 0.011501789093017578
+      },
+      "ready_wait_sum_seconds": 0.09720993041992188,
+      "worker_cpu_seconds": 0.49566,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 12992512,
+      "estimated_cny": 0.01056344,
+      "all_input_miss_upper_cny": 0.013574
+    },
+    {
+      "index": 47,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 8.38900899887085,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2549,
+        "completion_tokens": 894,
+        "total_tokens": 3443,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1525
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/047/metrics.json",
+        "reports/project-benchmark-20261111/runs/047/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01624751091003418,
+        "analyze": 0.01574873924255371,
+        "test_plan": 2.2208564281463623,
+        "repair": 0.010460138320922852,
+        "validate": 0.011941671371459961,
+        "review": 0.012619256973266602,
+        "gate": 0.009267091751098633
+      },
+      "ready_wait_sum_seconds": 2.2971408367156982,
+      "worker_cpu_seconds": 0.480848,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6746112,
+      "estimated_cny": 0.010242959999999999,
+      "all_input_miss_upper_cny": 0.01225
+    },
+    {
+      "index": 48,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 8.395649194717407,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2888,
+        "completion_tokens": 845,
+        "total_tokens": 3733,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1352
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/048/metrics.json",
+        "reports/project-benchmark-20261111/runs/048/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.00952768325805664,
+        "analyze": 0.013235330581665039,
+        "test_plan": 1.928117275238037,
+        "repair": 0.011331796646118164,
+        "validate": 0.01584458351135254,
+        "review": 0.01076197624206543,
+        "gate": 0.012695789337158203
+      },
+      "ready_wait_sum_seconds": 2.001514434814453,
+      "worker_cpu_seconds": 0.478643,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6676480,
+      "estimated_cny": 0.009525440000000001,
+      "all_input_miss_upper_cny": 0.012536
+    },
+    {
+      "index": 49,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 7.121995210647583,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2601,
+        "completion_tokens": 893,
+        "total_tokens": 3494,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1577
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/049/metrics.json",
+        "reports/project-benchmark-20261111/runs/049/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01350092887878418,
+        "analyze": 0.011292219161987305,
+        "test_plan": 0.013050556182861328,
+        "repair": 0.01597285270690918,
+        "validate": 0.009931325912475586,
+        "review": 0.007972240447998047,
+        "gate": 0.013427019119262695
+      },
+      "ready_wait_sum_seconds": 0.08514714241027832,
+      "worker_cpu_seconds": 0.498869,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16592896,
+      "estimated_cny": 0.01033896,
+      "all_input_miss_upper_cny": 0.012346
+    },
+    {
+      "index": 50,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 24.313994884490967,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2179,
+        "completion_tokens": 816,
+        "total_tokens": 2995,
+        "prompt_cache_hit_tokens": 384,
+        "prompt_cache_miss_tokens": 1795
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/050/metrics.json",
+        "reports/project-benchmark-20261111/runs/050/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.01513528823852539,
+        "analyze": 0.015245676040649414,
+        "test_plan": 7.535038232803345,
+        "repair": 0.01096796989440918,
+        "validate": 0.012386798858642578,
+        "review": 0.01215219497680664,
+        "gate": 0.018533945083618164
+      },
+      "ready_wait_sum_seconds": 7.619460105895996,
+      "worker_cpu_seconds": 0.469622,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6742016,
+      "estimated_cny": 0.010133360000000001,
+      "all_input_miss_upper_cny": 0.010886
+    },
+    {
+      "index": 51,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 8.598365545272827,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2554,
+        "completion_tokens": 899,
+        "total_tokens": 3453,
+        "prompt_cache_hit_tokens": 1024,
+        "prompt_cache_miss_tokens": 1530
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/051/metrics.json",
+        "reports/project-benchmark-20261111/runs/051/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.015133380889892578,
+        "analyze": 0.01414632797241211,
+        "test_plan": 1.9151601791381836,
+        "repair": 0.01119089126586914,
+        "validate": 0.015639543533325195,
+        "review": 0.015194892883300781,
+        "gate": 0.010286092758178711
+      },
+      "ready_wait_sum_seconds": 1.996751308441162,
+      "worker_cpu_seconds": 0.47810199999999997,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 6610944,
+      "estimated_cny": 0.010292959999999999,
+      "all_input_miss_upper_cny": 0.0123
+    },
+    {
+      "index": 52,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit",
+      "success": true,
+      "wall_seconds": 6.315643310546875,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2107,
+        "completion_tokens": 732,
+        "total_tokens": 2839,
+        "prompt_cache_hit_tokens": 635,
+        "prompt_cache_miss_tokens": 1472
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/052/metrics.json",
+        "reports/project-benchmark-20261111/runs/052/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.012083768844604492,
+        "analyze": 0.019925832748413086,
+        "test_plan": 0.021730899810791016,
+        "repair": 0.010404586791992188,
+        "validate": 0.010986328125,
+        "review": 0.011146783828735352,
+        "gate": 0.013831615447998047
+      },
+      "ready_wait_sum_seconds": 0.10010981559753418,
+      "worker_cpu_seconds": 0.500063,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 15228928,
+      "estimated_cny": 0.008825399999999999,
+      "all_input_miss_upper_cny": 0.01007
+    },
+    {
+      "index": 53,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo",
+      "success": true,
+      "wall_seconds": 7.235302686691284,
+      "model_calls": 4,
+      "usage_complete": true,
+      "usage": {
+        "prompt_tokens": 2979,
+        "completion_tokens": 927,
+        "total_tokens": 3906,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 1443
+      },
+      "failure_class": null,
+      "source_paths": [
+        "reports/project-benchmark-20261111/runs/053/metrics.json",
+        "reports/project-benchmark-20261111/runs/053/detail.json"
+      ],
+      "ready_wait_seconds_by_task": {
+        "baseline": 0.012125968933105469,
+        "analyze": 0.015158891677856445,
+        "test_plan": 0.01696610450744629,
+        "repair": 0.012744665145874023,
+        "validate": 0.014804840087890625,
+        "review": 0.008753299713134766,
+        "gate": 0.014944791793823242
+      },
+      "ready_wait_sum_seconds": 0.09549856185913086,
+      "worker_cpu_seconds": 0.494421,
+      "worker_cpu_terminal_records": 7,
+      "max_sampled_worker_memory_bytes": 16052224,
+      "estimated_cny": 0.01036344,
+      "all_input_miss_upper_cny": 0.013374
+    }
+  ],
+  "by_workers": [
+    {
+      "workers": 1,
+      "n": 27,
+      "success_count": 24,
+      "failure_count": 3,
+      "wall_seconds_all": {
+        "n": 27,
+        "median": 8.795478343963623,
+        "min": 6.741731882095337,
+        "max": 24.313994884490967
+      },
+      "wall_seconds_success_only": {
+        "n": 24,
+        "median": 8.856372952461243,
+        "min": 8.092791080474854,
+        "max": 24.313994884490967
+      },
+      "ready_wait_sum_seconds": {
+        "n": 27,
+        "median": 2.3138484954833984,
+        "min": 1.9936037063598633,
+        "max": 7.733224391937256
+      },
+      "worker_cpu_seconds": {
+        "n": 27,
+        "median": 0.479314,
+        "min": 0.307611,
+        "max": 0.499489
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 27,
+        "median": 6983680,
+        "min": 6090752,
+        "max": 8245248
+      },
+      "usage": {
+        "prompt_tokens": 67923,
+        "completion_tokens": 23226,
+        "total_tokens": 91149,
+        "prompt_cache_hit_tokens": 23552,
+        "prompt_cache_miss_tokens": 44371
+      },
+      "model_calls": 105,
+      "usage_complete_count": 27,
+      "failure_classes": {
+        "patch_policy_rejected": 1,
+        "immutable_tests_failed": 2
+      },
+      "estimated_cny": 0.27549208000000003,
+      "all_input_miss_upper_cny": 0.321654
+    },
+    {
+      "workers": 2,
+      "n": 27,
+      "success_count": 27,
+      "failure_count": 0,
+      "wall_seconds_all": {
+        "n": 27,
+        "median": 6.813320159912109,
+        "min": 6.005514621734619,
+        "max": 7.667211055755615
+      },
+      "wall_seconds_success_only": {
+        "n": 27,
+        "median": 6.813320159912109,
+        "min": 6.005514621734619,
+        "max": 7.667211055755615
+      },
+      "ready_wait_sum_seconds": {
+        "n": 27,
+        "median": 0.09059548377990723,
+        "min": 0.06918859481811523,
+        "max": 0.11286139488220215
+      },
+      "worker_cpu_seconds": {
+        "n": 27,
+        "median": 0.49836400000000003,
+        "min": 0.483643,
+        "max": 0.5156000000000001
+      },
+      "max_sampled_worker_memory_bytes": {
+        "n": 27,
+        "median": 16437248,
+        "min": 12992512,
+        "max": 17481728
+      },
+      "usage": {
+        "prompt_tokens": 69704,
+        "completion_tokens": 23521,
+        "total_tokens": 93225,
+        "prompt_cache_hit_tokens": 25467,
+        "prompt_cache_miss_tokens": 44237
+      },
+      "model_calls": 108,
+      "usage_complete_count": 27,
+      "failure_classes": {},
+      "estimated_cny": 0.27766068,
+      "all_input_miss_upper_cny": 0.327576
+    }
+  ],
+  "handoff_separate": {
+    "available": true,
+    "source_path": "reports/handoff/detail.json",
+    "model_calls": 1,
+    "usage": {
+      "prompt_tokens": 9,
+      "completion_tokens": 2,
+      "total_tokens": 11,
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 9
+    },
+    "estimated_cny": 3.4e-05,
+    "all_input_miss_upper_cny": 3.4e-05
+  },
+  "gui_smoke_separate": {
+    "available": true,
+    "source_path": "reports/gui-smoke/detail.json",
+    "model_calls": 4,
+    "usage": {
+      "prompt_tokens": 2986,
+      "completion_tokens": 930,
+      "total_tokens": 3916,
+      "prompt_cache_hit_tokens": 1536,
+      "prompt_cache_miss_tokens": 1450
+    },
+    "estimated_cny": 0.01040144,
+    "all_input_miss_upper_cny": 0.013412
+  },
+  "definitions": {
+    "ready_wait": "first Worker running minus latest dependency terminal completion; baseline uses job.created. Dynamic review is created by validate completion, gate waits for validate+review. Includes controller/launch delay, not pure resource queue time.",
+    "cpu": "sum of terminal Worker cgroup cpu.stat usage_usec, across executed attempts; excludes control process/model broker/cloud CPU",
+    "memory": "max of history.memory_bytes sums sampled active Worker cgroup memory.current; not a true simultaneous peak, excludes broker/control/cloud memory",
+    "cost": "provider usage estimate: cache miss 2, hit .04, output 8 CNY/million; unspecified cache input treated as miss; all-input-miss upper estimate also reported; no invoice reconciliation"
+  },
+  "limits": [
+    "Only three repetitions per cell; no significance or causal performance claims.",
+    "Sequential interleaving, but cloud load, output length and provider prefix-cache state remain uncontrolled.",
+    "Tiny DAG offers at most analyze/test_plan concurrency and little resource competition; cannot establish scheduling-policy advantage.",
+    "Failed runs stop earlier; report all-run and success-only wall time separately.",
+    "Fixed fixtures and immutable tests verify controlled repair, not arbitrary repository repair or security isolation."
+  ],
+  "round_total": {
+    "model_calls": 218,
+    "usage": {
+      "prompt_tokens": 140622,
+      "completion_tokens": 47679,
+      "total_tokens": 188301,
+      "prompt_cache_hit_tokens": 50555,
+      "prompt_cache_miss_tokens": 90067
+    },
+    "estimated_cny": 0.5635882,
+    "all_input_miss_upper_cny": 0.662676
+  }
+}

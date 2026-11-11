@@ -1,0 +1,396 @@
+{
+  "schema": 1,
+  "schedule": [
+    {
+      "index": 0,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 1,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 2,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 3,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 4,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 5,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 6,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 7,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 8,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 9,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 10,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 11,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 12,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 13,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 14,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 15,
+      "repeat": 1,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 16,
+      "repeat": 1,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 17,
+      "repeat": 1,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 18,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 19,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 20,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 21,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 22,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 23,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 24,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 25,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 26,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 27,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 28,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 29,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 30,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 31,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 32,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 33,
+      "repeat": 2,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 34,
+      "repeat": 2,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 35,
+      "repeat": 2,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 36,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 37,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 38,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 39,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 40,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 41,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 42,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 43,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 44,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 45,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 46,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "aging_fit"
+    },
+    {
+      "index": 47,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 48,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 1,
+      "policy": "fifo"
+    },
+    {
+      "index": 49,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 2,
+      "policy": "fifo"
+    },
+    {
+      "index": 50,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 51,
+      "repeat": 3,
+      "project": "intervals",
+      "workers": 1,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 52,
+      "repeat": 3,
+      "project": "text_normalization",
+      "workers": 2,
+      "policy": "resource_fit"
+    },
+    {
+      "index": 53,
+      "repeat": 3,
+      "project": "pricing",
+      "workers": 2,
+      "policy": "fifo"
+    }
+  ],
+  "fixed_budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "maximum_model_calls": 216,
+  "maximum_model_calls_per_job": 4,
+  "no_post_retries": true,
+  "notes": "Sequential interleaved runs. No performance advantage inferred from one sample.",
+  "protocol_sha256": "149841abf24a414b6567e0e8d832f8fae64f46f6a601292d5a2057466d726887",
+  "raw_archive_sha256": "56c4eda38b08ed42c4e932f641e255b729827aa717e1f16794c40729fc862ffa",
+  "raw_archive_name": "repair-evidence.zip",
+  "raw_evidence_committed": false
+}

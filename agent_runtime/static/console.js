@@ -2,7 +2,7 @@
 let csrf='', selected=null, polling=false, offline=true, recoveryRequired=false, currentDetail=null;
 const $=id=>document.getElementById(id);
 const names={running:'运行中',succeeded:'成功',failed:'失败',waiting:'等待',timeout:'超时',skipped:'已跳过',unschedulable:'预算不足',cancelled:'已停止',cancelling:'停止中',recovery_required:'待管理员恢复'};
-const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审'};
+const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审',engineering:'Python 项目修复'};
 const palette=['#109a8c','#5d8dcc','#c79d52','#957bb7','#5fa0a6','#c17c8b','#709563'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const number=(value,digits=1)=>finite(value)?value.toFixed(digits):'—';
@@ -26,7 +26,17 @@ async function api(path,body){
   finally{clearTimeout(deadline)}
 }
 
-function updateScene(){const scene=$('preset').value;const hints={resources:'约 15 秒的真实小负载：观察排队、CPU/内存使用、配额分配和任务结束后的释放。无需模型密钥。',dynamic:'固定规划 JSON：两个任务并行，其中一个失败后重试，最终汇总。无需模型密钥。',ipc:'独立 Worker 通过本机 mailbox 交换上下文引用。无需模型密钥。',document:'粘贴一段文本，分析和索引 Agent 并行处理后汇总。留空使用示例文本。',llm:'一次模型调用，只返回文本，会消耗所配置账户的 API 额度。',team:'规划 → 分析与测试并行 → 汇总，共四次模型调用，会消耗 API 额度。',review:'写作 → 评审 → 根据反馈修订；最多两轮、四次模型调用，会消耗 API 额度。'};$('promptField').hidden=!['document','llm','team','review'].includes(scene);$('sceneHint').textContent=hints[scene]||''}
+const projectDescriptions={pricing:'三个整数金额函数：修复折扣、免邮阈值与退款舍入，保留输入校验。',intervals:'三个时间工具函数：检查半开区间、时间分桶和剩余 TTL 的边界。',text_normalization:'三个文本函数：统一空白与大小写，准确统计词数并检查前缀。'};
+function updateScene(){
+  const scene=$('preset').value;
+  const hints={resources:'约 15 秒的真实小负载：观察排队、CPU/内存使用、配额分配和任务结束后的释放。无需模型密钥。',dynamic:'固定规划 JSON：两个任务并行，其中一个失败后重试，最终汇总。无需模型密钥。',ipc:'独立 Worker 通过本机 mailbox 交换上下文引用。无需模型密钥。',document:'粘贴一段文本，分析和索引 Agent 并行处理后汇总。留空使用示例文本。',llm:'一次模型调用，只返回文本，会消耗所配置账户的 API 额度。',team:'规划 → 分析与测试并行 → 汇总，共四次模型调用，会消耗 API 额度。',review:'写作 → 评审 → 根据反馈修订；最多两轮、四次模型调用，会消耗 API 额度。',engineering:'原始失败 → 分析 / 测试设计 → 补丁 → 真实测试 → 最终评审。最多 4 次模型调用，最大输出共 2048 token，输入另计；失败停止，不自动重试。'};
+  $('promptField').hidden=!['document','llm','team','review'].includes(scene);
+  if($('projectField'))$('projectField').hidden=scene!=='engineering';
+  if($('engineeringBudgetNote'))$('engineeringBudgetNote').hidden=scene!=='engineering';
+  if($('projectDescription'))$('projectDescription').textContent=projectDescriptions[$('project')?.value]||'';
+  $('sceneHint').textContent=hints[scene]||'';
+  $('submit').firstElementChild && ($('submit').firstElementChild.textContent=scene==='engineering'?'运行修复与验证':'启动工作流');
+}
 
 function renderMachine(machine={}){
   const host=machine.host||{},service=machine.service||{};
@@ -45,7 +55,7 @@ function renderMachine(machine={}){
   $('updated').textContent=finite(machine.time)?'采样 '+new Date(machine.time*1000).toLocaleTimeString():'等待采样';
 }
 
-function renderJobs(jobs){const list=$('jobs');list.replaceChildren();$('jobCount').textContent=jobs.length+' 次';if(!jobs.length)list.append(empty('暂无运行记录',true));for(const job of jobs){const button=node('button',null,'job'+(selected===job.id?' selected':''));button.type='button';const row=node('div',null,'job-row');row.append(node('span',scenes[job.preset]||job.preset),badge(job.status));button.append(row,node('span',job.id.slice(0,10)+' · '+new Date(job.created*1000).toLocaleTimeString(),'mono'));button.onclick=async()=>{selected=job.id;await refresh()};list.append(button)}}
+function renderJobs(jobs){const list=$('jobs');list.replaceChildren();$('jobCount').textContent=jobs.length+' 次';if(!jobs.length)list.append(empty('暂无运行记录',true));for(const job of jobs){const button=node('button',null,'job'+(selected===job.id?' selected':''));button.type='button';const row=node('div',null,'job-row');const projectLabel={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};const title=job.preset==='engineering'?'项目修复 · '+(projectLabel[job.project]||job.project||'受控项目'):scenes[job.preset]||job.preset;row.append(node('span',title),badge(job.status));button.append(row,node('span',job.id.slice(0,10)+' · '+new Date(job.created*1000).toLocaleTimeString(),'mono'));button.onclick=async()=>{selected=job.id;await refresh()};list.append(button)}}
 
 function renderAllocations(monitor){const box=$('allocations');box.replaceChildren();if(!monitor){box.append(empty('正在等待 Runtime 的资源账本'));return}const rows=monitor.tasks||[],running=monitor.stale?[]:rows.filter(t=>t.state==='running');const specs=[['CPU 预留','cpu_milli',v=>number(v/1000,2)+' 核'],['内存预留','memory_bytes',bytes],['PIDs 预留','pids',v=>String(v)],['Worker 槽位','slots',v=>String(v)]];for(const [label,key,format] of specs){const reserved=monitor.stale?null:(key==='slots'?monitor.slots_used:monitor.reserved?.[key]),budget=key==='slots'?monitor.slots_total:monitor.budget?.[key];const card=node('div');const head=node('div',null,'allocation-head');head.append(node('span',label),node('span',finite(reserved)&&finite(budget)&&budget>0?Math.round(reserved/budget*100)+'%':'—'));const value=node('div',finite(reserved)?format(reserved):'—','allocation-value');value.append(node('small',' / '+(finite(budget)?format(budget):'—')));const track=node('div',null,'allocation-track');if(finite(budget)&&budget>0){for(const task of running){const amount=key==='slots'?1:task.resources?.[key];if(!finite(amount))continue;const segment=node('i');segment.style.width=Math.max(0,Math.min(100,amount/budget*100))+'%';segment.style.background=colorFor(task.id);segment.title=task.id+'：'+format(amount);track.append(segment)}}card.append(head,value,track,node('div',monitor.stale?'采样失效 · 分配状态未知':(key==='slots'?'正在占用 / 并发上限':'调度器账本 · 不是实际消耗'),'allocation-sub'));box.append(card)}}
 
@@ -81,7 +91,73 @@ function renderTimeline(job){const box=$('timeline');box.replaceChildren();const
 
 function renderContext(monitor){const stats=monitor?.context||{},box=$('contextCacheStats');box.replaceChildren();const count=value=>finite(value)?String(value):'—';const items=[['命中 / 未命中',count(stats.cache_hits)+' / '+count(stats.cache_misses)],['磁盘读取',count(stats.disk_reads)],['缓存淘汰',count(stats.cache_evictions)],['占用 / 容量',bytes(stats.cache_bytes)+' / '+bytes(stats.cache_limit_bytes)]];for(const [label,value] of items){const card=node('div',null,'cache-stat');card.append(node('span',label),node('b',value));box.append(card)}$('contextCacheNote').textContent=(monitor?.stale?'最后记录 · ':'')+'应用层 JSON 缓存 · 不是模型 KV Cache'}
 
-function renderDetail(job){currentDetail=job;$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
+function engineeringCounts(report){
+  if(!report||typeof report!=='object')return null;
+  const candidate=report.candidate&&typeof report.candidate==='object'?report.candidate:report;
+  return {public:candidate.public||report.public,heldout:candidate.heldout||report.heldout};
+}
+function testCountLine(label,counts){
+  const row=node('div',null,'repair-check-row');
+  if(!counts||typeof counts!=='object'){row.append(node('span',label),node('b','待检查','muted'));return row}
+  const failed=(finite(counts.failed)?counts.failed:0)+(finite(counts.errors)?counts.errors:0);
+  const total=finite(counts.total)?counts.total:finite(counts.tests_run)?counts.tests_run:null;
+  const passed=finite(counts.passed)?counts.passed:null;
+  row.className+=' '+(failed>0?'check-fail':passed!==null&&total!==null&&passed===total?'check-pass':'');
+  row.append(node('span',label),node('b',(passed===null?'—':passed)+' / '+(total===null?'—':total)+' 通过'));
+  if(failed>0)row.append(node('small',failed+' 项失败 / 错误'));
+  return row;
+}
+function renderCheckGroup(id,title,report,baseline=false){
+  const box=$(id);if(!box)return;box.replaceChildren(node('h3',title));
+  const counts=engineeringCounts(report);
+  box.append(testCountLine('公开用例',counts?.public),testCountLine('独立用例',counts?.heldout));
+  if(baseline&&finite(report?.baseline_failing_count))box.append(node('p','原版 '+report.baseline_failing_count+' 项失败（预期红灯）','hint'));
+}
+function renderEngineering(job){
+  const panel=$('engineeringPanel');if(!panel)return;
+  const engineering=job.engineering;
+  panel.hidden=job.preset!=='engineering'&&!engineering;
+  if(panel.hidden)return;
+  const data=engineering||{},stale=Boolean(job.monitor?.stale),project=data.project||job.project||'pricing';
+  const labels={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};
+  $('engineeringTitle').textContent=data.title||'Python 项目修复 · '+(labels[project]||project);
+  const validation=data.validation,verdict=data.verdict;
+  const semanticFailure=validation?.success===false||verdict?.accepted===false;
+  const success=verdict?.accepted===true&&validation?.success===true;
+  const outcome=stale?'最后记录 · 非实时':success?'修复通过':semanticFailure||job.status==='failed'?'业务未通过':names[job.status]||'等待启动';
+  $('engineeringOutcome').textContent=outcome;
+  $('engineeringOutcome').className='badge '+(stale?'waiting':success?'succeeded':semanticFailure||job.status==='failed'?'failed':job.status);
+  const phases=Array.isArray(data.phases)?data.phases:[];
+  const defaults=[['baseline','原始失败'],['analyze','问题分析'],['test_plan','测试设计'],['repair','模型补丁'],['validate','真实测试'],['review','最终评审'],['gate','结果确认']];
+  const box=$('engineeringPhases');box.replaceChildren();
+  for(const [id,label] of defaults){
+    const phase=phases.find(p=>p.id===id)||{};
+    const state=phase.status||job.states?.[id]||'waiting';
+    const allowed=['waiting','running','succeeded','failed','timeout','skipped','cancelled','unschedulable'];
+    const card=node('div',null,'repair-phase '+(allowed.includes(state)?state:'waiting'));
+    const head=node('div',null,'repair-phase-head');head.append(node('strong',phase.label||label),badge(state));card.append(head);
+    if(id==='baseline')card.append(node('small','确认缺陷，不要求原版通过'));
+    if(phase.details!=null){const details=node('details',null,'repair-phase-details');details.append(node('summary','查看阶段记录'),node('pre',typeof phase.details==='string'?phase.details:formatResult(phase.details)));card.append(details)}
+    box.append(card);
+  }
+  renderCheckGroup('engineeringBaseline','修复前 · 预期失败',data.baseline,true);
+  renderCheckGroup('engineeringValidation','修复后 · 真实检查',validation);
+  const decision=$('engineeringVerdict');decision.replaceChildren();
+  if(stale)decision.append(node('strong','最后记录；连接或执行状态未确认'));
+  else if(verdict&&typeof verdict==='object'){
+    decision.append(node('strong',verdict.accepted===true?'最终评审接受':verdict.accepted===false?'最终评审未接受':'最终评审已返回'));
+    if(verdict.reason)decision.append(node('p',verdict.reason));
+  }else decision.append(node('span',semanticFailure?'验证未通过，停止后续付费调用':'等待真实测试和最终评审结果'));
+  decision.className='repair-verdict '+(success?'check-pass':semanticFailure?'check-fail':'');
+  $('engineeringCalls').textContent='模型调用 '+(finite(data.model_calls)?data.model_calls:'—')+' / '+(finite(data.call_limit)?data.call_limit:4);
+  const usage=data.usage||{};$('engineeringTokens').textContent='输入 / 输出 token：'+(finite(usage.prompt_tokens)?usage.prompt_tokens:'—')+' / '+(finite(usage.completion_tokens)?usage.completion_tokens:'—');
+  const budget=data.budget||job.budget||{};$('engineeringBudget').textContent='固定预算：'+(finite(budget.cpu_milli)?number(budget.cpu_milli/1000,2)+' 核':'—')+' / '+bytes(budget.memory_bytes)+' / '+(finite(budget.pids)?budget.pids:'—')+' pids';
+  const source=typeof data.patch_source==='string'?data.patch_source:typeof validation?.source==='string'?validation.source:'';
+  $('engineeringPatch').hidden=!source;$('engineeringSource').textContent=source;
+  $('engineeringHash').textContent=data.source_sha256||validation?.source_sha256||'';
+}
+
+function renderDetail(job){currentDetail=job;renderEngineering(job);$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
 
 function markOffline(message){
   offline=true;
@@ -105,7 +181,7 @@ async function refresh(){
     const busy=state.jobs.some(job=>['running','cancelling'].includes(job.status));
     $('runtimeState').textContent=recoveryRequired?'需要管理员恢复':busy?'执行中':'就绪';
     $('enforcement').textContent=state.enforcement==='cgroup_v2'?'cgroups v2 · 硬限制':'仅预算准入';
-    $('modelState').textContent=state.model_configured?state.model:'待配置密钥';
+    $('modelState').textContent=state.model_available===false?'模型服务暂不可用':state.model_configured?state.model:'待配置密钥';
     $('submit').disabled=busy||recoveryRequired;
     $('saveKey').disabled=busy||recoveryRequired;
     renderMachine(state.machine||{});
@@ -120,8 +196,9 @@ async function refresh(){
 
 function initialize(){
   $('preset').onchange=updateScene;
-  $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到本次服务会话':'已清除密钥';await refresh()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
-  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,prompt:$('prompt').value});selected=result.id;await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
+  if($('project'))$('project').onchange=updateScene;
+  $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到模型服务内存':'已清除密钥';await refresh()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
+  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selected=result.id;await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
   $('cancel').onclick=async()=>{if(!selected||offline||recoveryRequired)return;try{await api('jobs/'+selected+'/cancel',{});await refresh()}catch(error){$('notice').textContent=error.message}};
   updateScene();$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);
 }
