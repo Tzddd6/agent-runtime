@@ -86,7 +86,8 @@ class DeepSeekClient:
         if type(max_tokens) is not int or not 1 <= max_tokens <= 4096:
             raise ModelError('max_tokens 必须为 1—4096 的整数')
         data = json.dumps({'model': self.model, 'messages': messages,
-                           'max_tokens': max_tokens, 'stream': False}).encode()
+                           'max_tokens': max_tokens, 'stream': False,
+                           'thinking':{'type':'disabled'}}).encode()
         if len(data) > MAX_BYTES:
             raise ModelError('模型请求超过 1 MiB')
         req = urllib.request.Request(self.base+'/chat/completions', data=data,
@@ -101,6 +102,8 @@ class DeepSeekClient:
             text = value['choices'][0]['message']['content']
             if not isinstance(text, str):
                 raise ValueError('invalid content')
+            if not text.strip():
+                raise ModelError('模型未返回正文，可能已耗尽输出预算；不能视为任务成功')
             return {'content': text, 'model': value.get('model', self.model),
                     'usage': value.get('usage', {}), 'finish_reason': value['choices'][0].get('finish_reason'),
                     'latency_seconds': time.monotonic()-started}

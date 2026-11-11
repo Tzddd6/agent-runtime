@@ -21,6 +21,7 @@ class GatewayTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         owner = self
         self.calls, self.active, self.peak = [], 0, 0
+        self.response_content='mock answer'
         self.lock = threading.Lock()
 
         class Mock(BaseHTTPRequestHandler):
@@ -35,7 +36,7 @@ class GatewayTests(unittest.TestCase):
                 with owner.lock: owner.active-=1
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(json.dumps({'model':'deepseek-flash','choices':[{'message':{'content':'mock answer'},'finish_reason':'stop'}],
+                self.wfile.write(json.dumps({'model':'deepseek-flash','choices':[{'message':{'content':owner.response_content},'finish_reason':'stop'}],
                                            'usage':{'prompt_tokens':3,'completion_tokens':2}}).encode())
 
         self.mock=ThreadingHTTPServer(('127.0.0.1',0),Mock)
@@ -49,8 +50,14 @@ class GatewayTests(unittest.TestCase):
         value=self.client.complete([{'role':'user','content':'hello'}])
         self.assertEqual(value['content'],'mock answer')
         self.assertEqual(self.calls[0]['model'],'deepseek-flash')
+        self.assertEqual(self.calls[0]['thinking'],{'type':'disabled'})
         with self.assertRaises(ModelError):self.client.complete([{'role':'invalid','content':'hello'}])
         with self.assertRaises(ModelError):DeepSeekClient('key',base='https://example.com')
+
+    def test_empty_provider_content_is_not_success(self):
+        self.response_content=''
+        with self.assertRaisesRegex(ModelError,'未返回正文'):
+            self.client.complete([{'role':'user','content':'hello'}])
 
     def test_gateway_concurrency_authorization_and_logs(self):
         log=Path(self.temp.name)/'calls.jsonl'
