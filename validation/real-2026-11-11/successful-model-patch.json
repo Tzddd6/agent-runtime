@@ -1,0 +1,3 @@
+{
+  "source": "def line_total_cents(unit_cents, quantity, discount_pct):\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\n        raise ValueError(\"invalid\")\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\n\ndef shipping_cents(subtotal_cents):\n    if subtotal_cents < 0:\n        raise ValueError(\"invalid\")\n    if subtotal_cents >= 5000:\n        return 0\n    return 599\n\ndef refund_cents(paid_cents, returned_qty, total_qty):\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\n        raise ValueError(\"invalid\")\n    return (paid_cents * returned_qty) // total_qty\n"
+}

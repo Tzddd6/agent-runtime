@@ -1,0 +1,629 @@
+{
+  "kind": "fixed_model_output_replay",
+  "rounds": 8,
+  "repeats": 3,
+  "logical_readers": [
+    "analyzer",
+    "tester",
+    "repairer",
+    "reviewer"
+  ],
+  "records": [
+    {
+      "id": "cache-0-disabled",
+      "kind": "fixed_model_output_replay",
+      "repeat": 0,
+      "cache_mode": "disabled",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.007952840000143624,
+      "context_controller_cpu_seconds": 0.00792309400000002,
+      "test_seconds": 0.08149389900063397,
+      "wall_seconds": 0.08983383399936429,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 0,
+        "cache_misses": 64,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 64,
+        "cache_bytes": 0,
+        "disk_reads": 64,
+        "disk_read_bytes": 33312,
+        "cache_entries": 0,
+        "cache_limit_bytes": 0,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.04068851599913614,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.03944596800101863,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-disabled/project-check/pricing-2q095dy2/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    },
+    {
+      "id": "cache-0-lru2",
+      "kind": "fixed_model_output_replay",
+      "repeat": 0,
+      "cache_mode": "lru2",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.002035179000813514,
+      "context_controller_cpu_seconds": 0.0020274399999999915,
+      "test_seconds": 0.08054265200007649,
+      "wall_seconds": 0.08296143500047037,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 62,
+        "cache_misses": 2,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 0,
+        "cache_bytes": 4537,
+        "disk_reads": 2,
+        "disk_read_bytes": 1041,
+        "cache_entries": 2,
+        "cache_limit_bytes": 8388608,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.04014970800017181,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.03894564199981687,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/0-lru2/project-check/pricing-xqqcrynv/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    },
+    {
+      "id": "cache-1-lru2",
+      "kind": "fixed_model_output_replay",
+      "repeat": 1,
+      "cache_mode": "lru2",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.002035958999840659,
+      "context_controller_cpu_seconds": 0.002027331999999993,
+      "test_seconds": 0.08040695199997572,
+      "wall_seconds": 0.08283330099948216,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 62,
+        "cache_misses": 2,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 0,
+        "cache_bytes": 4537,
+        "disk_reads": 2,
+        "disk_read_bytes": 1041,
+        "cache_entries": 2,
+        "cache_limit_bytes": 8388608,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.040089189998980146,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.038860160999320215,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-lru2/project-check/pricing-ybw8ed59/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    },
+    {
+      "id": "cache-1-disabled",
+      "kind": "fixed_model_output_replay",
+      "repeat": 1,
+      "cache_mode": "disabled",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.007704900001044734,
+      "context_controller_cpu_seconds": 0.007677802999999983,
+      "test_seconds": 0.08099696200042672,
+      "wall_seconds": 0.08911030300077982,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 0,
+        "cache_misses": 64,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 64,
+        "cache_bytes": 0,
+        "disk_reads": 64,
+        "disk_read_bytes": 33312,
+        "cache_entries": 0,
+        "cache_limit_bytes": 0,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.04003246100000979,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.039569462000144995,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/1-disabled/project-check/pricing-q5xsrhbn/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    },
+    {
+      "id": "cache-2-disabled",
+      "kind": "fixed_model_output_replay",
+      "repeat": 2,
+      "cache_mode": "disabled",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.008559986999898683,
+      "context_controller_cpu_seconds": 0.00775351299999999,
+      "test_seconds": 0.08082318999913696,
+      "wall_seconds": 0.08975699199982046,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 0,
+        "cache_misses": 64,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 64,
+        "cache_bytes": 0,
+        "disk_reads": 64,
+        "disk_read_bytes": 33312,
+        "cache_entries": 0,
+        "cache_limit_bytes": 0,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.040510222999728285,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.038848443000460975,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-disabled/project-check/pricing-9kup215s/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    },
+    {
+      "id": "cache-2-lru2",
+      "kind": "fixed_model_output_replay",
+      "repeat": 2,
+      "cache_mode": "lru2",
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "no provider calls",
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "context_seconds": 0.00203665600020031,
+      "context_controller_cpu_seconds": 0.0020287110000000164,
+      "test_seconds": 0.07971930600069754,
+      "wall_seconds": 0.08213106700168282,
+      "success": true,
+      "accesses": 64,
+      "stats": {
+        "puts": 2,
+        "unique_objects": 2,
+        "logical_bytes": 4537,
+        "stored_bytes": 1041,
+        "cache_hits": 62,
+        "cache_misses": 2,
+        "cache_evictions": 0,
+        "cache_invalidations": 0,
+        "cache_bypasses": 0,
+        "cache_bytes": 4537,
+        "disk_reads": 2,
+        "disk_read_bytes": 1041,
+        "cache_entries": 2,
+        "cache_limit_bytes": 8388608,
+        "cache_limit_entries": 1024,
+        "cache_policy": "lru2"
+      },
+      "test_results": {
+        "project": "integer-pricing",
+        "success": true,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+        "baseline_failing_count": 8,
+        "baseline": {
+          "public": {
+            "total": 9,
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+          },
+          "success": false,
+          "timed_out": false,
+          "wall_seconds": 0.04020370799844386,
+          "exit_code": 0
+        },
+        "public": {
+          "total": 9,
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+        },
+        "heldout": {
+          "total": 16,
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+        },
+        "candidate": {
+          "public": {
+            "total": 9,
+            "passed": 9,
+            "failed": 0,
+            "errors": 0,
+            "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+          },
+          "heldout": {
+            "total": 16,
+            "passed": 16,
+            "failed": 0,
+            "errors": 0,
+            "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+          },
+          "success": true,
+          "timed_out": false,
+          "wall_seconds": 0.03810898499978066,
+          "exit_code": 0
+        },
+        "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt",
+        "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/cache-replay/2-lru2/project-check/pricing-p7swsvyt/report.json",
+        "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+      },
+      "usage": {},
+      "cpu_seconds": null,
+      "peak_memory_bytes": null
+    }
+  ],
+  "billed_model_calls": 0,
+  "medians": {
+    "disabled": {
+      "context_seconds": 0.007952840000143624,
+      "disk_reads": 64,
+      "cache_hits": 0,
+      "stored_bytes": 1041
+    },
+    "lru2": {
+      "context_seconds": 0.002035958999840659,
+      "disk_reads": 2,
+      "cache_hits": 62,
+      "stored_bytes": 1041
+    }
+  },
+  "claim_boundary": "Fixed model output replay, sequential logical-reader accesses, real project tests. No fresh model responses, no paid calls, no GPU KV-cache measurement. File reads are not physical disk I/O. Context CPU excludes subprocess test CPU; timings do not establish statistical significance."
+}

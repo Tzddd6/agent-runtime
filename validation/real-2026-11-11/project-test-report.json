@@ -1,0 +1,63 @@
+{
+  "project": "integer-pricing",
+  "success": true,
+  "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+  "baseline_failing_count": 8,
+  "baseline": {
+    "public": {
+      "total": 9,
+      "passed": 6,
+      "failed": 3,
+      "errors": 0,
+      "stdout": "F...F..F.\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 587 != 537\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:4\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 599 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\npublic:7\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 99 != 100\n\n----------------------------------------------------------------------\nRan 9 tests in 0.001s\n\nFAILED (failures=3)\n"
+    },
+    "heldout": {
+      "total": 16,
+      "passed": 11,
+      "failed": 5,
+      "errors": 0,
+      "stdout": "FFFF......F.....\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:0\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -47 != 1\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:1\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: -25 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:2\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 6893 != 0\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:3\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 876 != 609\n\n======================================================================\nFAIL: unittest.case.FunctionTestCase (check)\nheldout:10\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/trusted_runner.py\", line 19, in check\n    case.assertEqual(value,expected)\nAssertionError: 66 != 67\n\n----------------------------------------------------------------------\nRan 16 tests in 0.001s\n\nFAILED (failures=5)\n"
+    },
+    "success": false,
+    "timed_out": false,
+    "wall_seconds": 0.04182251800011727,
+    "exit_code": 0
+  },
+  "public": {
+    "total": 9,
+    "passed": 9,
+    "failed": 0,
+    "errors": 0,
+    "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+  },
+  "heldout": {
+    "total": 16,
+    "passed": 16,
+    "failed": 0,
+    "errors": 0,
+    "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+  },
+  "candidate": {
+    "public": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n"
+    },
+    "heldout": {
+      "total": 16,
+      "passed": 16,
+      "failed": 0,
+      "errors": 0,
+      "stdout": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+    },
+    "success": true,
+    "timed_out": false,
+    "wall_seconds": 0.0395559240005241,
+    "exit_code": 0
+  },
+  "workspace": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy",
+  "report_path": "/home/tzd/agent-runtime-real-experiments-20261111/reports/real-fixed/project-r0-w1-fifo/checks/pricing-szxol5iy/report.json",
+  "stdout": ".........\n----------------------------------------------------------------------\nRan 9 tests in 0.000s\n\nOK\n\n................\n----------------------------------------------------------------------\nRan 16 tests in 0.000s\n\nOK\n"
+}

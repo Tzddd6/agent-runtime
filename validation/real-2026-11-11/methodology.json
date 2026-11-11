@@ -1,0 +1,14 @@
+{
+  "pricing_source": "https://api-docs.deepseek.com/zh-cn/quick_start/pricing/",
+  "thinking_source": "https://api-docs.deepseek.com/zh-cn/guides/thinking_mode/",
+  "actual_bill": "unknown; estimates use peak tariff and successful-response usage, including empty-content diagnosis",
+  "global_call_cap": 100,
+  "reserved_upper_bound": 90,
+  "default_thinking_failure": "Reasoning consumed 256/512 output budget; empty content had incorrectly counted as task success",
+  "post_fix_online_samples_per_configuration": 1,
+  "concurrency_confound": "workers=1 gets 1CPU admission budget, workers=2 gets 2CPU; remote cache, run order and model variation not controlled",
+  "ready_wait": "Observed admission event time minus latest successful dependency event; root tasks use controller creation time, not kernel scheduler wait",
+  "resource_scope": "Local Agent/tool Workers; excludes provider compute and model-broker control process. Memory is sampled concurrent model-worker max combined with tool cgroup peak, not guaranteed true global peak",
+  "cache_ablation": "fixed real outputs replay, sequential logical readers and actual tests, not fresh model calls",
+  "independent_test_boundary": "heldout not sent to model, but this is a constructed 3-function task, not arbitrary repository repair"
+}

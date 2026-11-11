@@ -1,0 +1,2378 @@
+{
+  "methodology": {
+    "separate_kinds": true,
+    "missing_values": "null means not measured; never substituted with zero",
+    "replay_usage": "logical source tokens may be retained; replay incurs zero new provider calls",
+    "cost": "estimate only from supplied rates; actual vendor bill remains unknown",
+    "failed_calls": "failed tasks, empty responses and diagnostic runs still count whenever provider usage exists; completion_tokens already includes reasoning tokens",
+    "small_samples": "n=1 is a single observation, not evidence of statistical significance",
+    "budget_confound": "if worker count also changes admission CPU budget, serial/parallel results are their joint effect, not a pure parallelism intervention",
+    "provider_confound": "remote latency, vendor prefix cache warming, request order and nondeterministic model outputs may affect time/cost independently of the local scheduler and JSON cache",
+    "scope": "one controlled project fixture cannot establish benefits for arbitrary real repositories",
+    "wait_metric": "per-run mean/max of dependency-ready task wait values; excludes unmet-dependency time",
+    "peak_memory": "must be measured simultaneously for the workflow, not summed task peaks",
+    "redaction": "allowlisted metadata/counts only; prompts, answers, keys, stdout and extra fields excluded"
+  },
+  "rates": {
+    "currency": "CNY",
+    "input_per_million": 2,
+    "output_per_million": 8,
+    "cached_input_per_million": 0.04,
+    "model": "deepseek-flash"
+  },
+  "totals_by_kind": {
+    "live": {
+      "records": 21,
+      "successes": 8,
+      "failed_records": 13,
+      "estimated_api_cost": 0.22763175999999996,
+      "actual_api_cost": null,
+      "usage": {
+        "prompt_tokens": {
+          "observations": 21,
+          "observed_total": 52737
+        },
+        "completion_tokens": {
+          "observations": 21,
+          "observed_total": 22263
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 21,
+          "observed_total": 28544
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 21,
+          "observed_total": 24193
+        }
+      }
+    },
+    "replay": {
+      "records": 6,
+      "successes": 6,
+      "failed_records": 0,
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null,
+      "usage": {
+        "prompt_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "completion_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        }
+      }
+    }
+  },
+  "groups": [
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 2,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 4,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": false,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 4,
+          "median": 8.954076409339905,
+          "min": 5.638509750366211,
+          "max": 9.598130702972412
+        },
+        "ready_wait_seconds": {
+          "observations": 4,
+          "median": 0.012215803066889446,
+          "min": 0.0077803730964660645,
+          "max": 0.013315975666046143
+        },
+        "max_ready_wait_seconds": {
+          "observations": 4,
+          "median": 0.01632237434387207,
+          "min": 0.010308980941772461,
+          "max": 0.01818370819091797
+        },
+        "cpu_seconds": {
+          "observations": 4,
+          "median": 0.188179,
+          "min": 0.132043,
+          "max": 0.205791
+        },
+        "peak_memory_bytes": {
+          "observations": 4,
+          "median": 16615424.0,
+          "min": 6729728,
+          "max": 17231872
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 4,
+          "observed_total": 5926
+        },
+        "completion_tokens": {
+          "observations": 4,
+          "observed_total": 4502
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 4,
+          "observed_total": 3072
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 4,
+          "observed_total": 2854
+        }
+      },
+      "estimated_api_cost": 0.04184688,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-collaboration-review",
+        "pre-fix-collaboration-team",
+        "pre-fix-project-r0-w2-resource_fit-team",
+        "pre-fix-project-r1-w2-resource_fit-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 1,
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 2,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 2,
+          "median": 11.053694486618042,
+          "min": 10.89629316329956,
+          "max": 11.211095809936523
+        },
+        "ready_wait_seconds": {
+          "observations": 2,
+          "median": 0.5990337133407593,
+          "min": 0.5963988304138184,
+          "max": 0.6016685962677002
+        },
+        "max_ready_wait_seconds": {
+          "observations": 2,
+          "median": 2.3621081113815308,
+          "min": 2.357006311416626,
+          "max": 2.3672099113464355
+        },
+        "cpu_seconds": {
+          "observations": 2,
+          "median": 0.178537,
+          "min": 0.170933,
+          "max": 0.18614099999999997
+        },
+        "peak_memory_bytes": {
+          "observations": 2,
+          "median": 7335936.0,
+          "min": 7151616,
+          "max": 7520256
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 2,
+          "observed_total": 4954
+        },
+        "completion_tokens": {
+          "observations": 2,
+          "observed_total": 2560
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 2,
+          "observed_total": 3072
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 2,
+          "observed_total": 1882
+        }
+      },
+      "estimated_api_cost": 0.02436688,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-project-r0-w1-aging_fit-team",
+        "pre-fix-project-r1-w1-aging_fit-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 1,
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 2,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 2,
+          "median": 11.712056040763855,
+          "min": 11.593821287155151,
+          "max": 11.830290794372559
+        },
+        "ready_wait_seconds": {
+          "observations": 2,
+          "median": 0.629029244184494,
+          "min": 0.6034916639328003,
+          "max": 0.6545668244361877
+        },
+        "max_ready_wait_seconds": {
+          "observations": 2,
+          "median": 2.4753628969192505,
+          "min": 2.3737552165985107,
+          "max": 2.5769705772399902
+        },
+        "cpu_seconds": {
+          "observations": 2,
+          "median": 0.1751955,
+          "min": 0.17415200000000003,
+          "max": 0.176239
+        },
+        "peak_memory_bytes": {
+          "observations": 2,
+          "median": 7172096.0,
+          "min": 7086080,
+          "max": 7258112
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 2,
+          "observed_total": 4954
+        },
+        "completion_tokens": {
+          "observations": 2,
+          "observed_total": 2560
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 2,
+          "observed_total": 1536
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 2,
+          "observed_total": 3418
+        }
+      },
+      "estimated_api_cost": 0.02737744,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-project-r0-w1-fifo-team",
+        "pre-fix-project-r1-w1-fifo-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 1,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 2,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 2,
+          "median": 10.789613366127014,
+          "min": 10.72167181968689,
+          "max": 10.857554912567139
+        },
+        "ready_wait_seconds": {
+          "observations": 2,
+          "median": 0.6142652034759521,
+          "min": 0.5528472065925598,
+          "max": 0.6756832003593445
+        },
+        "max_ready_wait_seconds": {
+          "observations": 2,
+          "median": 2.42100727558136,
+          "min": 2.1737091541290283,
+          "max": 2.6683053970336914
+        },
+        "cpu_seconds": {
+          "observations": 2,
+          "median": 0.179094,
+          "min": 0.17461300000000002,
+          "max": 0.183575
+        },
+        "peak_memory_bytes": {
+          "observations": 2,
+          "median": 7208960.0,
+          "min": 7159808,
+          "max": 7258112
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 2,
+          "observed_total": 4954
+        },
+        "completion_tokens": {
+          "observations": 2,
+          "observed_total": 2560
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 2,
+          "observed_total": 3072
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 2,
+          "observed_total": 1882
+        }
+      },
+      "estimated_api_cost": 0.02436688,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-project-r0-w1-resource_fit-team",
+        "pre-fix-project-r1-w1-resource_fit-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 2,
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 9.367398738861084,
+          "min": 9.367398738861084,
+          "max": 9.367398738861084
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.009309053421020508,
+          "min": 0.009309053421020508,
+          "max": 0.009309053421020508
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.01059103012084961,
+          "min": 0.01059103012084961,
+          "max": 0.01059103012084961
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.19807,
+          "min": 0.19807,
+          "max": 0.19807
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 17281024,
+          "min": 17281024,
+          "max": 17281024
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 2477
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 1280
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 1536
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 941
+        }
+      },
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-project-r0-w2-aging_fit-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "empty-content-diagnostic",
+      "workers": 2,
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 2,
+      "successes": 0,
+      "completion_rate": 0.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 2,
+          "median": 9.24374234676361,
+          "min": 9.201160669326782,
+          "max": 9.28632402420044
+        },
+        "ready_wait_seconds": {
+          "observations": 2,
+          "median": 0.012254476547241211,
+          "min": 0.011138081550598145,
+          "max": 0.013370871543884277
+        },
+        "max_ready_wait_seconds": {
+          "observations": 2,
+          "median": 0.015042662620544434,
+          "min": 0.013567209243774414,
+          "max": 0.016518115997314453
+        },
+        "cpu_seconds": {
+          "observations": 2,
+          "median": 0.191772,
+          "min": 0.189471,
+          "max": 0.19407300000000002
+        },
+        "peak_memory_bytes": {
+          "observations": 2,
+          "median": 16613376.0,
+          "min": 16261120,
+          "max": 16965632
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 2,
+          "observed_total": 4954
+        },
+        "completion_tokens": {
+          "observations": 2,
+          "observed_total": 2560
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 2,
+          "observed_total": 3072
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 2,
+          "observed_total": 1882
+        }
+      },
+      "estimated_api_cost": 0.02436688,
+      "actual_api_cost": null,
+      "record_ids": [
+        "pre-fix-project-r0-w2-fifo-team",
+        "pre-fix-project-r1-w2-fifo-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "collaboration-team",
+      "workers": 2,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 4.711658239364624,
+          "min": 4.711658239364624,
+          "max": 4.711658239364624
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.006899416446685791,
+          "min": 0.006899416446685791,
+          "max": 0.006899416446685791
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.009777545928955078,
+          "min": 0.009777545928955078,
+          "max": 0.009777545928955078
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.208479,
+          "min": 0.208479,
+          "max": 0.208479
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 17649664,
+          "min": 17649664,
+          "max": 17649664
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 824
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 262
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 0
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 824
+        }
+      },
+      "estimated_api_cost": 0.003744,
+      "actual_api_cost": null,
+      "record_ids": [
+        "collaboration-team"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "collaboration-review",
+      "workers": 2,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 12.978439331054688,
+          "min": 12.978439331054688,
+          "max": 12.978439331054688
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.012552221616109213,
+          "min": 0.012552221616109213,
+          "max": 0.012552221616109213
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.019931554794311523,
+          "min": 0.019931554794311523,
+          "max": 0.019931554794311523
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.260453,
+          "min": 0.260453,
+          "max": 0.260453
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 6991872,
+          "min": 6991872,
+          "max": 6991872
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 819
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 426
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 128
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 691
+        }
+      },
+      "estimated_api_cost": 0.00479512,
+      "actual_api_cost": null,
+      "record_ids": [
+        "collaboration-review"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 1,
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 13.578067618000205,
+          "min": 13.578067618000205,
+          "max": 13.578067618000205
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.3184496402740479,
+          "min": 0.3184496402740479,
+          "max": 0.3184496402740479
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 1.546757459640503,
+          "min": 1.546757459640503,
+          "max": 1.546757459640503
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.387273,
+          "min": 0.387273,
+          "max": 0.387273
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 22503424,
+          "min": 22503424,
+          "max": 22503424
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3798
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 909
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 0
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 3798
+        }
+      },
+      "estimated_api_cost": 0.014868,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w1-fifo"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 2,
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 7.773428413998772,
+          "min": 7.773428413998772,
+          "max": 7.773428413998772
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.010494661331176759,
+          "min": 0.010494661331176759,
+          "max": 0.010494661331176759
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.014777183532714844,
+          "min": 0.014777183532714844,
+          "max": 0.014777183532714844
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.406866,
+          "min": 0.406866,
+          "max": 0.406866
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 23212032,
+          "min": 23212032,
+          "max": 23212032
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3798
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 907
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 2944
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 854
+        }
+      },
+      "estimated_api_cost": 0.00908176,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w2-aging_fit"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 1,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 8.279320548999749,
+          "min": 8.279320548999749,
+          "max": 8.279320548999749
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.3178980827331543,
+          "min": 0.3178980827331543,
+          "max": 0.3178980827331543
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 1.542839765548706,
+          "min": 1.542839765548706,
+          "max": 1.542839765548706
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.390636,
+          "min": 0.390636,
+          "max": 0.390636
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 23183360,
+          "min": 23183360,
+          "max": 23183360
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3789
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 922
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 2048
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 1741
+        }
+      },
+      "estimated_api_cost": 0.01093992,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w1-resource_fit"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 2,
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 7.764583985999707,
+          "min": 7.764583985999707,
+          "max": 7.764583985999707
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.011662149429321289,
+          "min": 0.011662149429321289,
+          "max": 0.011662149429321289
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.015102863311767578,
+          "min": 0.015102863311767578,
+          "max": 0.015102863311767578
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.39692700000000003,
+          "min": 0.39692700000000003,
+          "max": 0.39692700000000003
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 21909504,
+          "min": 21909504,
+          "max": 21909504
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3798
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 932
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 2944
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 854
+        }
+      },
+      "estimated_api_cost": 0.00928176,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w2-fifo"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 1,
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 8.52639029599959,
+          "min": 8.52639029599959,
+          "max": 8.52639029599959
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.3402071952819824,
+          "min": 0.3402071952819824,
+          "max": 0.3402071952819824
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 1.6527585983276367,
+          "min": 1.6527585983276367,
+          "max": 1.6527585983276367
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.387865,
+          "min": 0.387865,
+          "max": 0.387865
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 23740416,
+          "min": 23740416,
+          "max": 23740416
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3894
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 969
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 2176
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 1718
+        }
+      },
+      "estimated_api_cost": 0.01127504,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w1-aging_fit"
+      ]
+    },
+    {
+      "kind": "live",
+      "scenario": "integer-pricing",
+      "workers": 2,
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 1,
+      "successes": 1,
+      "completion_rate": 1.0,
+      "small_sample_warning": true,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 1,
+          "median": 7.250581656999202,
+          "min": 7.250581656999202,
+          "max": 7.250581656999202
+        },
+        "ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.013517522811889648,
+          "min": 0.013517522811889648,
+          "max": 0.013517522811889648
+        },
+        "max_ready_wait_seconds": {
+          "observations": 1,
+          "median": 0.017822265625,
+          "min": 0.017822265625,
+          "max": 0.017822265625
+        },
+        "cpu_seconds": {
+          "observations": 1,
+          "median": 0.39397000000000004,
+          "min": 0.39397000000000004,
+          "max": 0.39397000000000004
+        },
+        "peak_memory_bytes": {
+          "observations": 1,
+          "median": 23175168,
+          "min": 23175168,
+          "max": 23175168
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 1,
+          "observed_total": 3798
+        },
+        "completion_tokens": {
+          "observations": 1,
+          "observed_total": 914
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 1,
+          "observed_total": 2944
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 1,
+          "observed_total": 854
+        }
+      },
+      "estimated_api_cost": 0.00913776,
+      "actual_api_cost": null,
+      "record_ids": [
+        "project-r0-w2-resource_fit"
+      ]
+    },
+    {
+      "kind": "replay",
+      "scenario": "integer-pricing",
+      "workers": 1,
+      "policy": "fixed_trace",
+      "cache_mode": "disabled",
+      "model": "deepseek-flash",
+      "n": 3,
+      "successes": 3,
+      "completion_rate": 1.0,
+      "small_sample_warning": false,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 3,
+          "median": 0.08975699199982046,
+          "min": 0.08911030300077982,
+          "max": 0.08983383399936429
+        },
+        "ready_wait_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "max_ready_wait_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "cpu_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "peak_memory_bytes": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "completion_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        }
+      },
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null,
+      "record_ids": [
+        "cache-replay-0",
+        "cache-replay-3",
+        "cache-replay-4"
+      ]
+    },
+    {
+      "kind": "replay",
+      "scenario": "integer-pricing",
+      "workers": 1,
+      "policy": "fixed_trace",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "n": 3,
+      "successes": 3,
+      "completion_rate": 1.0,
+      "small_sample_warning": false,
+      "metrics": {
+        "wall_seconds": {
+          "observations": 3,
+          "median": 0.08283330099948216,
+          "min": 0.08213106700168282,
+          "max": 0.08296143500047037
+        },
+        "ready_wait_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "max_ready_wait_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "cpu_seconds": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        },
+        "peak_memory_bytes": {
+          "observations": 0,
+          "median": null,
+          "min": null,
+          "max": null
+        }
+      },
+      "usage": {
+        "prompt_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "completion_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_hit_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        },
+        "prompt_cache_miss_tokens": {
+          "observations": 0,
+          "observed_total": 0
+        }
+      },
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null,
+      "record_ids": [
+        "cache-replay-1",
+        "cache-replay-2",
+        "cache-replay-5"
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "pre-fix-collaboration-review",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 5.638509750366211,
+      "cpu_seconds": 0.132043,
+      "peak_memory_bytes": 6729728,
+      "task_ready_wait_seconds": {
+        "writer-1": 0.01818370819091797,
+        "critic-1": 0.010816097259521484,
+        "gate-1": 0.006562232971191406
+      },
+      "ready_wait_seconds": 0.011854012807210287,
+      "max_ready_wait_seconds": 0.01818370819091797,
+      "usage": {
+        "prompt_tokens": 299,
+        "completion_tokens": 662,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 299
+      },
+      "model_calls": 2,
+      "billed_model_calls": 2,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.005894,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-collaboration-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 9.518953084945679,
+      "cpu_seconds": 0.205791,
+      "peak_memory_bytes": 17231872,
+      "task_ready_wait_seconds": {
+        "plan": 0.003263711929321289,
+        "analyze": 0.008752107620239258,
+        "test_plan": 0.010308980941772461,
+        "review": 0.00879669189453125
+      },
+      "ready_wait_seconds": 0.0077803730964660645,
+      "max_ready_wait_seconds": 0.010308980941772461,
+      "usage": {
+        "prompt_tokens": 673,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 673
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.011586,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w1-aging_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 10.89629316329956,
+      "cpu_seconds": 0.170933,
+      "peak_memory_bytes": 7151616,
+      "task_ready_wait_seconds": {
+        "plan": 0.01624011993408203,
+        "analyze": 0.009151220321655273,
+        "test_plan": 2.3672099113464355,
+        "review": 0.01407313346862793
+      },
+      "ready_wait_seconds": 0.6016685962677002,
+      "max_ready_wait_seconds": 2.3672099113464355,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w1-fifo-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 11.830290794372559,
+      "cpu_seconds": 0.17415200000000003,
+      "peak_memory_bytes": 7086080,
+      "task_ready_wait_seconds": {
+        "plan": 0.017177343368530273,
+        "analyze": 0.01190638542175293,
+        "test_plan": 2.3737552165985107,
+        "review": 0.011127710342407227
+      },
+      "ready_wait_seconds": 0.6034916639328003,
+      "max_ready_wait_seconds": 2.3737552165985107,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 2477
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.015194,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w1-resource_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 10.857554912567139,
+      "cpu_seconds": 0.183575,
+      "peak_memory_bytes": 7159808,
+      "task_ready_wait_seconds": {
+        "plan": 0.011380195617675781,
+        "analyze": 0.011342048645019531,
+        "test_plan": 2.6683053970336914,
+        "review": 0.011705160140991211
+      },
+      "ready_wait_seconds": 0.6756832003593445,
+      "max_ready_wait_seconds": 2.6683053970336914,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w2-aging_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 9.367398738861084,
+      "cpu_seconds": 0.19807,
+      "peak_memory_bytes": 17281024,
+      "task_ready_wait_seconds": {
+        "plan": 0.01059103012084961,
+        "analyze": 0.008881568908691406,
+        "test_plan": 0.010380744934082031,
+        "review": 0.007382869720458984
+      },
+      "ready_wait_seconds": 0.009309053421020508,
+      "max_ready_wait_seconds": 0.01059103012084961,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w2-fifo-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 9.201160669326782,
+      "cpu_seconds": 0.19407300000000002,
+      "peak_memory_bytes": 16965632,
+      "task_ready_wait_seconds": {
+        "plan": 0.009220361709594727,
+        "analyze": 0.010029792785644531,
+        "test_plan": 0.011734962463378906,
+        "review": 0.013567209243774414
+      },
+      "ready_wait_seconds": 0.011138081550598145,
+      "max_ready_wait_seconds": 0.013567209243774414,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r0-w2-resource_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 8.38919973373413,
+      "cpu_seconds": 0.189172,
+      "peak_memory_bytes": 16674816,
+      "task_ready_wait_seconds": {
+        "plan": 0.017740249633789062,
+        "analyze": 0.011087894439697266,
+        "test_plan": 0.012758255004882812,
+        "review": 0.008723974227905273
+      },
+      "ready_wait_seconds": 0.012577593326568604,
+      "max_ready_wait_seconds": 0.017740249633789062,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r1-w1-aging_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 11.211095809936523,
+      "cpu_seconds": 0.18614099999999997,
+      "peak_memory_bytes": 7520256,
+      "task_ready_wait_seconds": {
+        "plan": 0.011619806289672852,
+        "analyze": 0.009063243865966797,
+        "test_plan": 2.357006311416626,
+        "review": 0.007905960083007812
+      },
+      "ready_wait_seconds": 0.5963988304138184,
+      "max_ready_wait_seconds": 2.357006311416626,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r1-w1-fifo-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 11.593821287155151,
+      "cpu_seconds": 0.176239,
+      "peak_memory_bytes": 7258112,
+      "task_ready_wait_seconds": {
+        "plan": 0.012781620025634766,
+        "analyze": 0.015190362930297852,
+        "test_plan": 2.5769705772399902,
+        "review": 0.013324737548828125
+      },
+      "ready_wait_seconds": 0.6545668244361877,
+      "max_ready_wait_seconds": 2.5769705772399902,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r1-w1-resource_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": false,
+      "wall_seconds": 10.72167181968689,
+      "cpu_seconds": 0.17461300000000002,
+      "peak_memory_bytes": 7258112,
+      "task_ready_wait_seconds": {
+        "plan": 0.016902446746826172,
+        "analyze": 0.011758565902709961,
+        "test_plan": 2.1737091541290283,
+        "review": 0.009018659591674805
+      },
+      "ready_wait_seconds": 0.5528472065925598,
+      "max_ready_wait_seconds": 2.1737091541290283,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r1-w2-fifo-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 9.28632402420044,
+      "cpu_seconds": 0.189471,
+      "peak_memory_bytes": 16261120,
+      "task_ready_wait_seconds": {
+        "plan": 0.014471054077148438,
+        "analyze": 0.014819145202636719,
+        "test_plan": 0.016518115997314453,
+        "review": 0.0076751708984375
+      },
+      "ready_wait_seconds": 0.013370871543884277,
+      "max_ready_wait_seconds": 0.016518115997314453,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "pre-fix-project-r1-w2-resource_fit-team",
+      "scenario": "empty-content-diagnostic",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": false,
+      "wall_seconds": 9.598130702972412,
+      "cpu_seconds": 0.18718600000000002,
+      "peak_memory_bytes": 16556032,
+      "task_ready_wait_seconds": {
+        "plan": 0.014231681823730469,
+        "analyze": 0.013124227523803711,
+        "test_plan": 0.014904499053955078,
+        "review": 0.011003494262695312
+      },
+      "ready_wait_seconds": 0.013315975666046143,
+      "max_ready_wait_seconds": 0.014904499053955078,
+      "usage": {
+        "prompt_tokens": 2477,
+        "completion_tokens": 1280,
+        "prompt_cache_hit_tokens": 1536,
+        "prompt_cache_miss_tokens": 941
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.01218344,
+      "actual_api_cost": null
+    },
+    {
+      "id": "collaboration-team",
+      "scenario": "collaboration-team",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": true,
+      "wall_seconds": 4.711658239364624,
+      "cpu_seconds": 0.208479,
+      "peak_memory_bytes": 17649664,
+      "task_ready_wait_seconds": {
+        "plan": 0.0028886795043945312,
+        "analyze": 0.006724357604980469,
+        "test_plan": 0.008207082748413086,
+        "review": 0.009777545928955078
+      },
+      "ready_wait_seconds": 0.006899416446685791,
+      "max_ready_wait_seconds": 0.009777545928955078,
+      "usage": {
+        "prompt_tokens": 824,
+        "completion_tokens": 262,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 824
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.003744,
+      "actual_api_cost": null
+    },
+    {
+      "id": "collaboration-review",
+      "scenario": "collaboration-review",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": true,
+      "wall_seconds": 12.978439331054688,
+      "cpu_seconds": 0.260453,
+      "peak_memory_bytes": 6991872,
+      "task_ready_wait_seconds": {
+        "writer-1": 0.019931554794311523,
+        "critic-1": 0.009744405746459961,
+        "gate-1": 0.0077364444732666016,
+        "writer-2": 0.012608766555786133,
+        "critic-2": 0.01130366325378418,
+        "gate-2": 0.013988494873046875
+      },
+      "ready_wait_seconds": 0.012552221616109213,
+      "max_ready_wait_seconds": 0.019931554794311523,
+      "usage": {
+        "prompt_tokens": 819,
+        "completion_tokens": 426,
+        "prompt_cache_hit_tokens": 128,
+        "prompt_cache_miss_tokens": 691
+      },
+      "model_calls": 4,
+      "billed_model_calls": 4,
+      "usage_source": "provider_usage",
+      "test_results": null,
+      "estimated_api_cost": 0.00479512,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w1-fifo",
+      "scenario": "integer-pricing",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 13.578067618000205,
+      "cpu_seconds": 0.387273,
+      "peak_memory_bytes": 22503424,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.013693094253540039,
+        "team.analyze": 0.010888338088989258,
+        "team.test_plan": 1.546757459640503,
+        "team.review": 0.009827852249145508,
+        "review.assistant": 0.011081457138061523
+      },
+      "ready_wait_seconds": 0.3184496402740479,
+      "max_ready_wait_seconds": 1.546757459640503,
+      "usage": {
+        "prompt_tokens": 3798,
+        "completion_tokens": 909,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 3798
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.014868,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w2-aging_fit",
+      "scenario": "integer-pricing",
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": true,
+      "wall_seconds": 7.773428413998772,
+      "cpu_seconds": 0.406866,
+      "peak_memory_bytes": 23212032,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.014777183532714844,
+        "team.analyze": 0.010576248168945312,
+        "team.test_plan": 0.01224660873413086,
+        "team.review": 0.007737398147583008,
+        "review.assistant": 0.007135868072509766
+      },
+      "ready_wait_seconds": 0.010494661331176759,
+      "max_ready_wait_seconds": 0.014777183532714844,
+      "usage": {
+        "prompt_tokens": 3798,
+        "completion_tokens": 907,
+        "prompt_cache_hit_tokens": 2944,
+        "prompt_cache_miss_tokens": 854
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.00908176,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w1-resource_fit",
+      "scenario": "integer-pricing",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 8.279320548999749,
+      "cpu_seconds": 0.390636,
+      "peak_memory_bytes": 23183360,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.011921167373657227,
+        "team.analyze": 0.009663105010986328,
+        "team.test_plan": 1.542839765548706,
+        "team.review": 0.011710643768310547,
+        "review.assistant": 0.013355731964111328
+      },
+      "ready_wait_seconds": 0.3178980827331543,
+      "max_ready_wait_seconds": 1.542839765548706,
+      "usage": {
+        "prompt_tokens": 3789,
+        "completion_tokens": 922,
+        "prompt_cache_hit_tokens": 2048,
+        "prompt_cache_miss_tokens": 1741
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "81c8e60646cfe96ed15775b507eb6f05dabbae69eb330372efe436b9922e3278",
+      "estimated_api_cost": 0.01093992,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w2-fifo",
+      "scenario": "integer-pricing",
+      "policy": "fifo",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": true,
+      "wall_seconds": 7.764583985999707,
+      "cpu_seconds": 0.39692700000000003,
+      "peak_memory_bytes": 21909504,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.015102863311767578,
+        "team.analyze": 0.010938405990600586,
+        "team.test_plan": 0.012586355209350586,
+        "team.review": 0.00910329818725586,
+        "review.assistant": 0.010579824447631836
+      },
+      "ready_wait_seconds": 0.011662149429321289,
+      "max_ready_wait_seconds": 0.015102863311767578,
+      "usage": {
+        "prompt_tokens": 3798,
+        "completion_tokens": 932,
+        "prompt_cache_hit_tokens": 2944,
+        "prompt_cache_miss_tokens": 854
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.00928176,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w1-aging_fit",
+      "scenario": "integer-pricing",
+      "policy": "aging_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 8.52639029599959,
+      "cpu_seconds": 0.387865,
+      "peak_memory_bytes": 23740416,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.010816812515258789,
+        "team.analyze": 0.008896827697753906,
+        "team.test_plan": 1.6527585983276367,
+        "team.review": 0.015241861343383789,
+        "review.assistant": 0.013321876525878906
+      },
+      "ready_wait_seconds": 0.3402071952819824,
+      "max_ready_wait_seconds": 1.6527585983276367,
+      "usage": {
+        "prompt_tokens": 3894,
+        "completion_tokens": 969,
+        "prompt_cache_hit_tokens": 2176,
+        "prompt_cache_miss_tokens": 1718
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.01127504,
+      "actual_api_cost": null
+    },
+    {
+      "id": "project-r0-w2-resource_fit",
+      "scenario": "integer-pricing",
+      "policy": "resource_fit",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "live",
+      "workers": 2,
+      "success": true,
+      "wall_seconds": 7.250581656999202,
+      "cpu_seconds": 0.39397000000000004,
+      "peak_memory_bytes": 23175168,
+      "task_ready_wait_seconds": {
+        "team.plan": 0.017822265625,
+        "team.analyze": 0.013741493225097656,
+        "team.test_plan": 0.015445709228515625,
+        "team.review": 0.009729862213134766,
+        "review.assistant": 0.010848283767700195
+      },
+      "ready_wait_seconds": 0.013517522811889648,
+      "max_ready_wait_seconds": 0.017822265625,
+      "usage": {
+        "prompt_tokens": 3798,
+        "completion_tokens": 914,
+        "prompt_cache_hit_tokens": 2944,
+        "prompt_cache_miss_tokens": 854
+      },
+      "model_calls": 5,
+      "billed_model_calls": 5,
+      "usage_source": "provider_usage",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        }
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.00913776,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-0",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "disabled",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08983383399936429,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-1",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08296143500047037,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-2",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08283330099948216,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-3",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "disabled",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08911030300077982,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-4",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "disabled",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08975699199982046,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    },
+    {
+      "id": "cache-replay-5",
+      "scenario": "integer-pricing",
+      "policy": "fixed_trace",
+      "cache_mode": "lru2",
+      "model": "deepseek-flash",
+      "kind": "replay",
+      "workers": 1,
+      "success": true,
+      "wall_seconds": 0.08213106700168282,
+      "cpu_seconds": null,
+      "peak_memory_bytes": null,
+      "ready_wait_seconds": null,
+      "max_ready_wait_seconds": null,
+      "usage": {
+        "prompt_tokens": null,
+        "completion_tokens": null,
+        "prompt_cache_hit_tokens": null,
+        "prompt_cache_miss_tokens": null
+      },
+      "model_calls": 0,
+      "billed_model_calls": 0,
+      "usage_source": "fixed_output_replay",
+      "test_results": {
+        "public": {
+          "passed": 9,
+          "failed": 0,
+          "errors": 0,
+          "total": 9
+        },
+        "heldout": {
+          "passed": 16,
+          "failed": 0,
+          "errors": 0,
+          "total": 16
+        },
+        "baseline": {
+          "public": {
+            "passed": 6,
+            "failed": 3,
+            "errors": 0,
+            "total": 9
+          },
+          "heldout": {
+            "passed": 11,
+            "failed": 5,
+            "errors": 0,
+            "total": 16
+          },
+          "success": false
+        },
+        "success": true
+      },
+      "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c",
+      "estimated_api_cost": 0.0,
+      "actual_api_cost": null
+    }
+  ]
+}

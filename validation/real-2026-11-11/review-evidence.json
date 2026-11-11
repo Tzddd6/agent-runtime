@@ -1,0 +1,90 @@
+{
+  "kind": "live_review_gate_check",
+  "passed": true,
+  "findings": [],
+  "gates": [
+    {
+      "task_id": "gate-1",
+      "round": 1,
+      "termination": "revision_requested",
+      "accepted": false,
+      "valid": true
+    },
+    {
+      "task_id": "gate-2",
+      "round": 2,
+      "termination": "max_rounds",
+      "accepted": false,
+      "valid": true
+    }
+  ],
+  "observed_approved": false,
+  "observed_revision": true,
+  "observed_max_rounds": true,
+  "usage": {
+    "recorded_model_calls": 4,
+    "calls": [
+      {
+        "task_id": "writer-1",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 133,
+          "completion_tokens": 79,
+          "total_tokens": 212,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 133
+        },
+        "latency_seconds": 1.9064427619996422
+      },
+      {
+        "task_id": "critic-1",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 146,
+          "completion_tokens": 118,
+          "total_tokens": 264,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 146
+        },
+        "latency_seconds": 1.4223461559995485
+      },
+      {
+        "task_id": "writer-2",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 354,
+          "completion_tokens": 116,
+          "total_tokens": 470,
+          "prompt_cache_hit_tokens": 128,
+          "prompt_cache_miss_tokens": 226
+        },
+        "latency_seconds": 6.391357677000997
+      },
+      {
+        "task_id": "critic-2",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 186,
+          "completion_tokens": 113,
+          "total_tokens": 299,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 186
+        },
+        "latency_seconds": 1.7288054949985963
+      }
+    ],
+    "totals": {
+      "prompt_tokens": 819,
+      "completion_tokens": 426,
+      "prompt_cache_hit_tokens": 128,
+      "prompt_cache_miss_tokens": 691
+    },
+    "usage_complete": true,
+    "billing_boundary": "Successful response usage only; failed/incomplete calls may still be billable. Not a provider bill."
+  },
+  "claim_boundary": "Only observed live paths are covered. Unobserved revision/max-round paths require separate offline tests."
+}

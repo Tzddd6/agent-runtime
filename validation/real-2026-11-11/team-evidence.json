@@ -1,0 +1,121 @@
+{
+  "kind": "live_tag_receipt_check",
+  "passed": true,
+  "findings": [],
+  "tags": {
+    "plan": "a1B2c3D4",
+    "analyze": "E5f6G7h8",
+    "test_plan": "T9s7Pq2L",
+    "review": "Z7x3C9v1"
+  },
+  "receipts": [
+    {
+      "task_id": "plan",
+      "expected_upstream_tags": [],
+      "received_tags": [],
+      "matches": true,
+      "dependency_ordered": true
+    },
+    {
+      "task_id": "analyze",
+      "expected_upstream_tags": [
+        "a1B2c3D4"
+      ],
+      "received_tags": [
+        "a1B2c3D4"
+      ],
+      "matches": true,
+      "dependency_ordered": true
+    },
+    {
+      "task_id": "test_plan",
+      "expected_upstream_tags": [
+        "a1B2c3D4"
+      ],
+      "received_tags": [
+        "a1B2c3D4"
+      ],
+      "matches": true,
+      "dependency_ordered": true
+    },
+    {
+      "task_id": "review",
+      "expected_upstream_tags": [
+        "E5f6G7h8",
+        "T9s7Pq2L"
+      ],
+      "received_tags": [
+        "E5f6G7h8",
+        "T9s7Pq2L"
+      ],
+      "matches": true,
+      "dependency_ordered": true
+    }
+  ],
+  "usage": {
+    "recorded_model_calls": 4,
+    "calls": [
+      {
+        "task_id": "plan",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 137,
+          "completion_tokens": 49,
+          "total_tokens": 186,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 137
+        },
+        "latency_seconds": 1.4799750250003854
+      },
+      {
+        "task_id": "analyze",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 197,
+          "completion_tokens": 61,
+          "total_tokens": 258,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 197
+        },
+        "latency_seconds": 1.1010923119993095
+      },
+      {
+        "task_id": "test_plan",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 199,
+          "completion_tokens": 64,
+          "total_tokens": 263,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 199
+        },
+        "latency_seconds": 1.4018349760008277
+      },
+      {
+        "task_id": "review",
+        "attempt": 1,
+        "model": "deepseek-flash",
+        "usage": {
+          "prompt_tokens": 291,
+          "completion_tokens": 88,
+          "total_tokens": 379,
+          "prompt_cache_hit_tokens": 0,
+          "prompt_cache_miss_tokens": 291
+        },
+        "latency_seconds": 1.3045047059986246
+      }
+    ],
+    "totals": {
+      "prompt_tokens": 824,
+      "completion_tokens": 262,
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 824
+    },
+    "usage_complete": true,
+    "billing_boundary": "Successful response usage only; failed/incomplete calls may still be billable. Not a provider bill."
+  },
+  "claim_boundary": "Matching independently generated upstream tags is observable receipt evidence, not proof of internal reasoning, factual correctness, or model-internal causality."
+}
