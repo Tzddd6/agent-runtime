@@ -4,6 +4,9 @@ import os
 import secrets
 import threading
 import time
+import socket
+import subprocess
+import sys
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -32,8 +35,48 @@ class DeepSeekClient:
             if not local_test or url.scheme != 'http' or url.hostname != '127.0.0.1':
                 raise ModelError('仅允许官方地址；离线测试只能使用显式启用的本地 mock')
         self.key, self.model, self.timeout, self.base = key, model, timeout, base
+        self.local_test = local_test
+        self.cancel_event = None
 
     def complete(self, messages, max_tokens=256):
+        # Isolate blocking DNS/TLS/socket reads behind one absolute local deadline.
+        # The child is a trusted model broker, never an Agent/tool Worker.
+        wire=json.dumps({'key':self.key,'model':self.model,'timeout':self.timeout,
+                         'base':self.base,'local_test':self.local_test,
+                         'messages':messages,'max_tokens':max_tokens},ensure_ascii=False).encode()
+        if len(wire)>MAX_BYTES+4096:
+            raise ModelError('模型请求超过 1 MiB')
+        environment=dict(os.environ)
+        environment.pop('DEEPSEEK_API_KEY',None)
+        environment.pop('AGENTRT_PROXY_TOKEN',None)
+        deadline=time.monotonic()+self.timeout
+        proc=subprocess.Popen([sys.executable,'-X','utf8','-m','agent_runtime.model_call'],
+            stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=environment)
+        first=True
+        try:
+            while True:
+                if self.cancel_event is not None and self.cancel_event.is_set():
+                    raise ModelError('本地模型调用已取消；远端计算与计费状态未知')
+                remaining=deadline-time.monotonic()
+                if remaining<=0:
+                    raise ModelError('模型调用超过绝对总期限；远端计算与计费状态未知')
+                try:
+                    raw,_=proc.communicate(input=wire if first else None,timeout=min(.1,remaining))
+                    break
+                except subprocess.TimeoutExpired:
+                    first=False
+            if proc.returncode!=0 or len(raw)>2*MAX_BYTES:
+                raise ModelError('模型代理子进程失败或响应超过限制')
+            value=json.loads(raw)
+            if 'error' in value:raise ModelError(value['error'])
+            return value
+        except (OSError,ValueError):
+            raise ModelError('模型代理通信失败') from None
+        finally:
+            if proc.poll() is None:proc.kill()
+            proc.communicate(timeout=3)
+
+    def _complete_direct(self, messages, max_tokens=256):
         if not isinstance(messages, list) or not messages:
             raise ModelError('messages 必须为非空数组')
         for msg in messages:
@@ -76,9 +119,22 @@ class ModelGateway:
         self.slots = threading.BoundedSemaphore(concurrency)
         self.log_path = log_path
         self.lock = threading.Lock()
+        self.cancel_event = threading.Event()
+        self.connections, self.connection_lock = set(), threading.Lock()
+        if isinstance(client,DeepSeekClient):client.cancel_event=self.cancel_event
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
+            def setup(self):
+                self.request.settimeout(5)
+                with owner.connection_lock:owner.connections.add(self.request)
+                super().setup()
+
+            def finish(self):
+                try:super().finish()
+                finally:
+                    with owner.connection_lock:owner.connections.discard(self.request)
+
             def log_message(self, *args):
                 pass
 
@@ -137,6 +193,11 @@ class ModelGateway:
             model=os.environ.get('DEEPSEEK_MODEL', 'deepseek-flash')), log_path)
 
     def close(self):
+        self.cancel_event.set()
         self.server.shutdown()
+        with self.connection_lock:connections=list(self.connections)
+        for connection in connections:
+            try:connection.shutdown(socket.SHUT_RDWR)
+            except OSError:pass
         self.server.server_close()
         self.thread.join(timeout=2)

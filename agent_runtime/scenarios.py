@@ -23,3 +23,16 @@ def team_tasks(prompt):
                      'reviewer':'综合分析和测试建议，给出一致的最终答复。'}[role]}]}
     return [task('plan','planner',[]), task('analyze','analyst',['plan']),
             task('test_plan','tester',['plan']), task('review','reviewer',['analyze','test_plan'],512)]
+
+
+def resource_tasks():
+    """A bounded real load lets a human watch scheduling without paying for LLMs."""
+    def load(key, cpu, memory, seconds, deps):
+        return {'id':key,'agent':key,'action':'load','seconds':seconds,
+                'memory_mib':memory,'depends_on':deps,'timeout':30,
+                'resources':{'cpu_milli':cpu,'memory_bytes':(memory+64)*1024**2,'pids':16}}
+    return [load('planner',250,8,1,[]),
+            load('analyzer',1000,32,7,['planner']),
+            load('tester',750,48,6,['planner']),
+            load('indexer',500,24,5,['planner']),
+            load('reviewer',500,16,2,['analyzer','tester','indexer'])]

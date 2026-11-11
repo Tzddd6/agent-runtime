@@ -45,7 +45,7 @@ class FeatureTests(unittest.TestCase):
         self.assertIsNone(broker.dispatch(a, {'op':'receive'})['message'])
         self.assertEqual(broker.dispatch(b, {'op':'get', 'ref':receipt['ref']})['data'], request['data'])
         self.assertEqual(broker.dispatch(b, {'op':'receive'})['message'], receipt)
-        broker.dispatch(b, dict(op='ack', ref=receipt['ref'], request_id='r1'))
+        broker.dispatch(b, dict(op='ack', message_id=receipt['message_id']))
         self.assertIsNone(broker.dispatch(b, {'op':'receive'})['message'])
         broker.revoke(a)
         with self.assertRaises(PermissionError):

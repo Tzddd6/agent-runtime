@@ -1,6 +1,8 @@
-# Agent Runtime v0.3 开发版
+# Agent Runtime v0.4 开发版
 
 本项目对应 OS 功能挑战 proj3，与 ICT 算子竞赛无关。Python 3.9+，仅用标准库。
+
+v0.4 新增类似任务管理器的实时资源视图：整机与服务用量、实际/预留曲线、任务与 PID、等待原因、依赖图、Attempt 时间线，以及上下文缓存指标。新增老化资源准入、AIOS 启发的 LRU-2 JSON 缓存和 AutoGen 风格的限轮评审。使用方法、论文出处与实测边界见 docs/运行指南-v0.4.md。
 
 ## 运行
 
@@ -32,7 +34,7 @@ python3 -m agent_runtime.web --host 127.0.0.1 --port 18881
 
 任务字段参照 examples/dynamic.json。资源向量为 cpu_milli、memory_bytes、pids；默认单任务 1000 millicpu、256 MiB、32 pids；默认总预算为 workers×1000 millicpu、1 GiB、128 pids，可通过 Python run(..., budget=...) 调整。超出总预算立即 unschedulable，前置失败则跳过后继。同一 Agent 的任务串行执行。
 
---policy fifo 保留队首阻塞基线；--policy resource_fit 选择预算能容纳的任务。尚无老化和防饥饿机制。
+--policy fifo 保留队首阻塞基线；--policy resource_fit 选择预算能容纳的任务；--policy aging_fit 在就绪任务等待超过 2 秒时停止旁路填充，让在运行任务自然释放资源后优先启动老任务。它是非抢占准入策略，不会抢占供应商的模型推理。
 
 ## Linux 严格资源模式
 

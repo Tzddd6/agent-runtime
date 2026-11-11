@@ -18,15 +18,39 @@ def ipc(task, **value):
 
 
 def main():
-    task = json.loads(sys.stdin.read())
+    if len(sys.argv)>2:
+        if sys.stdin.read(1) != 'G':return 2
+        source=Path(sys.argv[2])
+        try:
+            with source.open('rb') as payload_file:raw=payload_file.read(16*1024**2+1)
+            if len(raw)>16*1024**2:raise ValueError('Worker payload 超过 16 MiB')
+            task=json.loads(raw)
+        finally:source.unlink(missing_ok=True)
+    else:
+        # Compatibility for the original trusted JSON-stdin entry point.
+        task = json.loads(sys.stdin.read())
     action = task.get('action', 'echo')
     model_result = None
     output = task.get('message', '完成')
+    children = task.get('spawn', [])
     if task.get('_attempt', 1) <= task.get('fail_attempts', 0):
         print('模拟可恢复失败', file=sys.stderr)
         return 1
     if action == 'sleep':
         time.sleep(float(task.get('seconds', 0)))
+    elif action == 'load':
+        seconds, memory = float(task.get('seconds',1)), task.get('memory_mib',16)
+        if not 0<seconds<=20 or type(memory) is not int or not 1<=memory<=64:
+            raise ValueError('资源演示限于 20 秒、64 MiB 以内')
+        block=bytearray(memory*1024**2)
+        for offset in range(0,len(block),4096):block[offset]=1
+        end=time.monotonic()+seconds
+        counter=0
+        while time.monotonic()<end:
+            interval=min(end,time.monotonic()+.06)
+            while time.monotonic()<interval:counter=(counter+1)%1000003
+            time.sleep(.04)
+        output={'allocated_mib':memory,'work_units':counter,'seconds':seconds}
     elif action == 'fail':
         print('模拟 Worker 失败', file=sys.stderr)
         return 1
@@ -59,11 +83,14 @@ def main():
             receipt = ipc(task, op='receive')['message']
             if receipt is not None:
                 output = ipc(task, op='get', ref=receipt['ref'])['data']
-                ipc(task, op='ack', ref=receipt['ref'], request_id=receipt['request_id'])
+                ipc(task, op='ack', message_id=receipt['message_id'])
                 break
             if time.monotonic() >= deadline:
                 raise TimeoutError('等待 Agent 消息超时')
             time.sleep(.05)
+    elif action == 'review_gate':
+        from .conversation import route_review
+        output, children = route_review(task)
     elif action in ('analyze_text', 'index_text'):
         text = '\n'.join(item['text'] for item in task.get('_contexts', []))
         words = re.findall(r'\w+', text.lower())
@@ -81,7 +108,7 @@ def main():
         print(f'未知动作: {action}', file=sys.stderr)
         return 2
     result = {'task_id': task['id'], 'result': output,
-              'contexts': task.get('_contexts', []), 'spawn': task.get('spawn', [])}
+              'contexts': task.get('_contexts', []), 'spawn': children}
     if model_result is not None:
         result['result'] = model_result['content']
         result['model_call'] = model_result

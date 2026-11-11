@@ -84,7 +84,8 @@ class Broker:
                 if len(mailbox) >= self.capacity or len(self.receipts) >= 4096:
                     raise ValueError('capacity exceeded')
                 ref = self.store.put(value['data'], [agent, peer])
-                receipt = {'from': agent, 'to': peer, 'request_id': request, 'ref': ref}
+                receipt = {'from': agent, 'to': peer, 'request_id': request, 'ref': ref,
+                           'message_id':secrets.token_hex(24)}
                 mailbox.append(receipt)
                 self.receipts[identity] = receipt
                 return receipt
@@ -93,8 +94,11 @@ class Broker:
                 # Read/ack gives at-least-once delivery until explicit acknowledgement.
                 return {'message': mailbox[0] if mailbox else None}
             if op == 'ack':
+                message_id=value.get('message_id')
+                if not isinstance(message_id,str) or not message_id:
+                    raise ValueError('message_id is required for ACK')
                 mailbox = self.mailboxes.setdefault(agent, collections.deque())
-                if mailbox and mailbox[0]['ref'] == value['ref'] and mailbox[0]['request_id'] == value['request_id']:
+                if mailbox and mailbox[0]['message_id'] == message_id:
                     mailbox.popleft()
                 return {'ok': True}
             if op == 'get':

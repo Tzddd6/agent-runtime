@@ -2,6 +2,7 @@
 import argparse
 import hmac
 import json
+import logging
 import os
 import secrets
 import threading
@@ -11,9 +12,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse
 from .runtime import run
+from .telemetry import MachineSampler
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
+LOGGER = logging.getLogger(__name__)
+RECOVERY_MESSAGE = '执行资源回收状态未确认，已暂停新任务和模型配置；请管理员检查日志与残留进程/cgroup，确认回收后重启本项目服务'
 
 
 class Controller:
@@ -24,15 +28,20 @@ class Controller:
         self.csrf = secrets.token_urlsafe(32)
         self.lock = threading.Lock()
         self.jobs = {}
+        self.machine = MachineSampler(cgroup_root)
+        self.recovery_required = False
 
     def submit(self, value):
         preset = value.get('preset')
         workers = value.get('workers', 2)
         policy = value.get('policy', 'resource_fit')
-        if type(workers) is not int or not 1 <= workers <= 4 or policy not in ('fifo', 'resource_fit'):
+        if type(workers) is not int or not 1 <= workers <= 4 or policy not in ('fifo', 'resource_fit', 'aging_fit'):
             raise ValueError('并发数需为 1—4，调度策略不合法')
         if preset == 'dynamic':
             tasks = json.loads(DEMO.read_text(encoding='utf-8'))
+        elif preset == 'resources':
+            from .scenarios import resource_tasks
+            tasks = resource_tasks()
         elif preset == 'ipc':
             tasks = json.loads((DEMO.parent/'ipc.json').read_text(encoding='utf-8'))
         elif preset == 'document':
@@ -41,9 +50,7 @@ class Controller:
             if not isinstance(text, str) or len(text) > 4000:
                 raise ValueError('文档长度不得超过 4000 字')
             tasks = tasks_for(text)
-        elif preset in ('llm','team'):
-            if not os.environ.get('DEEPSEEK_API_KEY'):
-                raise ValueError('服务端尚未配置 DEEPSEEK_API_KEY')
+        elif preset in ('llm','team','review'):
             prompt = value.get('prompt', '')
             if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 4000:
                 raise ValueError('请输入 1—4000 字的提示词')
@@ -52,13 +59,31 @@ class Controller:
             if preset == 'team':
                 from .scenarios import team_tasks
                 tasks = team_tasks(prompt)
+            elif preset == 'review':
+                from .conversation import review_tasks
+                tasks = review_tasks(prompt)
         else:
             raise ValueError('只能运行动态演示或模型对话，不接受任意任务/命令')
         with self.lock:
+            if self.recovery_required:
+                raise ValueError(RECOVERY_MESSAGE)
             if any(j['status'] in ('running','cancelling') for j in self.jobs.values()):
                 raise ValueError('已有工作流运行中，请等待结束或停止后再提交')
+            # The same lock guards model-config updates: no clear/replace can race
+            # between this check and registering the active workflow.
+            if preset in ('llm','team','review') and not os.environ.get('DEEPSEEK_API_KEY'):
+                raise ValueError('服务端尚未配置 DEEPSEEK_API_KEY')
             key = uuid.uuid4().hex
+            service = self.machine.sample()['service']
+            cpu = workers*1000
+            if service['cpu_limit_cores'] is not None:
+                cpu = min(cpu, max(1,int(service['cpu_limit_cores']*1000)))
+            memory = 1024**3
+            if service['memory_limit_bytes'] is not None:
+                memory = min(memory,max(1,service['memory_limit_bytes']-128*1024**2))
+            budget = {'cpu_milli':cpu,'memory_bytes':memory,'pids':128}
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
+                   'workers':workers,'policy':policy,'budget':budget,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key}
             self.jobs[key] = job
             # 内存索引保留最近 20 次，磁盘结果保留供团队管理。
@@ -66,17 +91,40 @@ class Controller:
                 if self.jobs[old]['status'] not in ('running','cancelling'):
                     del self.jobs[old]
 
+        def observe(sample):
+            running = [t for t in sample['tasks'] if t['state']=='running']
+            measured = [t['metrics'] for t in running]
+            def total(name):
+                values = [m.get(name) for m in measured]
+                return sum(values) if all(v is not None for v in values) else None
+            frame = {'time':sample['time'],'reserved':sample['reserved'],
+                     'cpu_cores':total('cpu_cores'),'memory_bytes':total('memory_bytes'),
+                     'slots_used':sample['slots_used']}
+            with self.lock:
+                # An asynchronous observer may deliver an older sample after run
+                # raised. It must never turn a quarantined job back into live data.
+                job['monitor']={**sample,'stale':True} if job['status']=='recovery_required' else sample
+                history=job['history']
+                if (not history or frame['time']-history[-1]['time']>=.35
+                        or frame['reserved']!=history[-1]['reserved']):
+                    history.append(frame)
+                    del history[:-150]
+
         def execute():
             try:
                 states, _ = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
-                                cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True)
+                                cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
+                                budget=budget,observer=observe)
                 with self.lock:
                     job['status'] = ('cancelled' if any(s=='cancelled' for s in states.values())
                                      else 'succeeded' if all(s=='succeeded' for s in states.values()) else 'failed')
             except Exception:
+                LOGGER.exception('Workflow %s exited without confirmed resource release; recovery required', key)
                 with self.lock:
-                    job['status']='failed'
-                    job['error']='运行失败，请管理员查看服务日志及委派配置'
+                    self.recovery_required=True
+                    job['status']='recovery_required'
+                    job['error']=RECOVERY_MESSAGE
+                    job['monitor']={**(job['monitor'] or {}),'stale':True}
             finally:
                 with self.lock:
                     job['finished']=time.time()
@@ -86,18 +134,23 @@ class Controller:
 
     def snapshot(self):
         with self.lock:
-            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory')} for j in self.jobs.values()]
+            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history')} for j in self.jobs.values()]
+            recovery_required = self.recovery_required
         return {'jobs':list(reversed(jobs)), 'csrf':self.csrf,
                 'model_configured':bool(os.environ.get('DEEPSEEK_API_KEY')),
                 'model':os.environ.get('DEEPSEEK_MODEL','deepseek-flash'),
-                'enforcement':'cgroup_v2' if self.cgroup_root else 'admission_only'}
+                'enforcement':'cgroup_v2' if self.cgroup_root else 'admission_only',
+                'recovery_required':recovery_required,
+                'recovery_message':RECOVERY_MESSAGE if recovery_required else '',
+                'machine':self.machine.sample()}
 
     def detail(self, key):
         with self.lock:
             job = self.jobs.get(key)
             if not job:
                 raise KeyError(key)
-            result = {k:v for k,v in job.items() if k not in ('cancel','directory')}
+            result = {k:v for k,v in job.items() if k not in ('cancel','directory','history')}
+            result['history']=list(job['history'])
             directory = job['directory']
         events=[]
         for path in directory.glob('*/events.jsonl'):
@@ -111,8 +164,17 @@ class Controller:
             for line in raw:
                 try:events.append(json.loads(line))
                 except ValueError:pass
+        monitor=result.get('monitor')
+        watermark=monitor.get('event_sequence') if monitor else None
+        if type(watermark) is int:
+            # The observer may lag the journal: only return events belonging to
+            # this snapshot, never combine a new terminal event with old usage.
+            events=[event for event in events if type(event.get('sequence')) is int
+                    and event['sequence']<=watermark]
         result['events']=events[-100:]
-        result['states']={e['task_id']:e['state'] for e in events}
+        result['states']=({task['id']:task['state'] for task in monitor.get('tasks',[])}
+                          if monitor and type(watermark) is int
+                          else {e['task_id']:e['state'] for e in events})
         return result
 
 
@@ -142,6 +204,9 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             path=urlparse(self.path).path
             if path=='/':
                 self.respond(200,(Path(__file__).parent/'static/index.html').read_text(encoding='utf-8'),'text/html; charset=utf-8')
+            elif path in ('/static/console.js','/static/console.css'):
+                kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
+                self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())
             elif path.startswith('/api/jobs/'):
                 try:self.respond(200,controller.detail(path.rsplit('/',1)[1]))
@@ -167,6 +232,8 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                         raise ValueError('API Key 格式无效')
                     if key and len(key)<16:raise ValueError('API Key 长度不足')
                     with controller.lock:
+                        if controller.recovery_required:
+                            raise ValueError(RECOVERY_MESSAGE)
                         if any(j['status'] in ('running','cancelling') for j in controller.jobs.values()):
                             raise ValueError('请等待运行结束后再更新模型配置')
                         if key:os.environ['DEEPSEEK_API_KEY']=key

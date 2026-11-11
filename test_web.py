@@ -69,6 +69,28 @@ class WebTests(unittest.TestCase):
     def test_no_arbitrary_commands(self):
         with self.assertRaises(HTTPError):self.request('/api/jobs',{'preset':'command','argv':['anything']})
 
+    def test_monitor_assets_and_live_reservation_history(self):
+        self.assertIn('cpu',self.request('/static/console.js').read().decode().lower())
+        self.assertIn('text/css',self.request('/static/console.css').headers['Content-Type'])
+        fixture=[{'id':'slow','agent':'observer-demo','action':'sleep','seconds':.65},
+                 {'id':'after','depends_on':['slow']}]
+        with patch('agent_runtime.scenarios.resource_tasks',return_value=fixture):
+            key=json.load(self.request('/api/jobs',{'preset':'resources','policy':'aging_fit'}))['id']
+        deadline=time.monotonic()+8
+        snapshots=[]
+        while time.monotonic()<deadline:
+            detail=json.load(self.request('/api/jobs/'+key))
+            if detail.get('monitor'):snapshots.append(detail['monitor'])
+            if detail['status'] not in ('running','cancelling'):break
+            time.sleep(.05)
+        self.assertEqual(detail['status'],'succeeded')
+        self.assertTrue(any(s['slots_used']==1 for s in snapshots))
+        self.assertEqual(detail['monitor']['reserved']['cpu_milli'],0)
+        self.assertGreaterEqual(len(detail['history']),2)
+        status=json.load(self.request('/api/status'))
+        self.assertIn('host',status['machine'])
+        self.assertNotIn('monitor',status['jobs'][0])
+
     def test_key_configuration_never_echoes_secret(self):
         with patch.dict(os.environ,{'DEEPSEEK_API_KEY':''}):
             secret='mock-test-key-only-not-live'
