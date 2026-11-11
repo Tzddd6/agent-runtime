@@ -20,7 +20,7 @@ class Executor:
 
     def launch(self, payload, directory, limits):
         directory.mkdir(parents=True)
-        group = self.root / directory.name if self.root else None
+        group = self.root / f'{directory.parent.name}-{directory.name}' if self.root else None
         proc = None
         output = (directory / 'worker.log').open('w+', encoding='utf-8')
         try:
@@ -34,10 +34,14 @@ class Executor:
                     raise RuntimeError('严格模式要求 cgroup.kill')
             # Worker 只运行受信任的启动代码，在 stdin 收到许可前不执行任务。
             payload = {**payload, '_workspace': str(directory)}
+            environment = dict(os.environ)
+            environment.pop('DEEPSEEK_API_KEY', None)
+            environment.pop('AGENTRT_PROXY_TOKEN', None)
             proc = subprocess.Popen([sys.executable, '-X', 'utf8', '-m', 'agent_runtime.worker',
                                      str(directory / 'result.json')],
                                     stdin=subprocess.PIPE, stdout=output, stderr=subprocess.STDOUT,
-                                    text=True, encoding='utf-8', start_new_session=(os.name == 'posix'))
+                                    text=True, encoding='utf-8', env=environment,
+                                    start_new_session=(os.name == 'posix'))
             if group:
                 (group / 'cgroup.procs').write_text(str(proc.pid))
                 if str(proc.pid) not in (group / 'cgroup.procs').read_text().split():
@@ -80,13 +84,15 @@ class Executor:
                     if time.monotonic() >= end:
                         raise RuntimeError('CLEANUP_FAILED: cgroup 仍有存活成员')
                     time.sleep(0.02)
-                for name in ('memory.peak', 'memory.events', 'cpu.stat'):
+                for name in ('memory.peak', 'memory.events', 'cpu.stat', 'pids.events', 'pids.peak'):
                     if (group / name).exists():
                         usage[name] = (group / name).read_text()
                 group.rmdir()
-            handle['output'].seek(0)
-            # 仅把尾部诊断回传；日志完整保存在 Attempt 目录。
-            output = handle['output'].read()[-65536:]
+            # Seek before reading, so a chatty tool cannot force a full log into RAM.
+            with (handle['directory'] / 'worker.log').open('rb') as log:
+                log.seek(0, 2)
+                log.seek(max(0, log.tell() - 65536))
+                output = log.read().decode('utf-8', errors='replace')
             return proc.returncode, output, usage
         finally:
             handle['output'].close()

@@ -23,15 +23,15 @@ secrets.*
 *_key
 id_rsa*
 id_ed25519*
-
 # 运行产物
 logs/
 *.log
 *.pid
 *.tar.gz
 results/
-
 # 系统
 .DS_Store
 Thumbs.db
 runs/
+web-runs/
+reports/

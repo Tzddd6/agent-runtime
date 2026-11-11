@@ -20,7 +20,7 @@ class ExtendedTests(unittest.TestCase):
             return run(tasks, output_dir=self.temp.name, **kwargs)
 
     def test_dynamic_batch_and_retry(self):
-        tasks = json.loads(Path('examples/dynamic.json').read_text())
+        tasks = json.loads(Path('examples/dynamic.json').read_text(encoding='utf-8'))
         states, events = self.execute(tasks)
         self.assertTrue(all(s == 'succeeded' for s in states.values()))
         starts = [e for e in events if e['task_id'] == 'prepare_tests' and e['state'] == 'running']

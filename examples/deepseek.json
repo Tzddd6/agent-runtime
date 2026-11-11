@@ -1,0 +1,7 @@
+[
+  {
+    "id": "deepseek_hello", "agent": "assistant", "action": "llm", "timeout": 75,
+    "max_tokens": 128,
+    "messages": [{"role": "user", "content": "请用一句中文介绍操作系统中的进程。"}]
+  }
+]

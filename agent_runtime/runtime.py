@@ -8,9 +8,11 @@ import uuid
 from pathlib import Path
 from .context import ContextStore
 from .executor import Executor
+from .model_gateway import ModelGateway, ModelError
+from .ipc import Broker
 
 
-TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable'}
+TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
 DEFAULTS = {'cpu_milli': 1000, 'memory_bytes': 256 * 1024**2, 'pids': 32}
 
 
@@ -36,6 +38,9 @@ def validate(tasks):
             raise ValueError('agent 必须为字符串，contexts 必须为数组')
         if not isinstance(task.get('resources', {}), dict):
             raise ValueError('resources 必须为对象')
+        inputs = task.get('inputs', [])
+        if not isinstance(inputs, list) or not all(isinstance(i, str) and i in deps for i in inputs):
+            raise ValueError('inputs 必须为直接依赖任务 ID 的数组')
         for name, value in task.get('resources', {}).items():
             if name not in DEFAULTS or type(value) is not int or value <= 0:
                 raise ValueError('资源请求必须为已知字段的正整数')
@@ -55,7 +60,7 @@ def validate(tasks):
 
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
-        policy='resource_fit', cgroup_root=None, max_tasks=100):
+        policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False):
     validate(tasks)
     if max_workers < 1 or timeout <= 0 or not math.isfinite(timeout) or policy not in ('fifo', 'resource_fit'):
         raise ValueError('无效的并发数、期限或调度策略')
@@ -69,23 +74,39 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     root.mkdir(parents=True)
     store = ContextStore(root / 'contexts')
     tasks = [dict(t) for t in tasks]
+    task_by_id = {t['id']: t for t in tasks}
     states = {t['id']: 'waiting' for t in tasks}
     attempts = {t['id']: 0 for t in tasks}
     used = {k: 0 for k in budget}
     running, events = {}, []
+    gateway = broker = None
+    outputs = {}
     journal = (root / 'events.jsonl').open('w', encoding='utf-8')
 
     def event(key, state, **extra):
         states[key] = state
         item = {'workflow_id': root.name, 'task_id': key, 'state': state,
+                'agent': task_by_id[key].get('agent', key),
                 'time': time.time(), 'attempt': attempts[key], **extra}
         events.append(item)
         journal.write(json.dumps(item, ensure_ascii=False) + '\n')
         journal.flush()
-        print(json.dumps(item, ensure_ascii=False), flush=True)
+        if not quiet:
+            print(json.dumps(item, ensure_ascii=False), flush=True)
 
     try:
         while any(s in ('waiting', 'running') for s in states.values()):
+            if cancel_event is not None and cancel_event.is_set():
+                for key, (handle, task, limits) in list(running.items()):
+                    executor.cleanup(handle)
+                    del running[key]
+                    for name in used:
+                        used[name] -= limits[name]
+                    event(key, 'cancelled', reason='用户取消；远端模型是否停止及计费状态未知')
+                for key in states:
+                    if states[key] == 'waiting':
+                        event(key, 'cancelled', reason='用户取消')
+                break
             for task in list(tasks):
                 key = task['id']
                 if states[key] != 'waiting':
@@ -111,12 +132,30 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 # 初版用受控任务配置指定上下文；真实 IPC 调用授权留待后续。
                 refs = [store.put(data, [agent]) for data in task.get('contexts', [])]
                 payload['_contexts'] = [store.get(ref, agent) for ref in refs]
+                payload['_inputs'] = {name: outputs[name] for name in task.get('inputs', [])}
+                if task.get('action') in ('send', 'receive'):
+                    if broker is None:
+                        broker = Broker(store, [t.get('agent', t['id']) for t in tasks])
+                    payload['_ipc_url'] = broker.url
+                    payload['_ipc_token'] = broker.issue(agent)
+                if task.get('action') == 'llm':
+                    try:
+                        if gateway is None:
+                            gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
+                        payload['_gateway_url'] = gateway.url
+                        payload['_gateway_token'] = gateway.token
+                    except ModelError as exc:
+                        event(key, 'failed', error=str(exc))
+                        continue
                 directory = root / f'{key}-{attempts[key]}'
                 try:
                     handle = executor.launch(payload, directory, limits)
                 except OSError as exc:
+                    if broker:
+                        broker.revoke(payload.get('_ipc_token'))
                     event(key, 'failed', error=f'启动失败: {exc}')
                     continue
+                handle['ipc_token'] = payload.get('_ipc_token')
                 for k in used:
                     used[k] += limits[k]
                 running[key] = (handle, task, limits)
@@ -128,6 +167,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 if proc.poll() is None and not expired:
                     continue
                 code, diagnostic, usage = executor.cleanup(handle)
+                if broker:
+                    broker.revoke(handle.get('ipc_token'))
                 # 只有清理成功后才释放预算。
                 for k in used:
                     used[k] -= limits[k]
@@ -139,7 +180,11 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 result_file = handle['directory'] / 'result.json'
                 if code == 0 and not expired:
                     try:
+                        if result_file.stat().st_size > 1024 * 1024:
+                            raise ValueError('结果超过 1 MiB')
                         result = json.loads(result_file.read_text(encoding='utf-8'))
+                        if not isinstance(result, dict) or result.get('task_id') != key:
+                            raise ValueError('结果 task_id 不匹配')
                         children = result.get('spawn', [])
                         if not isinstance(children, list) or len(tasks) + len(children) > max_tasks:
                             raise ValueError('动态任务批次超过限制')
@@ -150,12 +195,19 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                             for child in children:
                                 states[child['id']] = 'waiting'
                                 attempts[child['id']] = 0
+                                task_by_id[child['id']] = child
+                            if broker:
+                                with broker.lock:
+                                    broker.agents.update(t.get('agent', t['id']) for t in children)
                     except (ValueError, OSError, TypeError, KeyError) as exc:
                         error = f'协议错误: {exc}'
                 state = 'timeout' if expired else ('succeeded' if code == 0 and error is None else 'failed')
-                if state in ('failed', 'timeout') and not error and attempts[key] <= task.get('retries', 0):
+                if (task.get('action') != 'llm' and state in ('failed', 'timeout') and not error
+                        and attempts[key] <= task.get('retries', 0)):
                     event(key, 'waiting', reason='清理完成，创建新 Attempt 重试', exit_code=code, usage=usage)
                 else:
+                    if state == 'succeeded':
+                        outputs[key] = result.get('result')
                     event(key, state, exit_code=code, output=diagnostic, result=result,
                           error=error, usage=usage)
             if running:
@@ -165,7 +217,12 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             for handle, _, _ in list(running.values()):
                 executor.cleanup(handle)
         finally:
+            if gateway:
+                gateway.close()
+            if broker:
+                broker.close()
             journal.close()
-    (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts},
+    (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
+                                                'context_stats': store.stats()},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')
     return states, events

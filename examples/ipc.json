@@ -1,0 +1,4 @@
+[
+  {"id":"send", "agent":"producer", "action":"send", "to":"consumer", "request_id":"demo-1", "data":{"text":"hello from another agent"}},
+  {"id":"receive", "agent":"consumer", "depends_on":["send"], "action":"receive", "seconds":3}
+]
