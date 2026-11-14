@@ -107,7 +107,7 @@ function renderOverview(job){
   const states=Object.values(job.states||{}),done=states.filter(x=>x==='succeeded').length;
   const end=job.finished||job.monitor?.time||Date.now()/1000;
   const usage=job.engineering?.usage||{};const facts=[['执行耗时',number(Math.max(0,end-job.created),1)+' s'],
-    ['任务完成',done+' / '+states.length],['模型调用',job.engineering?String(job.engineering.model_calls):String((job.events||[]).filter(e=>e.result?.model_call).length)],
+    ['任务完成',done+' / '+states.length],['已记录响应',job.engineering?String(job.engineering.model_calls):String((job.events||[]).filter(e=>e.result?.model_call).length)],
     ['输入 / 输出 token',finite(usage.prompt_tokens)?usage.prompt_tokens+' / '+usage.completion_tokens:'—']];
   const box=$('runFacts');box.replaceChildren();for(const [label,value] of facts){const card=node('div',null,'run-fact');card.append(node('small',label),node('strong',value));box.append(card)}
   $('historyState').textContent=job.restored?'已从磁盘恢复 · 不会自动重跑':'运行索引已保存 · 原始产物保留';
@@ -222,7 +222,7 @@ function renderEngineering(job){
     if(verdict.reason)decision.append(node('p',verdict.reason));
   }else decision.append(node('span',semanticFailure?(validation?.error||'真实测试未通过，已停止后续付费调用'):'等待真实测试和最终评审结果'));
   decision.className='repair-verdict '+(success?'check-pass':semanticFailure?'check-fail':'');
-  $('engineeringCalls').textContent='模型调用 '+(finite(data.model_calls)?data.model_calls:'—')+' / '+(finite(data.call_limit)?data.call_limit:4);
+  $('engineeringCalls').textContent='已记录模型响应 '+(finite(data.model_calls)?data.model_calls:'—')+' / '+(finite(data.call_limit)?data.call_limit:4);
   const usage=data.usage||{};$('engineeringTokens').textContent='输入 / 输出 token：'+(finite(usage.prompt_tokens)?usage.prompt_tokens:'—')+' / '+(finite(usage.completion_tokens)?usage.completion_tokens:'—');
   const budget=data.budget||job.budget||{};$('engineeringBudget').textContent='固定预算：'+(finite(budget.cpu_milli)?number(budget.cpu_milli/1000,2)+' 核':'—')+' / '+bytes(budget.memory_bytes)+' / '+(finite(budget.pids)?budget.pids:'—')+' pids';
   const source=typeof data.patch_source==='string'?data.patch_source:typeof validation?.source==='string'?validation.source:'';
