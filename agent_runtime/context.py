@@ -120,6 +120,13 @@ class ContextStore:
                     'cache_limit_bytes':self.cache_limit,'cache_limit_entries':self.cache_max_entries,
                     'cache_policy':self.cache_policy}
 
+    def grant(self, ref, owner, reader):
+        """Coordinator-only sharing; a digest alone never grants access."""
+        with self.lock:
+            if owner not in self.grants.get(ref,set()):
+                raise PermissionError('上下文未授权')
+            self.grants[ref].add(reader)
+
     def revoke_agent(self,agent):
         with self.lock:
             for readers in self.grants.values():readers.discard(agent)

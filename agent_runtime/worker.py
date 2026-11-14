@@ -29,6 +29,13 @@ def main():
     else:
         # Compatibility for the original trusted JSON-stdin entry point.
         task = json.loads(sys.stdin.read())
+    # Transport references, materialize only inside the consuming Attempt.
+    # Broker binds the bearer capability to the real Agent identity.
+    if '_context_refs' in task:
+        task['_contexts'] = [ipc(task,op='get',ref=ref)['data'] for ref in task['_context_refs']]
+    if '_input_refs' in task:
+        task['_inputs'] = {key:ipc(task,op='get',ref=ref)['data']
+                           for key,ref in task['_input_refs'].items()}
     action = task.get('action', 'echo')
     model_result = None
     output = task.get('message', '完成')

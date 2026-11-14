@@ -16,6 +16,7 @@ from .telemetry import MachineSampler
 from .model_gateway import ModelError
 from .job_store import JobStore
 from .agents import RuntimeControl
+from .scheduling import AdmissionScheduler
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -65,7 +66,7 @@ class Controller:
         preset = value.get('preset')
         workers = value.get('workers', 2)
         policy = value.get('policy', 'resource_fit')
-        if type(workers) is not int or not 1 <= workers <= 4 or policy not in ('fifo', 'resource_fit', 'aging_fit'):
+        if type(workers) is not int or not 1 <= workers <= 4 or policy not in AdmissionScheduler.POLICIES:
             raise ValueError('并发数需为 1—4，调度策略不合法')
         if preset == 'dynamic':
             tasks = json.loads(DEMO.read_text(encoding='utf-8'))

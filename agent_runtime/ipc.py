@@ -46,7 +46,9 @@ class Broker:
                     pass
 
         self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        # Default HTTPServer polling adds up to 0.5s to every workflow teardown.
+        self.thread = threading.Thread(target=self.server.serve_forever,
+                                       kwargs={'poll_interval':.02},daemon=True)
         self.thread.start()
         self.url = f'http://127.0.0.1:{self.server.server_port}/rpc'
 

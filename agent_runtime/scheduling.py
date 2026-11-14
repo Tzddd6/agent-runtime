@@ -18,7 +18,7 @@ class Decision:
 
 
 class AdmissionScheduler:
-    POLICIES = ('fifo', 'resource_fit', 'aging_fit')
+    POLICIES = ('fifo', 'resource_fit', 'aging_fit', 'drf')
 
     def __init__(self, policy, budget, defaults, aging_seconds=2.0):
         if policy not in self.POLICIES:
@@ -47,7 +47,8 @@ class AdmissionScheduler:
         self.ready_since.pop(task_id, None)
         self.sequence.pop(task_id, None)
 
-    def choose(self, ready_tasks, used, *, busy_agents=(), blocked_tasks=(), slots_available=1, now=None):
+    def choose(self, ready_tasks, used, *, busy_agents=(), blocked_tasks=(), slots_available=1, now=None,
+               agent_allocations=None):
         """Choose one ready task; the caller still owns launch and resource accounting.
 
         Call again after each successful launch with the new ``used`` vector and
@@ -113,6 +114,27 @@ class AdmissionScheduler:
             return decision(first, 'fifo')
 
         eligible = [t for t in feasible if t.get('agent',t['id']) not in busy and t['id'] not in blocked]
+        if self.policy == 'drf':
+            # Ghodsi et al., NSDI 2011, Algorithm 1: lowest current dominant
+            # share first. Reservations (not sampled CPU usage) are allocations.
+            allocations = {} if agent_allocations is None else agent_allocations
+            totals = {k:0 for k in self.budget}
+            for allocation in allocations.values():
+                if (set(allocation) != set(self.budget) or
+                        any(type(v) is not int or v < 0 for v in allocation.values())):
+                    raise ValueError('invalid Agent allocation')
+                for k in totals:totals[k] += allocation[k]
+            if totals != used:
+                raise ValueError('Agent allocations must reconcile with global reservations')
+            def rank(task):
+                allocation = allocations.get(task.get('agent',task['id']), {})
+                share = max(allocation.get(k,0)/self.budget[k] for k in self.budget)
+                return (share,self.sequence[task['id']])
+            if not eligible:return decision(reason='agent_busy')
+            first = min(eligible,key=rank)
+            if fits(first,available=True):return decision(first,'dominant_share')
+            # Preserve the lower-share Agent's turn. No backfill or preemption.
+            return decision(reason='drf_drain',draining=first['id'])
         if self.policy == 'aging_fit':
             aged = [t for t in eligible if now-self.ready_since[t['id']] >= self.aging_seconds]
             if aged:

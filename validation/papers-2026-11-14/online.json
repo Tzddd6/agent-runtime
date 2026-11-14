@@ -1,0 +1,51 @@
+{
+  "job": "3fcda0cec249463489885a7e0e6d071a",
+  "status": "succeeded",
+  "policy": "drf",
+  "states": {
+    "plan": "succeeded",
+    "analyze": "succeeded",
+    "index": "succeeded",
+    "review": "succeeded"
+  },
+  "enforcement": "cgroup_v2",
+  "dataflow": {
+    "context_ref_deliveries": 2,
+    "input_ref_deliveries": 2
+  },
+  "context": {
+    "puts": 6,
+    "unique_objects": 5,
+    "logical_bytes": 706,
+    "stored_bytes": 634,
+    "cache_hits": 1,
+    "cache_misses": 3,
+    "cache_evictions": 0,
+    "cache_invalidations": 0,
+    "cache_bypasses": 0,
+    "cache_bytes": 319,
+    "disk_reads": 3,
+    "disk_read_bytes": 319,
+    "cache_entries": 3,
+    "cache_limit_bytes": 8388608,
+    "cache_limit_entries": 1024,
+    "cache_policy": "lru2"
+  },
+  "reserved": {
+    "cpu_milli": 0,
+    "memory_bytes": 0,
+    "pids": 0
+  },
+  "result_refs": [
+    {},
+    {},
+    {},
+    {
+      "analyze": "09647471329636086cd71aea8afc03ef008592a775b33afc75ef7126c4e163f0",
+      "index": "6fe7b061fce25407edd4d566066bf47bf332df08d9635b5b1598880138d3f12d"
+    }
+  ],
+  "residual_cgroups": 0,
+  "paid_model_calls": 0,
+  "key_retained": true
+}

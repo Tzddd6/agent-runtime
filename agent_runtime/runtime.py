@@ -156,7 +156,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     used = {k: 0 for k in budget}
     running, events = {}, []
     gateway = broker = None
-    outputs = {}
+    outputs = {} # task ID -> immutable ContextStore reference
+    dataflow = {'context_ref_deliveries':0,'input_ref_deliveries':0}
     sampler, last_telemetry, terminal_usage = CgroupSampler(), [0], {}
     journal = (root / 'events.jsonl').open('w', encoding='utf-8')
     channel = _ObserverChannel(observer) if observer is not None else None
@@ -203,8 +204,10 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'sample_sequence':sample_sequence[0],'event_sequence':len(events),
                   'budget':dict(budget),'reserved':dict(used),'slots_used':len(running),
                   'slots_total':max_workers,'policy':policy,
-                  'context':store.stats(),
+                  'context':store.stats(),'dataflow':dict(dataflow),
                   'scheduling':{'reason':scheduler.last_decision.reason,
+                    'dominant_shares':{a.id:max(a.reserved[k]/budget[k] for k in budget)
+                                       for a in registry.agents.values()},
                     'draining_task_id':scheduler.last_decision.draining_task_id,
                     'waited_seconds':scheduler.last_decision.waited_seconds},
                   'enforcement':'cgroup_v2' if cgroup_root else 'admission_only'}
@@ -283,6 +286,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 ready = [t for t in tasks if states[t['id']]=='waiting'
                          and all(states[d]=='succeeded' for d in t.get('depends_on',[]))]
                 return scheduler.choose(ready,used,
+                    agent_allocations={a.id:dict(a.reserved) for a in registry.agents.values()},
                     busy_agents={a.id for a in registry.agents.values() if registry.blocked(a.id)},
                     blocked_tasks={t['id'] for t in ready if not registry.fits(t.get('agent',t['id']),{**DEFAULTS,**t.get('resources',{})})},
                     slots_available=max_workers-len(running))
@@ -317,14 +321,19 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 payload = {**task, '_attempt': attempts[key], 'timeout':task.get('timeout',timeout)}
                 try:
                     refs = [store.put(data, [agent]) for data in task.get('contexts', [])]
-                    payload['_contexts'] = [store.get(ref, agent) for ref in refs]
-                    payload['_inputs'] = {name: outputs[name] for name in task.get('inputs', [])}
+                    input_refs = {name:outputs[name] for name in task.get('inputs', [])}
+                    for name,ref in input_refs.items():
+                        store.grant(ref,'$runtime',agent)
+                    payload.pop('contexts',None)
+                    payload.pop('_contexts',None);payload.pop('_inputs',None)
+                    payload['_context_refs'] = refs
+                    payload['_input_refs'] = input_refs
                     # Catch non-JSON Python API configuration before OS launch.
                     json.dumps(payload,ensure_ascii=False)
                 except (ValueError,TypeError,KeyError,PermissionError,FileNotFoundError) as exc:
                     event(key,'failed',error=f'任务输入准备失败: {exc}')
                     continue
-                if task.get('action') in ('send', 'receive'):
+                if refs or input_refs or task.get('action') in ('send', 'receive'):
                     if broker is None:
                         broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'])
                     payload['_ipc_url'] = broker.url
@@ -336,6 +345,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         payload['_gateway_url'] = gateway.url
                         payload['_gateway_token'] = gateway.issue(agent)
                     except ModelError as exc:
+                        if broker:broker.revoke(payload.get('_ipc_token'))
                         event(key, 'failed', error=str(exc))
                         continue
                 directory = root / f'{key}-{attempts[key]}'
@@ -356,13 +366,16 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     continue
                 handle['ipc_token'] = payload.get('_ipc_token')
                 handle['gateway_token'] = payload.get('_gateway_token')
-                registry.reserve(agent,key,handle['proc'].pid,limits,refs)
+                registry.reserve(agent,key,handle['proc'].pid,limits,refs+list(input_refs.values()))
                 for k in used:
                     used[k] += limits[k]
                 running[key] = (handle, task, limits)
                 scheduler.started(key)
+                dataflow['context_ref_deliveries'] += len(refs)
+                dataflow['input_ref_deliveries'] += len(input_refs)
                 event(key, 'running', pid=handle['proc'].pid, resources=limits,
-                      enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs)
+                      enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs,
+                      input_refs=input_refs)
             for key, (handle, task, limits) in list(running.items()):
                 proc = handle['proc']
                 expired_flag = handle.get('expired')
@@ -390,6 +403,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         result = json.loads(result_file.read_text(encoding='utf-8'))
                         if not isinstance(result, dict) or result.get('task_id') != key:
                             raise ValueError('结果 task_id 不匹配')
+                        # Committed outputs outlive producer termination; only
+                        # the coordinator can grant explicit DAG consumers.
+                        output_ref = store.put(result.get('result'),[task.get('agent',key),'$runtime'])
                         children = result.get('spawn', [])
                         if not isinstance(children, list) or len(tasks) + len(children) > max_tasks:
                             raise ValueError('动态任务批次超过限制')
@@ -418,7 +434,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key, 'waiting', reason='清理完成，创建新 Attempt 重试', exit_code=code, usage=usage)
                 else:
                     if state == 'succeeded':
-                        outputs[key] = result.get('result')
+                        outputs[key] = output_ref
                         call=result.get('model_call')
                         if call:
                             acb=registry.agents[task.get('agent',key)];acb.model_calls+=1
@@ -465,6 +481,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             raise RuntimeError('TEARDOWN_FAILED: '+'; '.join(teardown_errors))
     (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
                                                 'agents':registry.snapshots(),'agent_controls':control.history(),
+                                                'dataflow':dataflow,'policy':policy,
                                                 'context_stats': store.stats()},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')
     return states, events

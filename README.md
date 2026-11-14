@@ -1,6 +1,8 @@
-# Agent Runtime v0.7 开发版
+# Agent Runtime v0.8 开发版
 
 本项目对应 OS 功能挑战 proj3，与 ICT 算子竞赛无关。Python 3.9+，仅用标准库。
+
+v0.8 补读 AIOS、DRF、Ray、MemGPT 原文，新增 Agent 主导份额公平准入，以及上下文/依赖结果的授权引用通路。网页支持 DRF、主导份额与引用投递观测。机制出处、赛题 4.1—4.7 对照、实验及尚未覆盖的能力见 [论文落地与赛题覆盖](docs/论文落地与赛题覆盖-v0.8.md)。
 
 v0.7 把 Agent 提升为工作流内独立的管理对象：AgentControlBlock 拥有生命周期、旗下任务/在途PID、邮箱身份、上下文授权、并发槽和聚合资源预算。Linux 使用 Agent 父 cgroup → Attempt 子 cgroup 双层限制；支持暂停准入、恢复、终止，终止会回收执行并撤销权限，不能被动态任务重新启用。网页提供“Agent 生命周期”免费演示与所有新运行的 Agent 管理视图。接口、语义及实测见 [Agent 一等对象实现](docs/Agent一等对象-v0.7.md)。
 

@@ -4,6 +4,7 @@ from pathlib import Path
 
 
 from .runtime import run, validate
+from .scheduling import AdmissionScheduler
 
 
 DEMO = [
@@ -21,7 +22,7 @@ def main():
     parser.add_argument('--workers', type=int, default=2)
     parser.add_argument('--timeout', type=float, default=10)
     parser.add_argument('--output-dir', type=Path, default=Path('runs'))
-    parser.add_argument('--policy', choices=['fifo', 'resource_fit', 'aging_fit'], default='resource_fit')
+    parser.add_argument('--policy', choices=AdmissionScheduler.POLICIES, default='resource_fit')
     parser.add_argument('--cgroup-root', help='已委派且已启用控制器的空 attempts 子树')
     args = parser.parse_args()
     try:
