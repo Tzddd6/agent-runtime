@@ -109,3 +109,10 @@ class Broker:
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=2)
+
+    def terminate_agent(self,agent):
+        with self.lock:
+            self.agents.discard(agent)
+            for token,owner in list(self.tokens.items()):
+                if owner==agent:self.tokens.pop(token,None)
+            self.mailboxes.pop(agent,None)

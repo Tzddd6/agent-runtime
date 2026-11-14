@@ -1,0 +1,236 @@
+{
+  "job": "dcace41ae43d499a9bc9548e992b8202",
+  "status": "cancelled",
+  "states": {
+    "alpha_1": "succeeded",
+    "alpha_2": "succeeded",
+    "alpha_3": "cancelled",
+    "beta_1": "succeeded",
+    "beta_2": "succeeded"
+  },
+  "budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "agents": [
+    {
+      "id": "alpha",
+      "role": "并行计算 Agent",
+      "state": "terminated",
+      "budget": {
+        "cpu_milli": 500,
+        "memory_bytes": 201326592,
+        "pids": 32
+      },
+      "reserved": {
+        "cpu_milli": 0,
+        "memory_bytes": 0,
+        "pids": 0
+      },
+      "max_concurrency": 2,
+      "tasks": [
+        "alpha_1",
+        "alpha_2",
+        "alpha_3"
+      ],
+      "active_tasks": {},
+      "context_refs": [],
+      "mailbox_id": "alpha",
+      "metrics": {
+        "source": "cgroup_v2",
+        "cpu_cores": null,
+        "cpu_total_seconds": 3.190293,
+        "memory_bytes": 0,
+        "memory_peak_bytes": 48447488,
+        "pids": 0,
+        "throttled_periods": 56
+      },
+      "created": 1794667299.9778016,
+      "cgroup_path": "/sys/fs/cgroup/system.slice/agentrt-console.service/attempts/35b18d3e54ae48d2b7a233345c7a78dd-agent-8ed3f6ad685b",
+      "model_calls": 0,
+      "token_usage": {},
+      "enforcement": "cgroup_v2"
+    },
+    {
+      "id": "beta",
+      "role": "独立计算 Agent",
+      "state": "completed",
+      "budget": {
+        "cpu_milli": 500,
+        "memory_bytes": 201326592,
+        "pids": 32
+      },
+      "reserved": {
+        "cpu_milli": 0,
+        "memory_bytes": 0,
+        "pids": 0
+      },
+      "max_concurrency": 1,
+      "tasks": [
+        "beta_1",
+        "beta_2"
+      ],
+      "active_tasks": {},
+      "context_refs": [],
+      "mailbox_id": "beta",
+      "metrics": {
+        "source": "cgroup_v2",
+        "cpu_cores": null,
+        "cpu_total_seconds": 3.085212,
+        "memory_bytes": 0,
+        "memory_peak_bytes": 23138304,
+        "pids": 0,
+        "throttled_periods": 0
+      },
+      "created": 1794667299.9782124,
+      "cgroup_path": "/sys/fs/cgroup/system.slice/agentrt-console.service/attempts/35b18d3e54ae48d2b7a233345c7a78dd-agent-f44e64e75f39",
+      "model_calls": 0,
+      "token_usage": {},
+      "enforcement": "cgroup_v2"
+    }
+  ],
+  "agent_events": [
+    {
+      "sequence": 1,
+      "time": 1794667299.9781742,
+      "agent_id": "alpha",
+      "previous": "registered",
+      "state": "ready",
+      "reason": "registered"
+    },
+    {
+      "sequence": 2,
+      "time": 1794667299.9784977,
+      "agent_id": "beta",
+      "previous": "registered",
+      "state": "ready",
+      "reason": "registered"
+    },
+    {
+      "sequence": 3,
+      "time": 1794667299.9978912,
+      "agent_id": "alpha",
+      "previous": "ready",
+      "state": "running",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 4,
+      "time": 1794667300.3256097,
+      "agent_id": "alpha",
+      "previous": "running",
+      "state": "pausing",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 5,
+      "time": 1794667306.1168451,
+      "agent_id": "beta",
+      "previous": "ready",
+      "state": "running",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 6,
+      "time": 1794667306.2427676,
+      "agent_id": "alpha",
+      "previous": "pausing",
+      "state": "paused",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 7,
+      "time": 1794667314.2034333,
+      "agent_id": "beta",
+      "previous": "running",
+      "state": "ready",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 8,
+      "time": 1794667314.239818,
+      "agent_id": "beta",
+      "previous": "ready",
+      "state": "running",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 9,
+      "time": 1794667314.6539674,
+      "agent_id": "alpha",
+      "previous": "paused",
+      "state": "ready",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 10,
+      "time": 1794667314.668829,
+      "agent_id": "alpha",
+      "previous": "ready",
+      "state": "running",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 11,
+      "time": 1794667314.9942906,
+      "agent_id": "alpha",
+      "previous": "running",
+      "state": "terminating",
+      "reason": "terminate_requested"
+    },
+    {
+      "sequence": 12,
+      "time": 1794667314.998624,
+      "agent_id": "alpha",
+      "previous": "terminating",
+      "state": "terminated",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 13,
+      "time": 1794667318.3577614,
+      "agent_id": "beta",
+      "previous": "running",
+      "state": "idle",
+      "reason": "coordinator"
+    },
+    {
+      "sequence": 14,
+      "time": 1794667318.378828,
+      "agent_id": "beta",
+      "previous": "idle",
+      "state": "completed",
+      "reason": "workflow_finished"
+    }
+  ],
+  "agent_controls": [
+    {
+      "id": "e96ae12052d0476689ac50d388cd1803",
+      "agent_id": "alpha",
+      "operation": "pause",
+      "status": "applied",
+      "time": 1794667300.3222997,
+      "finished": 1794667300.3256674
+    },
+    {
+      "id": "ca9ceebc00614f22b0ac6118e324fcf2",
+      "agent_id": "alpha",
+      "operation": "resume",
+      "status": "applied",
+      "time": 1794667314.6361578,
+      "finished": 1794667314.6540022
+    },
+    {
+      "id": "b578f63136f34177888cf6544bb044f3",
+      "agent_id": "alpha",
+      "operation": "terminate",
+      "status": "applied",
+      "time": 1794667314.982694,
+      "finished": 1794667314.9986458
+    }
+  ],
+  "residual_cgroups": 0,
+  "paid_model_calls": 0,
+  "key_retained": true
+}

@@ -36,3 +36,18 @@ def resource_tasks():
             load('tester',750,48,6,['planner']),
             load('indexer',500,24,5,['planner']),
             load('reviewer',500,16,2,['analyzer','tester','indexer'])]
+
+
+def agent_tasks():
+    """Two independent owners, repeated tasks and aggregate caps; no model calls."""
+    def task(key,owner,seconds,deps=()):
+        return {'id':key,'agent':owner,'action':'load','seconds':seconds,'memory_mib':16,
+                'depends_on':list(deps),'timeout':20,
+                'resources':{'cpu_milli':250,'memory_bytes':64*1024**2,'pids':8}}
+    tasks=[task('alpha_1','alpha',6),task('alpha_2','alpha',6),
+           task('alpha_3','alpha',4,['alpha_1','alpha_2']),task('beta_1','beta',8),
+           task('beta_2','beta',4,['beta_1'])]
+    specs=[{'id':owner,'role':role,'max_concurrency':slots,
+        'budget':{'cpu_milli':500,'memory_bytes':192*1024**2,'pids':32}}
+        for owner,role,slots in [('alpha','并行计算 Agent',2),('beta','独立计算 Agent',1)]]
+    return tasks,specs

@@ -17,6 +17,7 @@ DEMO = [
 def main():
     parser = argparse.ArgumentParser(description='最小 Agent Runtime 演示')
     parser.add_argument('--tasks', type=Path, help='JSON 任务数组；省略则运行内置示例')
+    parser.add_argument('--agents',type=Path,help='Agent 控制块配置 JSON 数组；省略则按任务自动注册')
     parser.add_argument('--workers', type=int, default=2)
     parser.add_argument('--timeout', type=float, default=10)
     parser.add_argument('--output-dir', type=Path, default=Path('runs'))
@@ -25,7 +26,8 @@ def main():
     args = parser.parse_args()
     try:
         tasks = json.loads(args.tasks.read_text(encoding='utf-8')) if args.tasks else DEMO
-        states, _ = run(tasks, args.workers, args.timeout, output_dir=args.output_dir, policy=args.policy, cgroup_root=args.cgroup_root)
+        agents=json.loads(args.agents.read_text(encoding='utf-8')) if args.agents else None
+        states, _ = run(tasks, args.workers, args.timeout, output_dir=args.output_dir, policy=args.policy, cgroup_root=args.cgroup_root,agents=agents)
     except (ValueError, KeyError, TypeError, OSError, RuntimeError) as exc:
         parser.error(str(exc))
     return 0 if all(s == 'succeeded' for s in states.values()) else 1

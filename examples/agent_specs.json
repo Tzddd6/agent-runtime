@@ -1,0 +1,4 @@
+[
+  {"id":"alpha","role":"parallel worker","max_concurrency":2,"budget":{"cpu_milli":500,"memory_bytes":201326592,"pids":32}},
+  {"id":"beta","role":"independent worker","max_concurrency":1,"budget":{"cpu_milli":500,"memory_bytes":201326592,"pids":32}}
+]

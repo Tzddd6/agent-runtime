@@ -119,3 +119,7 @@ class ContextStore:
             return {**self.metrics,'cache_entries':len(self.cache),
                     'cache_limit_bytes':self.cache_limit,'cache_limit_entries':self.cache_max_entries,
                     'cache_policy':self.cache_policy}
+
+    def revoke_agent(self,agent):
+        with self.lock:
+            for readers in self.grants.values():readers.discard(agent)

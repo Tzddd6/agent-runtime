@@ -14,6 +14,7 @@ from .model_gateway import ModelGateway, ModelError
 from .ipc import Broker
 from .telemetry import CgroupSampler
 from .scheduling import AdmissionScheduler
+from .agents import AgentRegistry,RuntimeControl,agent_id
 
 
 TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
@@ -97,6 +98,7 @@ def validate(tasks):
                 raise ValueError(f'{field} 必须为 0—3 的整数')
         if not isinstance(task.get('agent', key), str) or not isinstance(task.get('contexts', []), list):
             raise ValueError('agent 必须为字符串，contexts 必须为数组')
+        agent_id(task.get('agent',key))
         if not isinstance(task.get('resources', {}), dict):
             raise ValueError('resources 必须为对象')
         inputs = task.get('inputs', [])
@@ -121,7 +123,8 @@ def validate(tasks):
 
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
-        policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None):
+        policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
+        agents=None, control=None):
     validate(tasks)
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
@@ -134,10 +137,17 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   if budget is None else budget)
     if set(budget) != set(DEFAULTS) or any(type(v) is not int or v <= 0 for v in budget.values()):
         raise ValueError('预算必须包含全部资源字段及正整数值')
+    if control is not None and (not isinstance(control,RuntimeControl) or control.closed):
+        raise ValueError('control 必须是尚未结束的 RuntimeControl')
     scheduler = AdmissionScheduler(policy,budget,DEFAULTS)
     executor = Executor(cgroup_root)
     root = Path(output_dir or tempfile.mkdtemp(prefix='agentrt-')).resolve() / uuid.uuid4().hex
     root.mkdir(parents=True)
+    control=control or RuntimeControl()
+    registry=AgentRegistry(budget,agents,cgroup_root=Path(cgroup_root) if cgroup_root else None,
+                           workflow_id=root.name)
+    agent_journal=(root/'agents.jsonl').open('w',encoding='utf-8');registry.journal=agent_journal
+    executor.agent_roots=registry.groups
     store = ContextStore(root / 'contexts')
     tasks = [dict(t) for t in tasks]
     task_by_id = {t['id']: t for t in tasks}
@@ -153,6 +163,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     sample_sequence = [0]
 
     def observe(force=False):
+        registry.synchronize(states,finished=control.closed)
         if observer is None or (not force and time.monotonic()-last_telemetry[0] < .4):
             return
         last_telemetry[0] = time.monotonic()
@@ -165,8 +176,14 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             if states[key] == 'waiting':
                 if not all(states[d]=='succeeded' for d in t.get('depends_on',[])):
                     reason = '等待依赖任务'
-                elif any(other.get('agent',other['id'])==agent for _,other,_ in running.values()):
-                    reason = '同一 Agent 正在执行'
+                elif agent not in registry.agents:
+                    reason='Agent 注册未完成'
+                elif registry.agents[agent].mode!='open':
+                    reason = 'Agent 已暂停准入或正在终止'
+                elif registry.blocked(agent):
+                    reason = '等待 Agent 并发槽位'
+                elif not registry.fits(agent,limits):
+                    reason = '等待 Agent 级预算释放'
                 elif scheduler.last_decision.draining_task_id:
                     reason = '排空资源，优先让 '+scheduler.last_decision.draining_task_id+' 启动'
                 elif len(running)>=max_workers:
@@ -180,7 +197,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                          'depends_on':list(t.get('depends_on',[])),'resources':limits,'wait_reason':reason,
                          'pid':handle['proc'].pid if handle else None,'metrics':metrics})
         sample_sequence[0] += 1
+        agent_snapshots=registry.snapshots();control.publish(agent_snapshots)
         sample = {'workflow_id':root.name,'time':time.time(),'tasks':rows,
+                  'agents':agent_snapshots,'agent_events':list(registry.events),'agent_controls':control.history(),
                   'sample_sequence':sample_sequence[0],'event_sequence':len(events),
                   'budget':dict(budget),'reserved':dict(used),'slots_used':len(running),
                   'slots_total':max_workers,'policy':policy,
@@ -204,6 +223,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         observe(force=True)
 
     def cleanup_attempt(key, handle, limits):
+        if gateway and handle.get('gateway_token'):gateway.revoke(handle['gateway_token'])
         try:
             result = executor.cleanup(handle)
         except Exception as exc:
@@ -211,15 +231,42 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         # A successful cleanup is the sole authority for releasing a reservation.
         for name in used:
             used[name] -= limits[name]
+        registry.release(task_by_id[key].get('agent',key),key,limits)
         del running[key]
         sampler.forget(handle['group'])
         if broker:
             broker.revoke(handle.get('ipc_token'))
         return result
 
+    execution_failed=False
     try:
+        try:
+            for identity in registry.specs:registry.register(identity)
+            for task in tasks:registry.attach(task)
+        except OSError as exc:raise RuntimeError('EXECUTION_BACKEND_FAILED: Agent cgroup registration failed') from exc
+        control.publish(registry.snapshots())
         observe(force=True)
         while any(s in ('waiting', 'running') for s in states.values()):
+            while True:
+                try:command=control.queue.get_nowait()
+                except queue.Empty:break
+                identity=command['agent_id'];a=registry.agents.get(identity)
+                if a is None or a.mode in ('terminated','terminating'):
+                    control.acknowledge(command,'Agent 已终止或不存在');continue
+                operation=command['operation']
+                if operation=='terminate':
+                    a.mode='terminating';registry.transition(a,'terminating','terminate_requested')
+                    if broker:broker.terminate_agent(identity)
+                    store.revoke_agent(identity)
+                    for key,(handle,task,limits) in list(running.items()):
+                        if task.get('agent',key)==identity:
+                            cleanup_attempt(key,handle,limits)
+                            event(key,'cancelled',reason='所属 Agent 已终止；远端模型计费状态未知')
+                    for key in a.tasks:
+                        if states[key]=='waiting':event(key,'cancelled',reason='所属 Agent 已终止')
+                    a.mode='terminated'
+                else:a.mode='paused' if operation=='pause' else 'open'
+                registry.synchronize(states);control.acknowledge(command);observe(force=True)
             if cancel_event is not None and cancel_event.is_set():
                 for key, (handle, task, limits) in list(running.items()):
                     cleanup_attempt(key,handle,limits)
@@ -227,12 +274,17 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 for key in states:
                     if states[key] == 'waiting':
                         event(key, 'cancelled', reason='用户取消')
+                for a in registry.agents.values():
+                    a.mode='terminated'
+                    if broker:broker.terminate_agent(a.id)
+                    store.revoke_agent(a.id)
                 break
             def choose():
                 ready = [t for t in tasks if states[t['id']]=='waiting'
                          and all(states[d]=='succeeded' for d in t.get('depends_on',[]))]
                 return scheduler.choose(ready,used,
-                    busy_agents={t.get('agent',t['id']) for _,t,_ in running.values()},
+                    busy_agents={a.id for a in registry.agents.values() if registry.blocked(a.id)},
+                    blocked_tasks={t['id'] for t in ready if not registry.fits(t.get('agent',t['id']),{**DEFAULTS,**t.get('resources',{})})},
                     slots_available=max_workers-len(running))
             choose()
             for task in list(tasks):
@@ -250,9 +302,13 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key, 'unschedulable', reason='单任务请求超过总预算')
                     continue
                 agent = task.get('agent', key)
+                if registry.agents[agent].mode=='terminated':
+                    event(key,'cancelled',reason='所属 Agent 已终止');continue
+                if not registry.fits(agent,limits,reserved=False):
+                    event(key,'unschedulable',reason='单任务请求超过 Agent 预算');continue
                 if choose().task_id!=key:
                     continue
-                busy = any(t.get('agent', t['id']) == agent for _, t, _ in running.values())
+                busy = registry.blocked(agent)
                 if busy or len(running) >= max_workers or any(used[k] + limits[k] > budget[k] for k in budget):
                     if policy == 'fifo':
                         break
@@ -270,7 +326,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     continue
                 if task.get('action') in ('send', 'receive'):
                     if broker is None:
-                        broker = Broker(store, [t.get('agent', t['id']) for t in tasks])
+                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'])
                     payload['_ipc_url'] = broker.url
                     payload['_ipc_token'] = broker.issue(agent)
                 if task.get('action') == 'llm':
@@ -278,7 +334,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         if gateway is None:
                             gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
                         payload['_gateway_url'] = gateway.url
-                        payload['_gateway_token'] = gateway.token
+                        payload['_gateway_token'] = gateway.issue(agent)
                     except ModelError as exc:
                         event(key, 'failed', error=str(exc))
                         continue
@@ -287,16 +343,20 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     handle = executor.launch(payload, directory, limits)
                 except (ValueError,TypeError) as exc:
                     if broker:broker.revoke(payload.get('_ipc_token'))
+                    if gateway:gateway.revoke(payload.get('_gateway_token'))
                     event(key,'failed',error=f'任务启动载荷无效: {exc}')
                     continue
                 except OSError as exc:
                     if broker:
                         broker.revoke(payload.get('_ipc_token'))
+                    if gateway:gateway.revoke(payload.get('_gateway_token'))
                     if cgroup_root:
                         raise RuntimeError(f'EXECUTION_BACKEND_FAILED: Worker 委派或启动失败: {exc}') from exc
                     event(key, 'failed', error=f'启动失败: {exc}')
                     continue
                 handle['ipc_token'] = payload.get('_ipc_token')
+                handle['gateway_token'] = payload.get('_gateway_token')
+                registry.reserve(agent,key,handle['proc'].pid,limits,refs)
                 for k in used:
                     used[k] += limits[k]
                 running[key] = (handle, task, limits)
@@ -336,6 +396,11 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         if children:
                             # 在更新任何状态前验证整批，失败不留下半张图。
                             validate(tasks + children)
+                            new_owners={c.get('agent',c['id']) for c in children}-registry.agents.keys()
+                            if len(registry.agents)+len(new_owners)>100:raise ValueError('Agent 数量超过上限')
+                            try:
+                                for child in children:registry.attach(child)
+                            except OSError as exc:raise RuntimeError('EXECUTION_BACKEND_FAILED: dynamic Agent registration failed') from exc
                             tasks.extend(children)
                             for child in children:
                                 states[child['id']] = 'waiting'
@@ -343,7 +408,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                 task_by_id[child['id']] = child
                             if broker:
                                 with broker.lock:
-                                    broker.agents.update(t.get('agent', t['id']) for t in children)
+                                    broker.agents.update(t.get('agent', t['id']) for t in children
+                                        if registry.agents[t.get('agent',t['id'])].mode!='terminated')
                     except (ValueError, OSError, TypeError, KeyError) as exc:
                         error = f'协议错误: {exc}'
                 state = 'timeout' if expired else ('succeeded' if code == 0 and error is None else 'failed')
@@ -353,11 +419,18 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 else:
                     if state == 'succeeded':
                         outputs[key] = result.get('result')
+                        call=result.get('model_call')
+                        if call:
+                            acb=registry.agents[task.get('agent',key)];acb.model_calls+=1
+                            for field,value in call.get('usage',{}).items():
+                                if type(value) is int and value>=0:acb.token_usage[field]=acb.token_usage.get(field,0)+value
                     event(key, state, exit_code=code, output=diagnostic, result=result,
                           error=error, usage=usage)
-            if running:
-                observe()
-                time.sleep(0.02)
+            observe()
+            time.sleep(0.02) # Paused Agents with pending tasks must not busy-spin.
+    except BaseException:
+        execution_failed=True
+        raise
     finally:
         cleanup_errors = []
         teardown_errors = []
@@ -369,6 +442,11 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             else:
                 if states[key]=='running':states[key]='failed'
         try:
+            registry.cleanup()
+        except Exception as exc:cleanup_errors.append(str(exc))
+        try:
+            control.close()
+            registry.synchronize(states,finished=True,failed=execution_failed or bool(cleanup_errors))
             observe(force=True)
         except Exception as exc:
             teardown_errors.append(f'telemetry final snapshot: {exc}')
@@ -376,7 +454,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             # Attempt each independent closer even when an earlier one fails.
             for name,closer in [('model gateway',gateway.close if gateway else None),
                                 ('IPC broker',broker.close if broker else None),
-                                ('observer',channel.close if channel else None),('journal',journal.close)]:
+                                ('observer',channel.close if channel else None),('journal',journal.close),
+                                ('agent journal',agent_journal.close)]:
                 if closer is not None:
                     try:closer()
                     except Exception as exc:teardown_errors.append(f'{name}: {exc}')
@@ -385,6 +464,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         if teardown_errors:
             raise RuntimeError('TEARDOWN_FAILED: '+'; '.join(teardown_errors))
     (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
+                                                'agents':registry.snapshots(),'agent_controls':control.history(),
                                                 'context_stats': store.stats()},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')
     return states, events

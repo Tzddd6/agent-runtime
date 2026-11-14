@@ -5,6 +5,7 @@
   <title>Agent Runtime · 运行控制台</title><meta name="theme-color" content="#151d2c">
   <link rel="stylesheet" href="static/console.css">
   <link rel="stylesheet" href="static/workspace.css">
+  <link rel="stylesheet" href="static/agents.css">
   <script src="static/console.js" defer></script>
 </head>
 <body>
@@ -14,8 +15,9 @@
   <a class="nav active" href="#workspace" data-view="workflow"><span>◈</span>协作与修复</a>
   <a class="nav" href="#workspace" data-view="resources"><span>◫</span>资源监控</a>
   <a class="nav" href="#workspace" data-view="tasks"><span>⌘</span>任务与拓扑</a>
+  <a class="nav" href="#workspace" data-view="agents"><span>◎</span>Agent 管理</a>
   <a class="nav" href="#workspace" data-view="logs"><span>≡</span>结果与记录</a>
-  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.6 / 本机执行工作台</small></div>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.7 / Agent 执行工作台</small></div>
 </aside>
 <main>
   <header><span class="breadcrumb">Agent Runtime <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
@@ -30,7 +32,7 @@
   <div class="workspace" id="workspace">
     <section class="control-column">
       <article class="panel"><div class="panel-title"><h2>新建运行</h2><span id="runtimeState" class="small-status">就绪</span></div>
-        <form id="form"><label for="preset">任务场景</label><select id="preset"><option value="engineering">Python 项目修复 · 完整测试与评审</option><option value="resources">资源分配 · 实际 CPU 与内存负载</option><option value="dynamic">动态协作 · 并行与失败重试</option><option value="ipc">Agent 通信 · 消息与引用</option><option value="document">文档处理 · 分析、索引、汇总</option><option value="llm">DeepSeek · 模型对话</option><option value="team">DeepSeek · 四 Agent 协作</option><option value="review">DeepSeek · 写作与评审修订</option></select>
+        <form id="form"><label for="preset">任务场景</label><select id="preset"><option value="engineering">Python 项目修复 · 完整测试与评审</option><option value="agents">Agent 生命周期 · 暂停、恢复与终止</option><option value="resources">资源分配 · 实际 CPU 与内存负载</option><option value="dynamic">动态协作 · 并行与失败重试</option><option value="ipc">Agent 通信 · 消息与引用</option><option value="document">文档处理 · 分析、索引、汇总</option><option value="llm">DeepSeek · 模型对话</option><option value="team">DeepSeek · 四 Agent 协作</option><option value="review">DeepSeek · 写作与评审修订</option></select>
           <div id="projectField" hidden><label for="project">受控项目</label><select id="project"><option value="pricing">金额计算 · 折扣、免邮与退款</option><option value="intervals">时间区间 · 相交、分桶与 TTL</option><option value="text_normalization">文本规范化 · 空白、词数与前缀</option></select><p id="projectDescription" class="hint"></p></div>
           <div class="two"><div><label for="workers">Worker 上限</label><select id="workers"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div><label for="policy">调度策略</label><select id="policy"><option value="resource_fit">资源适配</option><option value="aging_fit">老化资源适配</option><option value="fifo">FIFO 基线</option></select></div></div>
           <p id="engineeringBudgetNote" class="budget-note">总资源预算固定，Worker 上限只控制并发；实际预算见右侧。</p>
@@ -52,9 +54,16 @@
         <button role="tab" id="tab-workflow" aria-selected="true" data-view="workflow">协作流程</button>
         <button role="tab" id="tab-resources" aria-selected="false" data-view="resources">资源监控</button>
         <button role="tab" id="tab-tasks" aria-selected="false" data-view="tasks">任务与拓扑</button>
+        <button role="tab" id="tab-agents" aria-selected="false" data-view="agents">Agent 管理</button>
         <button role="tab" id="tab-logs" aria-selected="false" data-view="logs">结果与事件</button>
       </div>
       <section class="panel welcome-panel" id="workflowEmpty" data-pane="workflow"><div class="welcome-symbol">◈</div><h2>把一次协作，变成可验证的流程</h2><p>运行 Python 项目修复，逐步查看缺陷、分析、补丁、真实测试与独立评审。</p><button class="secondary" id="viewResources">查看资源与执行状态 →</button></section>
+      <section class="panel" id="agentPanel" data-pane="agents" hidden>
+        <div class="panel-title"><div><div class="eyebrow">FIRST-CLASS AGENTS</div><h2>Agent 控制块与生命周期</h2></div><span id="agentCount" class="muted">等待注册</span></div>
+        <p class="hint">Agent 拥有独立身份、任务、邮箱、上下文和聚合资源预算。暂停只停止新任务准入，在途任务结束后进入已暂停；终止会回收旗下执行并撤销权限。历史记录不可控制。</p>
+        <div id="agentCards" class="agent-cards"></div>
+        <details class="agent-command-log" open><summary>生命周期控制记录</summary><pre id="agentCommands" class="log">尚无控制指令</pre></details>
+      </section>
 
       <section class="panel engineering-panel" id="engineeringPanel" data-pane="workflow" hidden>
         <div class="panel-title"><div><div class="eyebrow">REPAIR PIPELINE / 受控项目修复</div><h2 id="engineeringTitle">Python 项目修复</h2></div><span id="engineeringOutcome" class="badge">等待启动</span></div>

@@ -10,7 +10,7 @@ import threading
 
 
 FIELDS={'id','preset','project','status','created','finished','workers','policy','budget',
-        'error','final_states','history','monitor'}
+        'error','final_states','history','monitor','agent_summary','agent_control_summary'}
 MAX_BYTES=512*1024
 
 

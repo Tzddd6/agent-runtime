@@ -15,6 +15,7 @@ from .runtime import run
 from .telemetry import MachineSampler
 from .model_gateway import ModelError
 from .job_store import JobStore
+from .agents import RuntimeControl
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -71,6 +72,9 @@ class Controller:
         elif preset == 'resources':
             from .scenarios import resource_tasks
             tasks = resource_tasks()
+        elif preset == 'agents':
+            from .scenarios import agent_tasks
+            tasks,agent_specs=agent_tasks()
         elif preset == 'ipc':
             tasks = json.loads((DEMO.parent/'ipc.json').read_text(encoding='utf-8'))
         elif preset == 'document':
@@ -114,6 +118,7 @@ class Controller:
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
                    'workers':workers,'policy':policy,'budget':budget,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key}
+            job['_control']=RuntimeControl()
             if preset=='engineering':job['project']=project
             self.store.save(job) # Persist the sole submission intent before starting any Worker.
             self.jobs[key] = job
@@ -145,9 +150,14 @@ class Controller:
             try:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
-                                budget=budget,observer=observe)
+                                budget=budget,observer=observe,control=job['_control'],
+                                agents=agent_specs if preset=='agents' else None)
                 with self.lock:
                     job['final_states']=states
+                    for summary_path in job['directory'].glob('*/summary.json'):
+                        summary=json.loads(summary_path.read_text(encoding='utf-8'))
+                        job['agent_summary']=summary.get('agents',[])
+                        job['agent_control_summary']=summary.get('agent_controls',[])
                     semantic=True
                     if preset=='engineering':
                         from .project_workflow import project_view
@@ -165,6 +175,7 @@ class Controller:
             finally:
                 with self.lock:
                     job['finished']=time.time()
+                    job['_control'].close()
                     try:self.store.save(job)
                     except (OSError,ValueError):
                         self.storage_warning=True
@@ -175,7 +186,7 @@ class Controller:
 
     def snapshot(self):
         with self.lock:
-            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history','final_states')} for j in self.jobs.values()]
+            jobs = [{k:v for k,v in j.items() if k not in ('cancel','directory','monitor','history','final_states','_control','agent_summary','agent_control_summary')} for j in self.jobs.values()]
             recovery_required = self.recovery_required
         info=self.model_info()
         machine=self.machine.sample()
@@ -193,7 +204,7 @@ class Controller:
             job = self.jobs.get(key)
             if not job:
                 raise KeyError(key)
-            result = {k:v for k,v in job.items() if k not in ('cancel','directory','history')}
+            result = {k:v for k,v in job.items() if k not in ('cancel','directory','history','_control')}
             result['history']=list(job['history'])
             directory = job['directory']
         events=[]
@@ -225,7 +236,20 @@ class Controller:
         if result.get('preset')=='engineering':
             from .project_workflow import project_view
             result['engineering']=project_view(result['project'],events,result['states'],result['budget'])
+        result['agents']=((monitor or {}).get('agents',[]) if result['status'] in ('running','cancelling')
+                          else result.get('agent_summary',(monitor or {}).get('agents',[])))
+        result['agent_events']=(monitor or {}).get('agent_events',[])
+        result['agent_controls']=((monitor or {}).get('agent_controls',[]) if result['status'] in ('running','cancelling')
+                                 else result.get('agent_control_summary',(monitor or {}).get('agent_controls',[])))
         return result
+
+    def control_agent(self,key,identity,operation):
+        with self.lock:
+            if self.recovery_required:raise ValueError(RECOVERY_MESSAGE)
+            job=self.jobs.get(key)
+            if not job or job['status']!='running' or '_control' not in job:
+                raise ValueError('只能控制当前执行中的 Agent；历史记录不会恢复执行')
+            return job['_control'].request(identity,operation)
 
 
 def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
@@ -258,7 +282,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             path=urlparse(self.path).path
             if path=='/':
                 self.respond(200,(Path(__file__).parent/'static/index.html').read_text(encoding='utf-8'),'text/html; charset=utf-8')
-            elif path in ('/static/console.js','/static/console.css','/static/workspace.css'):
+            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())
@@ -297,6 +321,9 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                         else:os.environ.pop('DEEPSEEK_API_KEY',None)
                     self.respond(200,{'configured':bool(key)})
                 elif self.path=='/api/jobs':self.respond(202,{'id':controller.submit(value)})
+                elif len(self.path.split('/'))==7 and self.path.startswith('/api/jobs/') and self.path.split('/')[4]=='agents':
+                    parts=self.path.split('/')
+                    self.respond(202,controller.control_agent(parts[3],parts[5],parts[6]))
                 elif self.path.endswith('/cancel') and self.path.startswith('/api/jobs/'):
                     key=self.path.split('/')[-2]
                     with controller.lock:

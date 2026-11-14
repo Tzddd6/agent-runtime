@@ -182,6 +182,11 @@ def make_server(broker,port=18886):
 
 
 class BrokerClient:
+    def for_request(self,cancel_event):
+        import copy
+        client=copy.copy(self);client.cancel_event=cancel_event
+        return client
+
     def __init__(self,token,url=BROKER_URL,*,local_test=False):
         from urllib.parse import urlparse
         parsed=urlparse(url)

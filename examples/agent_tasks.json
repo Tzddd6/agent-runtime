@@ -1,0 +1,5 @@
+[
+  {"id":"a1","agent":"alpha","action":"sleep","seconds":0.2,"resources":{"cpu_milli":250,"memory_bytes":67108864,"pids":8}},
+  {"id":"a2","agent":"alpha","action":"sleep","seconds":0.2,"resources":{"cpu_milli":250,"memory_bytes":67108864,"pids":8}},
+  {"id":"b1","agent":"beta","resources":{"cpu_milli":250,"memory_bytes":67108864,"pids":8}}
+]

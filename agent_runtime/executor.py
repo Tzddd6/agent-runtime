@@ -12,6 +12,7 @@ from pathlib import Path
 class Executor:
     def __init__(self, cgroup_root=None):
         self.root = Path(cgroup_root).resolve() if cgroup_root else None
+        self.agent_roots={}
         if self.root:
             if sys.platform != 'linux' or not str(self.root).startswith('/sys/fs/cgroup/'):
                 raise RuntimeError('严格模式需要 /sys/fs/cgroup 下的 Linux 委派子树')
@@ -23,7 +24,8 @@ class Executor:
         started = time.monotonic()
         directory.mkdir(parents=True)
         payload_path = directory / '.payload.json'
-        group = self.root / f'{directory.parent.name}-{directory.name}' if self.root else None
+        parent=self.agent_roots.get(payload.get('agent',payload['id']),self.root)
+        group = parent / f'{directory.parent.name}-{directory.name}' if parent else None
         proc = handle = None
         output = (directory / 'worker.log').open('w+', encoding='utf-8')
         try:

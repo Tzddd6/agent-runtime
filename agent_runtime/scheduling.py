@@ -47,7 +47,7 @@ class AdmissionScheduler:
         self.ready_since.pop(task_id, None)
         self.sequence.pop(task_id, None)
 
-    def choose(self, ready_tasks, used, *, busy_agents=(), slots_available=1, now=None):
+    def choose(self, ready_tasks, used, *, busy_agents=(), blocked_tasks=(), slots_available=1, now=None):
         """Choose one ready task; the caller still owns launch and resource accounting.
 
         Call again after each successful launch with the new ``used`` vector and
@@ -83,6 +83,7 @@ class AdmissionScheduler:
                 self._next_sequence += 1
 
         busy = set(busy_agents)
+        blocked=set(blocked_tasks)
         def fits(task, available=False):
             return all(limits[task['id']][k] + (used[k] if available else 0) <= self.budget[k]
                        for k in self.budget)
@@ -104,13 +105,14 @@ class AdmissionScheduler:
 
         if self.policy == 'fifo':
             first = feasible[0]
+            if first['id'] in blocked:return decision(reason='agent_budget_blocked')
             if first.get('agent',first['id']) in busy:
                 return decision(reason='agent_busy')
             if not fits(first, available=True):
                 return decision(reason='fifo_head_blocked')
             return decision(first, 'fifo')
 
-        eligible = [t for t in feasible if t.get('agent',t['id']) not in busy]
+        eligible = [t for t in feasible if t.get('agent',t['id']) not in busy and t['id'] not in blocked]
         if self.policy == 'aging_fit':
             aged = [t for t in eligible if now-self.ready_since[t['id']] >= self.aging_seconds]
             if aged:

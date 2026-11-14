@@ -4,7 +4,9 @@ let currentView='workflow',viewJob=null,allJobs=[],inspectedTask=null,phaseSigna
 const $=id=>document.getElementById(id);
 const names={running:'运行中',succeeded:'成功',failed:'失败',waiting:'等待',timeout:'超时',skipped:'已跳过',unschedulable:'预算不足',cancelled:'已停止',cancelling:'停止中',recovery_required:'待管理员恢复'};
 names.interrupted='已中断';
+Object.assign(names,{registered:'已注册',ready:'就绪',idle:'空闲',pausing:'暂停中',paused:'已暂停',terminating:'终止中',terminated:'已终止',completed:'已完成'});
 const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审',engineering:'Python 项目修复'};
+scenes.agents='Agent 生命周期';
 const palette=['#109a8c','#5d8dcc','#c79d52','#957bb7','#5fa0a6','#c17c8b','#709563'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const number=(value,digits=1)=>finite(value)?value.toFixed(digits):'—';
@@ -37,6 +39,7 @@ function updateScene(){
   if($('engineeringBudgetNote'))$('engineeringBudgetNote').hidden=scene!=='engineering';
   if($('projectDescription'))$('projectDescription').textContent=projectDescriptions[$('project')?.value]||'';
   $('sceneHint').textContent=hints[scene]||'';
+  if(scene==='agents')$('sceneHint').textContent='无需模型费用。Alpha 拥有两个并发槽，Beta 独立执行；在 Agent 管理中暂停准入、恢复或终止，观察聚合配额与其他 Agent 的进展。';
   $('submit').firstElementChild && ($('submit').firstElementChild.textContent=scene==='engineering'?'运行修复与验证':'启动工作流');
 }
 
@@ -68,6 +71,8 @@ function selectRun(id){
   renderAllocations({stale:true});renderCharts(null,[]);renderContext(null);renderTasks([],[],true);renderDependencies([]);
   renderTimeline({events:[],created:Date.now()/1000,status:'waiting'});
   $('events').textContent='正在读取记录…';showView(currentView);
+  if($('agentCards'))$('agentCards').replaceChildren(empty('正在读取 Agent 控制块…',true));
+  if($('agentCommands'))$('agentCommands').textContent='正在读取控制记录…';
 }
 function renderJobs(jobs){
   allJobs=jobs;const list=$('jobs');list.replaceChildren();$('jobCount').textContent=jobs.length+' 次';
@@ -82,7 +87,7 @@ function renderJobs(jobs){
 }
 
 function showView(view){
-  if(!['workflow','resources','tasks','logs'].includes(view))return;currentView=view;
+  if(!['workflow','resources','tasks','agents','logs'].includes(view))return;currentView=view;
   for(const el of document.querySelectorAll?.('[data-view]')||[]){const active=el.dataset.view===view;
     if(el.getAttribute('role')==='tab'){el.setAttribute('aria-selected',String(active));el.tabIndex=active?0:-1}
     else el.classList.toggle('active',active)}
@@ -274,13 +279,46 @@ function renderTasks(rows,events,stale=false){
 }
 function renderDetail(job){
   const changed=viewJob!==job.id;
-  if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':'resources';phaseSignature=''}
-  renderDetailBase(job);renderOverview(job);renderInspector();showView(currentView);
+  if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':job.preset==='agents'?'agents':'resources';phaseSignature=''}
+  renderDetailBase(job);renderOverview(job);renderInspector();renderAgents(job);showView(currentView);
+}
+function renderAgents(job){
+  const box=$('agentCards');if(!box)return;box.replaceChildren();
+  const agents=job.agents||job.monitor?.agents||[];$('agentCount').textContent=agents.length+' 个 Agent';
+  const stale=offline||Boolean(job.monitor?.stale);
+  if(!agents.length)box.append(empty('该历史记录没有 Agent 控制块快照；新运行会自动注册。',true));
+  for(const agent of agents){
+    const card=node('article',null,'agent-card');const head=node('div',null,'panel-title');
+    const identity=node('div');identity.append(node('h3',agent.id),node('p',agent.role,'hint'));
+    const status=badge(stale?'waiting':agent.state);if(stale)status.textContent='最后记录 · '+(names[agent.state]||agent.state);
+    head.append(identity,status);card.append(head);
+    const facts=node('div',null,'agent-facts');
+    for(const [label,value] of [['CPU 预留 / 上限',(stale?'—':number(agent.reserved?.cpu_milli/1000,2))+' / '+number(agent.budget?.cpu_milli/1000,2)+' 核'],
+        ['内存预留 / 上限',bytes(stale?null:agent.reserved?.memory_bytes)+' / '+bytes(agent.budget?.memory_bytes)],
+        ['进程预算',(stale?'—':String(agent.reserved?.pids??'—'))+' / '+(agent.budget?.pids??'—')],
+        ['执行槽',(stale?'—':Object.keys(agent.active_tasks||{}).length)+' / '+agent.max_concurrency],
+        ['实时 CPU',stale?'—':finite(agent.metrics?.cpu_cores)?number(agent.metrics.cpu_cores,2)+' 核':'—'],
+        ['当前内存',bytes(stale?null:agent.metrics?.memory_bytes)],
+        ['累计 CPU',finite(agent.metrics?.cpu_total_seconds)?number(agent.metrics.cpu_total_seconds,3)+' s':'—'],
+        ['聚合内存峰值',bytes(agent.metrics?.memory_peak_bytes)]]){
+      const item=node('div');item.append(node('small',label),node('strong',value));facts.append(item)}
+    card.append(facts,node('p','邮箱 '+agent.mailbox_id+' · '+(agent.context_refs||[]).length+' 个上下文引用','hint'),
+      node('p','所属任务：'+(agent.tasks||[]).map(id=>id+' ['+(names[job.states?.[id]]||job.states?.[id]||'等待')+']').join('、'),'hint'));
+    if(agent.model_calls)card.append(node('p','已记录模型响应 '+agent.model_calls+' 次 · 输入 / 输出 token：'+(agent.token_usage?.prompt_tokens??'—')+' / '+(agent.token_usage?.completion_tokens??'—'),'hint'));
+    const actions=node('div',null,'agent-actions');
+    for(const [operation,label] of [[['pausing','paused'].includes(agent.state)?'resume':'pause',['pausing','paused'].includes(agent.state)?'恢复准入':'暂停准入'],['terminate','终止 Agent']]){
+      const button=node('button',label,'secondary'+(operation==='terminate'?' danger':''));button.type='button';
+      button.disabled=offline||recoveryRequired||job.status!=='running'||['terminated','terminating','completed','failed'].includes(agent.state);
+      button.onclick=async()=>{button.disabled=true;try{await api('jobs/'+job.id+'/agents/'+agent.id+'/'+operation,{});if(selected===job.id)$('notice').textContent='Agent 指令已排队，协调器将确认实际状态。';await refresh()}catch(e){$('notice').textContent=e.message}};
+      actions.append(button)}
+    card.append(actions);box.append(card);
+  }
+  $('agentCommands').textContent=(job.agent_controls||[]).map(c=>new Date(c.time*1000).toLocaleTimeString()+'  '+c.agent_id+'  '+c.operation+'  '+({queued:'排队中',applied:'已执行',rejected:'已拒绝'}[c.status]||c.status)+(c.error?' · '+c.error:'')).join('\n')||'尚无控制指令';
 }
 function initialize(){
   for(const el of document.querySelectorAll('[data-view]'))el.onclick=e=>{e.preventDefault();showView(el.dataset.view)};
-  for(const tab of document.querySelectorAll('[role=tab]'))tab.onkeydown=e=>{const order=['workflow','resources','tasks','logs'];let index=order.indexOf(currentView);
-    if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();index=e.key==='Home'?0:e.key==='End'?3:(index+(e.key==='ArrowRight'?1:3))%4;showView(order[index]);$('tab-'+order[index]).focus()}};
+  for(const tab of document.querySelectorAll('[role=tab]'))tab.onkeydown=e=>{const order=['workflow','resources','tasks','agents','logs'];let index=order.indexOf(currentView);
+    if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();index=e.key==='Home'?0:e.key==='End'?order.length-1:(index+(e.key==='ArrowRight'?1:order.length-1))%order.length;showView(order[index]);$('tab-'+order[index]).focus()}};
   $('jobSearch').oninput=()=>renderJobs(allJobs);$('jobFilter').onchange=()=>renderJobs(allJobs);
   $('taskFilter').onchange=()=>{if(currentDetail)renderTasks(taskRows(currentDetail),currentDetail.events||[],Boolean(currentDetail.monitor?.stale))};
   $('closeInspector').onclick=()=>{inspectedTask=null;showView('tasks')};
