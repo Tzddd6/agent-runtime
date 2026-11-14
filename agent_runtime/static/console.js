@@ -282,10 +282,16 @@ function renderDetail(job){
   if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':job.preset==='agents'?'agents':'resources';phaseSignature=''}
   renderDetailBase(job);renderOverview(job);renderInspector();renderAgents(job);showView(currentView);
 }
+function modelBudgetText(resources){
+  if(!resources)return '该历史记录没有模型额度快照';
+  const u=resources.used||{},b=resources.budget||{};
+  return '累计准入 '+(u.calls??'—')+' / '+(b.calls??'—')+' 次 · 请求输出额度 '+(u.output_tokens??'—')+' / '+(b.output_tokens??'—')+' token · 拒绝 '+(resources.rejected??0)+' 次';
+}
 function renderAgents(job){
   const box=$('agentCards');if(!box)return;box.replaceChildren();
   const agents=job.agents||job.monitor?.agents||[];$('agentCount').textContent=agents.length+' 个 Agent';
   const stale=offline||Boolean(job.monitor?.stale);
+  $('modelBudgetSummary').textContent=(stale?'最后记录 · ':'')+modelBudgetText(job.model_resources)+'。额度按请求上限扣减，失败不返还；实际 token 与供应商账单另计。';
   if(!agents.length)box.append(empty('该历史记录没有 Agent 控制块快照；新运行会自动注册。',true));
   for(const agent of agents){
     const card=node('article',null,'agent-card');const head=node('div',null,'panel-title');
@@ -302,6 +308,7 @@ function renderAgents(job){
         ['累计 CPU',finite(agent.metrics?.cpu_total_seconds)?number(agent.metrics.cpu_total_seconds,3)+' s':'—'],
         ['聚合内存峰值',bytes(agent.metrics?.memory_peak_bytes)]]){
       const item=node('div');item.append(node('small',label),node('strong',value));facts.append(item)}
+    card.append(node('p',modelBudgetText(agent.model_resources),'hint'));
     card.append(facts,node('p','邮箱 '+agent.mailbox_id+' · '+(agent.context_refs||[]).length+' 个上下文引用','hint'),
       node('p','所属任务：'+(agent.tasks||[]).map(id=>id+' ['+(names[job.states?.[id]]||job.states?.[id]||'等待')+']').join('、'),'hint'));
     if(agent.model_calls)card.append(node('p','已记录模型响应 '+agent.model_calls+' 次 · 输入 / 输出 token：'+(agent.token_usage?.prompt_tokens??'—')+' / '+(agent.token_usage?.completion_tokens??'—'),'hint'));
@@ -327,7 +334,7 @@ function initialize(){
   $('preset').onchange=updateScene;
   if($('project'))$('project').onchange=updateScene;
   $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到模型服务内存':'已清除密钥';await refresh()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
-  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selectRun(result.id);await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
+  $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,model_budget:{calls:Number($('modelCallsBudget').value),output_tokens:Number($('modelOutputBudget').value)},project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selectRun(result.id);await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
   $('cancel').onclick=async()=>{if(!selected||offline||recoveryRequired)return;try{await api('jobs/'+selected+'/cancel',{});await refresh()}catch(error){$('notice').textContent=error.message}};
   updateScene();showView('workflow');$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);
 }

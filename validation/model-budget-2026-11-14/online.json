@@ -1,0 +1,43 @@
+{
+  "job": "168f6903a31c41d391b04408623755c6",
+  "expected_status": "failed (budget denied)",
+  "status": "failed",
+  "model_resources": {
+    "budget": {
+      "calls": 0,
+      "output_tokens": 0
+    },
+    "used": {
+      "calls": 0,
+      "output_tokens": 0
+    },
+    "remaining": {
+      "calls": 0,
+      "output_tokens": 0
+    },
+    "rejected": 1,
+    "accounting": "admitted_max_output_tokens_no_refund"
+  },
+  "agent_model_resources": {
+    "budget": {
+      "calls": 8,
+      "output_tokens": 8192
+    },
+    "used": {
+      "calls": 0,
+      "output_tokens": 0
+    },
+    "remaining": {
+      "calls": 8,
+      "output_tokens": 8192
+    },
+    "rejected": 1,
+    "accounting": "admitted_max_output_tokens_no_refund"
+  },
+  "gateway_statuses": [
+    429
+  ],
+  "residual_cgroups": 0,
+  "paid_model_calls": 0,
+  "key_retained": true
+}

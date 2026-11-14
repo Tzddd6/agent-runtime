@@ -124,7 +124,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None):
+        agents=None, control=None, model_budget=None):
     validate(tasks)
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
@@ -145,7 +145,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     root.mkdir(parents=True)
     control=control or RuntimeControl()
     registry=AgentRegistry(budget,agents,cgroup_root=Path(cgroup_root) if cgroup_root else None,
-                           workflow_id=root.name)
+                           workflow_id=root.name,model_budget=model_budget)
     agent_journal=(root/'agents.jsonl').open('w',encoding='utf-8');registry.journal=agent_journal
     executor.agent_roots=registry.groups
     store = ContextStore(root / 'contexts')
@@ -205,6 +205,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'budget':dict(budget),'reserved':dict(used),'slots_used':len(running),
                   'slots_total':max_workers,'policy':policy,
                   'context':store.stats(),'dataflow':dict(dataflow),
+                  'model_resources':registry.model_budgets.snapshot(),
                   'scheduling':{'reason':scheduler.last_decision.reason,
                     'dominant_shares':{a.id:max(a.reserved[k]/budget[k] for k in budget)
                                        for a in registry.agents.values()},
@@ -342,6 +343,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     try:
                         if gateway is None:
                             gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
+                            gateway.budgets=registry.model_budgets
                         payload['_gateway_url'] = gateway.url
                         payload['_gateway_token'] = gateway.issue(agent)
                     except ModelError as exc:
@@ -482,6 +484,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
                                                 'agents':registry.snapshots(),'agent_controls':control.history(),
                                                 'dataflow':dataflow,'policy':policy,
+                                                'model_resources':registry.model_budgets.snapshot(),
                                                 'context_stats': store.stats()},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')
     return states, events

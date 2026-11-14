@@ -24,11 +24,13 @@ def main():
     parser.add_argument('--output-dir', type=Path, default=Path('runs'))
     parser.add_argument('--policy', choices=AdmissionScheduler.POLICIES, default='resource_fit')
     parser.add_argument('--cgroup-root', help='已委派且已启用控制器的空 attempts 子树')
+    parser.add_argument('--model-budget',type=Path,help='工作流模型预算 JSON：calls / output_tokens')
     args = parser.parse_args()
     try:
         tasks = json.loads(args.tasks.read_text(encoding='utf-8')) if args.tasks else DEMO
         agents=json.loads(args.agents.read_text(encoding='utf-8')) if args.agents else None
-        states, _ = run(tasks, args.workers, args.timeout, output_dir=args.output_dir, policy=args.policy, cgroup_root=args.cgroup_root,agents=agents)
+        model_budget=json.loads(args.model_budget.read_text(encoding='utf-8')) if args.model_budget else None
+        states, _ = run(tasks, args.workers, args.timeout, output_dir=args.output_dir, policy=args.policy, cgroup_root=args.cgroup_root,agents=agents,model_budget=model_budget)
     except (ValueError, KeyError, TypeError, OSError, RuntimeError) as exc:
         parser.error(str(exc))
     return 0 if all(s == 'succeeded' for s in states.values()) else 1

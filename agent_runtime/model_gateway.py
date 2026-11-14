@@ -10,6 +10,7 @@ import sys
 import urllib.error
 import urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from .model_budget import ModelBudgetExceeded
 
 
 MAX_BYTES = 1024 * 1024
@@ -129,6 +130,7 @@ class ModelGateway:
         self.lock = threading.Lock()
         self.cancel_event = threading.Event()
         self.capabilities={}
+        self.budgets=None
         self.connections, self.connection_lock = set(), threading.Lock()
         if hasattr(client,'cancel_event'):client.cancel_event=self.cancel_event
         owner = self
@@ -155,7 +157,7 @@ class ModelGateway:
                     authorization=self.headers.get('Authorization','').removeprefix('Bearer ')
                     with owner.lock:capability=owner.capabilities.get(authorization)
                     legacy=secrets.compare_digest(authorization,owner.token)
-                    if self.path != '/complete' or (not legacy and capability is None):
+                    if self.path != '/complete' or (not legacy and capability is None) or (legacy and owner.budgets is not None):
                         code = 403
                         raise ModelError('未授权的本地模型请求')
                     length = int(self.headers.get('Content-Length', '0'))
@@ -163,20 +165,37 @@ class ModelGateway:
                         raise ModelError('本地请求长度无效')
                     self.connection.settimeout(5)
                     value = json.loads(self.rfile.read(length))
-                    entered = owner.slots.acquire(timeout=owner.client.timeout)
-                    if not entered:
-                        code = 429
-                        raise ModelError('本地模型槽位等待超时')
+                    messages,max_tokens=value.get('messages'),value.get('max_tokens',256)
+                    if (not isinstance(messages,list) or not messages or
+                        any(not isinstance(m,dict) or m.get('role') not in ('system','user','assistant')
+                            or not isinstance(m.get('content'),str) for m in messages)
+                        or type(max_tokens) is not int or not 1<=max_tokens<=4096):
+                        code=400;raise ModelError('模型请求格式无效')
+                    deadline=time.monotonic()+owner.client.timeout
+                    while not entered:
+                        if owner.cancel_event.is_set() or (capability is not None and capability['cancel'].is_set()):
+                            raise ModelError('Agent 模型请求已撤销')
+                        remaining=deadline-time.monotonic()
+                        if remaining<=0:
+                            code=429;raise ModelError('本地模型槽位等待超时')
+                        entered=owner.slots.acquire(timeout=min(.05,remaining))
                     client=owner.client
                     if capability is not None:
-                        if capability.is_set() or owner.cancel_event.is_set():raise ModelError('Agent 模型请求已撤销')
+                        # Serialize revocation with admission. A queued revoked
+                        # request neither starts nor consumes the model budget.
+                        with owner.lock:
+                            if capability['cancel'].is_set() or owner.cancel_event.is_set():raise ModelError('Agent 模型请求已撤销')
+                            if owner.budgets is not None:
+                                try:owner.budgets.admit(capability['agent'],max_tokens)
+                                except ModelBudgetExceeded as exc:
+                                    code=429;raise ModelError(str(exc)) from None
                         # Each real provider/broker client gets an independent cancel
                         # event; cancelling one Agent cannot cancel another Agent.
                         if hasattr(client,'for_request'):
                             class Cancel:
-                                def is_set(self):return capability.is_set() or owner.cancel_event.is_set()
+                                def is_set(self):return capability['cancel'].is_set() or owner.cancel_event.is_set()
                             client=client.for_request(Cancel())
-                    result = client.complete(value.get('messages'), value.get('max_tokens', 256))
+                    result = client.complete(messages,max_tokens)
                 except (ModelError, ValueError, TypeError, AttributeError, OSError) as exc:
                     if code == 200:
                         code = 502
@@ -203,7 +222,7 @@ class ModelGateway:
         self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
         # 关闭时等待本地调用线程收敛，避免取消后立刻叠加新工作流的调用槽。
         self.server.daemon_threads = False
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(target=self.server.serve_forever,kwargs={'poll_interval':.02},daemon=True)
         self.thread.start()
         self.url = f'http://127.0.0.1:{self.server.server_port}/complete'
 
@@ -217,13 +236,13 @@ class ModelGateway:
 
     def issue(self,agent):
         token=secrets.token_urlsafe(32)
-        with self.lock:self.capabilities[token]=threading.Event()
+        with self.lock:self.capabilities[token]={'agent':agent,'cancel':threading.Event()}
         return token
 
     def revoke(self,token):
         with self.lock:
             event=self.capabilities.pop(token,None)
-            if event:event.set()
+            if event:event['cancel'].set()
 
     def close(self):
         self.cancel_event.set()

@@ -17,6 +17,7 @@ from .model_gateway import ModelError
 from .job_store import JobStore
 from .agents import RuntimeControl
 from .scheduling import AdmissionScheduler
+from .model_budget import validate_budget,DEFAULT_WORKFLOW_MODEL_BUDGET
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -66,6 +67,9 @@ class Controller:
         preset = value.get('preset')
         workers = value.get('workers', 2)
         policy = value.get('policy', 'resource_fit')
+        model_budget=validate_budget(value.get('model_budget',{}),DEFAULT_WORKFLOW_MODEL_BUDGET)
+        if any(model_budget[k]>DEFAULT_WORKFLOW_MODEL_BUDGET[k] for k in model_budget):
+            raise ValueError('网页模型预算不得超过服务默认上限')
         if type(workers) is not int or not 1 <= workers <= 4 or policy not in AdmissionScheduler.POLICIES:
             raise ValueError('并发数需为 1—4，调度策略不合法')
         if preset == 'dynamic':
@@ -117,7 +121,7 @@ class Controller:
             # Worker count changes concurrency only; keep the same resource envelope.
             budget = self.resource_budget(service)
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
-                   'workers':workers,'policy':policy,'budget':budget,'monitor':None,'history':[],
+                   'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key}
             job['_control']=RuntimeControl()
             if preset=='engineering':job['project']=project
@@ -152,13 +156,14 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget)
                 with self.lock:
                     job['final_states']=states
                     for summary_path in job['directory'].glob('*/summary.json'):
                         summary=json.loads(summary_path.read_text(encoding='utf-8'))
                         job['agent_summary']=summary.get('agents',[])
                         job['agent_control_summary']=summary.get('agent_controls',[])
+                        job['model_resource_summary']=summary.get('model_resources')
                     semantic=True
                     if preset=='engineering':
                         from .project_workflow import project_view
@@ -240,6 +245,8 @@ class Controller:
         result['agents']=((monitor or {}).get('agents',[]) if result['status'] in ('running','cancelling')
                           else result.get('agent_summary',(monitor or {}).get('agents',[])))
         result['agent_events']=(monitor or {}).get('agent_events',[])
+        result['model_resources']=((monitor or {}).get('model_resources') if result['status'] in ('running','cancelling')
+                                   else result.get('model_resource_summary',(monitor or {}).get('model_resources')))
         result['agent_controls']=((monitor or {}).get('agent_controls',[]) if result['status'] in ('running','cancelling')
                                  else result.get('agent_control_summary',(monitor or {}).get('agent_controls',[])))
         return result

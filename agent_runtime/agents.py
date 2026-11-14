@@ -9,6 +9,7 @@ import threading
 import time
 import uuid
 from .telemetry import CgroupSampler
+from .model_budget import ModelBudgetLedger,validate_budget,DEFAULT_AGENT_MODEL_BUDGET
 
 RESOURCES=('cpu_milli','memory_bytes','pids')
 
@@ -78,14 +79,15 @@ class AgentControlBlock:
 
 
 class AgentRegistry:
-    def __init__(self,budget,specs=None,*,cgroup_root=None,workflow_id='',journal=None):
+    def __init__(self,budget,specs=None,*,cgroup_root=None,workflow_id='',journal=None,model_budget=None):
         self.default=dict(budget);self.specs={};self.agents={};self.groups={}
         self.root=cgroup_root;self.workflow=workflow_id;self.journal=journal
         self.failed=False
+        self.model_budgets=ModelBudgetLedger(model_budget)
         self.sampler=CgroupSampler();self.events=deque(maxlen=64);self.sequence=0
         if specs is not None and (not isinstance(specs,list) or len(specs)>100):raise ValueError('agents must be a bounded list')
         for spec in specs or []:
-            if not isinstance(spec,dict) or set(spec)-{'id','role','budget','max_concurrency'}:raise ValueError('Invalid Agent specification')
+            if not isinstance(spec,dict) or set(spec)-{'id','role','budget','max_concurrency','model_budget'}:raise ValueError('Invalid Agent specification')
             identity=agent_id(spec.get('id'))
             if identity in self.specs:raise ValueError('Duplicate Agent ID')
             if not isinstance(spec.get('budget',{}),dict):raise ValueError('Agent budget must be an object')
@@ -94,7 +96,8 @@ class AgentRegistry:
                 raise ValueError('Agent budget must fit workflow budget')
             slots=spec.get('max_concurrency',1);role=spec.get('role',identity)
             if type(slots) is not int or not 1<=slots<=4 or not isinstance(role,str) or len(role)>128:raise ValueError('Invalid Agent role/concurrency')
-            self.specs[identity]={'budget':limits,'role':role,'max_concurrency':slots}
+            self.specs[identity]={'budget':limits,'role':role,'max_concurrency':slots,
+                'model_budget':validate_budget(spec.get('model_budget',{}),DEFAULT_AGENT_MODEL_BUDGET)}
 
     def transition(self,acb,state,reason):
         if acb.state==state:return
@@ -110,6 +113,7 @@ class AgentRegistry:
         if len(self.agents)>=100:raise ValueError('Agent registry exceeds 100 entries')
         spec=self.specs.get(identity,{'budget':dict(self.default),'role':identity,'max_concurrency':1})
         acb=AgentControlBlock(identity,spec['role'],dict(spec['budget']),spec['max_concurrency'])
+        self.model_budgets.register(identity,spec.get('model_budget'))
         self.agents[identity]=acb
         if self.root:
             group=self.root/(self.workflow+'-agent-'+hashlib.sha256(identity.encode()).hexdigest()[:12])
@@ -166,6 +170,7 @@ class AgentRegistry:
                 'tasks':sorted(a.tasks),'active_tasks':dict(a.active),'context_refs':sorted(a.context_refs),
                 'mailbox_id':a.id,'metrics':dict(a.metrics),'created':a.created,'cgroup_path':str(group) if group else None,
                 'model_calls':a.model_calls,'token_usage':dict(a.token_usage),
+                'model_resources':self.model_budgets.snapshot(a.id),
                 'enforcement':'cgroup_v2' if group else 'admission_only'})
         return result
 

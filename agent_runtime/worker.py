@@ -5,6 +5,7 @@ import time
 import subprocess
 from pathlib import Path
 import urllib.request
+import urllib.error
 import collections
 import hashlib
 import re
@@ -71,8 +72,12 @@ def main():
             data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256)}).encode(),
             headers={'Authorization':'Bearer '+task['_gateway_token'], 'Content-Type':'application/json'})
         # 只请求控制进程的本地网关，不直接访问供应商或读取其密钥。
-        with urllib.request.urlopen(request, timeout=65) as response:
-            model_result = json.load(response)
+        try:
+            with urllib.request.urlopen(request, timeout=65) as response:
+                model_result = json.load(response)
+        except urllib.error.HTTPError as exc:
+            if exc.code==429:raise RuntimeError('模型预算不足或本地调用槽位等待超时；未自动重试') from None
+            raise
     elif action == 'command':
         argv = task.get('argv')
         if not isinstance(argv, list) or not argv or not all(isinstance(s, str) for s in argv):

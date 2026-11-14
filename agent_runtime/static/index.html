@@ -17,7 +17,7 @@
   <a class="nav" href="#workspace" data-view="tasks"><span>⌘</span>任务与拓扑</a>
   <a class="nav" href="#workspace" data-view="agents"><span>◎</span>Agent 管理</a>
   <a class="nav" href="#workspace" data-view="logs"><span>≡</span>结果与记录</a>
-  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.8 / Agent 执行工作台</small></div>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.9 / Agent 执行工作台</small></div>
 </aside>
 <main>
   <header><span class="breadcrumb">Agent Runtime <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
@@ -36,6 +36,7 @@
           <div id="projectField" hidden><label for="project">受控项目</label><select id="project"><option value="pricing">金额计算 · 折扣、免邮与退款</option><option value="intervals">时间区间 · 相交、分桶与 TTL</option><option value="text_normalization">文本规范化 · 空白、词数与前缀</option></select><p id="projectDescription" class="hint"></p></div>
           <div class="two"><div><label for="workers">Worker 上限</label><select id="workers"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div><label for="policy">调度策略</label><select id="policy"><option value="resource_fit">资源适配</option><option value="drf">DRF · Agent 主导份额公平</option><option value="aging_fit">老化资源适配</option><option value="fifo">FIFO 基线</option></select></div></div>
           <p id="engineeringBudgetNote" class="budget-note">总资源预算固定，Worker 上限只控制并发；实际预算见右侧。</p>
+          <details class="model-config"><summary>本次运行的模型额度</summary><div class="two"><div><label for="modelCallsBudget">累计调用上限</label><input id="modelCallsBudget" type="number" min="0" max="32" value="32" required></div><div><label for="modelOutputBudget">累计输出额度</label><input id="modelOutputBudget" type="number" min="0" max="32768" value="32768" required></div></div><p class="hint">按每次请求的最大输出 token 累计扣减，失败不返还。设为 0 可禁止模型调用；输入 token 另计，此额度不是费用上限。</p></details>
           <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="4000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
           <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
         </form>
@@ -62,6 +63,7 @@
         <div class="panel-title"><div><div class="eyebrow">FIRST-CLASS AGENTS</div><h2>Agent 控制块与生命周期</h2></div><span id="agentCount" class="muted">等待注册</span></div>
         <p class="hint">Agent 拥有独立身份、任务、邮箱、上下文和聚合资源预算。暂停只停止新任务准入，在途任务结束后进入已暂停；终止会回收旗下执行并撤销权限。历史记录不可控制。</p>
         <div id="agentCards" class="agent-cards"></div>
+        <p id="modelBudgetSummary" class="budget-note">模型累计预算等待运行快照。</p>
         <details class="agent-command-log" open><summary>生命周期控制记录</summary><pre id="agentCommands" class="log">尚无控制指令</pre></details>
       </section>
 
