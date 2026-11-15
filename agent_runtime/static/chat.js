@@ -1,7 +1,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 let selected=null,current=null,status=null,csrf='',polling=false,sending=false,signature='';
-let pendingAttachments=[],uploading=false,librarySignature='';
+let pendingAttachments=[],uploading=false,librarySignature='',draftConversation=null;
 const processOpen=new Map();
 const modes={auto:'自动路由',llm:'直接对话',team:'多 Agent 协作',review:'写作与评审',document:'文本分析',engineering:'示例项目修复'};
 const active=t=>t.status==='running';
@@ -21,15 +21,15 @@ function showAttachments(){const box=$('attachmentList');box.replaceChildren();f
 async function uploadFiles(){
   const files=Array.from($('fileInput').files||[]);$('fileInput').value='';if(!files.length)return;
   if(files.length+pendingAttachments.length>4){notify('每次最多4个附件，其中最多2张图片');return}
-  const target=selected||uuid();selected=target;address(target);uploading=true;controls();notify('正在验证和保存附件…');
+  const target=selected||uuid();if(!current||current.id!==target)draftConversation=target;selected=target;address(target);uploading=true;controls();notify('正在验证和保存附件…');
   try{for(const file of files){if(file.size>8*1024**2)throw Error('单文件最多8MiB');const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',',2)[1]);reader.onerror=()=>reject(Error('读取文件失败'));reader.readAsDataURL(file)});const result=await api('attachments',{conversation_id:target,name:file.name,data});if(selected===target)pendingAttachments.push(result)}showAttachments();notify('附件已保存，将用于本次模型请求。请勿上传密钥。')}
   catch(error){showAttachments();notify(error.message+'。上传不会自动重试。')}
   finally{uploading=false;controls()}
 }
 function address(id){const url=new URL(location.href);if(id)url.searchParams.set('chat',id);else url.searchParams.delete('chat');history.replaceState(null,'',url);try{if(id)localStorage.setItem('agentrt-chat',id);else localStorage.removeItem('agentrt-chat')}catch{}}
 function closeMenu(){$('sidebar').classList.remove('open');$('shade').hidden=true}
-function newChat(){selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
-async function selectChat(id){selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
+function newChat(){draftConversation=null;selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
+async function selectChat(id){draftConversation=null;selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
 function showHistory(list){
   const box=$('chatHistory');box.replaceChildren();if(!list.length)box.append(element('p','新的对话会保存在这里','muted'));
   for(const chat of list){const button=element('button',chat.title,'history-item'+(chat.id===selected?' active':''));button.type='button';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===selected));button.onclick=()=>selectChat(chat.id);box.append(button)}
@@ -102,7 +102,7 @@ async function refresh(){
     status=state;csrf=state.csrf;$('modelLabel').textContent=state.model||'Agent Runtime';$('connection').textContent=state.recovery_required?'待管理员恢复':state.busy?'协作进行中':'已连接';$('connection').className='connection';
     showHistory(list.conversations);
     const library=$('capabilityList'),nextLibrary=JSON.stringify(state.capabilities);if(nextLibrary!==librarySignature){librarySignature=nextLibrary;library.replaceChildren();for(const [title,rows] of [['工具',state.capabilities?.plugins],['Skill',state.capabilities?.skills]]){library.append(element('strong',title));for(const row of rows||[])library.append(element('p',row.id+'：'+row.description))}}
-    if(selected){const target=selected,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{const chat=await api('chat/conversations/'+target+(after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified)render(chat)}catch(error){if(error.status!==404)throw error;if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
+    if(selected){const target=selected,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{const chat=await api('chat/conversations/'+target+(after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified)render(chat)}catch(error){if(error.status!==404)throw error;if(target===selected&&draftConversation===target){current=null;$('welcome').hidden=false;$('messages').hidden=true}else if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
     controls();
   }catch(error){status=null;$('connection').textContent='连接中断';$('connection').className='connection offline';controls();notify(error.message)}
   finally{polling=false}
@@ -113,7 +113,7 @@ async function send(event){
   const target=selected||uuid();selected=target;address(target);sending=true;notify('');controls();
   const payload={conversation_id:target,request_id:uuid(),prompt,mode:$('mode').value,project:$('project').value,response_tokens:Number($('responseTokens').value),deep_thinking:$('deepThinking').checked,attachments:pendingAttachments.map(a=>a.id),
                  model_budget:{calls:Number($('modelCalls').value),output_tokens:Number($('modelTokens').value)}};
-  try{await api('chat/turns',payload);if(selected===target){$('prompt').value='';pendingAttachments=[];showAttachments()}signature='';await refresh()}
+  try{draftConversation=null;await api('chat/turns',payload);if(selected===target){$('prompt').value='';pendingAttachments=[];showAttachments()}signature='';await refresh()}
   catch(error){notify(error.message+'。不会自动重复提交。');await refresh()}
   finally{sending=false;controls()}
 }
