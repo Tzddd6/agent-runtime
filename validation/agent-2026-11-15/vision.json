@@ -1,0 +1,19 @@
+{
+  "succeeded": true,
+  "expected_color_matched": true,
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 209,
+    "completion_tokens": 1,
+    "total_tokens": 210,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 209
+  },
+  "provider_seconds": 0.8551164889995562,
+  "fixture": "synthetic_red_square",
+  "supplier_key_exported": false,
+  "broker_restarted": false
+}

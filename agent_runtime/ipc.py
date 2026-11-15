@@ -10,11 +10,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class Broker:
-    def __init__(self, store, agents, capacity=128):
+    def __init__(self, store, agents, capacity=128, *, control=None):
         self.store, self.capacity = store, capacity
         self.agents = set(agents)
         self.tokens, self.mailboxes, self.receipts = {}, {}, {}
         self.lock = threading.RLock()
+        self.control=control;self.control_tokens=set()
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -52,16 +53,18 @@ class Broker:
         self.thread.start()
         self.url = f'http://127.0.0.1:{self.server.server_port}/rpc'
 
-    def issue(self, agent):
+    def issue(self, agent, *, configure=False):
         with self.lock:
             self.agents.add(agent)
             token = secrets.token_urlsafe(32)
             self.tokens[token] = agent
+            if configure:self.control_tokens.add(token)
             return token
 
     def revoke(self, token):
         with self.lock:
             self.tokens.pop(token, None)
+            self.control_tokens.discard(token)
 
     def dispatch(self, token, value):
         with self.lock:
@@ -69,6 +72,10 @@ class Broker:
             if agent is None:
                 raise PermissionError()
             op = value['op']
+            if op=='observe' and self.control is not None:return self.control.observe()
+            if op=='configure' and self.control is not None:
+                if token not in self.control_tokens:raise PermissionError()
+                return self.control.configure(value.get('settings'))
             if op == 'send':
                 peer, request = value['to'], value['request_id']
                 if peer not in self.agents:
@@ -116,5 +123,5 @@ class Broker:
         with self.lock:
             self.agents.discard(agent)
             for token,owner in list(self.tokens.items()):
-                if owner==agent:self.tokens.pop(token,None)
+                if owner==agent:self.tokens.pop(token,None);self.control_tokens.discard(token)
             self.mailboxes.pop(agent,None)

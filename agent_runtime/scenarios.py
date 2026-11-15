@@ -12,17 +12,27 @@ def tasks_for(text):
          'inputs':['analyze','index'], 'action':'review_document'}]}]
 
 
-def team_tasks(prompt):
+def team_tasks(prompt, *, final_tokens=512):
+    large=final_tokens>1024
+    instructions={
+        'planner':'为用户需求制定计划，直接列出最多3项步骤，合计不超过60个汉字；不展开实现，不重复题目。',
+        'analyst':'依据上游计划分析实现方法和资源约束。只给最多3项关键结论，合计不超过90个汉字；不复述计划，不写完整代码。',
+        'tester':'依据上游计划给出测试输入、预期与失败恢复条件。只给最多4项验收点，合计不超过100个汉字；不复述计划。',
+        'reviewer':'综合上游分析和测试建议，保留关键实现、资源约束、异常处理和验收条件。逐条覆盖原始需求中明确列出的每项要求，不可用笼统概括替代具体边界条件。直接给出可执行的最终答复，最多6项、合计不超过260个汉字；无需再次展开计划，不能遗漏上游的重要风险。'}
+    if large:
+        instructions.update(planner='为用户复杂需求列出完整任务分解、约束和交付物，400字以内，不写最终答案。',
+            analyst='依据上游计划分析实现方法、关键细节、资源约束和风险，600字以内，不复述题目。',
+            tester='依据上游计划给出测试输入、预期、边界、失败恢复和验收条件，600字以内，不复述题目。',
+            reviewer='综合上游分析和测试建议，完整回答用户需求，包含必要实现细节、资源约束、风险与验收条件。使用清晰的Markdown，不为简短而省略重要内容，不复述协作过程。')
     def task(key, role, deps, tokens=256):
         return {'id':key, 'agent':role, 'action':'llm', 'timeout':75,
+                'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16},
                 'depends_on':deps, 'inputs':deps, 'contexts':[{'user_request':prompt}],
                 'max_tokens':tokens, 'messages':[{'role':'system', 'content':
-                    {'planner':'为用户需求制定简短计划。',
-                     'analyst':'依据计划分析实现方法和系统资源需求。',
-                     'tester':'依据计划给出可验证的测试与失败场景。',
-                     'reviewer':'综合分析和测试建议，给出一致的最终答复。'}[role]}]}
-    return [task('plan','planner',[]), task('analyze','analyst',['plan']),
-            task('test_plan','tester',['plan']), task('review','reviewer',['analyze','test_plan'],512)]
+                    instructions[role]}]}
+    intermediate=1024 if large else 256
+    return [task('plan','planner',[],intermediate), task('analyze','analyst',['plan'],intermediate),
+            task('test_plan','tester',['plan'],intermediate), task('review','reviewer',['analyze','test_plan'],final_tokens)]
 
 
 def resource_tasks():

@@ -68,8 +68,8 @@ class ChatTests(unittest.TestCase):
         turns=[{'prompt':'x'*1000,'answer':'y'*1000,'status':'succeeded','mode':'llm'} for _ in range(20)]
         turns.insert(19,{'prompt':'private failure','answer':'bad','status':'failed','mode':'llm'})
         messages=history_messages({'turns':turns+[{}]})
-        self.assertLessEqual(len(messages),12)
-        self.assertLessEqual(len(json.dumps(messages,ensure_ascii=False).encode()),24576)
+        self.assertLessEqual(len(messages),32)
+        self.assertLessEqual(len(json.dumps(messages,ensure_ascii=False).encode()),98304)
         self.assertNotIn('private failure',str(messages))
 
     def test_corrupt_conversation_is_skipped_without_breaking_console_start(self):

@@ -10,7 +10,7 @@ import time
 import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urlparse,parse_qs,unquote
 from .runtime import run
 from .telemetry import MachineSampler
 from .model_gateway import ModelError
@@ -41,6 +41,11 @@ class Controller:
         self.machine = MachineSampler(cgroup_root)
         self.recovery_required = False
         self.storage_warning=False
+        from .database import RuntimeDatabase
+        from .attachments import AttachmentStore
+        self.database=RuntimeDatabase(self.root/'metadata')
+        self.attachments=AttachmentStore(self.root/'attachments',self.database)
+        self.upload_slot=threading.BoundedSemaphore(1)
         for job in self.store.load():
             self.jobs[job['id']]=job
             if job['status']=='recovery_required':self.recovery_required=True
@@ -67,8 +72,14 @@ class Controller:
         if service.get('pids_limit') is not None:pids=min(pids,max(1,service['pids_limit']-16))
         return {'cpu_milli':cpu,'memory_bytes':memory,'pids':pids}
 
-    def submit(self, value, *, chat_messages=None):
+    def submit(self, value, *, chat_messages=None, workspace_key=None, attachment_context=None):
         preset = value.get('preset')
+        deep_thinking=value.get('deep_thinking',False)
+        if type(deep_thinking) is not bool or deep_thinking and os.environ.get('AGENTRT_NATIVE_THINKING')!='1':
+            raise ValueError('深度思考参数无效或服务尚未启用')
+        response_tokens=value.get('response_tokens',4096)
+        if type(response_tokens) is not int or not 256<=response_tokens<=4096:
+            raise ValueError('单次回答额度需为 256—4096 token')
         workers = value.get('workers', 2)
         policy = value.get('policy', 'resource_fit')
         model_budget=validate_budget(value.get('model_budget',{}),DEFAULT_WORKFLOW_MODEL_BUDGET)
@@ -97,21 +108,26 @@ class Controller:
             project=value.get('project','pricing')
             if not isinstance(project,str):raise ValueError('项目类型无效')
             tasks=project_tasks(project)
-        elif preset in ('llm','team','review'):
+        elif preset in ('auto','llm','team','review'):
             prompt = value.get('prompt', '')
-            if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 4000:
-                raise ValueError('请输入 1—4000 字的提示词')
+            if not isinstance(prompt, str) or not 1 <= len(prompt.strip()) <= 20000:
+                raise ValueError('请输入 1—20000 字的提示词')
             tasks = [{'id':'assistant', 'agent':'assistant', 'action':'llm', 'timeout':75,
-                      'max_tokens':512, 'messages':[{'role':'user','content':prompt}]}]
-            if preset == 'team':
+                      'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16},
+                      'max_tokens':response_tokens, 'messages':[{'role':'user','content':prompt}]}]
+            if preset=='auto':
+                from .routing import auto_tasks
+                tasks=auto_tasks(prompt,response_tokens=response_tokens,
+                    conversation=chat_messages[:-1] if chat_messages else None,deep_thinking=deep_thinking,attachments=attachment_context)
+            elif preset == 'team':
                 from .scenarios import team_tasks
-                tasks = team_tasks(prompt)
+                tasks = team_tasks(prompt,final_tokens=response_tokens)
             elif preset == 'review':
                 from .conversation import review_tasks
-                tasks = review_tasks(prompt)
+                tasks = review_tasks(prompt,response_tokens=response_tokens)
             if chat_messages is not None:
-                if preset=='llm':tasks[0].update(messages=chat_messages,max_tokens=1024)
-                elif chat_messages[:-1]:
+                if preset=='llm':tasks[0].update(messages=chat_messages,max_tokens=response_tokens)
+                elif preset!='auto' and chat_messages[:-1]:
                     for task in tasks:
                         if task.get('action')=='llm':
                             task.setdefault('contexts',[]).append({'conversation':chat_messages[:-1]})
@@ -124,15 +140,18 @@ class Controller:
                 raise ValueError('已有工作流运行中，请等待结束或停止后再提交')
             # The same lock guards model-config updates: no clear/replace can race
             # between this check and registering the active workflow.
-            if preset in ('llm','team','review','engineering') and not self.model_info()['configured']:
+            if preset in ('auto','llm','team','review','engineering') and not self.model_info()['configured']:
                 raise ValueError('模型服务尚未配置 API 密钥或暂不可用')
             key = uuid.uuid4().hex
+            workspace_key=identity(workspace_key) if workspace_key else key
+            project_workspace=self.root/'workspaces'/workspace_key
+            project_workspace.mkdir(parents=True,exist_ok=True,mode=0o700)
             service = self.machine.sample()['service']
             # Worker count changes concurrency only; keep the same resource envelope.
             budget = self.resource_budget(service)
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
                    'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'monitor':None,'history':[],
-                   'cancel':threading.Event(), 'directory':self.root/key}
+                   'cancel':threading.Event(), 'directory':self.root/key,'workspace_key':workspace_key}
             job['_control']=RuntimeControl()
             if preset=='engineering':job['project']=project
             self.store.save(job) # Persist the sole submission intent before starting any Worker.
@@ -142,6 +161,7 @@ class Controller:
                 if self.jobs[old]['status'] not in ('running','cancelling'):
                     del self.jobs[old]
 
+        last_database=[0.0]
         def observe(sample):
             running = [t for t in sample['tasks'] if t['state']=='running']
             measured = [t['metrics'] for t in running]
@@ -160,13 +180,24 @@ class Controller:
                         or frame['reserved']!=history[-1]['reserved']):
                     history.append(frame)
                     del history[:-150]
+            if time.monotonic()-last_database[0]>=1:
+                try:self.database.observe(key,sample)
+                except Exception:self.storage_warning=True
+                last_database[0]=time.monotonic()
 
         def execute():
             try:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace)
+                for e in completed_events:
+                    plugin=e.get('result',{}).get('result',{}).get('plugin') if isinstance(e.get('result',{}).get('result'),dict) else None
+                    if isinstance(plugin,str):
+                        value=e['result']['result']
+                        decision='tool_error' if value.get('ok') is False or value.get('executed') is False else e['state']
+                        try:self.database.audit(key,plugin,decision)
+                        except Exception:self.storage_warning=True
                 with self.lock:
                     job['final_states']=states
                     for summary_path in job['directory'].glob('*/summary.json'):
@@ -175,6 +206,9 @@ class Controller:
                         job['agent_control_summary']=summary.get('agent_controls',[])
                         job['model_resource_summary']=summary.get('model_resources')
                     semantic=True
+                    if preset=='auto':
+                        semantic=not any(e.get('result',{}).get('result',{}).get('termination') in ('max_rounds','tool_failures')
+                            for e in completed_events if isinstance(e.get('result',{}).get('result'),dict))
                     if preset=='engineering':
                         from .project_workflow import project_view
                         summary=project_view(project,completed_events,states,budget)
@@ -205,21 +239,35 @@ class Controller:
             busy=any(j['status'] in ('running','cancelling') for j in self.jobs.values())
             recovery=self.recovery_required
         model=self.model_info()
+        from .capabilities import catalog
         return {'csrf':self.csrf,'busy':busy,'recovery_required':recovery,
+                'native_thinking':os.environ.get('AGENTRT_NATIVE_THINKING')=='1','vision':os.environ.get('AGENTRT_VISION')=='1','capabilities':catalog(),
                 'model':model['model'],'configured':model['configured'],'available':model.get('available',True)}
 
     def submit_chat(self,value):
         key=identity(value.get('conversation_id'));request=identity(value.get('request_id'))
-        prompt=value.get('prompt');mode=value.get('mode','llm');project=value.get('project','pricing')
-        if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=4000:raise ValueError('请输入 1—4000 字的问题')
+        prompt=value.get('prompt');mode=value.get('mode','auto');project=value.get('project','pricing')
+        if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=20000:raise ValueError('请输入 1—20000 字的问题')
         if mode not in MODES or project not in ('pricing','intervals','text_normalization'):raise ValueError('未知协作模式或项目')
         budget=validate_budget(value.get('model_budget',{}),DEFAULT_WORKFLOW_MODEL_BUDGET)
+        response_tokens=value.get('response_tokens',4096)
+        deep_thinking=value.get('deep_thinking',False)
+        if type(deep_thinking) is not bool or deep_thinking and os.environ.get('AGENTRT_NATIVE_THINKING')!='1':raise ValueError('深度思考暂不可用')
+        if deep_thinking and response_tokens<4096:raise ValueError('深度思考需要4096 token额度，含推理与答案')
+        attachment_ids=value.get('attachments',[])
+        if not isinstance(attachment_ids,list) or len(attachment_ids)>4 or any(not isinstance(a,str) for a in attachment_ids) or len(set(attachment_ids))!=len(attachment_ids):raise ValueError('附件列表无效')
+        for a in attachment_ids:
+            row=self.database.attachment(identity(a),key)
+            if row['media'].startswith('image/') and os.environ.get('AGENTRT_VISION')!='1':raise ValueError('图片已接收，图像理解服务尚未启用')
+        if type(response_tokens) is not int or not 256<=response_tokens<=4096:raise ValueError('单次回答额度需为 256—4096 token')
         if any(budget[k]>DEFAULT_WORKFLOW_MODEL_BUDGET[k] for k in budget):raise ValueError('模型预算超出服务上限')
         with self.chat_lock:
-            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget)
+            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget,response_tokens=response_tokens,deep_thinking=deep_thinking,attachments=attachment_ids)
             if reused:return {'conversation_id':key,'job_id':turn['job_id'],'reused':True}
             messages=history_messages(chat)+[{'role':'user','content':prompt}]
-            try:job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget},chat_messages=messages)
+            try:
+                attachment_context=self.attachments.context(attachment_ids,key,self.root/'workspaces'/key) if attachment_ids else None
+                job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking},chat_messages=messages,workspace_key=key,attachment_context=attachment_context)
             except (ValueError,OSError) as exc:
                 self.chats.update(key,request,status='failed',answer=str(exc))
                 raise
@@ -232,7 +280,7 @@ class Controller:
                     job=self.detail(job_id)
                     if job['status'] not in ('running','cancelling'):
                         answer=answer_for(job)
-                        if len(answer)>8000:answer=answer[:7900]+'\n\n回答较长，完整产物请查看控制台。'
+                        if len(answer)>32000:answer=answer[:31900]+'\n\n回答较长，完整产物请查看控制台。'
                         self.chats.update(key,request,status=job['status'],answer=answer,
                                           execution=execution_view(job))
                         return
@@ -242,8 +290,12 @@ class Controller:
         return {'conversation_id':key,'job_id':job_id,'reused':False}
 
     def chat_detail(self,key):
-        chat=self.chats.read(key)
+        with self.chats.lock:
+            chat=self.chats.read(key)
+            chat['revision']=str((self.chats.root/(identity(key)+'.json')).stat().st_mtime_ns)
+        attachments={a['id']:a for a in self.database.attachments_for(key)}
         for turn in chat['turns']:
+            turn['attachment_names']=[attachments[a]['name'] for a in turn.get('attachments',[]) if a in attachments]
             if turn['status']=='running' and turn.get('job_id'):
                 try:
                     job=self.detail(turn['job_id']);states=list(job.get('states',{}).values())
@@ -256,6 +308,16 @@ class Controller:
                 try:turn['execution']=execution_view(self.detail(turn['job_id']))
                 except KeyError:pass
         return chat
+
+    def project_file(self,key,name,digest=None):
+        with self.lock:
+            job=self.jobs.get(identity(key))
+            if job is None:raise ValueError('工作流不存在')
+            scope=identity(job.get('workspace_key',key))
+        from .tooling import operate
+        result=operate({'_project_workspace':str(self.root/'workspaces'/scope),'_download_full':True},'file.read',{'path':name})
+        if digest is not None and result['sha256']!=digest:raise ValueError('文件已变化，请查看最新运行产物')
+        return result['content'].encode('utf-8')
 
     def cancel_job(self,key):
         with self.lock:
@@ -341,13 +403,14 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
 
         def log_message(self,*args):pass
 
-        def respond(self, code, value, kind='application/json; charset=utf-8'):
-            data = value.encode() if isinstance(value,str) else json.dumps(value,ensure_ascii=False).encode()
+        def respond(self, code, value, kind='application/json; charset=utf-8',download=False):
+            data = value if isinstance(value,bytes) else value.encode() if isinstance(value,str) else json.dumps(value,ensure_ascii=False).encode()
             self.send_response(code)
             self.send_header('Content-Type',kind)
             self.send_header('Content-Length',str(len(data)))
             self.send_header('Cache-Control','no-store')
             self.send_header('X-Content-Type-Options','nosniff')
+            if download:self.send_header('Content-Disposition','attachment')
             self.end_headers()
             try:self.wfile.write(data)
             except (BrokenPipeError,ConnectionResetError):pass
@@ -371,11 +434,22 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())
             elif path=='/api/chat/status':self.respond(200,controller.chat_status())
+            elif path=='/api/database/status':self.respond(200,controller.database.status())
             elif path=='/api/chat/conversations':self.respond(200,{'conversations':controller.chats.listing()})
             elif path.startswith('/api/chat/conversations/'):
-                try:self.respond(200,controller.chat_detail(path.rsplit('/',1)[1]))
+                try:
+                    key=identity(path.rsplit('/',1)[1]);after=parse_qs(urlparse(self.path).query).get('after',[None])[0]
+                    revision=str((controller.chats.root/(key+'.json')).stat().st_mtime_ns)
+                    if after==revision:self.respond(200,{'not_modified':True,'revision':revision})
+                    else:self.respond(200,controller.chat_detail(key))
                 except FileNotFoundError:self.respond(404,{'error':'会话不存在'})
                 except (ValueError,OSError,KeyError,TypeError):self.respond(400,{'error':'无法读取此会话'})
+            elif path.startswith('/api/jobs/') and '/files/' in path:
+                try:
+                    key,name=path.removeprefix('/api/jobs/').split('/files/',1)
+                    digest=parse_qs(urlparse(self.path).query).get('sha',[None])[0]
+                    self.respond(200,controller.project_file(key,unquote(name),digest),'application/octet-stream',download=True)
+                except (ValueError,OSError,UnicodeError):self.respond(400,{'error':'无法读取此项目产物'})
             elif path.startswith('/api/jobs/'):
                 try:self.respond(200,controller.detail(path.rsplit('/',1)[1]))
                 except KeyError:self.respond(404,{'error':'工作流不存在或已移出最近记录'})
@@ -391,10 +465,15 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             try:
                 self.connection.settimeout(5)
                 length=int(self.headers.get('Content-Length','0'))
-                if not 0<length<=20000:raise ValueError('请求体过大或为空')
+                maximum=12*1024**2 if self.path=='/api/attachments' else 150000
+                if not 0<length<=maximum:raise ValueError('请求体过大或为空')
                 value=json.loads(self.rfile.read(length))
                 if not isinstance(value,dict):raise ValueError('需要 JSON 对象')
-                if self.path=='/api/model-config':
+                if self.path=='/api/attachments':
+                    if not controller.upload_slot.acquire(blocking=False):raise ValueError('正在处理其他附件，请稍后再试')
+                    try:self.respond(201,controller.attachments.upload(value))
+                    finally:controller.upload_slot.release()
+                elif self.path=='/api/model-config':
                     key=value.get('key')
                     if not isinstance(key,str) or len(key)>512 or '\n' in key or '\r' in key:
                         raise ValueError('API Key 格式无效')
@@ -422,7 +501,17 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 else:self.respond(404,{'error':'未找到'})
             except (ValueError,TypeError,OSError) as exc:self.respond(400,{'error':str(exc)})
 
-    return ThreadingHTTPServer((host,port),Handler)
+    class BoundedServer(ThreadingHTTPServer):
+        daemon_threads=True
+        def __init__(self,*args,**kwargs):self.slots=threading.BoundedSemaphore(8);super().__init__(*args,**kwargs)
+        def process_request(self,request,address):
+            if not self.slots.acquire(blocking=False):self.shutdown_request(request);return
+            try:super().process_request(request,address)
+            except BaseException:self.slots.release();raise
+        def process_request_thread(self,request,address):
+            try:super().process_request_thread(request,address)
+            finally:self.slots.release()
+    return BoundedServer((host,port),Handler)
 
 
 def delegated_attempts():

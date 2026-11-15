@@ -9,7 +9,7 @@ import secrets
 import threading
 
 
-FIELDS={'id','preset','project','status','created','finished','workers','policy','budget',
+FIELDS={'id','preset','project','status','created','finished','workers','policy','budget','workspace_key',
         'error','final_states','history','monitor','agent_summary','agent_control_summary','model_budget','model_resource_summary'}
 MAX_BYTES=512*1024
 

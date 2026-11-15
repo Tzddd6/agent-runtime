@@ -1,0 +1,22 @@
+{
+  "succeeded": true,
+  "finish_reason": "stop",
+  "usage": {
+    "prompt_tokens": 55,
+    "completion_tokens": 160,
+    "total_tokens": 215,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 123
+    },
+    "prompt_cache_hit_tokens": 0,
+    "prompt_cache_miss_tokens": 55
+  },
+  "reasoning_tokens": 123,
+  "provider_seconds": 1.6399028890009504,
+  "raw_reasoning_exported": false,
+  "supplier_key_exported": false,
+  "broker_restarted": false
+}

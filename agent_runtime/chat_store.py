@@ -7,8 +7,8 @@ import secrets
 import threading
 import time
 
-MODES=('llm','team','review','document','engineering')
-LIMIT=1024**2
+MODES=('auto','llm','team','review','document','engineering')
+LIMIT=8*1024**2
 
 def identity(value):
     if not isinstance(value,str) or not re.fullmatch('[a-f0-9]{32}',value):
@@ -20,6 +20,7 @@ class ChatStore:
     def __init__(self,root):
         self.root=Path(root);self.root.mkdir(parents=True,exist_ok=True,mode=0o700)
         self.lock=threading.RLock()
+        self.listing_cache={}
         # Recovery is observation only. Never resubmit an uncertain model call.
         for path in self.root.glob('*.json'):
             try:
@@ -38,7 +39,7 @@ class ChatStore:
             if len(raw)>LIMIT:raise ValueError('会话文件超过上限')
             value=json.loads(raw)
             if (not isinstance(value,dict) or value.get('id')!=key or
-                not isinstance(value.get('turns'),list) or len(value['turns'])>20 or
+                not isinstance(value.get('turns'),list) or len(value['turns'])>100 or
                 not isinstance(value.get('title'),str) or not isinstance(value.get('updated'),(int,float))):
                 raise ValueError('会话记录无效')
             for turn in value['turns']:
@@ -47,6 +48,7 @@ class ChatStore:
                     turn.get('status') not in ('running','succeeded','failed','cancelled','interrupted','recovery_required')):
                     raise ValueError('会话消息无效')
                 identity(turn.get('request_id'))
+            stat=path.stat();self.listing_cache[key]=(stat.st_mtime_ns,stat.st_size,{k:value[k] for k in ('id','title','updated')})
             return value
 
     def save(self,chat):
@@ -60,6 +62,7 @@ class ChatStore:
                 fd=os.open(str(temporary),os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
                 with os.fdopen(fd,'wb') as f:f.write(raw);f.flush();os.fsync(f.fileno())
                 os.replace(temporary,target)
+                stat=target.stat();self.listing_cache[chat['id']]=(stat.st_mtime_ns,stat.st_size,{k:chat[k] for k in ('id','title','updated')})
             finally:temporary.unlink(missing_ok=True)
 
     def listing(self):
@@ -67,26 +70,29 @@ class ChatStore:
         with self.lock:
             for p in self.root.glob('*.json'):
                 try:
-                    c=self.read(p.stem)
-                    values.append({k:c[k] for k in ('id','title','updated')})
+                    if p.is_symlink():continue
+                    stat=p.stat();cached=self.listing_cache.get(p.stem)
+                    if cached and cached[:2]==(stat.st_mtime_ns,stat.st_size):values.append(dict(cached[2]))
+                    else:
+                        c=self.read(p.stem);values.append({k:c[k] for k in ('id','title','updated')})
                 except (ValueError,OSError,KeyError,TypeError):continue
         return sorted(values,key=lambda c:c['updated'],reverse=True)
 
-    def intent(self,key,request,prompt,mode,project,budget):
+    def intent(self,key,request,prompt,mode,project,budget,*,response_tokens=4096,deep_thinking=False,attachments=None):
         identity(key);identity(request)
         with self.lock:
             try:chat=self.read(key)
             except FileNotFoundError:
                 if len(list(self.root.glob('*.json')))>=100:raise ValueError('已达到 100 个会话上限，请管理员归档记录')
                 chat={'id':key,'title':prompt[:32] or '项目修复','updated':time.time(),'turns':[]}
-            signature={'prompt':prompt,'mode':mode,'project':project,'model_budget':budget}
+            signature={'prompt':prompt,'mode':mode,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking,'attachments':attachments or []}
             for turn in chat['turns']:
                 if turn['request_id']==request:
-                    if any(turn[k]!=v for k,v in signature.items()):raise ValueError('同一请求 ID 不允许更改内容')
+                    if any(turn.get(k,4096 if k=='response_tokens' else False if k=='deep_thinking' else [] if k=='attachments' else None)!=v for k,v in signature.items()):raise ValueError('同一请求 ID 不允许更改内容')
                     if not turn.get('job_id'):raise ValueError('原请求的执行状态尚未确认，请打开控制台核对，不要重复提交')
                     return chat,turn,True
             if any(t['status']=='running' for t in chat['turns']):raise ValueError('请先等待当前回答或停止运行')
-            if len(chat['turns'])>=20:raise ValueError('当前会话已达 20 轮，请新建对话')
+            if len(chat['turns'])>=100:raise ValueError('当前会话已达 100 轮，请归档后新建对话')
             turn={**signature,'request_id':request,'job_id':None,'created':time.time(),'status':'running','answer':''}
             chat['turns'].append(turn);chat['updated']=time.time();self.save(chat)
             return chat,turn,False
@@ -103,7 +109,7 @@ def history_messages(chat):
         if turn['status']!='succeeded':continue
         pair=[{'role':'user','content':turn['prompt']},{'role':'assistant','content':turn['answer']}]
         size=len(json.dumps(pair,ensure_ascii=False).encode())
-        if used+size>24576 or len(pairs)>=6:break
+        if used+size>98304 or len(pairs)>=16:break
         pairs.append(pair);used+=size
     return [message for pair in reversed(pairs) for message in pair]
 
@@ -111,7 +117,12 @@ def history_messages(chat):
 def answer_for(job):
     results=[(e['task_id'],e.get('result',{}).get('result')) for e in job.get('events',[]) if e['state']=='succeeded']
     mode=job['preset']
-    if mode=='llm':answer=next((v for k,v in reversed(results) if k=='assistant'),None)
+    if mode=='auto':
+        answer=next((v for k,v in reversed(results) if k=='auto_answer'),None)
+        if answer is None:
+            gate=next((v for k,v in reversed(results) if (k=='route_gate' or k.startswith('auto_cycle_')) and isinstance(v,dict)),{})
+            answer=gate.get('answer')
+    elif mode=='llm':answer=next((v for k,v in reversed(results) if k=='assistant'),None)
     elif mode=='team':answer=next((v for k,v in reversed(results) if k=='review'),None)
     elif mode=='review':
         gate=next((v for k,v in reversed(results) if k.startswith('gate-') and isinstance(v,dict)),{})

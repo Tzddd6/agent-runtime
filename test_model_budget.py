@@ -28,7 +28,7 @@ class ModelBudgetTests(unittest.TestCase):
         self.assertEqual(ledger.snapshot()['rejected'],37)
 
     def test_bad_limits_and_registration_reset_are_rejected(self):
-        for value in ([],False,{'calls':True},{'calls':-1},{'tokens':1},{'calls':101}):
+        for value in ([],False,{'calls':True},{'calls':-1},{'tokens':1},{'calls':1025}):
             with self.assertRaises(ValueError):ModelBudgetLedger(value)
         ledger=ModelBudgetLedger({'calls':0});ledger.register('a')
         with self.assertRaises(ModelBudgetExceeded):ledger.admit('a',1)
@@ -110,7 +110,7 @@ class ModelBudgetTests(unittest.TestCase):
         import time
         with tempfile.TemporaryDirectory() as tmp:
             controller=Controller(tmp)
-            with self.assertRaises(ValueError):controller.submit({'preset':'dynamic','model_budget':{'calls':33}})
+            with self.assertRaises(ValueError):controller.submit({'preset':'dynamic','model_budget':{'calls':129}})
             key=controller.submit({'preset':'dynamic','model_budget':{'calls':0,'output_tokens':0}})
             end=time.monotonic()+5
             while controller.detail(key)['status']=='running' and time.monotonic()<end:time.sleep(.02)

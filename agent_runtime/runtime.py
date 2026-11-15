@@ -125,7 +125,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None):
+        agents=None, control=None, model_budget=None, workspace=None):
     validate(tasks)
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
@@ -145,6 +145,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     root = Path(output_dir or tempfile.mkdtemp(prefix='agentrt-')).resolve() / uuid.uuid4().hex
     root.mkdir(parents=True)
     control=control or RuntimeControl()
+    control.worker_ceiling=max_workers;control.settings={'workers':max_workers,'policy':policy}
+    project_workspace=Path(workspace).resolve() if workspace is not None else root/'workspace'
+    project_workspace.mkdir(parents=True,exist_ok=True,mode=0o700)
     registry=AgentRegistry(budget,agents,cgroup_root=Path(cgroup_root) if cgroup_root else None,
                            workflow_id=root.name,model_budget=model_budget)
     agent_journal=(root/'agents.jsonl').open('w',encoding='utf-8');registry.journal=agent_journal
@@ -168,6 +171,11 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
 
     def observe(force=False):
         registry.synchronize(states,finished=control.closed)
+        if force or time.time()-control.observation.get('updated',0)>=.4:
+            with control.lock:
+                control.observation={'budget':dict(budget),'reserved':dict(used),'settings':dict(control.settings),
+                    'agents':[{'id':a.id,'state':a.state,'reserved':dict(a.reserved)} for a in registry.agents.values()],
+                    'controls':[dict(c) for c in control.results],'sample_sequence':sample_sequence[0],'updated':time.time()}
         if observer is None or (not force and time.monotonic()-last_telemetry[0] < .4):
             return
         last_telemetry[0] = time.monotonic()
@@ -262,6 +270,13 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             while True:
                 try:command=control.queue.get_nowait()
                 except queue.Empty:break
+                if command['operation']=='configure':
+                    settings=command['settings']
+                    max_workers=settings.get('workers',max_workers)
+                    if settings.get('policy',policy)!=policy:
+                        policy=settings['policy'];scheduler=AdmissionScheduler(policy,budget,DEFAULTS)
+                    with control.lock:control.settings={'workers':max_workers,'policy':policy}
+                    control.acknowledge(command);observe(force=True);continue
                 identity=command['agent_id'];a=registry.agents.get(identity)
                 if a is None or a.mode in ('terminated','terminating'):
                     control.acknowledge(command,'Agent 已终止或不存在');continue
@@ -299,7 +314,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     agent_allocations={a.id:dict(a.reserved) for a in registry.agents.values()},
                     busy_agents={a.id for a in registry.agents.values() if registry.blocked(a.id)},
                     blocked_tasks={t['id'] for t in ready if not registry.fits(t.get('agent',t['id']),{**DEFAULTS,**t.get('resources',{})})},
-                    slots_available=max_workers-len(running))
+                    slots_available=max(0,max_workers-len(running)))
             for task in list(tasks):
                 key = task['id']
                 if states[key] != 'waiting':
@@ -346,11 +361,12 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 except (ValueError,TypeError,KeyError,PermissionError,FileNotFoundError) as exc:
                     event(key,'failed',error=f'任务输入准备失败: {exc}')
                     continue
-                if refs or input_refs or task.get('action') in ('send', 'receive'):
+                payload['_project_workspace']=str(project_workspace)
+                if refs or input_refs or task.get('action') in ('send', 'receive') or task.get('plugin','').startswith('runtime.'):
                     if broker is None:
-                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'])
+                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control)
                     payload['_ipc_url'] = broker.url
-                    payload['_ipc_token'] = broker.issue(agent)
+                    payload['_ipc_token'] = broker.issue(agent,configure=task.get('plugin')=='runtime.configure')
                 if task.get('action') == 'llm':
                     try:
                         if gateway is None:

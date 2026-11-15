@@ -25,6 +25,21 @@ class RuntimeControl:
     def __init__(self):
         self.lock=threading.Lock();self.queue=queue.Queue(64)
         self.known={};self.results=deque(maxlen=64);self.closed=False
+        self.settings={'workers':4,'policy':'resource_fit'};self.worker_ceiling=4;self.observation={}
+
+    def observe(self):
+        with self.lock:return json.loads(json.dumps(self.observation))
+
+    def configure(self,settings):
+        if not isinstance(settings,dict) or not settings or set(settings)-{'workers','policy'}:raise ValueError('只允许配置workers或policy')
+        if ('workers' in settings and (type(settings['workers']) is not int or not 1<=settings['workers']<=self.worker_ceiling)
+            or 'policy' in settings and settings['policy'] not in ('fifo','resource_fit','aging_fit','drf')):raise ValueError('配置超过当前服务许可范围')
+        with self.lock:
+            if self.closed:raise ValueError('工作流已结束')
+            command={'id':uuid.uuid4().hex,'agent_id':'runtime','operation':'configure','settings':dict(settings),'status':'queued','time':time.time()}
+            try:self.queue.put_nowait(command)
+            except queue.Full:raise ValueError('控制队列已满') from None
+            self.results.append(dict(command));return dict(command)
 
     def request(self,identity,operation):
         agent_id(identity)

@@ -64,12 +64,18 @@ def main():
         return 1
     elif action == 'llm':
         messages = list(task.get('messages', []))
+        images=[];contexts=[]
+        for context in task.get('_contexts',[]):
+            if isinstance(context,dict) and '_images' in context:
+                images.extend(context['_images']);contexts.append({k:v for k,v in context.items() if k!='_images'})
+            else:contexts.append(context)
+        if images:messages.append({'role':'system','content':'agentrt-internal-images-v1:'+json.dumps(images)})
         if task.get('_contexts') or task.get('_inputs'):
             messages.append({'role':'user', 'content':json.dumps(
-                {'context':task.get('_contexts', []), 'upstream_results':task.get('_inputs', {})},
+                {'context':contexts, 'upstream_results':task.get('_inputs', {})},
                 ensure_ascii=False)})
         request = urllib.request.Request(task['_gateway_url'],
-            data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256)}).encode(),
+            data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256),'thinking':task.get('thinking',False)}).encode(),
             headers={'Authorization':'Bearer '+task['_gateway_token'], 'Content-Type':'application/json'})
         # 只请求控制进程的本地网关，不直接访问供应商或读取其密钥。
         try:
@@ -100,6 +106,18 @@ def main():
             if time.monotonic() >= deadline:
                 raise TimeoutError('等待 Agent 消息超时')
             time.sleep(.05)
+    elif action == 'plugin':
+        from .capabilities import execute_plugin
+        try:
+            output=execute_plugin(task)
+            if task.get('expect_failure') and task.get('plugin')=='command.run':
+                output['expected_failure_observed']=bool(output.get('executed') and output.get('exit_code') not in (None,0))
+        except (ValueError,OSError,RuntimeError,ArithmeticError) as exc:
+            output={'plugin':task.get('plugin'),'ok':False,'executed':False,'error_type':type(exc).__name__,
+                    'error':str(exc) if type(exc) is ValueError else '工具未完成，按类型检查参数、权限或运行结果'}
+    elif action == 'route_gate':
+        from .routing import route_plan
+        output, children = route_plan(task)
     elif action == 'review_gate':
         from .conversation import route_review
         output, children = route_review(task)

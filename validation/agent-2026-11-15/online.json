@@ -1,0 +1,220 @@
+{
+  "samples": [
+    {
+      "name": "native_thinking",
+      "conversation_id": "6d1979a876144239ba7cba2d7ed8eff9",
+      "status": "succeeded",
+      "seconds": 2.2335216999053955,
+      "model_calls": 1,
+      "model_admitted": 1,
+      "completion_tokens": 144,
+      "prompt_tokens": 1688,
+      "reasoning_tokens": 85,
+      "tools": [],
+      "finish_reasons": [
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 71,
+      "quality_passed": true
+    },
+    {
+      "name": "image_and_text",
+      "conversation_id": "5f19913e83e94cbdb20b680639bcf8d0",
+      "status": "succeeded",
+      "seconds": 1.6997058391571045,
+      "model_calls": 1,
+      "model_admitted": 1,
+      "completion_tokens": 30,
+      "prompt_tokens": 2024,
+      "reasoning_tokens": 0,
+      "tools": [],
+      "finish_reasons": [
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 38,
+      "quality_passed": true
+    },
+    {
+      "name": "workspace_repair",
+      "conversation_id": "864c3a213a8844fc97d192dd7227c940",
+      "status": "failed",
+      "seconds": 3.0839757919311523,
+      "model_calls": 1,
+      "model_admitted": 1,
+      "completion_tokens": 387,
+      "prompt_tokens": 1989,
+      "reasoning_tokens": 0,
+      "tools": [],
+      "finish_reasons": [
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 20,
+      "immutable_test_unchanged": false,
+      "independent_check_passed": false,
+      "original_failure_observed": false,
+      "artifact_exists": false,
+      "quality_passed": false
+    },
+    {
+      "name": "workspace_repair",
+      "conversation_id": "3b1f6773b3634048836b209ca9d2b3d9",
+      "status": "failed",
+      "seconds": 11.779746055603027,
+      "model_calls": 3,
+      "model_admitted": 3,
+      "completion_tokens": 1388,
+      "prompt_tokens": 5367,
+      "reasoning_tokens": 0,
+      "tools": [
+        "file.copy",
+        "file.copy",
+        "command.run",
+        "artifact.write",
+        "command.run"
+      ],
+      "finish_reasons": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 20,
+      "immutable_test_unchanged": true,
+      "independent_check_passed": false,
+      "original_failure_observed": false,
+      "artifact_exists": true,
+      "quality_passed": false
+    },
+    {
+      "name": "workspace_repair",
+      "conversation_id": "18dec62dcd1f436fb51bd55c2d5f2e72",
+      "status": "failed",
+      "seconds": 12.833112001419067,
+      "model_calls": 4,
+      "model_admitted": 4,
+      "completion_tokens": 1252,
+      "prompt_tokens": 9909,
+      "reasoning_tokens": 0,
+      "tools": [
+        "file.copy",
+        "file.copy",
+        "command.run",
+        "file.read",
+        "file.replace",
+        "command.run",
+        "artifact.write",
+        "file.copy",
+        "command.run",
+        "file.replace",
+        "command.run"
+      ],
+      "finish_reasons": [
+        "stop",
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 55,
+      "immutable_test_unchanged": true,
+      "independent_check_passed": false,
+      "original_failure_observed": true,
+      "artifact_exists": true,
+      "quality_passed": false
+    },
+    {
+      "name": "workspace_repair",
+      "conversation_id": "929459d893d14f519b6ae1ed2c075eed",
+      "status": "succeeded",
+      "seconds": 10.69404673576355,
+      "model_calls": 3,
+      "model_admitted": 3,
+      "completion_tokens": 1188,
+      "prompt_tokens": 7670,
+      "reasoning_tokens": 0,
+      "tools": [
+        "file.copy",
+        "file.copy",
+        "command.run",
+        "file.read",
+        "file.replace",
+        "command.run",
+        "artifact.write"
+      ],
+      "finish_reasons": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 759,
+      "immutable_test_unchanged": true,
+      "independent_check_passed": true,
+      "original_failure_observed": true,
+      "artifact_exists": true,
+      "quality_passed": true
+    },
+    {
+      "name": "browse_and_runtime_control",
+      "conversation_id": "030a199c85df48129ddda7da118b1aa3",
+      "status": "recovery_required",
+      "seconds": 4.106980085372925,
+      "model_calls": 2,
+      "model_admitted": 2,
+      "completion_tokens": 179,
+      "prompt_tokens": 4118,
+      "reasoning_tokens": 0,
+      "tools": [
+        "runtime.observe"
+      ],
+      "finish_reasons": [
+        "stop",
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 64,
+      "configuration_applied": true,
+      "public_page_verified": false,
+      "quality_passed": false
+    },
+    {
+      "name": "browse_and_runtime_control",
+      "conversation_id": "74f3f82895534aaa9a732adfc8603c38",
+      "status": "succeeded",
+      "seconds": 10.504587173461914,
+      "model_calls": 3,
+      "model_admitted": 3,
+      "completion_tokens": 821,
+      "prompt_tokens": 7450,
+      "reasoning_tokens": 0,
+      "tools": [
+        "runtime.observe",
+        "runtime.configure",
+        "web.fetch",
+        "runtime.observe",
+        "web.fetch",
+        "artifact.write",
+        "file.read"
+      ],
+      "finish_reasons": [
+        "stop",
+        "stop",
+        "stop"
+      ],
+      "cgroup_v2": true,
+      "answer_characters": 643,
+      "configuration_applied": true,
+      "public_page_verified": true,
+      "quality_passed": true
+    }
+  ],
+  "database": {
+    "engine": "sqlite",
+    "attachments": 10,
+    "observations": 50,
+    "audit_events": 30
+  }
+}

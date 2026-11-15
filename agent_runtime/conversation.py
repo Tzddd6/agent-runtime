@@ -6,13 +6,13 @@ AutoGen or let a model choose commands, executable task fields, or unbounded tur
 import json
 
 
-def review_tasks(prompt, round_number=1, previous=None):
+def review_tasks(prompt, round_number=1, previous=None, *, response_tokens=512):
     if type(round_number) is not int or not 1<=round_number<=2:
         raise ValueError('评审最多两轮')
     writer, critic, gate = (f'{name}-{round_number}' for name in ('writer','critic','gate'))
     deps = previous or []
     return [
-        {'id':writer,'agent':'writer','action':'llm','timeout':75,'max_tokens':512,
+        {'id':writer,'agent':'writer','action':'llm','timeout':75,'max_tokens':response_tokens,
          'depends_on':deps,'inputs':[d for d in deps if not d.startswith('gate-')],
          'contexts':[{'user_request':prompt}], 'messages':[{'role':'system','content':
             '回答用户任务；如存在上轮答案和评审意见，依据意见修订。仅输出答案正文。'}]},
@@ -22,7 +22,7 @@ def review_tasks(prompt, round_number=1, previous=None):
             '{"decision":"approved或revise","feedback":"具体意见"}。decision只能为approved或revise。'}]},
         {'id':gate,'agent':'router','action':'review_gate','depends_on':[writer,critic],
          'inputs':[writer,critic],'review_round':round_number,'review_prompt':prompt,
-         'writer_task':writer,'critic_task':critic,
+         'writer_task':writer,'critic_task':critic,'response_tokens':response_tokens,
          'resources':{'cpu_milli':100,'memory_bytes':64*1024**2,'pids':8}}
     ]
 
@@ -42,5 +42,5 @@ def route_review(task):
               'termination':'approved' if accepted else 'max_rounds' if terminal else 'revision_requested',
               'answer':inputs[task['writer_task']]}
     children=[] if terminal else review_tasks(task['review_prompt'], round_number+1,
-        [task['id'],task['writer_task'],task['critic_task']])
+        [task['id'],task['writer_task'],task['critic_task']],response_tokens=task.get('response_tokens',512))
     return result,children

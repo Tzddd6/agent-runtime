@@ -217,21 +217,32 @@ class BrokerClient:
     def configure(self,key):return self._request('/configure',{'key':key})
 
     def complete(self,messages,max_tokens=256):
+        started=time.monotonic()
         if self.cancel_event is not None and self.cancel_event.is_set():
             raise ModelError('Local model call cancelled')
         accepted=self._request('/calls',{'request_id':uuid.uuid4().hex,'messages':messages,'max_tokens':max_tokens})
         identity=accepted['call_id']
         deadline=time.monotonic()+self.timeout
+        reads=0
         try:
             while time.monotonic()<deadline:
                 if self.cancel_event is not None and self.cancel_event.is_set():
                     raise ModelError('Local model call cancelled; remote billing state unknown')
-                try:call=self._request('/calls/'+identity)
+                try:
+                    call=self._request('/calls/'+identity)
+                    reads+=1
                 except ModelError:
                     time.sleep(.1);continue # Read-only polling can be retried.
-                if call['status']=='succeeded':return call['result']
+                if call['status']=='succeeded':
+                    result=dict(call['result'])
+                    result['transport_timings']={
+                        'client_seconds':time.monotonic()-started,
+                        'broker_seconds':max(0,call['finished']-call['created']),
+                        'completion_detection_seconds':max(0,time.time()-call['finished']),
+                        'status_reads':reads}
+                    return result
                 if call['status'] not in ACTIVE:raise ModelError('Model broker call failed or cancelled; remote billing state unknown')
-                time.sleep(.1)
+                time.sleep(.05)
             raise ModelError('Model broker deadline exceeded; remote billing state unknown')
         except BaseException:
             try:self._request('/calls/'+identity+'/cancel',{})

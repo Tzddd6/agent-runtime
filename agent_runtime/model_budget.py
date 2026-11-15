@@ -2,8 +2,8 @@
 import threading
 
 
-DEFAULT_AGENT_MODEL_BUDGET={'calls':8,'output_tokens':8192}
-DEFAULT_WORKFLOW_MODEL_BUDGET={'calls':32,'output_tokens':32768}
+DEFAULT_AGENT_MODEL_BUDGET={'calls':32,'output_tokens':65536}
+DEFAULT_WORKFLOW_MODEL_BUDGET={'calls':128,'output_tokens':262144}
 
 
 class ModelBudgetExceeded(RuntimeError):
@@ -14,7 +14,7 @@ def validate_budget(value,default):
     if not isinstance(value,dict) or set(value)-set(default):
         raise ValueError('Model budget must contain calls/output_tokens only')
     result={**default,**value}
-    for field,ceiling in (('calls',100),('output_tokens',409600)):
+    for field,ceiling in (('calls',1024),('output_tokens',4194304)):
         if type(result[field]) is not int or not 0<=result[field]<=ceiling:
             raise ValueError('Model budget must contain bounded nonnegative integers')
     return result

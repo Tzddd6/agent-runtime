@@ -1,5 +1,6 @@
 """控制进程内的 DeepSeek 网关。Worker 只持有临时本地会话 token。"""
 import json
+import math
 import os
 import secrets
 import threading
@@ -14,6 +15,17 @@ from .model_budget import ModelBudgetExceeded
 
 
 MAX_BYTES = 1024 * 1024
+THINKING_MARKER='agentrt-internal-options-v1:thinking=high'
+
+
+def numeric_timing(value):
+    return value if type(value) in (int,float) and math.isfinite(value) and value>=0 else None
+
+
+def public_timings(value):
+    if not isinstance(value,dict):return {}
+    return {key:numeric_timing(value[key]) for key in
+            ('client_seconds','broker_seconds','completion_detection_seconds','status_reads') if key in value}
 
 
 class ModelError(RuntimeError):
@@ -91,9 +103,33 @@ class DeepSeekClient:
                 raise ModelError('消息必须包含合法 role 和字符串 content')
         if type(max_tokens) is not int or not 1 <= max_tokens <= 4096:
             raise ModelError('max_tokens 必须为 1—4096 的整数')
+        thinking=messages[0]=={'role':'system','content':'agentrt-internal-options-v1:thinking=high'}
+        if thinking:messages=messages[1:]
+        if not messages:raise ModelError('messages 必须包含实际请求')
+        options={'thinking':{'type':'enabled' if thinking else 'disabled'}}
+        if thinking:options['reasoning_effort']='high'
+        import base64
+        normal=[];images=[]
+        for message in messages:
+            if message['role']=='system' and message['content'].startswith('agentrt-internal-images-v1:'):
+                value=json.loads(message['content'].split(':',1)[1])
+                if not isinstance(value,list):raise ModelError('图片参数无效')
+                images.extend(value)
+            else:normal.append(message)
+        if len(images)>2:raise ModelError('每次最多两张图片')
+        if images:
+            parts=[{'type':'text','text':'用户上传的图片，请结合当前需求分析。'}]
+            for image in images:
+                if (not isinstance(image,dict) or set(image)!={'mime','data'} or image['mime']!='image/jpeg'
+                    or not isinstance(image['data'],str) or len(image['data'])>350000):raise ModelError('图片参数无效')
+                raw_image=base64.b64decode(image['data'],validate=True)
+                if not raw_image.startswith(b'\xff\xd8\xff'):raise ModelError('仅允许标准化JPEG图片')
+                parts.append({'type':'image_url','image_url':{'url':'data:image/jpeg;base64,'+image['data']}})
+            normal.append({'role':'user','content':parts})
+        messages=normal
         data = json.dumps({'model': self.model, 'messages': messages,
                            'max_tokens': max_tokens, 'stream': False,
-                           'thinking':{'type':'disabled'}}).encode()
+                           **options}).encode()
         if len(data) > MAX_BYTES:
             raise ModelError('模型请求超过 1 MiB')
         req = urllib.request.Request(self.base+'/chat/completions', data=data,
@@ -153,6 +189,8 @@ class ModelGateway:
                 result, code = {}, 200
                 entered = False
                 started = time.monotonic()
+                queue_seconds = None
+                client_seconds = None
                 try:
                     authorization=self.headers.get('Authorization','').removeprefix('Bearer ')
                     with owner.lock:capability=owner.capabilities.get(authorization)
@@ -166,11 +204,15 @@ class ModelGateway:
                     self.connection.settimeout(5)
                     value = json.loads(self.rfile.read(length))
                     messages,max_tokens=value.get('messages'),value.get('max_tokens',256)
+                    thinking=value.get('thinking',False)
                     if (not isinstance(messages,list) or not messages or
                         any(not isinstance(m,dict) or m.get('role') not in ('system','user','assistant')
                             or not isinstance(m.get('content'),str) for m in messages)
-                        or type(max_tokens) is not int or not 1<=max_tokens<=4096):
+                        or type(max_tokens) is not int or not 1<=max_tokens<=4096 or type(thinking) is not bool):
                         code=400;raise ModelError('模型请求格式无效')
+                    messages=[m for m in messages if m!={'role':'system','content':THINKING_MARKER}]
+                    if not messages:code=400;raise ModelError('消息缺少实际请求')
+                    if thinking:messages=[{'role':'system','content':THINKING_MARKER}]+messages
                     deadline=time.monotonic()+owner.client.timeout
                     while not entered:
                         if owner.cancel_event.is_set() or (capability is not None and capability['cancel'].is_set()):
@@ -179,6 +221,7 @@ class ModelGateway:
                         if remaining<=0:
                             code=429;raise ModelError('本地模型槽位等待超时')
                         entered=owner.slots.acquire(timeout=min(.05,remaining))
+                    queue_seconds=time.monotonic()-started
                     client=owner.client
                     if capability is not None:
                         # Serialize revocation with admission. A queued revoked
@@ -195,7 +238,10 @@ class ModelGateway:
                             class Cancel:
                                 def is_set(self):return capability['cancel'].is_set() or owner.cancel_event.is_set()
                             client=client.for_request(Cancel())
+                    call_started=time.monotonic()
                     result = client.complete(messages,max_tokens)
+                    result['thinking_requested']=thinking
+                    client_seconds=time.monotonic()-call_started
                 except (ModelError, ValueError, TypeError, AttributeError, OSError) as exc:
                     if code == 200:
                         code = 502
@@ -208,7 +254,10 @@ class ModelGateway:
                     with owner.log_path.open('a', encoding='utf-8') as log:
                         log.write(json.dumps({'time': time.time(), 'status': code,
                             'model': owner.client.model, 'usage': result.get('usage', {}),
-                            'total_seconds': time.monotonic()-started}, ensure_ascii=False)+'\n')
+                            'total_seconds': time.monotonic()-started,
+                            'gateway_queue_seconds':queue_seconds,'client_seconds':client_seconds,
+                            'provider_http_seconds':numeric_timing(result.get('latency_seconds')),
+                            'transport_timings':public_timings(result.get('transport_timings'))}, ensure_ascii=False)+'\n')
                 payload = json.dumps(result, ensure_ascii=False).encode()
                 try:
                     self.send_response(code)

@@ -17,7 +17,7 @@
   <a class="nav" href="#workspace" data-view="tasks"><span>⌘</span>任务与拓扑</a>
   <a class="nav" href="#workspace" data-view="agents"><span>◎</span>Agent 管理</a>
   <a class="nav" href="#workspace" data-view="logs"><span>≡</span>结果与记录</a>
-  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.11 / Agent 执行工作台</small></div>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.14 / Agent 执行工作台</small></div>
 </aside>
 <main>
   <header><span class="breadcrumb">Agent Runtime <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
@@ -36,8 +36,8 @@
           <div id="projectField" hidden><label for="project">受控项目</label><select id="project"><option value="pricing">金额计算 · 折扣、免邮与退款</option><option value="intervals">时间区间 · 相交、分桶与 TTL</option><option value="text_normalization">文本规范化 · 空白、词数与前缀</option></select><p id="projectDescription" class="hint"></p></div>
           <div class="two"><div><label for="workers">Worker 上限</label><select id="workers"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div><label for="policy">调度策略</label><select id="policy"><option value="resource_fit">资源适配</option><option value="drf">DRF · Agent 主导份额公平</option><option value="aging_fit">老化资源适配</option><option value="fifo">FIFO 基线</option></select></div></div>
           <p id="engineeringBudgetNote" class="budget-note">总资源预算固定，Worker 上限只控制并发；实际预算见右侧。</p>
-          <details class="model-config"><summary>本次运行的模型额度</summary><div class="two"><div><label for="modelCallsBudget">累计调用上限</label><input id="modelCallsBudget" type="number" min="0" max="32" value="32" required></div><div><label for="modelOutputBudget">累计输出额度</label><input id="modelOutputBudget" type="number" min="0" max="32768" value="32768" required></div></div><p class="hint">按每次请求的最大输出 token 累计扣减，失败不返还。设为 0 可禁止模型调用；输入 token 另计，此额度不是费用上限。</p></details>
-          <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="4000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
+          <details class="model-config"><summary>本次运行的模型额度</summary><div class="two"><div><label for="modelCallsBudget">累计调用上限</label><input id="modelCallsBudget" type="number" min="0" max="128" value="128" required></div><div><label for="modelOutputBudget">累计输出额度</label><input id="modelOutputBudget" type="number" min="0" max="262144" value="262144" required></div></div><p class="hint">按每次请求的最大输出 token 累计扣减，失败不返还。设为 0 可禁止模型调用；输入 token 另计，此额度不是费用上限。</p></details>
+          <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="20000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
           <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
         </form>
         <details class="model-config"><summary><span>模型配置</span><span id="modelState" class="muted">待配置密钥</span></summary><p class="hint">密钥仅在独立模型服务内存中；模型服务重启后需重填，网页升级不清空。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="输入 API Key"><button id="saveKey" class="secondary">保存密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
