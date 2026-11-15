@@ -33,7 +33,7 @@ async function loadKnowledge(){
     const edit=element('button','查看 / 编辑','outlined-button');edit.type='button';edit.onclick=async()=>{if(knowledgeBusy)return;try{const data=await api('knowledge/'+doc.id);knowledgeEdit=data;$('knowledgeTitle').value=data.title;$('knowledgeBody').value=data.body;showKnowledgeEditor('编辑资料 · v'+data.revision)}catch(error){panelNotice(error.message)}};
     const remove=element('button','移除','text-button danger');remove.type='button';let armed=false;
     remove.onclick=async()=>{if(knowledgeBusy)return;if(!armed){armed=true;remove.textContent='确认移除';setTimeout(()=>{armed=false;remove.textContent='移除'},4000);return}
-      setKnowledgeBusy(true);try{await api('knowledge/remove',{id:doc.id,expected_sha256:doc.sha256});if(knowledgeEdit?.id===doc.id)closeKnowledgeEditor();await loadKnowledge();$('knowledgeQuery').value='';$('knowledgeResults').hidden=true;panelNotice('资料已移除，历史引用快照保留。')}catch(error){panelNotice(error.message)}finally{setKnowledgeBusy(false)}};
+      setKnowledgeBusy(true);try{await api('knowledge/remove',{id:doc.id,expected_sha256:doc.sha256});if(knowledgeEdit?.id===doc.id)closeKnowledgeEditor();await loadKnowledge();resetKnowledgeSearch();panelNotice('资料已移除，历史引用快照保留。')}catch(error){panelNotice(error.message)}finally{setKnowledgeBusy(false)}};
     row.append(icon,info,edit,remove);box.append(row);
   }
 }
@@ -49,10 +49,11 @@ async function saveKnowledge(event){
   if(knowledgeEdit.sha256)payload.expected_sha256=knowledgeEdit.sha256;
   if(new TextEncoder().encode(payload.body).length>256*1024){panelNotice('单篇资料最多256KiB。');return}
   setKnowledgeBusy(true);panelNotice('正在保存并建立本地索引…');
-  try{await api('knowledge/save',payload);closeKnowledgeEditor();await loadKnowledge();$('knowledgeQuery').value='';$('knowledgeResults').hidden=true;panelNotice('已保存。启用知识库的下一次对话会自动检索。')}
+  try{await api('knowledge/save',payload);closeKnowledgeEditor();await loadKnowledge();resetKnowledgeSearch();panelNotice('已保存。启用知识库的下一次对话会自动检索。')}
   catch(error){panelNotice(error.message+'。不会自动重试；可先刷新列表核对。')}
   finally{setKnowledgeBusy(false)}
 }
+function resetKnowledgeSearch(){++knowledgeSearchSequence;$('knowledgeQuery').value='';$('knowledgeResults').replaceChildren();$('knowledgeResults').hidden=true}
 async function searchKnowledge(){
   const sequence=++knowledgeSearchSequence,query=$('knowledgeQuery').value.trim(),box=$('knowledgeResults');
   box.replaceChildren();box.hidden=!query;if(!query)return;
