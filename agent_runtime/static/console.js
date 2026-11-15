@@ -323,6 +323,7 @@ function renderAgents(job){
   $('agentCommands').textContent=(job.agent_controls||[]).map(c=>new Date(c.time*1000).toLocaleTimeString()+'  '+c.agent_id+'  '+c.operation+'  '+({queued:'排队中',applied:'已执行',rejected:'已拒绝'}[c.status]||c.status)+(c.error?' · '+c.error:'')).join('\n')||'尚无控制指令';
 }
 function initialize(){
+  const linkedJob=new URLSearchParams(location.search).get('job');if(/^[a-f0-9]{32}$/.test(linkedJob||''))selected=linkedJob;
   for(const el of document.querySelectorAll('[data-view]'))el.onclick=e=>{e.preventDefault();showView(el.dataset.view)};
   for(const tab of document.querySelectorAll('[role=tab]'))tab.onkeydown=e=>{const order=['workflow','resources','tasks','agents','logs'];let index=order.indexOf(currentView);
     if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();index=e.key==='Home'?0:e.key==='End'?order.length-1:(index+(e.key==='ArrowRight'?1:order.length-1))%order.length;showView(order[index]);$('tab-'+order[index]).focus()}};

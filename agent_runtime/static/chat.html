@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agent Runtime · 对话</title><meta name="theme-color" content="#191c20">
+  <link rel="stylesheet" href="static/chat.css"><script src="static/chat.js" defer></script>
+</head>
+<body>
+<aside id="sidebar" class="sidebar">
+  <a class="brand" href="./"><span class="brand-symbol">✳</span> Agent Runtime</a>
+  <button id="newChat" class="new-chat"><span>＋</span> 新建对话 <small>⌘</small></button>
+  <div class="history-title">最近对话（团队共享）</div><nav id="chatHistory" aria-label="对话历史"><p class="muted">正在读取…</p></nav>
+  <div class="sidebar-footer"><a id="consoleLink" href="console">运行控制台 <span>↗</span></a><p>执行与资源管理在独立控制台</p></div>
+</aside>
+<div id="shade" class="shade" hidden></div>
+<main>
+  <header><div class="header-title"><button id="menu" class="icon-button" aria-label="切换对话侧栏">☰</button><span>Agent Runtime</span><span id="modelLabel" class="model-label">正在连接</span></div><span id="connection" class="connection">连接中</span></header>
+  <div id="notice" class="notice" role="status" hidden></div>
+  <section id="welcome" class="welcome"><div class="welcome-mark">✳</div><h1>有什么想一起完成？</h1><p>从一个问题开始，让多个 Agent 为你协作。</p><div class="suggestions">
+    <button data-mode="team" data-prompt="帮我为一个大学生软件项目制定可执行的开发计划，列出关键步骤与验证方式。"><span>◈</span><b>拆解一个计划</b><small>规划、分析与验证</small></button>
+    <button data-mode="review" data-prompt="帮我写一段介绍多智能体协作的短文，再检查表达是否准确、清楚。"><span>✎</span><b>写作与改进</b><small>起草、评审与修订</small></button>
+    <button data-mode="document" data-prompt="Agent Runtime 统一管理多个智能体的执行。共享上下文减少重复准备，独立执行与资源限制让协作过程更加可控。"><span>▤</span><b>分析一段文本</b><small>免费本地示例</small></button>
+    <button data-mode="engineering" data-prompt="运行金额计算示例项目的分析、修复、测试与评审。"><span>⌘</span><b>修复示例项目</b><small>测试与独立评审</small></button>
+  </div></section>
+  <section id="messages" class="messages" aria-label="对话内容" aria-live="polite" hidden></section>
+  <div class="composer-dock"><div class="composer-wrap">
+    <div id="runStatus" class="run-status" hidden><span class="working-dot"></span><span id="runStatusText">正在协作…</span><a id="runLink" href="console">查看执行 ↗</a></div>
+    <form id="chatForm" class="composer"><label class="sr-only" for="prompt">发送给 Agent Runtime 的消息</label><textarea id="prompt" rows="2" maxlength="4000" placeholder="向 Agent Runtime 提问…" required></textarea>
+      <div class="composer-toolbar"><div class="composer-options"><label class="sr-only" for="mode">协作方式</label><select id="mode"><option value="llm">直接对话</option><option value="team">多 Agent 协作</option><option value="review">写作与评审</option><option value="document">文本分析 · 免费</option><option value="engineering">示例项目修复</option></select><select id="project" aria-label="示例项目" hidden><option value="pricing">金额计算</option><option value="intervals">时间区间</option><option value="text_normalization">文本规范化</option></select>
+      <details id="budgetOptions" class="budget-options"><summary aria-label="本次模型额度">额度</summary><div class="budget-popover"><strong>本次运行的模型额度</strong><label for="modelCalls">累计调用上限</label><input id="modelCalls" type="number" min="0" max="32" value="4" required><label for="modelTokens">请求输出 token 上限</label><input id="modelTokens" type="number" min="0" max="32768" value="4096" required><p>失败不返还。输入 token 另计，此处不是费用上限。</p></div></details></div>
+      <button id="stop" type="button" class="stop-button" hidden>停止</button><button id="send" type="submit" class="send-button" aria-label="发送消息" disabled>↑</button></div>
+    </form><p id="composerHint" class="composer-hint">回答可能有误，请核实重要信息。不要在对话中发送密钥。</p>
+  </div></div>
+</main>
+</body></html>

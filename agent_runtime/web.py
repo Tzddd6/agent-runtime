@@ -18,6 +18,7 @@ from .job_store import JobStore
 from .agents import RuntimeControl
 from .scheduling import AdmissionScheduler
 from .model_budget import validate_budget,DEFAULT_WORKFLOW_MODEL_BUDGET
+from .chat_store import ChatStore,MODES,identity,history_messages,answer_for
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -34,6 +35,8 @@ class Controller:
         self.lock = threading.Lock()
         self.jobs = {}
         self.store=JobStore(self.root)
+        self.chats=ChatStore(self.root/'conversations')
+        self.chat_lock=threading.Lock()
         self.machine = MachineSampler(cgroup_root)
         self.recovery_required = False
         self.storage_warning=False
@@ -63,7 +66,7 @@ class Controller:
         if service.get('pids_limit') is not None:pids=min(pids,max(1,service['pids_limit']-16))
         return {'cpu_milli':cpu,'memory_bytes':memory,'pids':pids}
 
-    def submit(self, value):
+    def submit(self, value, *, chat_messages=None):
         preset = value.get('preset')
         workers = value.get('workers', 2)
         policy = value.get('policy', 'resource_fit')
@@ -105,6 +108,12 @@ class Controller:
             elif preset == 'review':
                 from .conversation import review_tasks
                 tasks = review_tasks(prompt)
+            if chat_messages is not None:
+                if preset=='llm':tasks[0].update(messages=chat_messages,max_tokens=1024)
+                elif chat_messages[:-1]:
+                    for task in tasks:
+                        if task.get('action')=='llm':
+                            task.setdefault('contexts',[]).append({'conversation':chat_messages[:-1]})
         else:
             raise ValueError('只能运行动态演示或模型对话，不接受任意任务/命令')
         with self.lock:
@@ -189,6 +198,63 @@ class Controller:
 
         threading.Thread(target=execute,daemon=True).start()
         return key
+
+    def chat_status(self):
+        with self.lock:
+            busy=any(j['status'] in ('running','cancelling') for j in self.jobs.values())
+            recovery=self.recovery_required
+        model=self.model_info()
+        return {'csrf':self.csrf,'busy':busy,'recovery_required':recovery,
+                'model':model['model'],'configured':model['configured'],'available':model.get('available',True)}
+
+    def submit_chat(self,value):
+        key=identity(value.get('conversation_id'));request=identity(value.get('request_id'))
+        prompt=value.get('prompt');mode=value.get('mode','llm');project=value.get('project','pricing')
+        if not isinstance(prompt,str) or not 1<=len(prompt.strip())<=4000:raise ValueError('请输入 1—4000 字的问题')
+        if mode not in MODES or project not in ('pricing','intervals','text_normalization'):raise ValueError('未知协作模式或项目')
+        budget=validate_budget(value.get('model_budget',{}),DEFAULT_WORKFLOW_MODEL_BUDGET)
+        if any(budget[k]>DEFAULT_WORKFLOW_MODEL_BUDGET[k] for k in budget):raise ValueError('模型预算超出服务上限')
+        with self.chat_lock:
+            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget)
+            if reused:return {'conversation_id':key,'job_id':turn['job_id'],'reused':True}
+            messages=history_messages(chat)+[{'role':'user','content':prompt}]
+            try:job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget},chat_messages=messages)
+            except (ValueError,OSError) as exc:
+                self.chats.update(key,request,status='failed',answer=str(exc))
+                raise
+            try:self.chats.update(key,request,job_id=job_id)
+            except OSError:
+                raise ValueError('执行已提交，但会话记录未确认写入。请前往控制台核对，不要重复提交。') from None
+        def follow():
+            try:
+                while True:
+                    job=self.detail(job_id)
+                    if job['status'] not in ('running','cancelling'):
+                        answer=answer_for(job)
+                        if len(answer)>8000:answer=answer[:7900]+'\n\n回答较长，完整产物请查看控制台。'
+                        self.chats.update(key,request,status=job['status'],answer=answer)
+                        return
+                    time.sleep(.1)
+            except (OSError,ValueError,KeyError):LOGGER.exception('Conversation result persistence failed for %s',key)
+        threading.Thread(target=follow,daemon=True).start()
+        return {'conversation_id':key,'job_id':job_id,'reused':False}
+
+    def chat_detail(self,key):
+        chat=self.chats.read(key)
+        for turn in chat['turns']:
+            if turn['status']=='running' and turn.get('job_id'):
+                try:
+                    job=self.detail(turn['job_id']);states=list(job.get('states',{}).values())
+                    turn['progress']={'finished':sum(s=='succeeded' for s in states),'total':len(states),
+                                      'status':job['status']}
+                except KeyError:pass
+        return chat
+
+    def cancel_job(self,key):
+        with self.lock:
+            job=self.jobs.get(key)
+            if not job:raise ValueError('工作流不存在')
+            if job['status']=='running':job['status']='cancelling';job['cancel'].set()
 
     def snapshot(self):
         with self.lock:
@@ -288,12 +354,21 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
         def do_GET(self):
             if not self.authorized():return
             path=urlparse(self.path).path
-            if path=='/':
-                self.respond(200,(Path(__file__).parent/'static/index.html').read_text(encoding='utf-8'),'text/html; charset=utf-8')
-            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css'):
+            if path in ('/','/console','/console/'):
+                name='chat.html' if path=='/' else 'index.html'
+                html=(Path(__file__).parent/'static'/name).read_text(encoding='utf-8')
+                if path=='/console/':html=html.replace('<head>','<head><base href="../">',1)
+                self.respond(200,html,'text/html; charset=utf-8')
+            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())
+            elif path=='/api/chat/status':self.respond(200,controller.chat_status())
+            elif path=='/api/chat/conversations':self.respond(200,{'conversations':controller.chats.listing()})
+            elif path.startswith('/api/chat/conversations/'):
+                try:self.respond(200,controller.chat_detail(path.rsplit('/',1)[1]))
+                except FileNotFoundError:self.respond(404,{'error':'会话不存在'})
+                except (ValueError,OSError,KeyError,TypeError):self.respond(400,{'error':'无法读取此会话'})
             elif path.startswith('/api/jobs/'):
                 try:self.respond(200,controller.detail(path.rsplit('/',1)[1]))
                 except KeyError:self.respond(404,{'error':'工作流不存在或已移出最近记录'})
@@ -329,17 +404,13 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                         else:os.environ.pop('DEEPSEEK_API_KEY',None)
                     self.respond(200,{'configured':bool(key)})
                 elif self.path=='/api/jobs':self.respond(202,{'id':controller.submit(value)})
+                elif self.path=='/api/chat/turns':self.respond(202,controller.submit_chat(value))
                 elif len(self.path.split('/'))==7 and self.path.startswith('/api/jobs/') and self.path.split('/')[4]=='agents':
                     parts=self.path.split('/')
                     self.respond(202,controller.control_agent(parts[3],parts[5],parts[6]))
                 elif self.path.endswith('/cancel') and self.path.startswith('/api/jobs/'):
                     key=self.path.split('/')[-2]
-                    with controller.lock:
-                        job=controller.jobs.get(key)
-                        if not job:raise ValueError('工作流不存在')
-                        if job['status']=='running':
-                            job['status']='cancelling'
-                            job['cancel'].set()
+                    controller.cancel_job(key)
                     self.respond(200,{'ok':True})
                 else:self.respond(404,{'error':'未找到'})
             except (ValueError,TypeError,OSError) as exc:self.respond(400,{'error':str(exc)})

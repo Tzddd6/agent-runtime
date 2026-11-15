@@ -1,0 +1,20 @@
+{
+  "conversation_id": "00c70549a173479aa2eff90d98752be3",
+  "job_id": "b1b39be1193b4aefb844d609a2735b8c",
+  "turns": 1,
+  "status": "succeeded",
+  "states": {
+    "plan": "succeeded",
+    "analyze": "succeeded",
+    "index": "succeeded",
+    "review": "succeeded"
+  },
+  "conversation_saved": true,
+  "browser_reload_checked": true,
+  "separate_console_job_link_checked": true,
+  "enforcement": "cgroup_v2",
+  "residual_cgroups": 0,
+  "paid_model_calls": 0,
+  "model_configured": false,
+  "model_available": true
+}
