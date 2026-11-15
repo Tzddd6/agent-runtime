@@ -1,0 +1,9 @@
+{
+  "markdown_contract_tests": 7,
+  "markdown_contract_passed": 7,
+  "nuc_web_regression_passed": 14,
+  "real_existing_conversation_checked": true,
+  "raw_html_executed": false,
+  "remote_images_loaded": false,
+  "paid_model_calls": 0
+}

@@ -359,7 +359,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 html=(Path(__file__).parent/'static'/name).read_text(encoding='utf-8')
                 if path=='/console/':html=html.replace('<head>','<head><base href="../">',1)
                 self.respond(200,html,'text/html; charset=utf-8')
-            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css'):
+            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css','/static/markdown.js'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())

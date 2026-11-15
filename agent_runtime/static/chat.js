@@ -25,14 +25,7 @@ function showHistory(list){
 }
 function copy(text,button){navigator.clipboard.writeText(text).then(()=>{button.textContent='已复制'},()=>{notify('复制失败，请手动选中文本复制')})}
 function bodyText(box,text){
-  // All generated content remains text nodes. No model HTML or executable links.
-  const parts=String(text).split('```');
-  parts.forEach((part,index)=>{
-    if(index%2===0){if(part)box.append(element('p',part));return}
-    const split=part.indexOf('\n'),lang=split>=0?part.slice(0,split).trim():'代码',code=split>=0?part.slice(split+1):part;
-    const block=element('div',null,'code-block'),head=element('div',null,'code-head'),button=element('button','复制','small-button');button.type='button';button.onclick=()=>copy(code,button);
-    head.append(element('span',lang.slice(0,32)||'代码'),button);block.append(head,element('pre',code));box.append(block);
-  });
+  renderMarkdown(box,text,copy);
 }
 function render(chat){
   current=chat;const last=chat.turns.at(-1);

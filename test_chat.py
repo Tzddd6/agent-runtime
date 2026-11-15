@@ -95,6 +95,7 @@ class ChatTests(unittest.TestCase):
                 self.assertIn('有什么想一起完成',get('/'))
                 self.assertIn('工作流资源分配',get('/console'))
                 self.assertIn('<base href="../">',get('/console/'))
+                self.assertIn('renderMarkdown',get('/static/markdown.js'))
                 self.assertNotIn('machine',json.loads(get('/api/chat/status')))
                 for path in ('/','/console','/api/chat/conversations'):
                     with self.assertRaises(HTTPError) as e:urlopen(base+path,timeout=3)
