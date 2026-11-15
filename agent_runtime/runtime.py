@@ -15,6 +15,7 @@ from .ipc import Broker
 from .telemetry import CgroupSampler
 from .scheduling import AdmissionScheduler
 from .agents import AgentRegistry,RuntimeControl,agent_id
+from .completion import CompletionWaiter
 
 
 TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
@@ -162,6 +163,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     journal = (root / 'events.jsonl').open('w', encoding='utf-8')
     channel = _ObserverChannel(observer) if observer is not None else None
     sample_sequence = [0]
+    completion=CompletionWaiter()
+    scheduling_stats={'iterations':0,'decisions':0}
 
     def observe(force=False):
         registry.synchronize(states,finished=control.closed)
@@ -224,7 +227,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         journal.flush()
         if not quiet:
             print(json.dumps(item, ensure_ascii=False), flush=True)
-        observe(force=True)
+        # Preserve every journal event, but sample cgroups once per dispatch or
+        # completion batch instead of rereading every Agent for every task.
+        registry.synchronize(states)
 
     def cleanup_attempt(key, handle, limits):
         if gateway and handle.get('gateway_token'):gateway.revoke(handle['gateway_token'])
@@ -233,6 +238,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         except Exception as exc:
             raise RuntimeError(f'CLEANUP_FAILED: {key}: {exc}') from exc
         # A successful cleanup is the sole authority for releasing a reservation.
+        completion.remove(key)
         for name in used:
             used[name] -= limits[name]
         registry.release(task_by_id[key].get('agent',key),key,limits)
@@ -251,6 +257,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         control.publish(registry.snapshots())
         observe(force=True)
         while any(s in ('waiting', 'running') for s in states.values()):
+            cycle_sequence=len(events)
+            scheduling_stats['iterations']+=1
             while True:
                 try:command=control.queue.get_nowait()
                 except queue.Empty:break
@@ -284,6 +292,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     store.revoke_agent(a.id)
                 break
             def choose():
+                scheduling_stats['decisions']+=1
                 ready = [t for t in tasks if states[t['id']]=='waiting'
                          and all(states[d]=='succeeded' for d in t.get('depends_on',[]))]
                 return scheduler.choose(ready,used,
@@ -291,7 +300,6 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     busy_agents={a.id for a in registry.agents.values() if registry.blocked(a.id)},
                     blocked_tasks={t['id'] for t in ready if not registry.fits(t.get('agent',t['id']),{**DEFAULTS,**t.get('resources',{})})},
                     slots_available=max_workers-len(running))
-            choose()
             for task in list(tasks):
                 key = task['id']
                 if states[key] != 'waiting':
@@ -311,13 +319,17 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key,'cancelled',reason='所属 Agent 已终止');continue
                 if not registry.fits(agent,limits,reserved=False):
                     event(key,'unschedulable',reason='单任务请求超过 Agent 预算');continue
-                if choose().task_id!=key:
-                    continue
+            # Dispatch the selected task directly. Scanning every candidate and
+            # recomputing choose() gave quadratic work and deferred a selected
+            # earlier task to the next polling tick.
+            while True:
+                decision=choose()
+                if decision.task_id is None:break
+                key=decision.task_id;task=task_by_id[key]
+                agent=task.get('agent',key);limits={**DEFAULTS,**task.get('resources',{})}
                 busy = registry.blocked(agent)
                 if busy or len(running) >= max_workers or any(used[k] + limits[k] > budget[k] for k in budget):
-                    if policy == 'fifo':
-                        break
-                    continue
+                    raise RuntimeError('Scheduler returned an inadmissible task')
                 attempts[key] += 1
                 payload = {**task, '_attempt': attempts[key], 'timeout':task.get('timeout',timeout)}
                 try:
@@ -372,12 +384,15 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 for k in used:
                     used[k] += limits[k]
                 running[key] = (handle, task, limits)
+                completion.add(key,handle['proc'])
                 scheduler.started(key)
                 dataflow['context_ref_deliveries'] += len(refs)
                 dataflow['input_ref_deliveries'] += len(input_refs)
                 event(key, 'running', pid=handle['proc'].pid, resources=limits,
                       enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs,
                       input_refs=input_refs)
+            if len(events)!=cycle_sequence:observe(force=True)
+            dispatched_sequence=len(events)
             for key, (handle, task, limits) in list(running.items()):
                 proc = handle['proc']
                 expired_flag = handle.get('expired')
@@ -444,8 +459,11 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                 if type(value) is int and value>=0:acb.token_usage[field]=acb.token_usage.get(field,0)+value
                     event(key, state, exit_code=code, output=diagnostic, result=result,
                           error=error, usage=usage)
-            observe()
-            time.sleep(0.02) # Paused Agents with pending tasks must not busy-spin.
+            observe(force=len(events)!=dispatched_sequence)
+            # Reconsider a changed DAG immediately. Otherwise Linux pidfds wake
+            # us on process exit, with a bounded fallback for control/cancel and
+            # unsupported platforms. Cleanup still owns every budget release.
+            if len(events)==cycle_sequence:completion.wait(.02)
     except BaseException:
         execution_failed=True
         raise
@@ -471,6 +489,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         finally:
             # Attempt each independent closer even when an earlier one fails.
             for name,closer in [('model gateway',gateway.close if gateway else None),
+                                ('completion notifier',completion.close),
                                 ('IPC broker',broker.close if broker else None),
                                 ('observer',channel.close if channel else None),('journal',journal.close),
                                 ('agent journal',agent_journal.close)]:
@@ -484,6 +503,8 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
                                                 'agents':registry.snapshots(),'agent_controls':control.history(),
                                                 'dataflow':dataflow,'policy':policy,
+                                                'scheduling_stats':{**scheduling_stats,**completion.stats},
+                                                'telemetry_stats':registry.telemetry_stats,
                                                 'model_resources':registry.model_budgets.snapshot(),
                                                 'context_stats': store.stats()},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')

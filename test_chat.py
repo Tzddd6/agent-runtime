@@ -30,10 +30,14 @@ class ChatTests(unittest.TestCase):
             first=c.submit_chat(self.payload());chat=self.wait(c,'a'*32)
             self.assertEqual(chat['turns'][0]['status'],'succeeded')
             self.assertIn('文档分析',chat['turns'][0]['answer'])
+            self.assertEqual(chat['turns'][0]['execution']['source'],'runtime_events')
+            self.assertTrue(all(s['kind']=='local' for s in chat['turns'][0]['execution']['steps']))
+            self.assertFalse(chat['turns'][0]['execution']['thinking_content'])
             second=c.submit_chat(self.payload());self.assertTrue(second['reused'])
             self.assertEqual(first['job_id'],second['job_id']);self.assertEqual(len(c.jobs),1)
             restored=Controller(tmp).chat_detail('a'*32)
             self.assertEqual(restored['turns'][0]['answer'],chat['turns'][0]['answer'])
+            self.assertEqual(restored['turns'][0]['execution'],chat['turns'][0]['execution'])
             with self.assertRaises(ValueError):c.submit_chat({**self.payload(),'prompt':'different'})
 
     def test_followup_reaches_model_as_authoritative_prior_messages(self):

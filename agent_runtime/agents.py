@@ -85,6 +85,8 @@ class AgentRegistry:
         self.failed=False
         self.model_budgets=ModelBudgetLedger(model_budget)
         self.sampler=CgroupSampler();self.events=deque(maxlen=64);self.sequence=0
+        self._sampled={}
+        self.telemetry_stats={'agent_cgroup_samples':0,'idle_snapshot_cache_hits':0}
         if specs is not None and (not isinstance(specs,list) or len(specs)>100):raise ValueError('agents must be a bounded list')
         for spec in specs or []:
             if not isinstance(spec,dict) or set(spec)-{'id','role','budget','max_concurrency','model_budget'}:raise ValueError('Invalid Agent specification')
@@ -162,15 +164,26 @@ class AgentRegistry:
 
     def snapshots(self):
         result=[]
+        now=time.monotonic()
         for a in self.agents.values():
             group=self.groups.get(a.id)
-            if group and group.exists():a.metrics=self.sampler.sample(group)
+            activity=tuple(sorted(a.active.items()))
+            previous=self._sampled.get(a.id)
+            if group and group.exists():
+                # Active Agents and every activity transition are sampled now.
+                # Idle, unchanged owners reuse telemetry for at most 400ms;
+                # admission and cleanup never consult this cache.
+                if a.active or previous is None or previous[1]!=activity or now-previous[0]>=.4:
+                    a.metrics=self.sampler.sample(group);self._sampled[a.id]=(now,activity)
+                    self.telemetry_stats['agent_cgroup_samples']+=1
+                else:self.telemetry_stats['idle_snapshot_cache_hits']+=1
             result.append({'id':a.id,'role':a.role,'state':a.state,'budget':dict(a.budget),
                 'reserved':dict(a.reserved),'max_concurrency':a.max_concurrency,
                 'tasks':sorted(a.tasks),'active_tasks':dict(a.active),'context_refs':sorted(a.context_refs),
                 'mailbox_id':a.id,'metrics':dict(a.metrics),'created':a.created,'cgroup_path':str(group) if group else None,
                 'model_calls':a.model_calls,'token_usage':dict(a.token_usage),
                 'model_resources':self.model_budgets.snapshot(a.id),
+                'metrics_sample_age_seconds':max(0,now-self._sampled[a.id][0]) if a.id in self._sampled else None,
                 'enforcement':'cgroup_v2' if group else 'admission_only'})
         return result
 
@@ -180,6 +193,7 @@ class AgentRegistry:
             try:
                 if 'populated 1' in (group/'cgroup.events').read_text():raise RuntimeError('Agent cgroup is still populated')
                 self.agents[identity].metrics=self.sampler.sample(group)
+                self.telemetry_stats['agent_cgroup_samples']+=1
                 group.rmdir()
                 self.agents[identity].metrics.update(cpu_cores=None,memory_bytes=0,pids=0)
             except (OSError,RuntimeError) as exc:errors.append(identity+': '+str(exc))

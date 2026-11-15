@@ -19,6 +19,7 @@ from .agents import RuntimeControl
 from .scheduling import AdmissionScheduler
 from .model_budget import validate_budget,DEFAULT_WORKFLOW_MODEL_BUDGET
 from .chat_store import ChatStore,MODES,identity,history_messages,answer_for
+from .execution_view import execution_view
 
 
 DEMO = Path(__file__).resolve().parents[1] / 'examples/dynamic.json'
@@ -232,7 +233,8 @@ class Controller:
                     if job['status'] not in ('running','cancelling'):
                         answer=answer_for(job)
                         if len(answer)>8000:answer=answer[:7900]+'\n\n回答较长，完整产物请查看控制台。'
-                        self.chats.update(key,request,status=job['status'],answer=answer)
+                        self.chats.update(key,request,status=job['status'],answer=answer,
+                                          execution=execution_view(job))
                         return
                     time.sleep(.1)
             except (OSError,ValueError,KeyError):LOGGER.exception('Conversation result persistence failed for %s',key)
@@ -247,6 +249,11 @@ class Controller:
                     job=self.detail(turn['job_id']);states=list(job.get('states',{}).values())
                     turn['progress']={'finished':sum(s=='succeeded' for s in states),'total':len(states),
                                       'status':job['status']}
+                    turn['execution']=execution_view(job)
+                except KeyError:pass
+            elif turn.get('job_id') and 'execution' not in turn:
+                # Enrich old records from their existing journal. No new run.
+                try:turn['execution']=execution_view(self.detail(turn['job_id']))
                 except KeyError:pass
         return chat
 

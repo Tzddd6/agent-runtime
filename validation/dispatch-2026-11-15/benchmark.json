@@ -1,0 +1,553 @@
+{
+  "summaries": [
+    {
+      "workload": "chain",
+      "baseline": {
+        "seconds": 1.0269011670006876,
+        "coordinator_cpu_seconds": 0.09,
+        "decisions": 51,
+        "ready_to_start_seconds_sum": 0.3946855068206787,
+        "range_seconds": [
+          1.0191597330012883,
+          1.056284873999175
+        ]
+      },
+      "candidate": {
+        "seconds": 0.6865296609994402,
+        "coordinator_cpu_seconds": 0.06,
+        "decisions": 67,
+        "ready_to_start_seconds_sum": 0.14801526069641113,
+        "range_seconds": [
+          0.6744000670005335,
+          0.6948879130013665
+        ]
+      },
+      "median_elapsed_change_percent": -33.14549802250048
+    },
+    {
+      "workload": "wide",
+      "baseline": {
+        "seconds": 1.2340773150008317,
+        "coordinator_cpu_seconds": 0.47000000000000003,
+        "decisions": 319,
+        "ready_to_start_seconds_sum": 17.39491558074951,
+        "range_seconds": [
+          1.2125468440008262,
+          1.2706224829998973
+        ]
+      },
+      "candidate": {
+        "seconds": 1.1438816820009379,
+        "coordinator_cpu_seconds": 0.26,
+        "decisions": 96,
+        "ready_to_start_seconds_sum": 15.65235447883606,
+        "range_seconds": [
+          1.1118040380006278,
+          1.1547092979999434
+        ]
+      },
+      "median_elapsed_change_percent": -7.308750586654533
+    },
+    {
+      "workload": "waves",
+      "baseline": {
+        "seconds": 0.9737428350017581,
+        "coordinator_cpu_seconds": 0.26999999999999996,
+        "decisions": 94,
+        "ready_to_start_seconds_sum": 2.7400312423706055,
+        "range_seconds": [
+          0.889651079000032,
+          0.981019283999558
+        ]
+      },
+      "candidate": {
+        "seconds": 0.8161002779997943,
+        "coordinator_cpu_seconds": 0.15000000000000002,
+        "decisions": 87,
+        "ready_to_start_seconds_sum": 1.9348835945129395,
+        "range_seconds": [
+          0.8109590350013605,
+          0.8198846060004144
+        ]
+      },
+      "median_elapsed_change_percent": -16.18934192226217
+    }
+  ],
+  "rows": [
+    {
+      "workload": "chain",
+      "repeat": 0,
+      "version": "baseline",
+      "seconds": 1.0230830370001058,
+      "coordinator_cpu_seconds": 0.09,
+      "decisions": 50,
+      "ready_to_start_seconds_sum": 0.4123349189758301,
+      "succeeded": 12,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 0,
+      "version": "candidate",
+      "seconds": 0.6744000670005335,
+      "coordinator_cpu_seconds": 0.06,
+      "decisions": 63,
+      "ready_to_start_seconds_sum": 0.16132283210754395,
+      "succeeded": 12,
+      "stats": {
+        "iterations": 51,
+        "decisions": 63,
+        "pidfds_registered": 12,
+        "fallback_registrations": 0,
+        "waits": 27,
+        "exit_wakeups": 11
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 1,
+      "version": "candidate",
+      "seconds": 0.6799420070001361,
+      "coordinator_cpu_seconds": 0.049999999999999996,
+      "decisions": 70,
+      "ready_to_start_seconds_sum": 0.13960909843444824,
+      "succeeded": 12,
+      "stats": {
+        "iterations": 58,
+        "decisions": 70,
+        "pidfds_registered": 12,
+        "fallback_registrations": 0,
+        "waits": 34,
+        "exit_wakeups": 12
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 1,
+      "version": "baseline",
+      "seconds": 1.056284873999175,
+      "coordinator_cpu_seconds": 0.09,
+      "decisions": 53,
+      "ready_to_start_seconds_sum": 0.38373899459838867,
+      "succeeded": 12,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 2,
+      "version": "baseline",
+      "seconds": 1.0191597330012883,
+      "coordinator_cpu_seconds": 0.08,
+      "decisions": 51,
+      "ready_to_start_seconds_sum": 0.3879530429840088,
+      "succeeded": 12,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 2,
+      "version": "candidate",
+      "seconds": 0.6948879130013665,
+      "coordinator_cpu_seconds": 0.04999999999999999,
+      "decisions": 69,
+      "ready_to_start_seconds_sum": 0.14801526069641113,
+      "succeeded": 12,
+      "stats": {
+        "iterations": 57,
+        "decisions": 69,
+        "pidfds_registered": 12,
+        "fallback_registrations": 0,
+        "waits": 33,
+        "exit_wakeups": 12
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 3,
+      "version": "candidate",
+      "seconds": 0.6871869659989898,
+      "coordinator_cpu_seconds": 0.06,
+      "decisions": 67,
+      "ready_to_start_seconds_sum": 0.1459367275238037,
+      "succeeded": 12,
+      "stats": {
+        "iterations": 55,
+        "decisions": 67,
+        "pidfds_registered": 12,
+        "fallback_registrations": 0,
+        "waits": 31,
+        "exit_wakeups": 12
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 3,
+      "version": "baseline",
+      "seconds": 1.0518418179999571,
+      "coordinator_cpu_seconds": 0.08,
+      "decisions": 52,
+      "ready_to_start_seconds_sum": 0.40091967582702637,
+      "succeeded": 12,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 4,
+      "version": "baseline",
+      "seconds": 1.0269011670006876,
+      "coordinator_cpu_seconds": 0.09,
+      "decisions": 51,
+      "ready_to_start_seconds_sum": 0.3946855068206787,
+      "succeeded": 12,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "chain",
+      "repeat": 4,
+      "version": "candidate",
+      "seconds": 0.6865296609994402,
+      "coordinator_cpu_seconds": 0.06,
+      "decisions": 67,
+      "ready_to_start_seconds_sum": 0.15105009078979492,
+      "succeeded": 12,
+      "stats": {
+        "iterations": 55,
+        "decisions": 67,
+        "pidfds_registered": 12,
+        "fallback_registrations": 0,
+        "waits": 31,
+        "exit_wakeups": 11
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 0,
+      "version": "baseline",
+      "seconds": 1.2340773150008317,
+      "coordinator_cpu_seconds": 0.48000000000000004,
+      "decisions": 335,
+      "ready_to_start_seconds_sum": 17.31209683418274,
+      "succeeded": 32,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 0,
+      "version": "candidate",
+      "seconds": 1.1438816820009379,
+      "coordinator_cpu_seconds": 0.27,
+      "decisions": 112,
+      "ready_to_start_seconds_sum": 15.751123189926147,
+      "succeeded": 32,
+      "stats": {
+        "iterations": 80,
+        "decisions": 112,
+        "pidfds_registered": 32,
+        "fallback_registrations": 0,
+        "waits": 35,
+        "exit_wakeups": 17
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 1,
+      "version": "candidate",
+      "seconds": 1.1547092979999434,
+      "coordinator_cpu_seconds": 0.28,
+      "decisions": 100,
+      "ready_to_start_seconds_sum": 15.56036639213562,
+      "succeeded": 32,
+      "stats": {
+        "iterations": 68,
+        "decisions": 100,
+        "pidfds_registered": 32,
+        "fallback_registrations": 0,
+        "waits": 25,
+        "exit_wakeups": 15
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 1,
+      "version": "baseline",
+      "seconds": 1.2442461749997165,
+      "coordinator_cpu_seconds": 0.45,
+      "decisions": 316,
+      "ready_to_start_seconds_sum": 18.1429443359375,
+      "succeeded": 32,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 2,
+      "version": "baseline",
+      "seconds": 1.2226058129999728,
+      "coordinator_cpu_seconds": 0.47000000000000003,
+      "decisions": 318,
+      "ready_to_start_seconds_sum": 17.255922317504883,
+      "succeeded": 32,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 2,
+      "version": "candidate",
+      "seconds": 1.1320024910000939,
+      "coordinator_cpu_seconds": 0.26,
+      "decisions": 86,
+      "ready_to_start_seconds_sum": 15.753048419952393,
+      "succeeded": 32,
+      "stats": {
+        "iterations": 54,
+        "decisions": 86,
+        "pidfds_registered": 32,
+        "fallback_registrations": 0,
+        "waits": 16,
+        "exit_wakeups": 13
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 3,
+      "version": "candidate",
+      "seconds": 1.1503793770007178,
+      "coordinator_cpu_seconds": 0.26,
+      "decisions": 96,
+      "ready_to_start_seconds_sum": 15.65235447883606,
+      "succeeded": 32,
+      "stats": {
+        "iterations": 64,
+        "decisions": 96,
+        "pidfds_registered": 32,
+        "fallback_registrations": 0,
+        "waits": 22,
+        "exit_wakeups": 16
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 3,
+      "version": "baseline",
+      "seconds": 1.2706224829998973,
+      "coordinator_cpu_seconds": 0.48000000000000004,
+      "decisions": 348,
+      "ready_to_start_seconds_sum": 18.223517179489136,
+      "succeeded": 32,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 4,
+      "version": "baseline",
+      "seconds": 1.2125468440008262,
+      "coordinator_cpu_seconds": 0.46,
+      "decisions": 319,
+      "ready_to_start_seconds_sum": 17.39491558074951,
+      "succeeded": 32,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "wide",
+      "repeat": 4,
+      "version": "candidate",
+      "seconds": 1.1118040380006278,
+      "coordinator_cpu_seconds": 0.25,
+      "decisions": 92,
+      "ready_to_start_seconds_sum": 14.72000002861023,
+      "succeeded": 32,
+      "stats": {
+        "iterations": 60,
+        "decisions": 92,
+        "pidfds_registered": 32,
+        "fallback_registrations": 0,
+        "waits": 21,
+        "exit_wakeups": 12
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 0,
+      "version": "baseline",
+      "seconds": 0.9737428350017581,
+      "coordinator_cpu_seconds": 0.27,
+      "decisions": 96,
+      "ready_to_start_seconds_sum": 2.8576316833496094,
+      "succeeded": 24,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 0,
+      "version": "candidate",
+      "seconds": 0.8161002779997943,
+      "coordinator_cpu_seconds": 0.14,
+      "decisions": 89,
+      "ready_to_start_seconds_sum": 1.7907965183258057,
+      "succeeded": 24,
+      "stats": {
+        "iterations": 65,
+        "decisions": 89,
+        "pidfds_registered": 24,
+        "fallback_registrations": 0,
+        "waits": 33,
+        "exit_wakeups": 18
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 1,
+      "version": "candidate",
+      "seconds": 0.8109590350013605,
+      "coordinator_cpu_seconds": 0.14,
+      "decisions": 87,
+      "ready_to_start_seconds_sum": 1.8327860832214355,
+      "succeeded": 24,
+      "stats": {
+        "iterations": 63,
+        "decisions": 87,
+        "pidfds_registered": 24,
+        "fallback_registrations": 0,
+        "waits": 32,
+        "exit_wakeups": 19
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 1,
+      "version": "baseline",
+      "seconds": 0.981019283999558,
+      "coordinator_cpu_seconds": 0.28,
+      "decisions": 98,
+      "ready_to_start_seconds_sum": 2.8594863414764404,
+      "succeeded": 24,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 2,
+      "version": "baseline",
+      "seconds": 0.9630786090001493,
+      "coordinator_cpu_seconds": 0.26999999999999996,
+      "decisions": 94,
+      "ready_to_start_seconds_sum": 2.6745009422302246,
+      "succeeded": 24,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 2,
+      "version": "candidate",
+      "seconds": 0.8198846060004144,
+      "coordinator_cpu_seconds": 0.15999999999999998,
+      "decisions": 84,
+      "ready_to_start_seconds_sum": 2.0130674839019775,
+      "succeeded": 24,
+      "stats": {
+        "iterations": 60,
+        "decisions": 84,
+        "pidfds_registered": 24,
+        "fallback_registrations": 0,
+        "waits": 30,
+        "exit_wakeups": 16
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 3,
+      "version": "candidate",
+      "seconds": 0.8144277789997432,
+      "coordinator_cpu_seconds": 0.15000000000000002,
+      "decisions": 89,
+      "ready_to_start_seconds_sum": 1.9348835945129395,
+      "succeeded": 24,
+      "stats": {
+        "iterations": 65,
+        "decisions": 89,
+        "pidfds_registered": 24,
+        "fallback_registrations": 0,
+        "waits": 33,
+        "exit_wakeups": 17
+      },
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 3,
+      "version": "baseline",
+      "seconds": 0.9755350700015697,
+      "coordinator_cpu_seconds": 0.24999999999999994,
+      "decisions": 92,
+      "ready_to_start_seconds_sum": 2.7400312423706055,
+      "succeeded": 24,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 4,
+      "version": "baseline",
+      "seconds": 0.889651079000032,
+      "coordinator_cpu_seconds": 0.26,
+      "decisions": 92,
+      "ready_to_start_seconds_sum": 2.710980176925659,
+      "succeeded": 24,
+      "stats": null,
+      "paid_model_calls": 0
+    },
+    {
+      "workload": "waves",
+      "repeat": 4,
+      "version": "candidate",
+      "seconds": 0.8196297380000033,
+      "coordinator_cpu_seconds": 0.16,
+      "decisions": 84,
+      "ready_to_start_seconds_sum": 2.0268242359161377,
+      "succeeded": 24,
+      "stats": {
+        "iterations": 60,
+        "decisions": 84,
+        "pidfds_registered": 24,
+        "fallback_registrations": 0,
+        "waits": 29,
+        "exit_wakeups": 17
+      },
+      "paid_model_calls": 0
+    }
+  ],
+  "budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "workers": 4,
+  "observer_enabled": true,
+  "repeats": 5,
+  "paid_model_calls": 0,
+  "limits": "Controlled short local tasks only. No inference speedup or real-model task performance claim."
+}

@@ -1,6 +1,7 @@
 'use strict';
 const $=id=>document.getElementById(id);
 let selected=null,current=null,status=null,csrf='',polling=false,sending=false,signature='';
+const processOpen=new Map();
 const modes={llm:'直接对话',team:'多 Agent 协作',review:'写作与评审',document:'文本分析',engineering:'示例项目修复'};
 const active=t=>t.status==='running';
 const uuid=()=>crypto.randomUUID().replaceAll('-','');
@@ -27,6 +28,25 @@ function copy(text,button){navigator.clipboard.writeText(text).then(()=>{button.
 function bodyText(box,text){
   renderMarkdown(box,text,copy);
 }
+function processPanel(turn){
+  const execution=turn.execution,working=active(turn),view=element('details',null,'process-panel'+(working?' working':''));
+  view.open=processOpen.has(turn.request_id)?processOpen.get(turn.request_id):working;
+  view.ontoggle=()=>processOpen.set(turn.request_id,view.open);
+  const labels={running:'正在处理',cancelling:'正在停止',succeeded:'处理完成',failed:'执行未完成',cancelled:'已停止',interrupted:'运行已中断',recovery_required:'需要管理员检查'};
+  const elapsed=execution?.elapsed_seconds,summary=element('summary');
+  summary.append(element('span',working?'◎':turn.status==='succeeded'?'✓':'!','process-icon'),
+                 element('span',(labels[turn.status]||turn.status)+(typeof elapsed==='number'?' · '+elapsed.toFixed(1)+' 秒':'')),element('span','⌄','process-chevron'));
+  view.append(summary);
+  const stages=element('div',null,'process-stages'),states={waiting:'等待',running:'执行中',succeeded:'完成',failed:'失败',cancelled:'停止',timeout:'超时',skipped:'跳过',unschedulable:'预算不足',retrying:'准备重试',interrupted:'已中断'};
+  if(execution?.steps?.length){
+    for(const step of execution.steps){const row=element('div',null,'process-step '+step.status);
+      const description=element('div',null,'process-step-label');description.append(element('span',step.label),element('small',(step.kind==='model'?'模型请求':'本地执行')+(step.attempt>1?' · 第 '+step.attempt+' 次尝试':'')));
+      row.append(element('span',step.status==='succeeded'?'✓':step.status==='running'?'◌':'·','process-step-icon'),description,
+                 element('span',(states[step.status]||step.status)+(typeof step.elapsed_seconds==='number'?' · '+step.elapsed_seconds.toFixed(2)+' 秒':''),'process-step-time'));stages.append(row)}
+  }else stages.append(element('p',working?'请求已提交，正在等待执行记录。':'该历史记录没有步骤快照，可打开执行记录查看。','process-note'));
+  stages.append(element('p','展示实际执行步骤与耗时，不包含模型内部思考内容。'+(typeof execution?.model_admitted==='number'?'已放行模型请求 '+execution.model_admitted+' 次。':''),'process-note'));
+  view.append(stages);return view;
+}
 function render(chat){
   current=chat;const last=chat.turns.at(-1);
   $('consoleLink').href=last?.job_id?'console?job='+encodeURIComponent(last.job_id):'console';
@@ -36,9 +56,10 @@ function render(chat){
   for(const turn of chat.turns){
     const user=element('article',null,'message user');user.setAttribute('aria-label','你的消息');user.append(element('div',turn.prompt,'user-bubble'));box.append(user);
     const assistant=element('article',null,'message assistant');assistant.setAttribute('aria-label','Agent Runtime 的回答');const heading=element('div',null,'assistant-heading');heading.append(element('span','✳'),element('span','Agent Runtime'),element('span',modes[turn.mode]||''));assistant.append(heading);
+    assistant.append(processPanel(turn));
     const body=element('div',null,'assistant-body');
     if(active(turn)){
-      const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span',progressText(turn)));body.append(pending);
+      const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','等待本次执行完成后显示回答…'));body.append(pending);
     }else bodyText(body,turn.answer||'此运行没有可用回答，请在控制台查看记录。');
     assistant.append(body);
     const actions=element('div',null,'message-actions');
