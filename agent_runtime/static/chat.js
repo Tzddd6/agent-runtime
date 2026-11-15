@@ -72,7 +72,7 @@ function render(chat){
     if(active(turn)){
       const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','等待本次执行完成后显示回答…'));body.append(pending);
     }else bodyText(body,turn.answer||'此运行没有可用回答，请在控制台查看记录。');
-    assistant.append(body);
+    assistant.append(body);if(turn.knowledge){assistant.append(knowledgeSources(turn));linkKnowledgeCitations(body,turn)}
     const actions=element('div',null,'message-actions');
     if(turn.answer){const button=element('button','复制回答','small-button');button.type='button';button.onclick=()=>copy(turn.answer,button);actions.append(button)}
     if(turn.job_id){const link=element('a','查看执行记录 ↗');link.href='console?job='+encodeURIComponent(turn.job_id);actions.append(link)}
@@ -101,7 +101,8 @@ async function refresh(){
     const [state,list]=await Promise.all([api('chat/status'),api('chat/conversations')]);
     status=state;csrf=state.csrf;$('modelLabel').textContent=state.model||'Agent Runtime';$('connection').textContent=state.recovery_required?'待管理员恢复':state.busy?'协作进行中':'已连接';$('connection').className='connection';
     showHistory(list.conversations);
-    const library=$('capabilityList'),nextLibrary=JSON.stringify(state.capabilities);if(nextLibrary!==librarySignature){librarySignature=nextLibrary;library.replaceChildren();for(const [title,rows] of [['工具',state.capabilities?.plugins],['Skill',state.capabilities?.skills]]){library.append(element('strong',title));for(const row of rows||[])library.append(element('p',row.id+'：'+row.description))}}
+    $('knowledgeCount').textContent=state.knowledge?.documents||0;$('capabilityCount').textContent=(state.capabilities?.plugins?.length||0)+' / '+(state.capabilities?.skills?.length||0);
+    const nextLibrary=JSON.stringify(state.capabilities);if(nextLibrary!==librarySignature){librarySignature=nextLibrary;renderLibrary()}
     if(selected){const target=selected,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{const chat=await api('chat/conversations/'+target+(after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified)render(chat)}catch(error){if(error.status!==404)throw error;if(target===selected&&draftConversation===target){current=null;$('welcome').hidden=false;$('messages').hidden=true}else if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
     controls();
   }catch(error){status=null;$('connection').textContent='连接中断';$('connection').className='connection offline';controls();notify(error.message)}
@@ -111,7 +112,7 @@ async function send(event){
   event.preventDefault();if($('send').disabled||sending)return;
   const prompt=$('prompt').value.trim()||(pendingAttachments.length?'请分析这些附件并回答。':'');if(!prompt)return;
   const target=selected||uuid();selected=target;address(target);sending=true;notify('');controls();
-  const payload={conversation_id:target,request_id:uuid(),prompt,mode:$('mode').value,project:$('project').value,response_tokens:Number($('responseTokens').value),deep_thinking:$('deepThinking').checked,attachments:pendingAttachments.map(a=>a.id),
+  const payload={conversation_id:target,request_id:uuid(),prompt,mode:$('mode').value,project:$('project').value,response_tokens:Number($('responseTokens').value),deep_thinking:$('deepThinking').checked,use_knowledge:$('useKnowledge').checked,attachments:pendingAttachments.map(a=>a.id),
                  model_budget:{calls:Number($('modelCalls').value),output_tokens:Number($('modelTokens').value)}};
   try{draftConversation=null;await api('chat/turns',payload);if(selected===target){$('prompt').value='';pendingAttachments=[];showAttachments()}signature='';await refresh()}
   catch(error){notify(error.message+'。不会自动重复提交。');await refresh()}
@@ -125,7 +126,7 @@ function init(){
   $('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('chatForm').requestSubmit()}};
   $('stop').onclick=async()=>{const turn=current?.turns.find(active);if(!turn?.job_id)return;$('stop').disabled=true;try{await api('jobs/'+turn.job_id+'/cancel',{});await refresh()}catch(error){notify(error.message)}finally{$('stop').disabled=false}};
   $('menu').onclick=()=>{const open=$('sidebar').classList.toggle('open');$('shade').hidden=!open};$('shade').onclick=closeMenu;
-  document.onkeydown=event=>{if(event.key==='Escape'){closeMenu();$('budgetOptions').open=false}};
+  document.onkeydown=event=>{if(event.key==='Escape')closeMenu()};
   for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{$('mode').value=button.dataset.mode;$('prompt').value=button.dataset.prompt;controls();$('prompt').focus()};
   if(selected){$('welcome').hidden=true;$('messages').hidden=false;$('messages').append(element('p','正在读取对话…','muted'))}
   refresh();setInterval(refresh,1500);

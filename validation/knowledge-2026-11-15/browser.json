@@ -1,0 +1,18 @@
+{
+  "production_read_only_browser_checks": [
+    "white chat workspace",
+    "citation click expands immutable snapshot",
+    "classified settings",
+    "real SQLite counters",
+    "20 tools and 9 skills with search",
+    "independent real resource monitoring"
+  ],
+  "local_fixture_write_checks": [
+    "create note",
+    "save and index",
+    "Chinese query returns real excerpt"
+  ],
+  "browser_error_logs": [],
+  "console_usage_node_checks": "deduplication, retries, missing values and zero usage passed",
+  "screenshots_delivered_in_local_workspace": true
+}

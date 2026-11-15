@@ -7,6 +7,7 @@ names.interrupted='已中断';
 Object.assign(names,{registered:'已注册',ready:'就绪',idle:'空闲',pausing:'暂停中',paused:'已暂停',terminating:'终止中',terminated:'已终止',completed:'已完成'});
 const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审',engineering:'Python 项目修复'};
 scenes.agents='Agent 生命周期';
+scenes.auto='自动协作';
 const palette=['#109a8c','#5d8dcc','#c79d52','#957bb7','#5fa0a6','#c17c8b','#709563'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const number=(value,digits=1)=>finite(value)?value.toFixed(digits):'—';
@@ -99,6 +100,11 @@ function showView(view){
       pane.id==='taskInspector'&&!inspectedTask;
   }
 }
+function recordedUsage(events){
+  const calls=new Map();for(const event of events||[])if(event.result?.model_call)calls.set(event.task_id+'/'+event.attempt,event.result.model_call);
+  const usage=[...calls.values()].map(c=>c.usage);if(!usage.length||usage.some(u=>!finite(u?.prompt_tokens)||!finite(u?.completion_tokens)))return {};
+  return {prompt_tokens:usage.reduce((n,u)=>n+u.prompt_tokens,0),completion_tokens:usage.reduce((n,u)=>n+u.completion_tokens,0)};
+}
 function renderOverview(job){
   if(!$('selectedTitle'))return;
   $('selectedTitle').textContent=jobTitle(job);$('selectedStatus').textContent=names[job.status]||job.status;
@@ -106,9 +112,9 @@ function renderOverview(job){
   $('selectedDescription').textContent=job.id+' · '+(job.policy||'—')+' · '+job.workers+' Worker';
   const states=Object.values(job.states||{}),done=states.filter(x=>x==='succeeded').length;
   const end=job.finished||job.monitor?.time||Date.now()/1000;
-  const usage=job.engineering?.usage||{};const facts=[['执行耗时',number(Math.max(0,end-job.created),1)+' s'],
+  const usage=job.engineering?.usage||recordedUsage(job.events);const facts=[['执行耗时',number(Math.max(0,end-job.created),1)+' s'],
     ['任务完成',done+' / '+states.length],['已记录响应',job.engineering?String(job.engineering.model_calls):String((job.events||[]).filter(e=>e.result?.model_call).length)],
-    ['输入 / 输出 token',finite(usage.prompt_tokens)?usage.prompt_tokens+' / '+usage.completion_tokens:'—']];
+    ['已记录输入 / 输出 token',finite(usage.prompt_tokens)?usage.prompt_tokens+' / '+usage.completion_tokens:'—']];
   const box=$('runFacts');box.replaceChildren();for(const [label,value] of facts){const card=node('div',null,'run-fact');card.append(node('small',label),node('strong',value));box.append(card)}
   $('historyState').textContent=job.restored?'已从磁盘恢复 · 不会自动重跑':'运行索引已保存 · 原始产物保留';
   $('exportRun').disabled=false;

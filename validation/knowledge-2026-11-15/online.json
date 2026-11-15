@@ -1,0 +1,73 @@
+{
+  "cases": [
+    {
+      "revision": 1,
+      "conversation_id": "15f7d42e61b2453fa58b523f28a56c69",
+      "request_id": "5bb0e0b7f8b041888af8a4f9eb57482c",
+      "submitted": true,
+      "job_id": "759c9a149dc549d6a5d79f4eefabe9cf",
+      "status": "succeeded",
+      "elapsed_seconds": 1.785,
+      "answer": "票据 KBCANARY 的容量为 173MiB，编号为 KB15-9e20781501e3。[K1]",
+      "excerpt_chars": 1985,
+      "search_ms": 0.84,
+      "source_revision": 1,
+      "source_sha256": "dffe1afc0931b83328a4cc702c1aed74b2c4716d9f38977d03210b7b1fabb1c9",
+      "source_citation": "K1",
+      "witness_in_answer": true,
+      "capacity_in_answer": true,
+      "citation_in_answer": true,
+      "model_calls": 1,
+      "actual_usage": [
+        {
+          "prompt_tokens": 3664,
+          "completion_tokens": 38,
+          "total_tokens": 3702,
+          "prompt_tokens_details": {
+            "cached_tokens": 128
+          },
+          "prompt_cache_hit_tokens": 128,
+          "prompt_cache_miss_tokens": 3536
+        }
+      ],
+      "same_request_reused": true
+    },
+    {
+      "revision": 2,
+      "conversation_id": "08589f4df7694ab69175b67fe09627ad",
+      "request_id": "0a12a50fd62845e48c8780318301c1cf",
+      "submitted": true,
+      "job_id": "1fa7ea1f5e3a4b9ebe36112a0c9b0689",
+      "status": "succeeded",
+      "elapsed_seconds": 2.039,
+      "answer": "票据 KBCANARY：容量为 229MiB，编号为 KB15-939f76fadcf7[K1]",
+      "excerpt_chars": 1985,
+      "search_ms": 0.97,
+      "source_revision": 2,
+      "source_sha256": "9b56d779629559643f71321bf8a6e38b6e8cf73c7cf3fdea6ce7035489ebdcd4",
+      "source_citation": "K1",
+      "witness_in_answer": true,
+      "capacity_in_answer": true,
+      "citation_in_answer": true,
+      "model_calls": 1,
+      "actual_usage": [
+        {
+          "prompt_tokens": 3661,
+          "completion_tokens": 37,
+          "total_tokens": 3698,
+          "prompt_tokens_details": {
+            "cached_tokens": 1920
+          },
+          "prompt_cache_hit_tokens": 1920,
+          "prompt_cache_miss_tokens": 1741
+        }
+      ],
+      "same_request_reused": true
+    }
+  ],
+  "model_requests_auto_replayed": false,
+  "passed": true,
+  "deleted_source_snapshot_retained": true,
+  "guide_document_id": "f93f8987f2554dffa3f2597576c57eb0",
+  "fixture_removed": true
+}

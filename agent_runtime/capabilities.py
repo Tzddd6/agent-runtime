@@ -16,7 +16,8 @@ SKILLS={'python-review':'检查Python接口、边界与错误处理',
         'web-research':'检索公开网页并核对来源与时效',
         'workspace-engineering':'在隔离项目中修改文件、运行命令并验证',
         'data-validation':'检查JSON、CSV和计算的输入与结论',
-        'runtime-operations':'先观测资源与失败，再有限调整Runtime配置'}
+        'runtime-operations':'先观测资源与失败，再有限调整Runtime配置',
+        'knowledge-analysis':'基于命中资料回答、交叉检查并引用可核对的来源'}
 PLUGINS={'text.stats':'统计文本字符、行与词数',
          'math.calculate':'计算有限的基础算术表达式',
          'python.syntax':'检查Python语法并提取函数和类名，不执行代码',

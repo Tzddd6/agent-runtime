@@ -1,0 +1,10 @@
+{
+  "regular_discovered": 212,
+  "regular_passed": 204,
+  "regular_skipped": 8,
+  "strict_tests_passed": 12,
+  "residual_attempts": 0,
+  "paid_model_calls": 0,
+  "enforcement": "cgroup_v2",
+  "report_write_recovered": "Original full suite and strict checks passed; report directory owner corrected. 27 affected tests rerun after UTF8 validation change."
+}

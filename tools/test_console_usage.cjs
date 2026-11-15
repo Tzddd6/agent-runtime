@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
+const context=vm.createContext({});vm.runInContext(fs.readFileSync('agent_runtime/static/console.js','utf8'),context);
+const event=(id,attempt,input,output)=>({task_id:id,attempt,result:{model_call:{usage:{prompt_tokens:input,completion_tokens:output}}}});
+context.events=[event('route',1,30,4),event('route',1,30,4),event('review',1,50,7),event('review',2,20,2)];
+const usage=JSON.parse(JSON.stringify(vm.runInContext('recordedUsage(events)',context)));
+assert.deepEqual(usage,{prompt_tokens:100,completion_tokens:13});
+context.events=[];assert.equal(Object.keys(vm.runInContext('recordedUsage(events)',context)).length,0);
+context.events=[{task_id:'route',attempt:1,result:{model_call:{}}}];assert.equal(Object.keys(vm.runInContext('recordedUsage(events)',context)).length,0);
+context.events=[event('route',1,0,0)];assert.equal(vm.runInContext('recordedUsage(events).completion_tokens',context),0);
+console.log('Console usage aggregation: deduplication, retry usage, missing data and zero usage passed');

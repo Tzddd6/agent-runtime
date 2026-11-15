@@ -44,6 +44,8 @@ class Controller:
         from .database import RuntimeDatabase
         from .attachments import AttachmentStore
         self.database=RuntimeDatabase(self.root/'metadata')
+        from .knowledge import KnowledgeStore
+        self.knowledge=KnowledgeStore(self.database)
         self.attachments=AttachmentStore(self.root/'attachments',self.database)
         self.upload_slot=threading.BoundedSemaphore(1)
         for job in self.store.load():
@@ -241,6 +243,7 @@ class Controller:
         model=self.model_info()
         from .capabilities import catalog
         return {'csrf':self.csrf,'busy':busy,'recovery_required':recovery,
+                'knowledge':{'available':True,'documents':len(self.knowledge.listing()['documents'])},
                 'native_thinking':os.environ.get('AGENTRT_NATIVE_THINKING')=='1','vision':os.environ.get('AGENTRT_VISION')=='1','capabilities':catalog(),
                 'model':model['model'],'configured':model['configured'],'available':model.get('available',True)}
 
@@ -255,6 +258,8 @@ class Controller:
         if type(deep_thinking) is not bool or deep_thinking and os.environ.get('AGENTRT_NATIVE_THINKING')!='1':raise ValueError('深度思考暂不可用')
         if deep_thinking and response_tokens<4096:raise ValueError('深度思考需要4096 token额度，含推理与答案')
         attachment_ids=value.get('attachments',[])
+        use_knowledge=value.get('use_knowledge',True)
+        if type(use_knowledge) is not bool:raise ValueError('知识库开关需为布尔值')
         if not isinstance(attachment_ids,list) or len(attachment_ids)>4 or any(not isinstance(a,str) for a in attachment_ids) or len(set(attachment_ids))!=len(attachment_ids):raise ValueError('附件列表无效')
         for a in attachment_ids:
             row=self.database.attachment(identity(a),key)
@@ -262,11 +267,16 @@ class Controller:
         if type(response_tokens) is not int or not 256<=response_tokens<=4096:raise ValueError('单次回答额度需为 256—4096 token')
         if any(budget[k]>DEFAULT_WORKFLOW_MODEL_BUDGET[k] for k in budget):raise ValueError('模型预算超出服务上限')
         with self.chat_lock:
-            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget,response_tokens=response_tokens,deep_thinking=deep_thinking,attachments=attachment_ids)
+            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget,response_tokens=response_tokens,deep_thinking=deep_thinking,attachments=attachment_ids,use_knowledge=use_knowledge)
             if reused:return {'conversation_id':key,'job_id':turn['job_id'],'reused':True}
             messages=history_messages(chat)+[{'role':'user','content':prompt}]
             try:
                 attachment_context=self.attachments.context(attachment_ids,key,self.root/'workspaces'/key) if attachment_ids else None
+                if use_knowledge and mode=='auto':
+                    knowledge=self.knowledge.context(prompt)
+                    attachment_context={**(attachment_context or {}),'knowledge':knowledge}
+                    # Immutable per-turn excerpts survive document edits and removal.
+                    self.chats.update(key,request,knowledge=knowledge)
                 job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking},chat_messages=messages,workspace_key=key,attachment_context=attachment_context)
             except (ValueError,OSError) as exc:
                 self.chats.update(key,request,status='failed',answer=str(exc))
@@ -429,12 +439,19 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 html=(Path(__file__).parent/'static'/name).read_text(encoding='utf-8')
                 if path=='/console/':html=html.replace('<head>','<head><base href="../">',1)
                 self.respond(200,html,'text/html; charset=utf-8')
-            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css','/static/markdown.js'):
+            elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css','/static/markdown.js','/static/workbench.js','/static/workbench.css','/static/monitor.css'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
             elif path=='/api/status':self.respond(200,controller.snapshot())
             elif path=='/api/chat/status':self.respond(200,controller.chat_status())
             elif path=='/api/database/status':self.respond(200,controller.database.status())
+            elif path=='/api/knowledge':self.respond(200,controller.knowledge.listing())
+            elif path=='/api/knowledge/search':
+                try:self.respond(200,{'sources':controller.knowledge.search(parse_qs(urlparse(self.path).query).get('q',[''])[0])})
+                except ValueError as exc:self.respond(400,{'error':str(exc)})
+            elif path.startswith('/api/knowledge/'):
+                try:self.respond(200,controller.knowledge.read(path.rsplit('/',1)[1]))
+                except ValueError as exc:self.respond(404,{'error':str(exc)})
             elif path=='/api/chat/conversations':self.respond(200,{'conversations':controller.chats.listing()})
             elif path.startswith('/api/chat/conversations/'):
                 try:
@@ -465,11 +482,15 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             try:
                 self.connection.settimeout(5)
                 length=int(self.headers.get('Content-Length','0'))
-                maximum=12*1024**2 if self.path=='/api/attachments' else 150000
+                maximum=12*1024**2 if self.path=='/api/attachments' else 1024**2 if self.path=='/api/knowledge/save' else 150000
                 if not 0<length<=maximum:raise ValueError('请求体过大或为空')
                 value=json.loads(self.rfile.read(length))
                 if not isinstance(value,dict):raise ValueError('需要 JSON 对象')
-                if self.path=='/api/attachments':
+                if self.path in ('/api/knowledge/save','/api/knowledge/remove'):
+                    if not controller.upload_slot.acquire(blocking=False):raise ValueError('正在处理其他资料，请稍后再试')
+                    try:self.respond(200,controller.knowledge.save(value) if self.path.endswith('/save') else controller.knowledge.remove(value))
+                    finally:controller.upload_slot.release()
+                elif self.path=='/api/attachments':
                     if not controller.upload_slot.acquire(blocking=False):raise ValueError('正在处理其他附件，请稍后再试')
                     try:self.respond(201,controller.attachments.upload(value))
                     finally:controller.upload_slot.release()
