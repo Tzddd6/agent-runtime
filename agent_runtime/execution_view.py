@@ -36,6 +36,7 @@ def execution_view(job,now=None):
         pair=(key,attempt)
         step=records.setdefault(pair,{'id':key,'attempt':attempt,'agent':event.get('agent',key),
                                      'label':label(key),'kind':'model' if model_step(key) else 'local'})
+        if event.get('agent')=='clock':step.update(kind='local',label='读取服务器时间')
         if key.startswith('auto_') and key!='auto_answer' and not key.startswith(('auto_decide_','auto_cycle_')):
             role=step['agent'].split('_',1)[0]
             title={'analyst':'分析','coder':'代码方案','tester':'测试设计','reviewer':'评审','researcher':'资料分析','tool':'调用工具'}.get(role,'协作任务')

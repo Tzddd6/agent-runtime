@@ -10,7 +10,11 @@ from pathlib import Path
 
 
 class Executor:
-    def __init__(self, cgroup_root=None):
+    def __init__(self, cgroup_root=None, *, backend='spawn',workflow_root=None):
+        if backend not in ('spawn','forkserver','auto'):raise ValueError('无效的进程后端')
+        self.backend=('forkserver' if sys.platform=='linux' else 'spawn') if backend=='auto' else backend
+        self.workflow_root=workflow_root;self.preloader=None
+        self.stats={'backend':self.backend,'launches':0,'preloader_startup_seconds':0,'launch_seconds':0}
         self.root = Path(cgroup_root).resolve() if cgroup_root else None
         self.agent_roots={}
         if self.root:
@@ -50,11 +54,19 @@ class Executor:
             environment = dict(os.environ)
             environment.pop('DEEPSEEK_API_KEY', None)
             environment.pop('AGENTRT_PROXY_TOKEN', None)
-            proc = subprocess.Popen([sys.executable, '-X', 'utf8', '-m', 'agent_runtime.worker',
-                                     str(directory / 'result.json'),str(payload_path)],
-                                    stdin=subprocess.PIPE, stdout=output, stderr=subprocess.STDOUT,
-                                    text=True, encoding='utf-8', env=environment,
-                                    start_new_session=(os.name == 'posix'))
+            if self.backend=='forkserver':
+                from .forkserver import ForkServer
+                if self.preloader is None:
+                    self.preloader=ForkServer(self.workflow_root or directory.parent)
+                    self.stats['preloader_startup_seconds']=self.preloader.startup_seconds
+                proc=self.preloader.launch(directory,payload_path)
+            else:
+                proc = subprocess.Popen([sys.executable, '-X', 'utf8', '-m', 'agent_runtime.worker',
+                                         str(directory / 'result.json'),str(payload_path)],
+                                        stdin=subprocess.PIPE, stdout=output, stderr=subprocess.STDOUT,
+                                        text=True, encoding='utf-8', env=environment,
+                                        start_new_session=(os.name == 'posix'))
+            self.stats['launches']+=1;self.stats['launch_seconds']+=time.monotonic()-started
             handle={'proc':proc,'output':output,'group':group,'directory':directory,
                     'payload_path':payload_path,'started':started,'expired':threading.Event(),
                     '_cleanup_lock':threading.RLock()}
@@ -88,6 +100,9 @@ class Executor:
                 if group and group.exists():group.rmdir()
                 payload_path.unlink(missing_ok=True)
             raise
+
+    def close(self):
+        if self.preloader is not None:self.preloader.close();self.preloader=None
 
     @staticmethod
     def _signal(handle):

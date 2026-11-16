@@ -79,7 +79,8 @@ class PaperMechanismTests(unittest.TestCase):
             self.assertLess(len(json.dumps(payload)),2048)
             result=next(e['result'] for e in events if e['task_id']=='review' and e['state']=='succeeded')
             self.assertEqual(result['result']['report'],{'source':{'text':large}})
-            self.assertEqual(result['contexts'],[{'text':large}])
+            self.assertEqual(result['context_refs'],next(e['context_refs'] for e in events if e['task_id']=='review' and e['state']=='running'))
+            self.assertNotIn('contexts',result)
             summary=json.loads(next(Path(tmp).glob('*/summary.json')).read_text(encoding='utf-8'))
             self.assertEqual(summary['dataflow'],{'context_ref_deliveries':1,'input_ref_deliveries':1,'semantic_ref_deliveries':0})
 

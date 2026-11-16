@@ -25,6 +25,7 @@ def compact_catalog(prompt):
     if re.search(r'代码|源码|修复|文件|python|测试|工程',prompt,re.I):families+=['workspace.','file.','project.','python.','command.']
     if re.search(r'资料|网页|知识|来源|搜索|检索',prompt):families+=['library.','web.','context.']
     if re.search(r'资源|并发|调度|runtime|cgroup',prompt,re.I):families+=['runtime.']
+    if re.search(r'几点|时间|日期|时区|clock',prompt,re.I):families+=['clock.']
     if re.search(r'计算|算术|数据|json|csv|差异',prompt,re.I):families+=['math.','json.','csv.','text.']
     selected=[key for key in PLUGINS if key.startswith(tuple(families))] if families else ['text.stats','math.calculate','library.search']
     selected=list(dict.fromkeys(selected+['tools.discover']))
@@ -32,6 +33,9 @@ def compact_catalog(prompt):
 
 
 def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking=False, attachments=None,workspace=None):
+    if re.fullmatch(r'\s*(?:请问)?(?:现在(?:是)?几点(?:了|钟)?|今天(?:是)?(?:几号|什么日期))[？?。！!\s]*',prompt):
+        return [{'id':'auto_answer','agent':'clock','action':'clock','timezone':'Asia/Shanghai','timeout':10,
+                 'resources':{'cpu_milli':100,'memory_bytes':32*1024**2,'pids':8}}]
     context={'user_request':prompt}
     if conversation:context['conversation']=conversation
     if attachments:context.update(attachments)

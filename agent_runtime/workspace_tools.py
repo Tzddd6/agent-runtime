@@ -31,14 +31,21 @@ def apply_patch(task,args):
     if set(args)!={'patches'} or not isinstance(patches,list) or not 1<=len(patches)<=6:raise ValueError('patches需为1—6项')
     prepared=[];seen=set()
     for patch in patches:
-        if not isinstance(patch,dict) or set(patch)!={'path','sha256','content'}:raise ValueError('补丁需包含path、sha256、content')
+        if not isinstance(patch,dict) or set(patch) not in ({'path','sha256','content'},{'path','sha256','replacements'}):raise ValueError('补丁需包含path、sha256与content或replacements')
         name=patch['path'];scoped_path(workspace(task),name)
         if name in seen or protected(name) or not name.endswith('.py') or any(p in ('uploads','verified') for p in Path(name).parts):raise ValueError('只可修改已有Python源码，禁止测试或重复路径')
         seen.add(name)
-        if not isinstance(patch['content'],str) or len(patch['content'].encode())>40000:raise ValueError('单个补丁超过40KB')
-        compile(patch['content'],name,'exec')
         original=operate({**task,'_download_full':True},'file.read',{'path':name})
         if original['sha256']!=patch['sha256']:raise ValueError('源码已变化；未应用任何补丁')
+        if 'replacements' in patch:
+            rows=patch['replacements'];content=original['content']
+            if not isinstance(rows,list) or not 1<=len(rows)<=16:raise ValueError('替换片段需为1—16项')
+            for row in rows:
+                if not isinstance(row,dict) or set(row)!={'old','new'} or not all(isinstance(v,str) for v in row.values()) or not row['old'] or content.count(row['old'])!=1:raise ValueError('替换片段缺失或不唯一')
+                content=content.replace(row['old'],row['new'],1)
+            patch={k:patch[k] for k in ('path','sha256')}|{'content':content}
+        if not isinstance(patch['content'],str) or len(patch['content'].encode())>40000:raise ValueError('单个补丁超过40KB')
+        compile(patch['content'],name,'exec')
         prepared.append((patch,original))
     written=[]
     try:

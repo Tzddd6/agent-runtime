@@ -128,7 +128,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced'):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto'):
     validate(tasks)
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
@@ -145,9 +145,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     if control is not None and (not isinstance(control,RuntimeControl) or control.closed):
         raise ValueError('control 必须是尚未结束的 RuntimeControl')
     scheduler = AdmissionScheduler(policy,budget,DEFAULTS)
-    executor = Executor(cgroup_root)
     root = Path(output_dir or tempfile.mkdtemp(prefix='agentrt-')).resolve() / uuid.uuid4().hex
     root.mkdir(parents=True)
+    executor = Executor(cgroup_root,backend=worker_backend,workflow_root=root)
     control=control or RuntimeControl()
     control.worker_ceiling=max_workers;control.settings={'workers':max_workers,'policy':policy}
     project_workspace=Path(workspace).resolve() if workspace is not None else root/'workspace'
@@ -220,6 +220,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'budget':dict(budget),'reserved':dict(used),'slots_used':len(running),
                   'slots_total':max_workers,'policy':policy,
                   'context':store.stats(),'dataflow':dict(dataflow),
+                  'execution':dict(executor.stats),
                   'context_control':broker.contexts.stats() if broker else {'policy':context_mode,'views':0},
                   'model_resources':registry.model_budgets.snapshot(),
                   'scheduling':{'reason':scheduler.last_decision.reason,
@@ -414,6 +415,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 dataflow['input_ref_deliveries'] += len(input_refs)
                 dataflow['semantic_ref_deliveries'] += len(shared_refs)
                 event(key, 'running', pid=handle['proc'].pid, resources=limits,
+                      worker_backend=executor.backend,
                       enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs,
                       input_refs=input_refs,shared_refs=shared_refs)
             if len(events)!=cycle_sequence:observe(force=True)
@@ -511,9 +513,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 cleanup_errors.append(str(exc))
             else:
                 if states[key]=='running':states[key]='failed'
-        try:
-            registry.cleanup()
-        except Exception as exc:cleanup_errors.append(str(exc))
+        for closer in (executor.close,registry.cleanup):
+            try:closer()
+            except Exception as exc:cleanup_errors.append(str(exc))
         try:
             control.close()
             registry.synchronize(states,finished=True,failed=execution_failed or bool(cleanup_errors))
@@ -538,6 +540,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                                 'agents':registry.snapshots(),'agent_controls':control.history(),
                                                 'dataflow':dataflow,'policy':policy,
                                                 'scheduling_stats':{**scheduling_stats,**completion.stats},
+                                                'execution_stats':executor.stats,
                                                 'telemetry_stats':registry.telemetry_stats,
                                                 'model_resources':registry.model_budgets.snapshot(),
                                                 'context_stats': store.stats(),

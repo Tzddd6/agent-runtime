@@ -74,6 +74,12 @@ class Broker:
             if agent is None:
                 raise PermissionError()
             op = value['op']
+            if op=='materialize':
+                refs=value.get('context_refs',[]);inputs=value.get('input_refs',{})
+                if not isinstance(refs,list) or not isinstance(inputs,dict) or len(refs)+len(inputs)>128 or any(not isinstance(k,str) for k in inputs):raise ValueError('invalid batch')
+                keys=list(dict.fromkeys(refs+list(inputs.values())))
+                by_ref=self.store.get_many(keys,agent,max_bytes=4*1024**2)
+                return {'context':[by_ref[r] for r in refs],'upstream_results':{k:by_ref[r] for k,r in inputs.items()}}
             if op=='context_view':return self.contexts.view(agent,value.get('context_refs',[]),value.get('input_refs',{}),value.get('query',''))
             if op=='context_search':return self.contexts.search(agent,value.get('query'),value.get('limit',6))
             if op=='context_read':return self.contexts.read(agent,value.get('ref'),value.get('offset',0),value.get('limit',4000))

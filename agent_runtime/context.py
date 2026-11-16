@@ -138,12 +138,17 @@ class ContextStore:
     def authorized(self,agent):
         with self.lock:return [ref for ref,readers in self.grants.items() if agent in readers]
 
-    def get_many(self,refs,agent):
+    def get_many(self,refs,agent,max_bytes=None):
         if not isinstance(refs,list) or len(refs)>164:raise ValueError('引用批次数超过限制')
         with self.lock:
             if any(not isinstance(ref,str) or not re.fullmatch('[0-9a-f]{64}',ref) or agent not in self.grants.get(ref,set()) for ref in refs):
                 raise PermissionError('上下文未授权')
-            return {ref:self.get(ref,agent) for ref in dict.fromkeys(refs)}
+            result={};size=0
+            for ref in dict.fromkeys(refs):
+                value=self.get(ref,agent);size+=len(json.dumps(value,ensure_ascii=False).encode())
+                if max_bytes is not None and size>max_bytes:raise ValueError('上下文批次超过字节上限')
+                result[ref]=value
+            return result
 
     def label_source(self,ref,metadata):
         if (ref not in self.grants or not isinstance(metadata,dict) or set(metadata)-{'task_id','agent','action','attempt','kind'}

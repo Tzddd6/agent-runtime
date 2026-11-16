@@ -49,7 +49,9 @@ PLUGINS={'text.stats':'统计文本字符、行与词数',
          'workspace.test':'隔离运行unittest，拒绝0测试或全部跳过的假成功',
          'library.search':'检索版本化的Python、SQL、Git、HTTP和Linux资料',
          'library.read':'按ID读取带官方来源的本地资料条目',
-         'tools.discover':'按名称或关键词读取工具参数与权限'}
+         'tools.discover':'按名称或关键词读取工具参数与权限',
+         'clock.now':'读取实际服务器时间，明确IANA时区与来源',
+         'project.apply_edits':'编译受检AST表达式补丁并执行原项目验证'}
 ARGUMENTS={
  'text.stats':{'text':'可选文本，省略时使用用户请求'},'math.calculate':{'expression':'(12+3)*2'},
  'python.syntax':{'source':'def add(a,b):\n return a+b'},'project.inspect':{'project':'pricing/intervals/text_normalization'},
@@ -65,14 +67,15 @@ ARGUMENTS={
  'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'},
  'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000},
  'workspace.inspect':{},'workspace.test':{},'workspace.import':{'files':[{'path':'uploads/附件id.py','name':'calc.py'},{'path':'uploads/测试附件id.py','name':'test_calc.py'}]},'workspace.apply_patch':{'patches':[{'path':'calc.py','sha256':'原SHA','content':'完整新源码'}]},
- 'library.search':{'query':'Python测试','limit':4},'library.read':{'id':'python-testing'},'tools.discover':{'query':'file.read'}}
+ 'library.search':{'query':'Python测试','limit':4},'library.read':{'id':'python-testing'},'tools.discover':{'query':'file.read'},
+ 'clock.now':{'timezone':'Asia/Shanghai'},'project.apply_edits':{'project':'pricing','edits':[{'site':'列出的位置','expression':'表达式'}]}}
 
 
 def catalog():
     return {'skills':[{'id':key,'description':value} for key,value in SKILLS.items()],
             'plugins':[{'id':key,'description':value,'arguments_example':ARGUMENTS[key],
                 'permissions':['sandboxed_command' if key=='command.run' else 'public_network' if key=='web.fetch'
-                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch','workspace.import') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
+                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch','workspace.import','project.patch_check','project.apply_edits') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
                 for key,value in PLUGINS.items()],
             'host_arbitrary_code_execution':False,'external_plugins_installed':False}
 
@@ -107,6 +110,16 @@ def calculate(expression):
 def execute_plugin(task):
     name=task.get('plugin');args=task.get('arguments',{})
     if name not in PLUGINS or not isinstance(args,dict):raise ValueError('插件或参数无效')
+    if name=='clock.now':
+        from .clock_tool import now
+        if set(args)-{'timezone'}:raise ValueError('时间工具参数无效')
+        return {'plugin':name,**now(args.get('timezone','Asia/Shanghai'))}
+    if name=='project.apply_edits':
+        from .compact_patch import compile_patch
+        from .engineering import canonical_project
+        if set(args)!={'project','edits'}:raise ValueError('表达式补丁参数无效')
+        project=canonical_project(args['project']);source=compile_patch(json.dumps({'edits':args['edits']}),project)
+        return {'edit_protocol':'ast_expressions',**execute_plugin({**task,'plugin':'project.patch_check','arguments':{'project':project,'source':source}})}
     if name.startswith(('file.','web.','workspace.')) or name in ('command.run','artifact.write'):
         from .tooling import operate
         return {'plugin':name,**operate(task,name,args)}

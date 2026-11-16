@@ -26,20 +26,26 @@ def detect_controlled(prompt):
     return canonical_project(hit[1].lower()) if hit else None
 
 
-def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=None):
+def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=None,protocol='compact'):
+    if protocol not in ('compact','full'):raise ValueError('补丁协议无效')
     return [{'id':'repair_prepare','agent':'repair-control','action':'repair_prepare','timeout':40,'resources':RES,
-             'repair_project':project,'contexts':[{'user_request':prompt}],'repair_attachments':attachments,'response_tokens':response_tokens,'thinking':thinking}]
+             'repair_project':project,'repair_protocol':protocol,'contexts':[{'user_request':prompt}],'repair_attachments':attachments,'response_tokens':response_tokens,'thinking':thinking}]
 
 
 def candidate(parent,context,round_number):
     key=f'repair_candidate_{round_number}'
-    instruction=PATCH_SYSTEM+('格式为{"source":"完整模块源码"}。' if parent.get('repair_project') else
+    compact=parent.get('repair_protocol','compact')=='compact'
+    instruction=PATCH_SYSTEM+(
+        '仅输出内部协议{"edits":[{"site":"列出的表达式位置","expression":"新表达式"}]}。Runtime重建并交付完整源码。'
+        '不重新输出整个模块；不支持if/else三元表达式；必须保持需求指定的运算顺序与取整位置。' if parent.get('repair_project') and compact else
+        '格式为{"source":"完整模块源码"}。禁止三元表达式、导入、额外函数。' if parent.get('repair_project') else
+        '格式为{"patches":[{"path":"现有源码路径","sha256":"快照原哈希","replacements":[{"old":"唯一原片段","new":"新片段"}]}]}。最多6个已有源码文件。' if compact else
         '格式为{"patches":[{"path":"现有源码路径","sha256":"快照原哈希","content":"完整新源码"}]}。最多6个已有源码文件。')
     model={'id':key,'agent':'repair-author','action':'llm','timeout':75,'resources':RES,'contexts':[context],
            'messages':[{'role':'system','content':instruction}],'max_tokens':parent.get('response_tokens',4096),'thinking':parent.get('thinking',False),
            'depends_on':[parent['id']]}
     gate={'id':f'repair_check_{round_number}','agent':'repair-control','action':'repair_check','timeout':40,'resources':RES,
-          'depends_on':[key,parent['id']],'inputs':[key],'repair_project':parent.get('repair_project'),'round':round_number,
+          'depends_on':[key,parent['id']],'inputs':[key],'repair_project':parent.get('repair_project'),'repair_protocol':parent.get('repair_protocol','compact'),'round':round_number,
           'contexts':[context],'candidate_id':key,'response_tokens':parent.get('response_tokens',4096),'thinking':parent.get('thinking',False)}
     return [model,gate]
 
@@ -52,7 +58,18 @@ def execute(task):
         context=dict(task['_contexts'][0]);project=task.get('repair_project')
         if project:
             baseline=tool('project.test',{'project':project});info=manifest(project)
-            if json.dumps(info,ensure_ascii=False) not in context['user_request']:context['project']=info
+            if task.get('repair_protocol','compact')=='compact':
+                from .compact_patch import describe
+                # Remove only a structurally exact canonical manifest, keeping
+                # every user-authored instruction outside that known object.
+                goal=context['user_request']
+                for match in re.finditer(r'\{',goal):
+                    try:value,end=json.JSONDecoder().raw_decode(goal[match.start():])
+                    except ValueError:continue
+                    if value==info:
+                        goal=goal[:match.start()]+'\n项目资料由Runtime按表达式位置提供。'+goal[match.start()+end:];break
+                context['user_request']=goal;context['project']=describe(project)
+            elif json.dumps(info,ensure_ascii=False) not in context['user_request']:context['project']=info
         else:
             if task.get('repair_attachments'):tool('workspace.import',{'files':task['repair_attachments']})
             context['workspace']=tool('workspace.inspect',{})
@@ -67,7 +84,9 @@ def execute(task):
     error=None;result={};source=None
     try:
         if project:
-            source=validate_patch(raw,project)
+            from .compact_patch import compile_patch
+            parsed=json.loads(raw)
+            source=compile_patch(raw,project) if isinstance(parsed,dict) and 'edits' in parsed else validate_patch(raw,project)
             fingerprint=hashlib.sha256(source.encode()).hexdigest()
             if context.get('previous_failed_source_sha256')==fingerprint:
                 result={**context['previous_failed_verification'],'reused_from_previous_failed_check':True}

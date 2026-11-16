@@ -39,10 +39,10 @@ def main():
     # Transport references, materialize only inside the consuming Attempt.
     # Broker binds the bearer capability to the real Agent identity.
     if '_context_refs' in task and context_view is None:
-        task['_contexts'] = [ipc(task,op='get',ref=ref)['data'] for ref in task['_context_refs']]
-    if '_input_refs' in task and context_view is None:
-        task['_inputs'] = {key:ipc(task,op='get',ref=ref)['data']
-                           for key,ref in task['_input_refs'].items()}
+        if task.get('_context_refs') or task.get('_input_refs'):
+            batch=ipc(task,op='materialize',context_refs=task.get('_context_refs',[]),input_refs=task.get('_input_refs',{}))
+            task['_contexts']=batch['context'];task['_inputs']=batch['upstream_results']
+        else:task['_contexts']=[];task['_inputs']={}
     action = task.get('action', 'echo')
     model_result = None
     output = task.get('message', '完成')
@@ -52,6 +52,9 @@ def main():
         return 1
     if action == 'sleep':
         time.sleep(float(task.get('seconds', 0)))
+    elif action=='clock':
+        from .clock_tool import now
+        output=now(task.get('timezone','Asia/Shanghai'))['display']
     elif action == 'load':
         seconds, memory = float(task.get('seconds',1)), task.get('memory_mib',16)
         if not 0<seconds<=20 or type(memory) is not int or not 1<=memory<=64:
@@ -150,7 +153,7 @@ def main():
         print(f'未知动作: {action}', file=sys.stderr)
         return 2
     result = {'task_id': task['id'], 'result': output,
-              'contexts': task.get('_contexts', []), 'spawn': children}
+              'context_refs':task.get('_context_refs',[]),'spawn':children}
     if model_result is not None:
         result['result'] = model_result['content']
         result['model_call'] = model_result
