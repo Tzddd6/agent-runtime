@@ -1,0 +1,530 @@
+{
+  "version": "v0.19.1",
+  "regular": {
+    "total": 301,
+    "passed": 292,
+    "skipped": 9,
+    "run_user": "tzd"
+  },
+  "strict": {
+    "source_base_commit": "cc58140d5fb7862085b23a2b8ffc66b840162791",
+    "source_state": "post-fix candidate, see release source manifest",
+    "tests": 80,
+    "passed": true,
+    "remaining_attempt_cgroups": [],
+    "supplier_requests": 0,
+    "includes": [
+      "real browser virtual display/type/click/screenshot",
+      "host-home and local-network policy",
+      "real document extraction",
+      "CPU/OOM/PIDs/timeouts/descendants",
+      "Agent lifecycle and model budget",
+      "context authority",
+      "bounded tool recovery"
+    ]
+  },
+  "markdown_contracts": {
+    "passed": 8,
+    "supplier_requests": 0
+  },
+  "real_stream": {
+    "status": "succeeded",
+    "seconds": 11.227224921007291,
+    "final_characters": 4304,
+    "partial_samples": [
+      {
+        "seconds": 1.010435652002343,
+        "characters": 1,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.175177983008325,
+        "characters": 2,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.339158987000701,
+        "characters": 83,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.421382929009269,
+        "characters": 166,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.586391826000181,
+        "characters": 217,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.668603569996776,
+        "characters": 307,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.8331630430038786,
+        "characters": 336,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 1.9156009560101666,
+        "characters": 359,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.080094700009795,
+        "characters": 394,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.1621279410028365,
+        "characters": 450,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.3263363570004003,
+        "characters": 505,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.490297999000177,
+        "characters": 598,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.57235024900001,
+        "characters": 619,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.737605489004636,
+        "characters": 682,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.8199050600087503,
+        "characters": 762,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 2.984042263007723,
+        "characters": 793,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.1492178909975337,
+        "characters": 849,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.231421948003117,
+        "characters": 899,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.3962277179962257,
+        "characters": 942,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.5603881630086107,
+        "characters": 990,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.6429716060083592,
+        "characters": 1043,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.8072195959975943,
+        "characters": 1108,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 3.88934808500926,
+        "characters": 1151,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.0544181110017234,
+        "characters": 1214,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.218358698999509,
+        "characters": 1277,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.382797858008416,
+        "characters": 1329,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.4650811400060775,
+        "characters": 1396,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.629572363002808,
+        "characters": 1467,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.711758247009129,
+        "characters": 1534,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.876117271007388,
+        "characters": 1595,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 4.958245636997162,
+        "characters": 1682,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.123045276995981,
+        "characters": 1725,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.204987713004812,
+        "characters": 1791,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.369285178996506,
+        "characters": 1861,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.453013848004048,
+        "characters": 1979,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.61788102099672,
+        "characters": 2057,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.7835672500077635,
+        "characters": 2143,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 5.866473210000549,
+        "characters": 2164,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.031321618007496,
+        "characters": 2223,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.114299289998598,
+        "characters": 2317,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.280277653000667,
+        "characters": 2354,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.362971978000132,
+        "characters": 2393,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.5275235529989,
+        "characters": 2423,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.610098343007849,
+        "characters": 2484,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 6.775480094001978,
+        "characters": 2553,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.023103792002075,
+        "characters": 2582,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.1879354389966466,
+        "characters": 2673,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.269944690997363,
+        "characters": 2710,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.434713472001022,
+        "characters": 2735,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.599240198003827,
+        "characters": 2766,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.681782062005368,
+        "characters": 2815,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.8469579910015455,
+        "characters": 2867,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 7.929270876004011,
+        "characters": 2920,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.094263417006005,
+        "characters": 2987,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.176727238998865,
+        "characters": 3031,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.341366161999758,
+        "characters": 3087,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.423390441996162,
+        "characters": 3157,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.58829020500707,
+        "characters": 3230,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.752692787005799,
+        "characters": 3325,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.835060457000509,
+        "characters": 3408,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 8.999226779997116,
+        "characters": 3492,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.081606880004983,
+        "characters": 3567,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.24641082099697,
+        "characters": 3654,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.328892542005633,
+        "characters": 3707,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.493123419000767,
+        "characters": 3765,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.57625252600701,
+        "characters": 3821,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.74147692900442,
+        "characters": 3890,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.905882917999406,
+        "characters": 3945,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 9.988099470007,
+        "characters": 4001,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.152557613997487,
+        "characters": 4051,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.235730108004645,
+        "characters": 4102,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.4015131220076,
+        "characters": 4148,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.483990649998304,
+        "characters": 4178,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.64944934900268,
+        "characters": 4200,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.731925483996747,
+        "characters": 4230,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 10.896907421003561,
+        "characters": 4259,
+        "source": "provider_content_delta",
+        "while_running": true
+      },
+      {
+        "seconds": 11.062183678004658,
+        "characters": 4304,
+        "source": "provider_content_delta",
+        "while_running": true
+      }
+    ],
+    "provider_calls": 1,
+    "actual_stream_deltas": 79,
+    "usage": [
+      {
+        "prompt_tokens": 137,
+        "completion_tokens": 2289,
+        "total_tokens": 2426,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 137
+      }
+    ],
+    "first_partial_seconds": 1.010435652002343,
+    "partial_preceded_final": true,
+    "broker_pid_unchanged": 1477,
+    "supplier_key_exported": false
+  },
+  "math_ui": {
+    "bodyWidth": 1265,
+    "errors": 0,
+    "failedFonts": 0,
+    "formulas": 89,
+    "mainFont": true,
+    "mathFont": true,
+    "viewport": 1280
+  },
+  "supplier_key_read_exported_or_transferred": false,
+  "broker_pid_unchanged": 1477,
+  "retained_harness_failures": [
+    "18890 already SSH; no paid intent was submitted",
+    "font-route NameError caught by static-resource auth test; fixed before final301/80 pass"
+  ],
+  "scope": "UI preview, actual provider deltas; no hidden reasoning, no router JSON preview. Same original40-case comparison remains unchanged; no overall performance advantage claimed."
+}

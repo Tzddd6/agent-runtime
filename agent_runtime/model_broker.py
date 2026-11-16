@@ -197,6 +197,7 @@ class BrokerClient:
         self.token,self.url=token,url
         self.model,self.timeout='deepseek-flash',40
         self.cancel_event=None
+        self.supports_stream_callbacks=os.environ.get('AGENTRT_PROVIDER_STREAMING')=='1'
 
     @classmethod
     def from_env(cls):

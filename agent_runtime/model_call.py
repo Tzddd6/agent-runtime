@@ -59,7 +59,9 @@ def main():
             handoff_existing_key(request['key'])
         client=DeepSeekClient(request['key'],model=request['model'],timeout=request['timeout'],
                               base=request['base'],local_test=request.get('local_test',False))
-        value=client._complete_direct(request['messages'],request['max_tokens'])
+        from .provider_stream import extract,complete as stream_complete
+        messages,callback=extract(request['messages'])
+        value=stream_complete(client,messages,request['max_tokens'],callback) if callback else client._complete_direct(messages,request['max_tokens'])
     except ModelError as exc:value={'error':str(exc)}
     except Exception:value={'error':'模型代理子进程请求失败'}
     sys.stdout.write(json.dumps(value,ensure_ascii=False))

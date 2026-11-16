@@ -57,4 +57,13 @@ test('Malformed and unterminated syntax is visible and bounded',()=>{
   assert(box.textContent.includes('**未结束'));assert.equal(all(box,'pre')[0].textContent,'x = "**literal**"');
   render('> '.repeat(100)+'x');render('*'.repeat(8000));
 });
+test('Math is preserved before Markdown escapes and code never renders math',()=>{
+  const seen=[];global.katex={render(value,node,options){seen.push({value,options});node.textContent='MATH'}};
+  const box=render('公式 \\(f(t)\\)\n\n\\[\nF(s)=\\int_0^\\infty f(t)e^{-st}dt\n\\]\n\n$x_1$ 和 **加粗**\n\n```latex\n\\[code\\]\n```');
+  assert.equal(seen.length,3);assert.equal(seen[0].value,'f(t)');assert(seen[1].value.includes('\\int_0'));
+  assert(seen[1].options.displayMode);assert.equal(seen[0].options.trust,false);assert.equal(seen[0].options.maxExpand,500);
+  assert.equal(all(box,'pre')[0].textContent,'\\[code\\]\n');assert.equal(all(box,'strong')[0].textContent,'加粗');
+  const partial=render('暂未闭合 \\(x_1');assert(partial.textContent.includes('\\(x_1'));
+  delete global.katex;
+});
 process.stdout.write(JSON.stringify({tests:cases,passed:cases,paid_model_calls:0})+'\n');

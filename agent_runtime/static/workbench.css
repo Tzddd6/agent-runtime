@@ -35,3 +35,11 @@ html{scrollbar-gutter:stable}#chatHistory,.settings-content,.settings-nav,.code-
 .jump-latest{position:fixed;right:28px;bottom:calc(var(--composer-height,230px) + 15px);z-index:12;min-height:42px;padding:8px 15px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:0 4px 18px #1b294514;font-size:12px;cursor:pointer}
 .jump-latest[hidden]{display:none}.jump-latest:hover{background:var(--soft-accent);border-color:var(--accent)}.process-step-label .step-error{color:#b25c4d;line-height:1.7;max-width:510px}
 @media(max-width:760px){.jump-latest{right:15px;min-height:44px}.history-item,.workspace-nav>button,.workspace-nav>a{min-height:42px}}
+/* Math is local and bounded; narrow screens scroll formulas independently. */
+.math-block {overflow-x:auto;overflow-y:hidden;padding:.4rem 0;max-width:100%;}
+.math-inline {max-width:100%;}
+.katex-display {margin:.65em 0!important;}
+.streaming-answer::after {content:'▍';color:var(--accent,#5368ff);animation:stream-caret 1s steps(2,end) infinite;}
+.stream-note {font-size:12px;color:var(--muted,#78818c);margin-top:10px;}
+@keyframes stream-caret {50%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.streaming-answer::after{animation:none}}

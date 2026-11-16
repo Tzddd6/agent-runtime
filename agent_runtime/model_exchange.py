@@ -31,5 +31,9 @@ def complete(task,messages):
     for receipt in receipts:
         for key,value in (receipt.get('usage') or {}).items():
             if type(value) in (int,float):usage[key]=usage.get(key,0)+value
+            elif key in ('prompt_tokens_details','completion_tokens_details') and isinstance(value,dict):
+                detail=usage.setdefault(key,{})
+                for name,number in value.items():
+                    if type(number) in (int,float):detail[name]=detail.get(name,0)+number
     result.update(usage=usage,provider_calls=len(receipts),continuation_calls=len(receipts)-1,call_receipts=receipts)
     return result

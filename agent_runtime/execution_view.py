@@ -67,6 +67,8 @@ def execution_view(job,now=None):
         if isinstance(value,dict) and value.get('structure_verified') is True and isinstance(value.get('artifact'),dict):
             artifacts.append({k:value['artifact'][k] for k in ('path','bytes','sha256') if k in value['artifact']})
         if call:
+            step['stream_deltas']=call.get('stream_deltas',0)
+            step['first_delta_seconds']=call.get('first_delta_seconds')
             step['provider_calls']=call.get('provider_calls',1);step['continuation_calls']=call.get('continuation_calls',0)
             step['thinking_requested']=bool(call.get('thinking_requested'))
             usage=call.get('usage',{})

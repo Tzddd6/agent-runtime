@@ -135,13 +135,13 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto'):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None):
     validate(tasks)
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
             or policy not in AdmissionScheduler.POLICIES
-            or type(max_tasks) is not int or max_tasks < 1 or (observer is not None and not callable(observer))):
+            or type(max_tasks) is not int or max_tasks < 1 or (observer is not None and not callable(observer)) or (output_observer is not None and not callable(output_observer))):
         raise ValueError('无效的并发数、期限或调度策略')
     if len(tasks) > max_tasks:
         raise ValueError('任务数超过上限')
@@ -396,8 +396,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         if gateway is None:
                             gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
                             gateway.budgets=registry.model_budgets
+                            gateway.output_observer=output_observer
                         payload['_gateway_url'] = gateway.url
-                        payload['_gateway_token'] = gateway.issue(agent)
+                        payload['_gateway_token'] = gateway.issue(agent,stream_key=key if output_observer and task.get('action')=='llm' and key in ('auto_answer','assistant','review') else None)
                     except ModelError as exc:
                         if broker:broker.revoke(payload.get('_ipc_token'))
                         event(key, 'failed', error=str(exc))

@@ -2,6 +2,7 @@
 import argparse
 import hmac
 import json
+import re
 import logging
 import os
 import secrets
@@ -193,12 +194,16 @@ class Controller:
                 except Exception:self.storage_warning=True
                 last_database[0]=time.monotonic()
 
+        def output(event):
+            with self.lock:
+                if job['status']=='running' and not job['cancel'].is_set():job['_stream']=dict(event)
+
         def execute():
             try:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output)
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
@@ -331,6 +336,9 @@ class Controller:
                     turn['progress']={'finished':sum(s=='succeeded' for s in states),'total':len(states),
                                       'status':job['status']}
                     turn['execution']=execution_view(job)
+                    with self.lock:stream=dict(self.jobs.get(turn['job_id'],{}).get('_stream',{}))
+                    if stream.get('text'):
+                        turn['partial_answer']=stream['text'];turn['streaming']={'source':stream['source'],'updated':stream['updated']}
                 except KeyError:pass
             elif turn.get('job_id') and 'execution' not in turn:
                 # Enrich old records from their existing journal. No new run.
@@ -476,6 +484,14 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             elif path in ('/static/console.js','/static/console.css','/static/workspace.css','/static/agents.css','/static/chat.js','/static/chat.css','/static/markdown.js','/static/workbench.js','/static/workbench.css','/static/monitor.css'):
                 kind='application/javascript; charset=utf-8' if path.endswith('.js') else 'text/css; charset=utf-8'
                 self.respond(200,(Path(__file__).parent/'static'/path.rsplit('/',1)[1]).read_text(encoding='utf-8'),kind)
+            elif path.startswith('/static/vendor/katex/'):
+                name=path.removeprefix('/static/vendor/katex/')
+                if name in ('katex.min.js','katex.min.css') or re.fullmatch(r'fonts/KaTeX_[A-Za-z0-9_-]+\.(?:woff2?|ttf)',name):
+                    target=Path(__file__).parent/'static/vendor/katex'/name
+                    kind='application/javascript' if name.endswith('.js') else 'text/css' if name.endswith('.css') else 'font/woff2' if name.endswith('.woff2') else 'font/woff' if name.endswith('.woff') else 'font/ttf'
+                    if target.is_file() and not target.is_symlink():self.respond(200,target.read_bytes(),kind)
+                    else:self.respond(404,{'error':'Not found'})
+                else:self.respond(404,{'error':'Not found'})
             elif path=='/api/status':self.respond(200,controller.snapshot())
             elif path=='/api/chat/status':self.respond(200,controller.chat_status())
             elif path=='/api/database/status':self.respond(200,controller.database.status())

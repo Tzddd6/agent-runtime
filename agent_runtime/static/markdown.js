@@ -4,16 +4,32 @@
   function renderMarkdown(target,source,copyCode){
     const doc=target.ownerDocument,make=(tag,text)=>{const n=doc.createElement(tag);if(text!==undefined)n.textContent=text;return n};
     const literal=(parent,text)=>parent.append(doc.createTextNode(text));
+    function math(parent,value,display,original){
+      const node=make(display?'div':'span');node.className=display?'math-block':'math-inline';
+      if(root.katex&&value.length<=8000){try{root.katex.render(value,node,{displayMode:display,throwOnError:false,trust:false,maxExpand:500,maxSize:10,strict:'ignore',macros:{}})}catch{node.textContent=original}}
+      else node.textContent=original;
+      parent.append(node);
+    }
     function closing(text,mark,start){let i=start;while((i=text.indexOf(mark,i))>=0){let slashes=0;for(let j=i-1;j>=0&&text[j]==='\\';j--)slashes++;if(slashes%2===0)return i;i+=mark.length}return -1}
     function inline(parent,text,depth=0){
       if(depth>8){literal(parent,text);return}
       let i=0,buffer='';const flush=()=>{if(buffer){literal(parent,buffer);buffer=''}};
       while(i<text.length){
-        if(text[i]==='\\'&&/[\\`*_{}[\]()#+.!|>~-]/.test(text[i+1]||'')){buffer+=text[i+1];i+=2;continue}
         if(text[i]==='`'){
           const mark=text.slice(i).match(/^`+/)[0],end=text.indexOf(mark,i+mark.length);
           if(end>=0){flush();parent.append(make('code',text.slice(i+mark.length,end)));i=end+mark.length;continue}
         }
+        let formula=false;
+        for(const [left,right,display] of [['\\(','\\)',false],['\\[','\\]',true],['$$','$$',true],['$','$',false]]){
+          if(!text.startsWith(left,i))continue;
+          const end=closing(text,right,i+left.length);
+          if(end>i+left.length&&(left!=='$'||!(/\s/.test(text[i+1])||/\s/.test(text[end-1])))){
+            flush();math(parent,text.slice(i+left.length,end),display,text.slice(i,end+right.length));i=end+right.length;formula=true;break;
+          }
+          if(left.startsWith('\\')){buffer+=left;i+=left.length;formula=true;break}
+        }
+        if(formula)continue;
+        if(text[i]==='\\'&&/[\\`*_{}[\]()#+.!|>~-]/.test(text[i+1]||'')){buffer+=text[i+1];i+=2;continue}
         const image=text[i]==='!'&&text[i+1]==='[';
         if(image||text[i]==='['){
           const start=i+(image?1:0),middle=closing(text,'](',start+1),end=middle>=0?closing(text,')',middle+2):-1;
@@ -63,6 +79,15 @@
           box.className='code-block';head.className='code-head';button.className='small-button';button.type='button';
           button.onclick=()=>copyCode&&copyCode(value,button);head.append(make('span',lang),button);pre.append(make('code',value));box.append(head,pre);parent.append(box);continue;
         }
+        const begin=lines[i].match(/^ {0,3}(\\\[|\$\$)/);
+        if(begin){
+          const left=begin[1],right=left==='\\['?'\\]':'$$',raw=lines.slice(i).join('\n'),start=raw.indexOf(left),end=closing(raw,right,start+left.length);
+          if(end>=start+left.length){
+            math(parent,raw.slice(start+left.length,end),true,raw.slice(start,end+right.length));
+            const consumed=raw.slice(0,end+right.length).split('\n').length,tail=raw.slice(end+right.length).split('\n')[0];
+            i+=consumed;if(tail.trim()){lines.splice(i,0,tail)}continue;
+          }
+        }
         const h=heading(lines[i]);if(h){const n=make('h'+h[1].length);inline(n,h[2].replace(/\s+#+\s*$/,''));parent.append(n);i++;continue}
         if(rule(lines[i])){parent.append(make('hr'));i++;continue}
         if(/^ {0,3}>/.test(lines[i])){
@@ -97,7 +122,7 @@
         }
         const paragraph=[];
         while(i<lines.length&&lines[i].trim()){
-          if(paragraph.length&&(fence(lines[i])||heading(lines[i])||rule(lines[i])||listItem(lines[i])||/^ {0,3}>/.test(lines[i])||i+1<lines.length&&divider(lines[i+1])))break;
+          if(paragraph.length&&(fence(lines[i])||heading(lines[i])||rule(lines[i])||listItem(lines[i])||/^ {0,3}(?:>|\\\[|\$\$)/.test(lines[i])||i+1<lines.length&&divider(lines[i+1])))break;
           paragraph.push(lines[i++].replace(/ {2,}$/,''));
         }
         const p=make('p');paragraph.forEach((line,index)=>{if(index)p.append(make('br'));inline(p,line)});parent.append(p);

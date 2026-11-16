@@ -39,6 +39,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class DeepSeekClient:
+    supports_stream_callbacks=True
     def __init__(self, key, model='deepseek-flash', timeout=30, base='https://api.deepseek.com', *, local_test=False):
         if not key:
             raise ModelError('请在控制进程环境设置 DEEPSEEK_API_KEY')
@@ -167,6 +168,8 @@ class ModelGateway:
         self.cancel_event = threading.Event()
         self.capabilities={}
         self.budgets=None
+        self.output_observer=None
+        self.stream_tokens={}
         self.connections, self.connection_lock = set(), threading.Lock()
         if hasattr(client,'cancel_event'):client.cancel_event=self.cancel_event
         owner = self
@@ -186,11 +189,33 @@ class ModelGateway:
                 pass
 
             def do_POST(self):
+                if self.path=='/progress':
+                    try:
+                        token=self.headers.get('Authorization','').removeprefix('Bearer ')
+                        length=int(self.headers.get('Content-Length','0'))
+                        if not 0<length<=32768:raise ValueError('Invalid delta size')
+                        value=json.loads(self.rfile.read(length));delta=value.get('delta')
+                        if set(value)!={'delta'} or not isinstance(delta,str) or len(delta)>16000:raise ValueError('Invalid delta')
+                        with owner.lock:
+                            stream=owner.stream_tokens.get(token)
+                            if stream is None or stream['cap']['cancel'].is_set() or owner.cancel_event.is_set():raise ValueError('Revoked delta capability')
+                            cap=stream['cap'];cap['preview']=(cap['preview']+delta)[:32000];stream['deltas']+=1
+                            if stream['first'] is None:stream['first']=time.monotonic()-stream['started']
+                            event={'task_id':cap['stream_key'],'text':cap['preview'],'updated':time.time(),'source':'provider_content_delta'}
+                        if owner.output_observer:
+                            try:owner.output_observer(event)
+                            except Exception:pass # a UI subscriber cannot replay/fail the paid call.
+                        self.send_response(200);self.send_header('Content-Length','2');self.end_headers();self.wfile.write(b'{}')
+                    except (ValueError,TypeError,OSError):
+                        try:self.send_response(403);self.send_header('Content-Length','0');self.end_headers()
+                        except OSError:pass
+                    return
                 result, code = {}, 200
                 entered = False
                 started = time.monotonic()
                 queue_seconds = None
                 client_seconds = None
+                stream_token=None;stream=None
                 try:
                     authorization=self.headers.get('Authorization','').removeprefix('Bearer ')
                     with owner.lock:capability=owner.capabilities.get(authorization)
@@ -211,6 +236,8 @@ class ModelGateway:
                         or type(max_tokens) is not int or not 1<=max_tokens<=4096 or type(thinking) is not bool):
                         code=400;raise ModelError('模型请求格式无效')
                     messages=[m for m in messages if m!={'role':'system','content':THINKING_MARKER}]
+                    from .provider_stream import PREFIX
+                    messages=[m for m in messages if not (m.get('role')=='system' and m['content'].startswith(PREFIX))]
                     if not messages:code=400;raise ModelError('消息缺少实际请求')
                     if thinking:messages=[{'role':'system','content':THINKING_MARKER}]+messages
                     deadline=time.monotonic()+owner.client.timeout
@@ -239,7 +266,14 @@ class ModelGateway:
                                 def is_set(self):return capability['cancel'].is_set() or owner.cancel_event.is_set()
                             client=client.for_request(Cancel())
                     call_started=time.monotonic()
+                    if capability is not None and capability.get('stream_key') and owner.output_observer and getattr(client,'supports_stream_callbacks',False):
+                        stream_token=secrets.token_urlsafe(32)
+                        stream={'cap':capability,'deltas':0,'first':None,'started':call_started}
+                        with owner.lock:owner.stream_tokens[stream_token]=stream
+                        marker={'url':owner.url.removesuffix('/complete')+'/progress','token':stream_token}
+                        messages=[{'role':'system','content':PREFIX+json.dumps(marker)}]+messages
                     result = client.complete(messages,max_tokens)
+                    if stream is not None:result.update(stream_deltas=stream['deltas'],first_delta_seconds=stream['first'])
                     result['thinking_requested']=thinking
                     client_seconds=time.monotonic()-call_started
                 except (ModelError, ValueError, TypeError, AttributeError, OSError) as exc:
@@ -249,6 +283,8 @@ class ModelGateway:
                     public=failure(model_code(exc))
                     result = {'error':public['message'],'error_code':public['code']}
                 finally:
+                    if stream_token:
+                        with owner.lock:owner.stream_tokens.pop(stream_token,None)
                     if entered:
                         owner.slots.release()
                 # 不记录密钥、临时 token、提示词或模型正文。
@@ -285,9 +321,9 @@ class ModelGateway:
         return cls(DeepSeekClient(os.environ.get('DEEPSEEK_API_KEY'),
             model=os.environ.get('DEEPSEEK_MODEL', 'deepseek-flash')), log_path)
 
-    def issue(self,agent):
+    def issue(self,agent,*,stream_key=None):
         token=secrets.token_urlsafe(32)
-        with self.lock:self.capabilities[token]={'agent':agent,'cancel':threading.Event()}
+        with self.lock:self.capabilities[token]={'agent':agent,'cancel':threading.Event(),'stream_key':stream_key,'preview':''}
         return token
 
     def revoke(self,token):

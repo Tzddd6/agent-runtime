@@ -64,6 +64,7 @@ function processPanel(turn){
     for(const step of execution.steps){const row=element('div',null,'process-step '+step.status);
       const description=element('div',null,'process-step-label');description.append(element('span',step.label),element('small',(step.kind==='model'?'模型请求':'本地执行')+(step.thinking_requested?' · 深度思考':'')+(step.reasoning_tokens>0?' · 推理 '+step.reasoning_tokens+' token':'')+(step.attempt>1?' · 第 '+step.attempt+' 次尝试':'')));
       if(step.continuation_calls>0)description.append(element('small','按长度上限续写 '+step.continuation_calls+' 次 · 已计入调用与token'));
+      if(step.stream_deltas>0)description.append(element('small','流式正文 · '+step.stream_deltas+' 次真实增量'+(Number.isFinite(step.first_delta_seconds)?' · 模型首字 '+step.first_delta_seconds.toFixed(2)+' 秒':'')));
       if(step.failure)description.append(element('small',step.failure.message,'step-error'));
       row.append(element('span',step.status==='succeeded'?'✓':step.status==='running'?'◌':'·','process-step-icon'),description,
                  element('span',(states[step.status]||step.status)+(typeof step.elapsed_seconds==='number'?' · '+step.elapsed_seconds.toFixed(2)+' 秒':''),'process-step-time'));stages.append(row)}
@@ -90,10 +91,12 @@ function updateTurn(record,turn){
   const focused=record.panel.contains(document.activeElement),open=record.panel.open;
   const panel=processPanel(turn);if(record.source)panel.open=open;record.panel.replaceWith(panel);record.panel=panel;
   if(focused)panel.querySelector('summary').focus({preventScroll:true});
-  const knowledge=JSON.stringify(turn.knowledge),bodyChanged=!record.source||record.source.status!==turn.status||record.source.answer!==turn.answer||record.knowledge!==knowledge;
+  const knowledge=JSON.stringify(turn.knowledge),bodyChanged=!record.source||record.source.status!==turn.status||record.source.answer!==turn.answer||record.source.partial_answer!==turn.partial_answer||record.knowledge!==knowledge;
   if(bodyChanged){
     record.body.replaceChildren();
-    if(active(turn)){const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','等待本次执行完成后显示回答…'));record.body.append(pending)}
+    record.body.classList.toggle('streaming-answer',Boolean(active(turn)&&turn.partial_answer));
+    if(active(turn)&&turn.partial_answer){bodyText(record.body,turn.partial_answer);record.body.append(element('div','正在接收模型正文 · 尚未完成核验','stream-note'))}
+    else if(active(turn)){const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','正在处理，收到正文后将逐段显示…'));record.body.append(pending)}
     else bodyText(record.body,turn.answer||'此运行没有可用回答，请查看执行记录。');
     record.sources?.remove();record.sources=null;
     if(turn.knowledge){record.sources=knowledgeSources(turn);record.assistant.insertBefore(record.sources,record.actions);linkKnowledgeCitations(record.body,turn)}
@@ -152,14 +155,15 @@ function controls(){
   const hints={auto:'Runtime 自动判断直接回答或分解协作，模型调用会消耗额度。',llm:'直接对话使用模型 API，可接续最近的对话。',team:'多个 Agent 分工协作，会产生多次模型调用。',review:'先起草，再评审，最多两轮修订。',document:'在本机分析文本，无需模型费用。',engineering:'只运行受控示例项目的修复与测试，会使用模型 API。'};
   $('composerHint').textContent=status?.recovery_required?'资源回收状态待确认，请管理员打开运行控制台检查。':!online?'连接中断，发送已暂停。':!free&&!status?.configured?'模型尚未就绪，请在运行控制台配置。':hints[$('mode').value]+' 不要发送密钥，重要信息请核实。';
 }
-async function refresh(){
+async function refresh(fast=false){
   if(polling)return;polling=true;
   try{
-    const [state,list]=await Promise.all([api('chat/status'),api('chat/conversations')]);
+    if(!fast||!status){const [state,list]=await Promise.all([api('chat/status'),api('chat/conversations')]);
     status=state;csrf=state.csrf;$('modelLabel').textContent=state.model||'Agent Runtime';$('connection').textContent=state.recovery_required?'待管理员恢复':state.busy?'协作进行中':'已连接';$('connection').className='connection';
     showHistory(list.conversations);
     $('knowledgeCount').textContent=state.knowledge?.documents||0;$('capabilityCount').textContent=(state.capabilities?.plugins?.length||0)+' / '+(state.capabilities?.skills?.length||0);
     const nextLibrary=JSON.stringify(state.capabilities);if(nextLibrary!==librarySignature){librarySignature=nextLibrary;renderLibrary()}
+    }
     if(selected){const target=selected,tail=current?.id===target&&current.turns.some(active)?current.turns.at(-1)?.request_id:null,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{let chat=await api('chat/conversations/'+target+(tail?'?tail='+encodeURIComponent(tail):after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified){if(Number.isInteger(chat.turn_offset)){chat=current?.id===target&&chat.turn_offset>=0&&chat.turn_offset<=current.turns.length?{...chat,turns:current.turns.slice(0,chat.turn_offset).concat(chat.turns)}:await api('chat/conversations/'+target)}if(target===selected)render(chat)}}catch(error){if(error.status!==404)throw error;if(target===selected&&draftConversation===target){current=null;$('welcome').hidden=false;$('messages').hidden=true}else if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
     controls();
   }catch(error){status=null;$('connection').textContent='连接中断';$('connection').className='connection offline';controls();notify(error.message)}
@@ -194,6 +198,6 @@ function init(){
   document.onkeydown=event=>{if(event.key==='Escape')closeMenu()};
   for(const button of document.querySelectorAll('[data-prompt]'))button.onclick=()=>{$('mode').value=button.dataset.mode;$('prompt').value=button.dataset.prompt;controls();$('prompt').focus()};
   if(selected){$('welcome').hidden=true;$('messages').hidden=false;$('messages').append(element('p','正在读取对话…','muted'))}
-  refresh();setInterval(refresh,1500);
+  refresh();setInterval(refresh,1500);setInterval(()=>{if(current?.turns.some(active))refresh(true)},250);
 }
 init();
