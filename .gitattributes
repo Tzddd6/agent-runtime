@@ -4,3 +4,4 @@
 *.json text eol=lf
 *.html text eol=lf
 *.pdf binary
+validation/direct-2026-11-16/frozen/*.py -text

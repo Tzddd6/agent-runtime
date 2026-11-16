@@ -1,0 +1,547 @@
+[
+  {
+    "case": "code_pricing_0",
+    "status": "failed",
+    "tool_summary": [
+      {
+        "plugin": "project.patch_check",
+        "executed": false
+      },
+      {
+        "plugin": "project.inspect",
+        "executed": true
+      },
+      {
+        "plugin": "file.list",
+        "executed": true
+      },
+      {
+        "plugin": "python.syntax",
+        "executed": true
+      },
+      {
+        "plugin": "project.patch_check",
+        "executed": true,
+        "success": true,
+        "tests_modified": false,
+        "source_sha256": "094a8534508bac584ac067eedcf787168faa957f76c52fd8ab5cdf813a9dbd8f"
+      }
+    ],
+    "issues": [
+      {
+        "task_id": "auto_check",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "project.patch_check",
+          "ok": false,
+          "executed": false,
+          "error_type": "ValueError",
+          "error": "unknown controlled project"
+        }
+      },
+      {
+        "task_id": "auto_decide_3",
+        "state": "failed",
+        "error": null,
+        "value": null
+      },
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "认可用受控项目并检查修复源码，再执行实际测试。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.inspect\\\",\\\"arguments\\\":{\\\"project\\\":\\\"pricing\\\"},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"b\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"c\\\",\\\"plugin\\\":\\\"python.syntax\\\",\\\"arguments\\\":{\\\"source\\\":\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\\\\n\\\\ndef shipping_cents(subtotal_cents):\\\\n    if subtotal_cents < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if subtotal_cents >= 5000:\\\\n        return 0\\\\n    return 599\\\\n\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (paid_cents * returned_qty) // total_qty\\\\n\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r3_patch-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_patch\", \"result\": {\"plugin\": \"project.patch_check\", \"project\": \"pricing\", \"success\": true, \"source_sha256\": \"094a8534508bac584ac067eedcf787168faa957f76c52fd8ab5cdf813a9dbd8f\", \"public\": {\"total\": 9, \"passed\": 9, \"failed\": 0, \"errors\": 0}, \"heldout\": {\"total\": 16, \"passed\": 16, \"failed\": 0, \"errors\": 0}, \"executed\": true, \"tests_modified\": false}}\n"
+      },
+      {
+        "worker": "auto_cycle_2-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_2\", \"result\": {\"route\": \"collaborate\", \"reason\": \"已取得原始源码，但上次补丁核验因项目名不被识别而失败。需先修正可通过受控项目检验的补丁，再用受控测试验证。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"project.patch_check\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_decide_3-1",
+        "diagnostic": "Traceback (most recent call last):\n  File \"<frozen runpy>\", line 198, in _run_module_as_main\n  File \"<frozen runpy>\", line 88, in _run_code\n  File \"REPO/agent_runtime/worker.py\", line 155, in <module>\n    raise SystemExit(main())\n                     ^^^^^^\n  File \"REPO/agent_runtime/worker.py\", line 85, in main\n    if exc.code==429:raise RuntimeError('模型预算不足或本地调用槽位等待超时；未自动重试') from None\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: 模型预算不足或本地调用槽位等待超时；未自动重试\n"
+      },
+      {
+        "worker": "auto_decide_2-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_2\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"已取得原始源码，但上次补丁核验因项目名不被识别而失败。需先修正可通过受控项目检验的补丁，再用受控测试验证。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"patch\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"pricing\\\",\\\"source\\\":\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return unit_cents * quantity * (100 - discount_pct) // 100\\\\n\\\\ndef shipping_cents(subtotal_cents):\\\\n    if subtotal_cents < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if subtotal_cents >= 5000:\\\\n        return 0\\\\n    return 599\\\\n\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return paid_cents * returned_qty // total_qty\\\\n\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r2_a-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_a\", \"result\": {\"plugin\": \"project.inspect\", \"project\": \"pricing\", \"source\": \"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    return unit_cents * quantity - discount_pct\\n\\ndef shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents > 5000:\\n        return 0\\n    return 599\\n\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\n        raise ValueError(\\\"invalid\\\")\\n    return paid_cents // total_qty * returned_qty\\n\", \"read_only\": true, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_r2_b-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_b\", \"result\": {\"plugin\": \"file.list\", \"files\": [], \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_r2_c-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_c\", \"result\": {\"plugin\": \"python.syntax\", \"valid\": true, \"functions\": [\"line_total_cents\", \"shipping_cents\", \"refund_cents\"], \"classes\": [], \"executed\": true, \"code_executed\": false}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"修复定价项目源码并用受控补丁检查器真实运行测试与校验语法。\", \"tasks\": 2, \"roles\": [\"coder\", \"tool\"], \"plugins\": [\"project.patch_check\"], \"skills\": [\"workspace-engineering\"]}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"修复定价项目源码并用受控补丁检查器真实运行测试与校验语法。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"fix\\\",\\\"role\\\":\\\"coder\\\",\\\"skill\\\":\\\"workspace-engineering\\\",\\\"instruction\\\":\\\"根据原始需求给出完整修复后的 pricing.py 源码，严格遵守约束：仅整数运算、比较、if/return、ValueError；无导入、注解、循环等。金额按整行/整笔打折后 floor 一次：line_total_cents 返回 (unit_cents*quantity*(100-discount_pct))//100；shipping 在 subtotal>=5000 时免费否则 599；refund 返回 (paid_cents*returned_qty)//total_qty。仅输出源码文本供后续 patch_check 使用。\\\"},{\\\"id\\\":\\\"check\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"integer-pricing\\\",\\\"source\\\":\\\"__FIX_SOURCE_PLACEHOLDER__\\\"},\\\"depends_on\\\":[\\\"fix\\\"]}]}\"}\n"
+      },
+      {
+        "worker": "auto_fix-1",
+        "diagnostic": "{\"task_id\": \"auto_fix\", \"result\": \"{\\\"source\\\":\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\\\\n\\\\ndef shipping_cents(subtotal_cents):\\\\n    if subtotal_cents < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if subtotal_cents >= 5000:\\\\n        return 0\\\\n    return 599\\\\n\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (paid_cents * returned_qty) // total_qty\\\\n\\\"}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"collaborate\", \"reason\": \"上游补丁已生成但真实核验失败（unknown controlled project），需先确认可用受控项目并检查修复源码，再执行实际测试。\", \"tasks\": 3, \"roles\": [\"tool\", \"tool\", \"tool\"], \"plugins\": [\"project.inspect\", \"file.list\", \"python.syntax\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_check-1",
+        "diagnostic": "{\"task_id\": \"auto_check\", \"result\": {\"plugin\": \"project.patch_check\", \"ok\": false, \"executed\": false, \"error_type\": \"ValueError\", \"error\": \"unknown controlled project\"}}\n"
+      }
+    ]
+  },
+  {
+    "case": "code_intervals_0",
+    "status": "failed",
+    "tool_summary": [
+      {
+        "plugin": "file.list",
+        "executed": true
+      },
+      {
+        "plugin": "file.read",
+        "executed": false
+      },
+      {
+        "plugin": "file.list",
+        "executed": true
+      },
+      {
+        "plugin": "file.write",
+        "executed": true
+      },
+      {
+        "plugin": "python.syntax",
+        "executed": true
+      },
+      {
+        "plugin": "command.run",
+        "executed": true
+      }
+    ],
+    "issues": [
+      {
+        "task_id": "auto_b",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "file.read",
+          "ok": false,
+          "executed": false,
+          "error_type": "FileNotFoundError",
+          "error": "工具未完成，按类型检查参数、权限或运行结果"
+        }
+      },
+      {
+        "task_id": "auto_cycle_3",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "route": "stopped",
+          "answer": "已达到3轮工具观察与调整上限，仍有事项需要继续核对。",
+          "termination": "max_rounds",
+          "tasks": 0
+        }
+      },
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_1\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需要先定位受控项目中的 intervals.py 并读取真实内容；当前上下文的源码是修复前版本，且已有 file.read 失败（FileNotFoundError），需先列出工作区确认真实路径，再写入修复并运行真实测试。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"list\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_2-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_2\", \"result\": {\"route\": \"collaborate\", \"reason\": \"项目文件列表为空，需先写入修复后的 intervals.py，再运行真实测试核验。requirement：bucket_index 应计算 floor((timestamp-origin)/width)，可用 timestamp // width - origin // width 仅在整数下对负数地板除是否等价需验证；例如 (10-3)//4=1，10//4-3//4=2-0=2，不等价，故当前实现有误，需修正为 (timestamp - origin) // width。overlap_seconds 在无交集时当前返回负数，需要 clamp 到 0。remaining_ttl 的 future-created 语义需保持 ttl（当前 max(0, ttl-(负数)) 可能超过 ttl），需用 min(ttl, max(0, ttl-(now-created)))。\", \"tasks\": 3, \"roles\": [\"tool\", \"tool\", \"tool\"], \"plugins\": [\"file.write\", \"python.syntax\", \"command.run\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_r3_write-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_write\", \"result\": {\"plugin\": \"file.write\", \"path\": \"intervals.py\", \"bytes\": 474, \"sha256\": \"96d7761a847d16d511adf6d6c08a4f97e7b160eb59adfbfa5263708aa785dd9a\", \"written\": true, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_r3_test-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_test\", \"result\": {\"plugin\": \"command.run\", \"ok\": false, \"exit_code\": 1, \"stop_reason\": null, \"output\": \"no raise\\n\", \"seconds\": 0.022956417000386864, \"isolation\": \"bubblewrap_user_mount_pid_network\", \"network_enabled\": false, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_decide_3-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_3\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"已写入源码并通过语法检查，但真实测试退出码为1，输出'no raise'，说明存在需要修复的边界行为；需要读取当前源码后精确定位并修改。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"read\\\",\\\"plugin\\\":\\\"file.read\\\",\\\"arguments\\\":{\\\"path\\\":\\\"intervals.py\\\",\\\"offset\\\":0,\\\"limit\\\":12000},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_b-1",
+        "diagnostic": "{\"task_id\": \"auto_b\", \"result\": {\"plugin\": \"file.read\", \"ok\": false, \"executed\": false, \"error_type\": \"FileNotFoundError\", \"error\": \"工具未完成，按类型检查参数、权限或运行结果\"}}\n"
+      },
+      {
+        "worker": "auto_decide_2-1",
+        "diagnostic": "te\\\"]},{\\\"id\\\":\\\"test\\\",\\\"plugin\\\":\\\"command.run\\\",\\\"arguments\\\":{\\\"argv\\\":[\\\"python3\\\",\\\"-c\\\",\\\"import intervals as m\\\\nassert m.overlap_seconds(0,3,5,8)==0\\\\nassert m.overlap_seconds(0,5,2,7)==3\\\\nassert m.overlap_seconds(-2,2,0,3)==2\\\\nassert m.overlap_seconds(1,1,0,5)==0\\\\nfor args in [(3,2,0,1),(0,1,0,1)]:\\\\n    try:\\\\n        m.overlap_seconds(*args); raise SystemExit('no raise')\\\\n    except ValueError: pass\\\\nassert m.bucket_index(10,3,4)==1\\\\nassert m.bucket_index(0,0,4)==0\\\\nassert m.bucket_index(-1,0,4)==-1\\\\nassert m.bucket_index(3,10,4)==-2\\\\nassert m.bucket_index(-3,-10,4)==1\\\\ntry:\\\\n    m.bucket_index(0,0,0); raise SystemExit('no raise')\\\\nexcept ValueError: pass\\\\nassert m.remaining_ttl(8,10,5)==5\\\\nassert m.remaining_ttl(10,8,5)==3\\\\nassert m.remaining_ttl(20,8,5)==0\\\\nassert m.remaining_ttl(5,5,0)==0\\\\ntry:\\\\n    m.remaining_ttl(0,0,-1); raise SystemExit('no raise')\\\\nexcept ValueError: pass\\\\nprint('ok')\\\"],\\\"timeout\\\":10},\\\"depends_on\\\":[\\\"write\\\",\\\"syntax\\\"]}]}\"}\n"
+      },
+      {
+        "worker": "auto_a-1",
+        "diagnostic": "{\"task_id\": \"auto_a\", \"result\": {\"plugin\": \"file.list\", \"files\": [], \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_cycle_3-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_3\", \"result\": {\"route\": \"stopped\", \"answer\": \"已达到3轮工具观察与调整上限，仍有事项需要继续核对。\", \"termination\": \"max_rounds\", \"tasks\": 0}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需要修复源码并用真实测试核验，必须通过工具读取项目、修改源码并运行测试，不能只靠模型建议。\", \"tasks\": 2, \"roles\": [\"tool\", \"tool\"], \"plugins\": [\"file.list\", \"file.read\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需要修复源码并用真实测试核验，必须通过工具读取项目、修改源码并运行测试，不能只靠模型建议。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"b\\\",\\\"plugin\\\":\\\"file.read\\\",\\\"arguments\\\":{\\\"path\\\":\\\"intervals.py\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r3_syntax-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_syntax\", \"result\": {\"plugin\": \"python.syntax\", \"valid\": true, \"functions\": [\"overlap_seconds\", \"bucket_index\", \"remaining_ttl\"], \"classes\": [], \"executed\": true, \"code_executed\": false}}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需要先定位受控项目中的 intervals.py 并读取真实内容；当前上下文的源码是修复前版本，且已有 file.read 失败（FileNotFoundError），需先列出工作区确认真实路径，再写入修复并运行真实测试。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"file.list\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_r2_list-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_list\", \"result\": {\"plugin\": \"file.list\", \"files\": [], \"executed\": true}}\n"
+      }
+    ]
+  },
+  {
+    "case": "code_text_normalization_0",
+    "status": "succeeded",
+    "tool_summary": [
+      {
+        "plugin": "project.inspect",
+        "executed": true
+      },
+      {
+        "plugin": "project.patch_check",
+        "executed": false
+      },
+      {
+        "plugin": "file.list",
+        "executed": true
+      },
+      {
+        "plugin": "project.inspect",
+        "executed": true
+      }
+    ],
+    "issues": [
+      {
+        "task_id": "auto_r2_a",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "project.patch_check",
+          "ok": false,
+          "executed": false,
+          "error_type": "ValueError",
+          "error": "source is outside the allowed fixed-project Python subset"
+        }
+      },
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_1\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需要先修复源码，再用固定项目的补丁检查和测试验证真实通过，最后才能返回完整修复源码。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\",\\\"source\\\":\\\"def normalize_label(text):\\\\n    words = text.split()\\\\n    lowered = []\\\\n    return text\\\\n\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_2-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_2\", \"result\": {\"route\": \"collaborate\", \"reason\": \"上一轮 patch_check 因源码超出固定项目允许的 Python 子集被拒绝。需要先读取项目的实际接口与约束，再产出符合受限语法的补丁并真实核验。\", \"tasks\": 2, \"roles\": [\"tool\", \"tool\"], \"plugins\": [\"project.inspect\", \"file.list\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_decide_3-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_3\", \"result\": \"{\\\"route\\\":\\\"direct\\\",\\\"answer\\\":\\\"{\\\\\\\"source\\\\\\\":\\\\\\\"def normalize_label(text):\\\\\\\\n    words = text.split()\\\\\\\\n    return \\\\\\\\\\\\\\\" \\\\\\\\\\\\\\\".join(words).lower()\\\\\\\\ndef word_count(text):\\\\\\\\n    words = text.split()\\\\\\\\n    return len(words)\\\\\\\\ndef starts_with(text, prefix):\\\\\\\\n    cleaned_text = text.strip().lower()\\\\\\\\n    cleaned_prefix = prefix.strip().lower()\\\\\\\\n    return cleaned_text.startswith(cleaned_prefix)\\\\\\\\n\\\\\\\"}\\\"}\"}\n"
+      },
+      {
+        "worker": "auto_decide_2-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_2\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"上一轮 patch_check 因源码超出固定项目允许的 Python 子集被拒绝。需要先读取项目的实际接口与约束，再产出符合受限语法的补丁并真实核验。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.inspect\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\"},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"b\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r2_a-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_a\", \"result\": {\"plugin\": \"project.patch_check\", \"ok\": false, \"executed\": false, \"error_type\": \"ValueError\", \"error\": \"source is outside the allowed fixed-project Python subset\"}}\n"
+      },
+      {
+        "worker": "auto_a-1",
+        "diagnostic": "{\"task_id\": \"auto_a\", \"result\": {\"plugin\": \"project.inspect\", \"project\": \"text_normalization\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"read_only\": true, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_cycle_3-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_3\", \"result\": {\"route\": \"direct\", \"answer\": \"{\\\"source\\\":\\\"def normalize_label(text):\\\\n    words = text.split()\\\\n    return \\\\\\\" \\\\\\\".join(words).lower()\\\\ndef word_count(text):\\\\n    words = text.split()\\\\n    return len(words)\\\\ndef starts_with(text, prefix):\\\\n    cleaned_text = text.strip().lower()\\\\n    cleaned_prefix = prefix.strip().lower()\\\\n    return cleaned_text.startswith(cleaned_prefix)\\\\n\\\"}\", \"tasks\": 0}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需修复受控项目的三个函数并用真实测试核验，先读取/写补丁并运行不可修改测试。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"project.inspect\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_r3_b-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_b\", \"result\": {\"plugin\": \"file.list\", \"files\": [], \"executed\": true}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需修复受控项目的三个函数并用真实测试核验，先读取/写补丁并运行不可修改测试。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.inspect\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r3_a-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_a\", \"result\": {\"plugin\": \"project.inspect\", \"project\": \"text_normalization\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"read_only\": true, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需要先修复源码，再用固定项目的补丁检查和测试验证真实通过，最后才能返回完整修复源码。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"project.patch_check\"], \"skills\": []}}\n"
+      }
+    ]
+  },
+  {
+    "case": "code_intervals_1",
+    "status": "failed",
+    "tool_summary": [
+      {
+        "plugin": "file.read",
+        "executed": false
+      },
+      {
+        "plugin": "file.list",
+        "executed": true
+      },
+      {
+        "plugin": "runtime.observe",
+        "executed": true
+      },
+      {
+        "plugin": "project.inspect",
+        "executed": false
+      },
+      {
+        "plugin": "file.read",
+        "executed": false
+      }
+    ],
+    "issues": [
+      {
+        "task_id": "auto_a",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "file.read",
+          "ok": false,
+          "executed": false,
+          "error_type": "FileNotFoundError",
+          "error": "工具未完成，按类型检查参数、权限或运行结果"
+        }
+      },
+      {
+        "task_id": "auto_r3_b",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "project.inspect",
+          "ok": false,
+          "executed": false,
+          "error_type": "ValueError",
+          "error": "只允许固定示例项目"
+        }
+      },
+      {
+        "task_id": "auto_r3_c",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "file.read",
+          "ok": false,
+          "executed": false,
+          "error_type": "FileNotFoundError",
+          "error": "工具未完成，按类型检查参数、权限或运行结果"
+        }
+      },
+      {
+        "task_id": "auto_cycle_3",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "route": "stopped",
+          "answer": "已达到3轮工具观察与调整上限，仍有事项需要继续核对。",
+          "termination": "max_rounds",
+          "tasks": 0
+        }
+      },
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_1\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"尚未读取或修改项目源码，也未进行真实测试；需要先定位项目文件，再修复并用受控工具验证。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"list\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_2-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_2\", \"result\": {\"route\": \"collaborate\", \"reason\": \"上一轮 file.read 读取失败，且目录列表为空，说明尚未确认 intervals.py 是否存在于项目工作区；需先观测目录与固定示例项目，再写入并真实测试。\", \"tasks\": 3, \"roles\": [\"tool\", \"tool\", \"tool\"], \"plugins\": [\"runtime.observe\", \"project.inspect\", \"file.read\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_decide_3-1",
+        "diagnostic": "示例项目time-intervals做真实AST与测试核验，最后才能生成完整源码。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"list\\\",\\\"plugin\\\":\\\"file.list\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"read\\\",\\\"plugin\\\":\\\"file.read\\\",\\\"arguments\\\":{\\\"path\\\":\\\"intervals.py\\\",\\\"offset\\\":0,\\\"limit\\\":12000},\\\"depends_on\\\":[\\\"list\\\"]},{\\\"id\\\":\\\"patch\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"time-intervals\\\",\\\"source\\\":\\\"def overlap_seconds(start_a, end_a, start_b, end_b):\\\\n    if end_a < start_a or end_b < start_b:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if min(end_a, end_b) <= max(start_a, start_b):\\\\n        return 0\\\\n    return min(end_a, end_b) - max(start_a, start_b)\\\\ndef bucket_index(timestamp, origin, width):\\\\n    if width <= 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (timestamp - origin) // width\\\\ndef remaining_ttl(now, created, ttl):\\\\n    if ttl < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return max(0, min(ttl, ttl - (now - created)))\\\\n\\\"},\\\"depends_on\\\":[\\\"read\\\"]}]}\"}\n"
+      },
+      {
+        "worker": "auto_decide_2-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_2\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"上一轮 file.read 读取失败，且目录列表为空，说明尚未确认 intervals.py 是否存在于项目工作区；需先观测目录与固定示例项目，再写入并真实测试。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"runtime.observe\\\",\\\"arguments\\\":{},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"b\\\",\\\"plugin\\\":\\\"project.inspect\\\",\\\"arguments\\\":{\\\"project\\\":\\\"pricing/intervals/text_normalization\\\"},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"c\\\",\\\"plugin\\\":\\\"file.read\\\",\\\"arguments\\\":{\\\"path\\\":\\\"intervals.py\\\",\\\"offset\\\":0,\\\"limit\\\":12000},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_a-1",
+        "diagnostic": "{\"task_id\": \"auto_a\", \"result\": {\"plugin\": \"file.read\", \"ok\": false, \"executed\": false, \"error_type\": \"FileNotFoundError\", \"error\": \"工具未完成，按类型检查参数、权限或运行结果\"}}\n"
+      },
+      {
+        "worker": "auto_cycle_3-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_3\", \"result\": {\"route\": \"stopped\", \"answer\": \"已达到3轮工具观察与调整上限，仍有事项需要继续核对。\", \"termination\": \"max_rounds\", \"tasks\": 0}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需要修复 intervals.py 并通过真实测试核验，先读取项目源码再写入补丁并运行测试\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"file.read\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_r3_b-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_b\", \"result\": {\"plugin\": \"project.inspect\", \"ok\": false, \"executed\": false, \"error_type\": \"ValueError\", \"error\": \"只允许固定示例项目\"}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需要修复 intervals.py 并通过真实测试核验，先读取项目源码再写入补丁并运行测试\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"file.read\\\",\\\"arguments\\\":{\\\"path\\\":\\\"intervals.py\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_r3_a-1",
+        "diagnostic": "tate\": \"idle\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"routing-control\", \"state\": \"idle\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"tool_r1_a\", \"state\": \"idle\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"synthesizer\", \"state\": \"ready\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"iteration-control\", \"state\": \"ready\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"tool_r2_list\", \"state\": \"idle\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}, {\"id\": \"tool_r3_a\", \"state\": \"running\", \"reserved\": {\"cpu_milli\": 250, \"memory_bytes\": 134217728, \"pids\": 16}}, {\"id\": \"tool_r3_b\", \"state\": \"running\", \"reserved\": {\"cpu_milli\": 250, \"memory_bytes\": 134217728, \"pids\": 16}}, {\"id\": \"tool_r3_c\", \"state\": \"ready\", \"reserved\": {\"cpu_milli\": 0, \"memory_bytes\": 0, \"pids\": 0}}], \"controls\": [], \"sample_sequence\": 26, \"updated\": 1794786909.4981453, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_r3_c-1",
+        "diagnostic": "{\"task_id\": \"auto_r3_c\", \"result\": {\"plugin\": \"file.read\", \"ok\": false, \"executed\": false, \"error_type\": \"FileNotFoundError\", \"error\": \"工具未完成，按类型检查参数、权限或运行结果\"}}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"collaborate\", \"reason\": \"尚未读取或修改项目源码，也未进行真实测试；需要先定位项目文件，再修复并用受控工具验证。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"file.list\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "auto_r2_list-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_list\", \"result\": {\"plugin\": \"file.list\", \"files\": [], \"executed\": true}}\n"
+      }
+    ]
+  },
+  {
+    "case": "code_text_normalization_1",
+    "status": "succeeded",
+    "tool_summary": [
+      {
+        "plugin": "project.inspect",
+        "executed": true
+      },
+      {
+        "plugin": "project.test",
+        "executed": true,
+        "success": false,
+        "tests_modified": false,
+        "source_sha256": "3e0f760eafc6dc2f61a0ffe10cffd0a3e439c47f37365bfe55f514494e4ae4d7"
+      },
+      {
+        "plugin": "project.patch_check",
+        "executed": true,
+        "success": true,
+        "tests_modified": false,
+        "source_sha256": "7dc1830fca0be6790fe2b3bb112fed574b19864b386db81902bea876584b074c"
+      }
+    ],
+    "issues": [
+      {
+        "task_id": "auto_test_before",
+        "state": "succeeded",
+        "error": null,
+        "value": {
+          "plugin": "project.test",
+          "project": "text_normalization",
+          "success": false,
+          "source_sha256": "3e0f760eafc6dc2f61a0ffe10cffd0a3e439c47f37365bfe55f514494e4ae4d7",
+          "public": {
+            "total": 8,
+            "passed": 2,
+            "failed": 6,
+            "errors": 0
+          },
+          "heldout": {
+            "total": 13,
+            "passed": 7,
+            "failed": 6,
+            "errors": 0
+          },
+          "executed": true,
+          "tests_modified": false
+        }
+      },
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_1\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需要先编写符合白名单和受控结构的修复源码，并用 project.patch_check 对固定项目运行真实测试核验。\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\",\\\"source\\\":\\\"def normalize_label(text):\\\\n    return \\\\\\\" \\\\\\\".join(text.split()).lower()\\\\ndef word_count(text):\\\\n    return len(text.split())\\\\ndef starts_with(text, prefix):\\\\n    if prefix.lower().strip() == \\\\\\\"\\\\\\\":\\\\n        return True\\\\n    if text.lower().strip().startswith(prefix.lower().strip()):\\\\n        return True\\\\n    return False\\\\n\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_test_before-1",
+        "diagnostic": "{\"task_id\": \"auto_test_before\", \"result\": {\"plugin\": \"project.test\", \"project\": \"text_normalization\", \"success\": false, \"source_sha256\": \"3e0f760eafc6dc2f61a0ffe10cffd0a3e439c47f37365bfe55f514494e4ae4d7\", \"public\": {\"total\": 8, \"passed\": 2, \"failed\": 6, \"errors\": 0}, \"heldout\": {\"total\": 13, \"passed\": 7, \"failed\": 6, \"errors\": 0}, \"executed\": true, \"tests_modified\": false}}\n"
+      },
+      {
+        "worker": "auto_cycle_2-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_2\", \"result\": {\"route\": \"direct\", \"answer\": \"{\\\"source\\\":\\\"def normalize_label(text):\\\\n    words = text.split()\\\\n    lowered = []\\\\n    return \\\\\\\" \\\\\\\".join(text.lower().split())\\\\n\\\\ndef word_count(text):\\\\n    return len(text.split())\\\\n\\\\ndef starts_with(text, prefix):\\\\n    return text.strip().lower().startswith(prefix.strip().lower())\\\\n\\\"}\", \"tasks\": 0}}\n"
+      },
+      {
+        "worker": "auto_inspect-1",
+        "diagnostic": "{\"task_id\": \"auto_inspect\", \"result\": {\"plugin\": \"project.inspect\", \"project\": \"text_normalization\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"read_only\": true, \"executed\": true}}\n"
+      },
+      {
+        "worker": "auto_decide_2-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_2\", \"result\": \"{\\\"route\\\":\\\"direct\\\",\\\"answer\\\":\\\"{\\\\\\\"source\\\\\\\":\\\\\\\"def normalize_label(text):\\\\\\\\n    words = text.split()\\\\\\\\n    lowered = []\\\\\\\\n    return \\\\\\\\\\\\\\\" \\\\\\\\\\\\\\\".join(text.lower().split())\\\\\\\\n\\\\\\\\ndef word_count(text):\\\\\\\\n    return len(text.split())\\\\\\\\n\\\\\\\\ndef starts_with(text, prefix):\\\\\\\\n    return text.strip().lower().startswith(prefix.strip().lower())\\\\\\\\n\\\\\\\"}\\\"}\"}\n"
+      },
+      {
+        "worker": "auto_r2_a-1",
+        "diagnostic": "{\"task_id\": \"auto_r2_a\", \"result\": {\"plugin\": \"project.patch_check\", \"project\": \"text_normalization\", \"success\": true, \"source_sha256\": \"7dc1830fca0be6790fe2b3bb112fed574b19864b386db81902bea876584b074c\", \"public\": {\"total\": 8, \"passed\": 8, \"failed\": 0, \"errors\": 0}, \"heldout\": {\"total\": 13, \"passed\": 13, \"failed\": 0, \"errors\": 0}, \"executed\": true, \"tests_modified\": false}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需读取受控项目源码、在限制条件下修复并真实运行测试核验\", \"tasks\": 2, \"roles\": [\"tool\", \"tool\"], \"plugins\": [\"project.inspect\", \"project.test\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"需读取受控项目源码、在限制条件下修复并真实运行测试核验\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"inspect\\\",\\\"plugin\\\":\\\"project.inspect\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\"},\\\"depends_on\\\":[]},{\\\"id\\\":\\\"test_before\\\",\\\"plugin\\\":\\\"project.test\\\",\\\"arguments\\\":{\\\"project\\\":\\\"text_normalization\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"collaborate\", \"reason\": \"需要先编写符合白名单和受控结构的修复源码，并用 project.patch_check 对固定项目运行真实测试核验。\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"project.patch_check\"], \"skills\": []}}\n"
+      }
+    ]
+  },
+  {
+    "case": "code_pricing_1",
+    "status": "succeeded",
+    "tool_summary": [
+      {
+        "plugin": "project.patch_check",
+        "executed": true,
+        "success": true,
+        "tests_modified": false,
+        "source_sha256": "1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c"
+      }
+    ],
+    "issues": [
+      {
+        "worker": "auto_decide_1-1",
+        "diagnostic": "{\"task_id\": \"auto_decide_1\", \"result\": \"{\\\"route\\\":\\\"direct\\\",\\\"answer\\\":\\\"{\\\\\\\"source\\\\\\\":\\\\\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\\\\\n        raise ValueError(\\\\\\\\\\\\\\\"invalid\\\\\\\\\\\\\\\")\\\\\\\\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\\\\\\\\n\\\\\\\\ndef shipping_cents(subtotal_cents):\\\\\\\\n    if subtotal_cents < 0:\\\\\\\\n        raise ValueError(\\\\\\\\\\\\\\\"invalid\\\\\\\\\\\\\\\")\\\\\\\\n    if subtotal_cents >= 5000:\\\\\\\\n        return 0\\\\\\\\n    return 599\\\\\\\\n\\\\\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\\\\\n        raise ValueError(\\\\\\\\\\\\\\\"invalid\\\\\\\\\\\\\\\")\\\\\\\\n    return (paid_cents * returned_qty) // total_qty\\\\\\\\n\\\\\\\"}\\\"}\"}\n"
+      },
+      {
+        "worker": "auto_a-1",
+        "diagnostic": "{\"task_id\": \"auto_a\", \"result\": {\"plugin\": \"project.patch_check\", \"project\": \"pricing\", \"success\": true, \"source_sha256\": \"1e841d1745dc6711451bdb4b46306d9ec3e718e140b63ec9bb5f641a1949111c\", \"public\": {\"total\": 9, \"passed\": 9, \"failed\": 0, \"errors\": 0}, \"heldout\": {\"total\": 16, \"passed\": 16, \"failed\": 0, \"errors\": 0}, \"executed\": true, \"tests_modified\": false}}\n"
+      },
+      {
+        "worker": "route_gate-1",
+        "diagnostic": "{\"task_id\": \"route_gate\", \"result\": {\"route\": \"collaborate\", \"reason\": \"修复源码并通过真实项目测试核验\", \"tasks\": 1, \"roles\": [\"tool\"], \"plugins\": [\"project.patch_check\"], \"skills\": []}}\n"
+      },
+      {
+        "worker": "route-1",
+        "diagnostic": "{\"task_id\": \"route\", \"result\": \"{\\\"route\\\":\\\"collaborate\\\",\\\"reason\\\":\\\"修复源码并通过真实项目测试核验\\\",\\\"tasks\\\":[{\\\"id\\\":\\\"a\\\",\\\"plugin\\\":\\\"project.patch_check\\\",\\\"arguments\\\":{\\\"project\\\":\\\"pricing\\\",\\\"source\\\":\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\\\\n\\\\ndef shipping_cents(subtotal_cents):\\\\n    if subtotal_cents < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if subtotal_cents >= 5000:\\\\n        return 0\\\\n    return 599\\\\n\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (paid_cents * returned_qty) // total_qty\\\\n\\\"},\\\"depends_on\\\":[]}]}\"}\n"
+      },
+      {
+        "worker": "auto_cycle_1-1",
+        "diagnostic": "{\"task_id\": \"auto_cycle_1\", \"result\": {\"route\": \"direct\", \"answer\": \"{\\\"source\\\":\\\"def line_total_cents(unit_cents, quantity, discount_pct):\\\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (unit_cents * quantity * (100 - discount_pct)) // 100\\\\n\\\\ndef shipping_cents(subtotal_cents):\\\\n    if subtotal_cents < 0:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    if subtotal_cents >= 5000:\\\\n        return 0\\\\n    return 599\\\\n\\\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\\\n        raise ValueError(\\\\\\\"invalid\\\\\\\")\\\\n    return (paid_cents * returned_qty) // total_qty\\\\n\\\"}\", \"tasks\": 0}}\n"
+      }
+    ]
+  }
+]

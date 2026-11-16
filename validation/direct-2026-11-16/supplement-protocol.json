@@ -1,0 +1,17 @@
+{
+  "declared_utc": "2026-11-15T23:59:12Z",
+  "posthoc_followup": true,
+  "primary_rows_retained": 42,
+  "primary_request_intents": 59,
+  "extra_request_intents_cap": 37,
+  "runtime_response_tokens": 4096,
+  "runtime_budget": "service defaults: 128 calls, 262144 requested output; study-wide safety cap still applies",
+  "direct_code_output_tokens": 4096,
+  "context_matched_output_tokens": 2048,
+  "knowledge_control": "same retrieved reference text as Runtime, no catalog/planning/Worker; measures retrieval separately",
+  "original": "direct-compare-20261116",
+  "case_count": 9,
+  "sample_count": 12,
+  "benchmark_sha256": "0c487cb25ac2ba543f2367bcc52c4401b260412003b5e4270c9c77c3b523374f",
+  "runtime_commit": "f6a7cf4393987ef225543712f7df26756d624348"
+}

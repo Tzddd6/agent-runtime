@@ -1,0 +1,587 @@
+{
+  "cases": [
+    {
+      "id": "knowledge_19_0",
+      "group": "knowledge",
+      "repeat": 0,
+      "prompt": "查询资料中 TICKET_BENCH_19 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 663,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_4E3F8566BCF42115"
+      },
+      "document_id": "521fa7e260dbcfba34bc5edfe6125794",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_limits_2",
+      "group": "plain",
+      "repeat": 2,
+      "prompt": "按给定定义作答，不需要工具。某cgroup的cpu.max=35000 100000，组内有两个进程，配额约束组内合计CPU。memory.max=209715200字节，memory.swap.max=0，memory.events中oom_kill=1表示曾杀死进程。资源预留额度不等于实际用量。仅输出JSON：cpu_cores为该组总上限，memory_bytes，swap_bytes，oom_killed为布尔值，reservation_equals_usage为布尔值。",
+      "expected": {
+        "cpu_cores": 0.35,
+        "memory_bytes": 209715200,
+        "swap_bytes": 0,
+        "oom_killed": true,
+        "reservation_equals_usage": false
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "code_pricing_0",
+      "group": "code",
+      "repeat": 0,
+      "project": "pricing",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"integer-pricing\", \"file\": \"pricing.py\", \"requirements\": \"Inputs are integers; money is non-negative cents. line_total_cents(unit_cents,quantity,discount_pct): unit_cents and quantity >=0, discount_pct in 0..100; apply percentage discount to the whole line and floor once to integer cents. shipping_cents(subtotal_cents): reject negatives, free shipping for subtotal >=5000, otherwise 599. refund_cents(paid_cents,returned_qty,total_qty): paid_cents>=0, total_qty>0, 0<=returned_qty<=total_qty; prorate the whole paid amount and floor once. Invalid values must raise ValueError. Keep exactly these three signatures. No imports, attributes, subscripts, loops, decorators or arbitrary calls; only integer arithmetic, comparisons, if/return, and ValueError/min/max are supported.\", \"source\": \"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    return unit_cents * quantity - discount_pct\\n\\ndef shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents > 5000:\\n        return 0\\n    return 599\\n\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\n        raise ValueError(\\\"invalid\\\")\\n    return paid_cents // total_qty * returned_qty\\n\", \"public_examples\": [[\"line_total_cents\", [199, 3, 10], 537], [\"shipping_cents\", [5000], 0], [\"refund_cents\", [100, 2, 3], 66]], \"patch_schema\": {\"source\": \"complete pricing.py source; JSON only\"}}",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_money_0",
+      "group": "plain",
+      "repeat": 0,
+      "prompt": "纯文本算术题，不需要工具。单价316分，数量3，折扣13%。金额=单价×数量×(100-折扣)//100，只在最后向下取整。退款=实付761分×退货2件//总共3件。仅输出JSON，字段total_cents和refund_cents，不加说明。",
+      "expected": {
+        "total_cents": 824,
+        "refund_cents": 507
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "plain_money_1",
+      "group": "plain",
+      "repeat": 1,
+      "prompt": "纯文本算术题，不需要工具。单价805分，数量2，折扣27%。金额=单价×数量×(100-折扣)//100，只在最后向下取整。退款=实付889分×退货2件//总共3件。仅输出JSON，字段total_cents和refund_cents，不加说明。",
+      "expected": {
+        "total_cents": 1175,
+        "refund_cents": 592
+      },
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "knowledge_7_2",
+      "group": "knowledge",
+      "repeat": 2,
+      "prompt": "查询资料中 TICKET_BENCH_07 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 839,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_11E7F15963E5410B"
+      },
+      "document_id": "df6d709f01339f124450a2bfc34a13ae",
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "plain_money_2",
+      "group": "plain",
+      "repeat": 2,
+      "prompt": "纯文本算术题，不需要工具。单价675分，数量4，折扣35%。金额=单价×数量×(100-折扣)//100，只在最后向下取整。退款=实付682分×退货2件//总共3件。仅输出JSON，字段total_cents和refund_cents，不加说明。",
+      "expected": {
+        "total_cents": 1755,
+        "refund_cents": 454
+      },
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "knowledge_7_1",
+      "group": "knowledge",
+      "repeat": 1,
+      "prompt": "查询资料中 TICKET_BENCH_07 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 839,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_11E7F15963E5410B"
+      },
+      "document_id": "df6d709f01339f124450a2bfc34a13ae",
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "code_intervals_0",
+      "group": "code",
+      "repeat": 0,
+      "project": "intervals",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"time-intervals\", \"file\": \"intervals.py\", \"requirements\": \"All inputs are integers. overlap_seconds: length of intersection of half-open intervals; reject end<start; non-overlap or empty interval gives zero. bucket_index: floor((timestamp-origin)/width), including negatives; width must be positive. remaining_ttl: ttl minus elapsed time, clamped to 0..ttl; future-created item retains ttl; reject ttl<0. Invalid values raise ValueError. Keep three signatures. Only integer arithmetic //, comparisons, if/return, ValueError/min/max; no imports, attributes, loops or other calls.\", \"source\": \"def overlap_seconds(start_a, end_a, start_b, end_b):\\n    if end_a < start_a or end_b < start_b:\\n        raise ValueError(\\\"invalid\\\")\\n    return min(end_a, end_b) - max(start_a, start_b)\\ndef bucket_index(timestamp, origin, width):\\n    if width <= 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return timestamp // width - origin // width\\ndef remaining_ttl(now, created, ttl):\\n    if ttl < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return max(0, ttl - (now - created))\\n\", \"public_examples\": [[\"overlap_seconds\", [0, 3, 5, 8], 0], [\"bucket_index\", [10, 3, 4], 1], [\"remaining_ttl\", [8, 10, 5], 5]], \"patch_schema\": {\"source\": \"complete intervals.py source; JSON only\"}}",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_filter_1",
+      "group": "plain",
+      "repeat": 1,
+      "prompt": "纯文本筛选题，不需要工具。筛出status=open且seconds>=30的记录，id按字母升序排列；求这些记录seconds总和。只输出JSON字段ids（数组）和seconds（整数）。数据：[{\"id\": \"A\", \"status\": \"open\", \"seconds\": 67}, {\"id\": \"B\", \"status\": \"open\", \"seconds\": 65}, {\"id\": \"C\", \"status\": \"closed\", \"seconds\": 47}, {\"id\": \"D\", \"status\": \"open\", \"seconds\": 65}, {\"id\": \"E\", \"status\": \"open\", \"seconds\": 32}, {\"id\": \"F\", \"status\": \"closed\", \"seconds\": 67}, {\"id\": \"G\", \"status\": \"open\", \"seconds\": 56}]",
+      "expected": {
+        "ids": [
+          "A",
+          "B",
+          "D",
+          "E",
+          "G"
+        ],
+        "seconds": 285
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "code_text_normalization_0",
+      "group": "code",
+      "repeat": 0,
+      "project": "text_normalization",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"text-normalization\", \"file\": \"text_utils.py\", \"requirements\": \"All arguments are strings. normalize_label: split on arbitrary Unicode whitespace, join words with one ASCII space and lowercase. word_count: count whitespace-separated words; empty/whitespace-only gives zero. starts_with: trim and lowercase both text and prefix, then return bool for prefix match; empty prefix is true. Keep three signatures. Only safe str methods strip/lower/split/join/startswith and len; safe method chains and local variables allowed. No imports, subscripts, loops, dunder, reflection, function aliases or arbitrary calls.\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"public_examples\": [[\"normalize_label\", [\"  Hello   WORLD  \"], \"hello world\"], [\"word_count\", [\"one  two\"], 2], [\"starts_with\", [\"  Hi\", \" HI \"], true]], \"patch_schema\": {\"source\": \"complete text_utils.py source; JSON only\"}}",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "code_intervals_1",
+      "group": "code",
+      "repeat": 1,
+      "project": "intervals",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"time-intervals\", \"file\": \"intervals.py\", \"requirements\": \"All inputs are integers. overlap_seconds: length of intersection of half-open intervals; reject end<start; non-overlap or empty interval gives zero. bucket_index: floor((timestamp-origin)/width), including negatives; width must be positive. remaining_ttl: ttl minus elapsed time, clamped to 0..ttl; future-created item retains ttl; reject ttl<0. Invalid values raise ValueError. Keep three signatures. Only integer arithmetic //, comparisons, if/return, ValueError/min/max; no imports, attributes, loops or other calls.\", \"source\": \"def overlap_seconds(start_a, end_a, start_b, end_b):\\n    if end_a < start_a or end_b < start_b:\\n        raise ValueError(\\\"invalid\\\")\\n    return min(end_a, end_b) - max(start_a, start_b)\\ndef bucket_index(timestamp, origin, width):\\n    if width <= 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return timestamp // width - origin // width\\ndef remaining_ttl(now, created, ttl):\\n    if ttl < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return max(0, ttl - (now - created))\\n\", \"public_examples\": [[\"overlap_seconds\", [0, 3, 5, 8], 0], [\"bucket_index\", [10, 3, 4], 1], [\"remaining_ttl\", [8, 10, 5], 5]], \"patch_schema\": {\"source\": \"complete intervals.py source; JSON only\"}}",
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "code_text_normalization_1",
+      "group": "code",
+      "repeat": 1,
+      "project": "text_normalization",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"text-normalization\", \"file\": \"text_utils.py\", \"requirements\": \"All arguments are strings. normalize_label: split on arbitrary Unicode whitespace, join words with one ASCII space and lowercase. word_count: count whitespace-separated words; empty/whitespace-only gives zero. starts_with: trim and lowercase both text and prefix, then return bool for prefix match; empty prefix is true. Keep three signatures. Only safe str methods strip/lower/split/join/startswith and len; safe method chains and local variables allowed. No imports, subscripts, loops, dunder, reflection, function aliases or arbitrary calls.\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"public_examples\": [[\"normalize_label\", [\"  Hello   WORLD  \"], \"hello world\"], [\"word_count\", [\"one  two\"], 2], [\"starts_with\", [\"  Hi\", \" HI \"], true]], \"patch_schema\": {\"source\": \"complete text_utils.py source; JSON only\"}}",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_filter_2",
+      "group": "plain",
+      "repeat": 2,
+      "prompt": "纯文本筛选题，不需要工具。筛出status=open且seconds>=30的记录，id按字母升序排列；求这些记录seconds总和。只输出JSON字段ids（数组）和seconds（整数）。数据：[{\"id\": \"A\", \"status\": \"open\", \"seconds\": 33}, {\"id\": \"B\", \"status\": \"closed\", \"seconds\": 5}, {\"id\": \"C\", \"status\": \"open\", \"seconds\": 29}, {\"id\": \"D\", \"status\": \"open\", \"seconds\": 56}, {\"id\": \"E\", \"status\": \"closed\", \"seconds\": 52}, {\"id\": \"F\", \"status\": \"open\", \"seconds\": 59}, {\"id\": \"G\", \"status\": \"open\", \"seconds\": 16}]",
+      "expected": {
+        "ids": [
+          "A",
+          "D",
+          "F"
+        ],
+        "seconds": 148
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "code_pricing_1",
+      "group": "code",
+      "repeat": 1,
+      "project": "pricing",
+      "prompt": "修复这个小型Python项目，保持规定接口。请进行真实测试核验；最终只返回JSON {\"source\":\"完整修复后的源码\"}，不要省略源码，不要用伪代码。受控项目只允许常规if语句和return，不用三元表达式、类型注解、额外函数、导入、循环或推导式；其余安全方法以项目要求为准。\n{\"project\": \"integer-pricing\", \"file\": \"pricing.py\", \"requirements\": \"Inputs are integers; money is non-negative cents. line_total_cents(unit_cents,quantity,discount_pct): unit_cents and quantity >=0, discount_pct in 0..100; apply percentage discount to the whole line and floor once to integer cents. shipping_cents(subtotal_cents): reject negatives, free shipping for subtotal >=5000, otherwise 599. refund_cents(paid_cents,returned_qty,total_qty): paid_cents>=0, total_qty>0, 0<=returned_qty<=total_qty; prorate the whole paid amount and floor once. Invalid values must raise ValueError. Keep exactly these three signatures. No imports, attributes, subscripts, loops, decorators or arbitrary calls; only integer arithmetic, comparisons, if/return, and ValueError/min/max are supported.\", \"source\": \"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    return unit_cents * quantity - discount_pct\\n\\ndef shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents > 5000:\\n        return 0\\n    return 599\\n\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\n        raise ValueError(\\\"invalid\\\")\\n    return paid_cents // total_qty * returned_qty\\n\", \"public_examples\": [[\"line_total_cents\", [199, 3, 10], 537], [\"shipping_cents\", [5000], 0], [\"refund_cents\", [100, 2, 3], 66]], \"patch_schema\": {\"source\": \"complete pricing.py source; JSON only\"}}",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_limits_1",
+      "group": "plain",
+      "repeat": 1,
+      "prompt": "按给定定义作答，不需要工具。某cgroup的cpu.max=25000 100000，组内有两个进程，配额约束组内合计CPU。memory.max=209715200字节，memory.swap.max=0，memory.events中oom_kill=1表示曾杀死进程。资源预留额度不等于实际用量。仅输出JSON：cpu_cores为该组总上限，memory_bytes，swap_bytes，oom_killed为布尔值，reservation_equals_usage为布尔值。",
+      "expected": {
+        "cpu_cores": 0.25,
+        "memory_bytes": 209715200,
+        "swap_bytes": 0,
+        "oom_killed": true,
+        "reservation_equals_usage": false
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "knowledge_19_2",
+      "group": "knowledge",
+      "repeat": 2,
+      "prompt": "查询资料中 TICKET_BENCH_19 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 663,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_4E3F8566BCF42115"
+      },
+      "document_id": "521fa7e260dbcfba34bc5edfe6125794",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "knowledge_7_0",
+      "group": "knowledge",
+      "repeat": 0,
+      "prompt": "查询资料中 TICKET_BENCH_07 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 839,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_11E7F15963E5410B"
+      },
+      "document_id": "df6d709f01339f124450a2bfc34a13ae",
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "knowledge_19_1",
+      "group": "knowledge",
+      "repeat": 1,
+      "prompt": "查询资料中 TICKET_BENCH_19 的容量、并发数、调度策略与见证编号。只输出JSON字段memory_mib、workers、policy、witness；必须保留原编号，资料不足则说明不知道。无需系统操作。",
+      "expected": {
+        "memory_mib": 663,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_4E3F8566BCF42115"
+      },
+      "document_id": "521fa7e260dbcfba34bc5edfe6125794",
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_limits_0",
+      "group": "plain",
+      "repeat": 0,
+      "prompt": "按给定定义作答，不需要工具。某cgroup的cpu.max=15000 100000，组内有两个进程，配额约束组内合计CPU。memory.max=209715200字节，memory.swap.max=0，memory.events中oom_kill=1表示曾杀死进程。资源预留额度不等于实际用量。仅输出JSON：cpu_cores为该组总上限，memory_bytes，swap_bytes，oom_killed为布尔值，reservation_equals_usage为布尔值。",
+      "expected": {
+        "cpu_cores": 0.15,
+        "memory_bytes": 209715200,
+        "swap_bytes": 0,
+        "oom_killed": true,
+        "reservation_equals_usage": false
+      },
+      "order": [
+        "runtime",
+        "direct"
+      ]
+    },
+    {
+      "id": "plain_filter_0",
+      "group": "plain",
+      "repeat": 0,
+      "prompt": "纯文本筛选题，不需要工具。筛出status=open且seconds>=30的记录，id按字母升序排列；求这些记录seconds总和。只输出JSON字段ids（数组）和seconds（整数）。数据：[{\"id\": \"A\", \"status\": \"closed\", \"seconds\": 52}, {\"id\": \"B\", \"status\": \"open\", \"seconds\": 44}, {\"id\": \"C\", \"status\": \"open\", \"seconds\": 65}, {\"id\": \"D\", \"status\": \"closed\", \"seconds\": 42}, {\"id\": \"E\", \"status\": \"open\", \"seconds\": 2}, {\"id\": \"F\", \"status\": \"open\", \"seconds\": 65}, {\"id\": \"G\", \"status\": \"closed\", \"seconds\": 25}]",
+      "expected": {
+        "ids": [
+          "B",
+          "C",
+          "F"
+        ],
+        "seconds": 174
+      },
+      "order": [
+        "direct",
+        "runtime"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "9a5540c2041dc613e2579a286f0b03eb",
+      "title": "部署票据 TICKET_BENCH_00",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_00\n{\"memory_mib\": 577, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_0F1AA069F0E116DF\"}\n\n记录00说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录00说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 577,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_0F1AA069F0E116DF"
+      }
+    },
+    {
+      "id": "fbf413d3aa9f13b194af72cb703717de",
+      "title": "部署票据 TICKET_BENCH_01",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_01\n{\"memory_mib\": 705, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_C0809A7DF437166D\"}\n\n记录01说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录01说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 705,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_C0809A7DF437166D"
+      }
+    },
+    {
+      "id": "6e5a3ed2e43f050c3a6ce07e70a6ec96",
+      "title": "部署票据 TICKET_BENCH_02",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_02\n{\"memory_mib\": 575, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_D366191BAC61AFA1\"}\n\n记录02说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录02说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 575,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_D366191BAC61AFA1"
+      }
+    },
+    {
+      "id": "8687a9ec34b1ed74c64793b36934f91d",
+      "title": "部署票据 TICKET_BENCH_03",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_03\n{\"memory_mib\": 421, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_405B6367DA3ABCD6\"}\n\n记录03说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录03说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 421,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_405B6367DA3ABCD6"
+      }
+    },
+    {
+      "id": "2f9f2c260b7243c91d0abd1be4c8380b",
+      "title": "部署票据 TICKET_BENCH_04",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_04\n{\"memory_mib\": 181, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_7AD7914C5B52B0D8\"}\n\n记录04说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录04说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 181,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_7AD7914C5B52B0D8"
+      }
+    },
+    {
+      "id": "ef4e8cc7251ebc3f8057ce5234e2210d",
+      "title": "部署票据 TICKET_BENCH_05",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_05\n{\"memory_mib\": 330, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_5EB0912C7258D595\"}\n\n记录05说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录05说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 330,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_5EB0912C7258D595"
+      }
+    },
+    {
+      "id": "02fa4524ff677ce4cc1eac047fdf4396",
+      "title": "部署票据 TICKET_BENCH_06",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_06\n{\"memory_mib\": 165, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_4AF3BAE3B86DB664\"}\n\n记录06说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录06说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 165,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_4AF3BAE3B86DB664"
+      }
+    },
+    {
+      "id": "df6d709f01339f124450a2bfc34a13ae",
+      "title": "部署票据 TICKET_BENCH_07",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_07\n{\"memory_mib\": 839, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_11E7F15963E5410B\"}\n\n记录07说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录07说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 839,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_11E7F15963E5410B"
+      }
+    },
+    {
+      "id": "7a4fc3cb482077babc1d859b692d6f64",
+      "title": "部署票据 TICKET_BENCH_08",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_08\n{\"memory_mib\": 552, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_53135A71A1AF3AB2\"}\n\n记录08说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录08说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 552,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_53135A71A1AF3AB2"
+      }
+    },
+    {
+      "id": "a50f5edcea23761ef53c06a311af112e",
+      "title": "部署票据 TICKET_BENCH_09",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_09\n{\"memory_mib\": 526, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_8403DE3F1978B2BB\"}\n\n记录09说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录09说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 526,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_8403DE3F1978B2BB"
+      }
+    },
+    {
+      "id": "e7fa3217c1d8037b990e222d25c0bf3e",
+      "title": "部署票据 TICKET_BENCH_10",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_10\n{\"memory_mib\": 379, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_7E63976E5C59A976\"}\n\n记录10说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录10说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 379,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_7E63976E5C59A976"
+      }
+    },
+    {
+      "id": "076fdbccb01a319ac44ed539e907a264",
+      "title": "部署票据 TICKET_BENCH_11",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_11\n{\"memory_mib\": 857, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_AD00D0432456D56C\"}\n\n记录11说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录11说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 857,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_AD00D0432456D56C"
+      }
+    },
+    {
+      "id": "60047826a1099941f3d4c4fec9571769",
+      "title": "部署票据 TICKET_BENCH_12",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_12\n{\"memory_mib\": 159, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_05F324965B69AE6C\"}\n\n记录12说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录12说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 159,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_05F324965B69AE6C"
+      }
+    },
+    {
+      "id": "2447c1647c36aea84b1a0fa67c479347",
+      "title": "部署票据 TICKET_BENCH_13",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_13\n{\"memory_mib\": 152, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_262772062970F299\"}\n\n记录13说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录13说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 152,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_262772062970F299"
+      }
+    },
+    {
+      "id": "6b48873214a617584cbe2f8929235535",
+      "title": "部署票据 TICKET_BENCH_14",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_14\n{\"memory_mib\": 200, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_8D4BF3BCAF26E593\"}\n\n记录14说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录14说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 200,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_8D4BF3BCAF26E593"
+      }
+    },
+    {
+      "id": "14174fc861fe41fce14fb04b64ad3473",
+      "title": "部署票据 TICKET_BENCH_15",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_15\n{\"memory_mib\": 146, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_C3ECFACAB3076EF7\"}\n\n记录15说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录15说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 146,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_C3ECFACAB3076EF7"
+      }
+    },
+    {
+      "id": "333f756902a3bfcbf4213263abeb65ad",
+      "title": "部署票据 TICKET_BENCH_16",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_16\n{\"memory_mib\": 140, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_0B56BD586DFD86D3\"}\n\n记录16说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录16说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 140,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_0B56BD586DFD86D3"
+      }
+    },
+    {
+      "id": "f94ad4cbaf0038106b836eed09713336",
+      "title": "部署票据 TICKET_BENCH_17",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_17\n{\"memory_mib\": 202, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_69B56E56CC0FEFC1\"}\n\n记录17说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录17说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 202,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_69B56E56CC0FEFC1"
+      }
+    },
+    {
+      "id": "db209583096f72c52e4b9ea34f18ffce",
+      "title": "部署票据 TICKET_BENCH_18",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_18\n{\"memory_mib\": 518, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_3E5259893A639E5E\"}\n\n记录18说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录18说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 518,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_3E5259893A639E5E"
+      }
+    },
+    {
+      "id": "521fa7e260dbcfba34bc5edfe6125794",
+      "title": "部署票据 TICKET_BENCH_19",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_19\n{\"memory_mib\": 663, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_4E3F8566BCF42115\"}\n\n记录19说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录19说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 663,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_4E3F8566BCF42115"
+      }
+    },
+    {
+      "id": "a52f7992a3387ab458de1e04bf9671c8",
+      "title": "部署票据 TICKET_BENCH_20",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_20\n{\"memory_mib\": 755, \"workers\": 1, \"policy\": \"fifo\", \"witness\": \"PAIR_9BB7A70C6189CB25\"}\n\n记录20说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录20说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 755,
+        "workers": 1,
+        "policy": "fifo",
+        "witness": "PAIR_9BB7A70C6189CB25"
+      }
+    },
+    {
+      "id": "9fca8f1493c5b2ca2d23467ba021996c",
+      "title": "部署票据 TICKET_BENCH_21",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_21\n{\"memory_mib\": 752, \"workers\": 2, \"policy\": \"resource_fit\", \"witness\": \"PAIR_A05A36010B763AB3\"}\n\n记录21说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录21说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 752,
+        "workers": 2,
+        "policy": "resource_fit",
+        "witness": "PAIR_A05A36010B763AB3"
+      }
+    },
+    {
+      "id": "6f07ff7bd3559061399b0911430c994c",
+      "title": "部署票据 TICKET_BENCH_22",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_22\n{\"memory_mib\": 757, \"workers\": 3, \"policy\": \"aging_fit\", \"witness\": \"PAIR_3D9C83D9E5CF7249\"}\n\n记录22说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录22说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 757,
+        "workers": 3,
+        "policy": "aging_fit",
+        "witness": "PAIR_3D9C83D9E5CF7249"
+      }
+    },
+    {
+      "id": "f6db62dbd89ef631b3aed6b0ceabf915",
+      "title": "部署票据 TICKET_BENCH_23",
+      "body": "合成资料，仅用于此次对照测试，不代表生产配置。\n票据 TICKET_BENCH_23\n{\"memory_mib\": 805, \"workers\": 4, \"policy\": \"drf\", \"witness\": \"PAIR_6DF644924B2125BF\"}\n\n记录23说明1：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明2：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明3：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明4：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明5：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明6：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明7：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n记录23说明8：上线前应检查输入边界、输出契约、错误处理和审计信息。资源上限表示准入与执行边界，不等于已经消耗的资源。配置变更需保留版本与来源，测试结果应与运行证据对应。重复请求不能盲目重放，失败样本同样保留。\n",
+      "expected": {
+        "memory_mib": 805,
+        "workers": 4,
+        "policy": "drf",
+        "witness": "PAIR_6DF644924B2125BF"
+      }
+    }
+  ]
+}

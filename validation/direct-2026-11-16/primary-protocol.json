@@ -1,0 +1,39 @@
+{
+  "prepared_utc": "2026-11-15T23:53:41Z",
+  "seed": 20261116,
+  "runtime_commit": "f6a7cf4393987ef225543712f7df26756d624348",
+  "dataset_sha256": "54edb7fcf1d2b3ad857044e3e37d4953f593575dddebd60d932f477f9bc68793",
+  "benchmark_sha256": "1e814e661f3793971c4dc190f134b7e45d53849d2435b3ecb05949f2d9bc8eb5",
+  "pairs": 21,
+  "groups": {
+    "plain": 9,
+    "knowledge": 6,
+    "code": 6
+  },
+  "budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "model": "existing broker default, native thinking off in both arms",
+  "direct_max_output": 2048,
+  "runtime_per_workflow": {
+    "calls": 6,
+    "output_tokens": 8192,
+    "final_max_output": 2048
+  },
+  "global_paid_call_intents_cap": 96,
+  "global_requested_output_cap": 131072,
+  "baseline": "one model call through same credential-owning broker; no DAG, tools or retrieval",
+  "knowledge_baseline": "full identical 24-document corpus; Runtime receives local retrieval only",
+  "quality": "exact expected JSON fields; code AST gate + public cases + newly generated unseen cases",
+  "code_evidence": "separate metric: actual successful protected test tool with same final source hash",
+  "resources": "fresh process and per-sample cgroup; includes coordinator, workers, startup, file-cache charges; excludes independent broker and cloud",
+  "failure_policy": "retain all samples; never retry accepted/uncertain paid POST; stop on uncertain resource cleanup",
+  "limitations": [
+    "synthetic small tasks",
+    "no API temperature or seed control",
+    "not a standard single-agent tool-loop comparison",
+    "no currency conversion without actual bill rates"
+  ]
+}

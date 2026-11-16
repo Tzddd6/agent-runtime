@@ -1,0 +1,220 @@
+{
+  "primary_pairs": 21,
+  "primary_samples": 42,
+  "supplement_samples": 12,
+  "total_request_intents": 78,
+  "groups": {
+    "code": {
+      "direct": {
+        "samples": 6,
+        "passed": 5,
+        "json_format_ok": 6,
+        "call_intents": 6,
+        "returned_calls": 6,
+        "usage_complete": true,
+        "median_wall_seconds": 1.5302500629986753,
+        "wall_range_seconds": [
+          1.2969837049968191,
+          6.146537437001825
+        ],
+        "median_local_cpu_seconds": 0.0841915,
+        "median_cgroup_memory_peak_bytes": 9869312.0,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 2680,
+        "completion_tokens": 1043,
+        "cached_input_tokens": 768,
+        "uncached_input_tokens": 1912
+      },
+      "runtime": {
+        "samples": 6,
+        "passed": 2,
+        "json_format_ok": 3,
+        "call_intents": 21,
+        "returned_calls": 21,
+        "usage_complete": true,
+        "median_wall_seconds": 7.681237538999994,
+        "wall_range_seconds": [
+          4.124439902996528,
+          11.166097542998614
+        ],
+        "median_local_cpu_seconds": 1.14438,
+        "median_cgroup_memory_peak_bytes": 39882752.0,
+        "delivered_patch_verified_same_hash": 1,
+        "any_successful_protected_patch_test": 3,
+        "prompt_tokens": 49968,
+        "completion_tokens": 3966,
+        "cached_input_tokens": 33920,
+        "uncached_input_tokens": 16048
+      }
+    },
+    "knowledge": {
+      "direct": {
+        "samples": 6,
+        "passed": 6,
+        "json_format_ok": 6,
+        "call_intents": 6,
+        "returned_calls": 6,
+        "usage_complete": true,
+        "median_wall_seconds": 0.927086635500018,
+        "wall_range_seconds": [
+          0.7930293659956078,
+          1.18670678500348
+        ],
+        "median_local_cpu_seconds": 0.0778945,
+        "median_cgroup_memory_peak_bytes": 10250240.0,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 87990,
+        "completion_tokens": 240,
+        "cached_input_tokens": 72320,
+        "uncached_input_tokens": 15670
+      },
+      "runtime": {
+        "samples": 6,
+        "passed": 6,
+        "json_format_ok": 6,
+        "call_intents": 6,
+        "returned_calls": 6,
+        "usage_complete": true,
+        "median_wall_seconds": 1.624797585001943,
+        "wall_range_seconds": [
+          1.4842240350044449,
+          1.954727426993486
+        ],
+        "median_local_cpu_seconds": 0.277162,
+        "median_cgroup_memory_peak_bytes": 28803072.0,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 29547,
+        "completion_tokens": 294,
+        "cached_input_tokens": 17024,
+        "uncached_input_tokens": 12523
+      }
+    },
+    "plain": {
+      "direct": {
+        "samples": 9,
+        "passed": 8,
+        "json_format_ok": 9,
+        "call_intents": 9,
+        "returned_calls": 9,
+        "usage_complete": true,
+        "median_wall_seconds": 1.0312668690021383,
+        "wall_range_seconds": [
+          0.5893478079960914,
+          1.3049279430051683
+        ],
+        "median_local_cpu_seconds": 0.07615,
+        "median_cgroup_memory_peak_bytes": 10833920,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 1071,
+        "completion_tokens": 201,
+        "cached_input_tokens": 0,
+        "uncached_input_tokens": 1071
+      },
+      "runtime": {
+        "samples": 9,
+        "passed": 7,
+        "json_format_ok": 9,
+        "call_intents": 11,
+        "returned_calls": 11,
+        "usage_complete": true,
+        "median_wall_seconds": 1.5938827499994659,
+        "wall_range_seconds": [
+          1.3923602130016661,
+          9.704292981994513
+        ],
+        "median_local_cpu_seconds": 0.26278,
+        "median_cgroup_memory_peak_bytes": 26697728,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 21478,
+        "completion_tokens": 507,
+        "cached_input_tokens": 17920,
+        "uncached_input_tokens": 3558
+      }
+    },
+    "code_default": {
+      "direct": {
+        "samples": 3,
+        "passed": 2,
+        "json_format_ok": 3,
+        "call_intents": 3,
+        "returned_calls": 3,
+        "usage_complete": true,
+        "median_wall_seconds": 1.2788451779997558,
+        "wall_range_seconds": [
+          1.2776429500008817,
+          1.3891873669999768
+        ],
+        "median_local_cpu_seconds": 0.122941,
+        "median_cgroup_memory_peak_bytes": 17227776,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 1340,
+        "completion_tokens": 522,
+        "cached_input_tokens": 768,
+        "uncached_input_tokens": 572
+      },
+      "runtime": {
+        "samples": 3,
+        "passed": 1,
+        "json_format_ok": 2,
+        "call_intents": 10,
+        "returned_calls": 10,
+        "usage_complete": true,
+        "median_wall_seconds": 7.299048324995965,
+        "wall_range_seconds": [
+          5.1234139729931485,
+          11.28454833199794
+        ],
+        "median_local_cpu_seconds": 1.010693,
+        "median_cgroup_memory_peak_bytes": 45125632,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 1,
+        "prompt_tokens": 22670,
+        "completion_tokens": 2507,
+        "cached_input_tokens": 19072,
+        "uncached_input_tokens": 3598
+      }
+    },
+    "knowledge_context_matched": {
+      "direct_context": {
+        "samples": 6,
+        "passed": 6,
+        "json_format_ok": 6,
+        "call_intents": 6,
+        "returned_calls": 6,
+        "usage_complete": true,
+        "median_wall_seconds": 1.009573780498613,
+        "wall_range_seconds": [
+          0.9272650759958196,
+          1.2943736860033823
+        ],
+        "median_local_cpu_seconds": 0.11649899999999999,
+        "median_cgroup_memory_peak_bytes": 15675392.0,
+        "delivered_patch_verified_same_hash": 0,
+        "any_successful_protected_patch_test": 0,
+        "prompt_tokens": 17529,
+        "completion_tokens": 240,
+        "cached_input_tokens": 10752,
+        "uncached_input_tokens": 6777
+      }
+    }
+  },
+  "runtime_commit": "f6a7cf4393987ef225543712f7df26756d624348",
+  "provider_models": [
+    "deepseek-flash"
+  ],
+  "currency_cost": null,
+  "global_no_paid_post_replay": true,
+  "cleanup_counter_note": "Original remaining_sample_cgroups counts virtual control files as well as directories. Retained unchanged; use cleanup-verification.json and the completed per-sample populated/rmdir checks.",
+  "raw_cleanup_counters": [
+    42,
+    42
+  ],
+  "knowledge_input_reduction_vs_full_context": 0.664200477326969,
+  "knowledge_runtime_input_ratio_vs_matched": 1.6856067088824234
+}

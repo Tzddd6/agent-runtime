@@ -1,0 +1,17 @@
+{
+  "benchmark_cgroups": [
+    {
+      "unit": "agentrt-direct-compare-20261116.service",
+      "unit_cgroup_exists": false
+    },
+    {
+      "unit": "agentrt-direct-compare-supplement-20261116.service",
+      "unit_cgroup_exists": false
+    }
+  ],
+  "model_broker_pid": 1477,
+  "web_configured": true,
+  "web_recovery_required": false,
+  "web_busy": false,
+  "original_counter_issue": "len(base.iterdir()) includes virtual cgroup control files; raw reports retained; finished=True proves every per-sample populated=0 check and rmdir completed"
+}
