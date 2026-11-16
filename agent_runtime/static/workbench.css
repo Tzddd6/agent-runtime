@@ -27,3 +27,9 @@ main{margin-left:264px}header{height:72px;border-bottom:1px solid transparent;pa
 .attachment-chip>button:hover{background:var(--hover);color:var(--text)}.attachment-button{min-width:38px;min-height:38px;display:grid;place-items:center}
 button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:760px){.attachment-chip>span:nth-child(2){max-width:155px}.upload-hint{font-size:9px}.attachment-button,.attachment-chip>button{min-width:40px;min-height:40px}}
+
+/* Stable reading position and independent panel scrolling. */
+html{scrollbar-gutter:stable}#chatHistory,.settings-content,.settings-nav,.code-block pre{overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.jump-latest{position:fixed;right:28px;bottom:calc(var(--composer-height,230px) + 15px);z-index:12;min-height:42px;padding:8px 15px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:0 4px 18px #1b294514;font-size:12px;cursor:pointer}
+.jump-latest[hidden]{display:none}.jump-latest:hover{background:var(--soft-accent);border-color:var(--accent)}.process-step-label .step-error{color:#b25c4d;line-height:1.7;max-width:510px}
+@media(max-width:760px){.jump-latest{right:15px;min-height:44px}.history-item,.workspace-nav>button,.workspace-nav>a{min-height:42px}}

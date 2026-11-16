@@ -19,7 +19,7 @@ for node in ast.parse((root/'tools/validate_linux.py').read_text()).body:
     if isinstance(node,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='strict_names' for t in node.targets):names+=ast.literal_eval(node.value)
     elif isinstance(node,ast.AugAssign) and isinstance(node.target,ast.Name) and node.target.id=='strict_names':names+=ast.literal_eval(node.value)
 names=[name for name in names if not name.startswith('test_agents.')]
-names+=['test_agents','test_failure_scenarios','test_artifact_binding','test_v18_execution','test_unified_execution','test_local_repair','test_runtime_capabilities']
+names+=['test_agents','test_failure_scenarios','test_artifact_binding','test_v18_execution','test_unified_execution','test_local_repair','test_runtime_capabilities','test_goal_history']
 result=subprocess.run([sys.executable,'-m','unittest','-v',*names],env={**os.environ,'AGENTRT_TEST_CGROUP':str(attempts)},stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True)
 print(result.stdout,flush=True)
 remaining=[p.name for p in attempts.iterdir() if p.is_dir()]

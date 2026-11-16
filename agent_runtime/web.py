@@ -471,10 +471,18 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             elif path=='/api/chat/conversations':self.respond(200,{'conversations':controller.chats.listing()})
             elif path.startswith('/api/chat/conversations/'):
                 try:
-                    key=identity(path.rsplit('/',1)[1]);after=parse_qs(urlparse(self.path).query).get('after',[None])[0]
+                    key=identity(path.rsplit('/',1)[1]);query=parse_qs(urlparse(self.path).query)
+                    after=query.get('after',[None])[0];tail=query.get('tail',[None])[0]
                     revision=str((controller.chats.root/(key+'.json')).stat().st_mtime_ns)
                     if after==revision:self.respond(200,{'not_modified':True,'revision':revision})
-                    else:self.respond(200,controller.chat_detail(key))
+                    else:
+                        detail=controller.chat_detail(key)
+                        if tail is not None:
+                            tail=identity(tail)
+                            index=next((i for i,turn in enumerate(detail['turns']) if turn['request_id']==tail),None)
+                            if index is not None:
+                                detail['turn_offset']=index;detail['turns']=detail['turns'][index:]
+                        self.respond(200,detail)
                 except FileNotFoundError:self.respond(404,{'error':'会话不存在'})
                 except (ValueError,OSError,KeyError,TypeError):self.respond(400,{'error':'无法读取此会话'})
             elif path.startswith('/api/jobs/') and '/files/' in path:

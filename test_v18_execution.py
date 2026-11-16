@@ -12,6 +12,18 @@ PRICING_EDITS={'edits':[
 
 
 class V18Tests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform=='linux','Linux spawn/fork isolation')
+    def test_both_backends_exclude_unknown_coordinator_credentials(self):
+        from agent_runtime.executor import Executor
+        with tempfile.TemporaryDirectory() as folder,patch.dict(os.environ,{'OTHER_PROVIDER_SECRET':'fixture-private-marker'}):
+            for backend in ('spawn','forkserver'):
+                root=Path(folder)/backend;root.mkdir();executor=Executor(backend=backend,workflow_root=root)
+                try:
+                    handle=executor.launch({'id':'env','action':'command','argv':[sys.executable,'-c','import os; assert "OTHER_PROVIDER_SECRET" not in os.environ; print("isolated")'],'timeout':5},root/'attempt',{'cpu_milli':1000,'memory_bytes':96*1024**2,'pids':16})
+                    handle['proc'].wait(timeout=5);code,output,_=executor.cleanup(handle)
+                    self.assertEqual(code,0);self.assertIn('isolated',output)
+                finally:executor.close()
+
     def test_auto_backend_uses_no_preloader_for_single_leaf_but_reuses_dynamic_graph(self):
         from agent_runtime.runtime import run
         with tempfile.TemporaryDirectory() as folder:

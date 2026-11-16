@@ -105,6 +105,6 @@ function initWorkbench(){
   try{const p=JSON.parse(localStorage.getItem('agentrt-preferences-v1')||'{}');if(['balanced','full'].includes(p.context))$('contextMode').value=p.context}catch{}
   for(const id of ['themeSelect','fontSelect','useKnowledge','modelCalls','modelTokens','responseTokens','contextMode'])$(id).addEventListener('change',savePreferences);applyAppearance();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyAppearance);
-  document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='n'&&!$('workspaceDialog').open){event.preventDefault();newChat()}});
+  document.addEventListener('keydown',event=>{if(event.altKey&&event.key.toLowerCase()==='n'&&!$('workspaceDialog').open){event.preventDefault();newChat()}});
 }
 initWorkbench();

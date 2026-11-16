@@ -3,6 +3,7 @@ const $=id=>document.getElementById(id);
 let selected=null,current=null,status=null,csrf='',polling=false,sending=false,signature='';
 let pendingAttachments=[],uploading=false,librarySignature='',draftConversation=null;
 const processOpen=new Map();
+const turnNodes=new Map();let renderedConversation=null;
 const modes={auto:'自动路由',llm:'直接对话',team:'多 Agent 协作',review:'写作与评审',document:'文本分析',engineering:'示例项目修复'};
 const active=t=>t.status==='running';
 const uuid=()=>crypto.randomUUID().replaceAll('-','');
@@ -38,8 +39,8 @@ async function uploadFiles(provided){
 }
 function address(id){const url=new URL(location.href);if(id)url.searchParams.set('chat',id);else url.searchParams.delete('chat');history.replaceState(null,'',url);try{if(id)localStorage.setItem('agentrt-chat',id);else localStorage.removeItem('agentrt-chat')}catch{}}
 function closeMenu(){$('sidebar').classList.remove('open');$('shade').hidden=true}
-function newChat(){if(uploading)return;draftConversation=null;selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
-async function selectChat(id){if(uploading)return;draftConversation=null;selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
+function newChat(){if(uploading)return;renderedConversation=null;turnNodes.clear();$('jumpToLatest').hidden=true;draftConversation=null;selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
+async function selectChat(id){if(uploading)return;renderedConversation=null;turnNodes.clear();draftConversation=null;selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
 function showHistory(list){
   const box=$('chatHistory');box.replaceChildren();if(!list.length)box.append(element('p','新的对话会保存在这里','muted'));
   for(const chat of list){const button=element('button',chat.title,'history-item'+(chat.id===selected?' active':''));button.type='button';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===selected));button.onclick=()=>selectChat(chat.id);box.append(button)}
@@ -70,29 +71,59 @@ function processPanel(turn){
   const context=execution?.context_control;if(context?.views)stages.append(element('p','上下文视图 '+context.views+' 次 · 原文 '+(context.raw_text_bytes/1024).toFixed(1)+' KiB → 发送片段 '+(context.sent_text_bytes/1024).toFixed(1)+' KiB · 分页读取 '+context.page_reads+' 次。此处为文本字节，不是供应商 token。','process-note'));
   view.append(stages);return view;
 }
-function render(chat){
-  current=chat;const last=chat.turns.at(-1);
-  $('consoleLink').href=last?.job_id?'console?job='+encodeURIComponent(last.job_id):'console';
-  const next=JSON.stringify(chat);if(next===signature){controls();return}signature=next;
-  const follow=window.innerHeight+window.scrollY>=document.body.scrollHeight-160;
-  const box=$('messages');box.replaceChildren();$('welcome').hidden=chat.turns.length>0;box.hidden=!chat.turns.length;
-  for(const turn of chat.turns){
-    const user=element('article',null,'message user');user.setAttribute('aria-label','你的消息');user.append(element('div',turn.prompt+(turn.attachment_names?.length?'\n\n附件：'+turn.attachment_names.join('、'):''),'user-bubble'));box.append(user);
-    const assistant=element('article',null,'message assistant');assistant.setAttribute('aria-label','Agent Runtime 的回答');const heading=element('div',null,'assistant-heading');heading.append(element('span','✳'),element('span','Agent Runtime'),element('span',modes[turn.mode]||''));assistant.append(heading);
-    assistant.append(processPanel(turn));
-    const body=element('div',null,'assistant-body');
-    if(active(turn)){
-      const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','等待本次执行完成后显示回答…'));body.append(pending);
-    }else bodyText(body,turn.answer||'此运行没有可用回答，请在控制台查看记录。');
-    assistant.append(body);if(turn.knowledge){assistant.append(knowledgeSources(turn));linkKnowledgeCitations(body,turn)}
-    const actions=element('div',null,'message-actions');
-    if(turn.answer){const button=element('button','复制回答','small-button');button.type='button';button.onclick=()=>copy(turn.answer,button);actions.append(button)}
-    if(turn.job_id){const link=element('a','查看执行记录 ↗');link.href='console?job='+encodeURIComponent(turn.job_id);actions.append(link)}
-    for(const artifact of new Map((turn.execution?.artifacts||[]).map(a=>[a.path,a])).values()){const link=element('a','下载 '+artifact.path);link.href='api/jobs/'+encodeURIComponent(turn.job_id)+'/files/'+artifact.path.split('/').map(encodeURIComponent).join('/')+'?sha='+encodeURIComponent(artifact.sha256);link.download=artifact.path.split('/').at(-1);actions.append(link)}
-    assistant.append(actions);box.append(assistant);
+function nearLatest(){return window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-140}
+function updateTurn(record,turn){
+  if(record.source===turn)return false;
+  const stamp=JSON.stringify(turn);if(record.stamp===stamp){record.source=turn;return false}
+  const text=turn.prompt+(turn.attachment_names?.length?'\n\n附件：'+turn.attachment_names.join('、'):'');
+  if(record.bubble.textContent!==text)record.bubble.textContent=text;
+  const focused=record.panel.contains(document.activeElement),open=record.panel.open;
+  const panel=processPanel(turn);if(record.source)panel.open=open;record.panel.replaceWith(panel);record.panel=panel;
+  if(focused)panel.querySelector('summary').focus({preventScroll:true});
+  const knowledge=JSON.stringify(turn.knowledge),bodyChanged=!record.source||record.source.status!==turn.status||record.source.answer!==turn.answer||record.knowledge!==knowledge;
+  if(bodyChanged){
+    record.body.replaceChildren();
+    if(active(turn)){const pending=element('div',null,'pending');pending.append(element('span',null,'working-dot'),element('span','等待本次执行完成后显示回答…'));record.body.append(pending)}
+    else bodyText(record.body,turn.answer||'此运行没有可用回答，请查看执行记录。');
+    record.sources?.remove();record.sources=null;
+    if(turn.knowledge){record.sources=knowledgeSources(turn);record.assistant.insertBefore(record.sources,record.actions);linkKnowledgeCitations(record.body,turn)}
   }
-  controls();if(follow)requestAnimationFrame(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'instant'}));
+  const artifacts=JSON.stringify(turn.execution?.artifacts||[]);
+  if(!record.source||record.source.answer!==turn.answer||record.source.job_id!==turn.job_id||record.artifacts!==artifacts){
+    record.actions.replaceChildren();
+    if(turn.answer){const button=element('button','复制回答','small-button');button.type='button';button.onclick=()=>copy(turn.answer,button);record.actions.append(button)}
+    if(turn.job_id){const link=element('a','查看执行记录 ↗');link.href='console?job='+encodeURIComponent(turn.job_id);record.actions.append(link)}
+    for(const artifact of new Map((turn.execution?.artifacts||[]).map(a=>[a.path,a])).values()){
+      const link=element('a','下载 '+artifact.path);link.href='api/jobs/'+encodeURIComponent(turn.job_id)+'/files/'+artifact.path.split('/').map(encodeURIComponent).join('/')+'?sha='+encodeURIComponent(artifact.sha256);link.download=artifact.path.split('/').at(-1);record.actions.append(link)
+    }
+  }
+  record.source=turn;record.stamp=stamp;record.knowledge=knowledge;record.artifacts=artifacts;return true;
 }
+function render(chat){
+  const box=$('messages'),initial=renderedConversation!==chat.id,follow=initial||nearLatest();
+  if(initial){box.replaceChildren();turnNodes.clear();renderedConversation=chat.id}
+  current=chat;const last=chat.turns.at(-1);$('consoleLink').href=last?.job_id?'console?job='+encodeURIComponent(last.job_id):'console';
+  $('welcome').hidden=chat.turns.length>0;box.hidden=!chat.turns.length;
+  const keep=new Set(chat.turns.map(turn=>turn.request_id));
+  for(const [key,record] of turnNodes)if(!keep.has(key)){record.user.remove();record.assistant.remove();turnNodes.delete(key)}
+  let anchor=box.firstChild,changed=false;
+  for(const turn of chat.turns){
+    let record=turnNodes.get(turn.request_id);
+    if(!record){
+      const user=element('article',null,'message user'),bubble=element('div',null,'user-bubble');user.setAttribute('aria-label','你的消息');user.append(bubble);
+      const assistant=element('article',null,'message assistant'),heading=element('div',null,'assistant-heading');assistant.setAttribute('aria-label','Agent Runtime 的回答');heading.append(element('span','✳'),element('span','Agent Runtime'),element('span',modes[turn.mode]||''));
+      const panel=processPanel(turn),body=element('div',null,'assistant-body'),actions=element('div',null,'message-actions');assistant.append(heading,panel,body,actions);
+      record={user,bubble,assistant,panel,body,actions,source:null};turnNodes.set(turn.request_id,record)
+    }
+    changed=updateTurn(record,turn)||changed;
+    if(record.user!==anchor)box.insertBefore(record.user,anchor);anchor=record.user.nextSibling;
+    if(record.assistant!==anchor)box.insertBefore(record.assistant,anchor);anchor=record.assistant.nextSibling;
+  }
+  controls();
+  if(follow){$('jumpToLatest').hidden=true;requestAnimationFrame(()=>window.scrollTo({top:document.documentElement.scrollHeight,behavior:'instant'}))}
+  else if(changed){$('jumpToLatest').textContent='↓ 查看最新进展';$('jumpToLatest').hidden=false}
+}
+
 function progressText(turn){const p=turn.progress;if(p?.status==='cancelling')return '正在停止执行…';if(p?.total)return '正在协作，已完成 '+p.finished+' / '+p.total+' 个步骤';return '正在处理你的请求…'}
 function controls(){
   const pending=current?.turns.find(active),online=Boolean(status),busy=Boolean(status?.busy)||sending||Boolean(pending),free=$('mode').value==='document';
@@ -117,7 +148,7 @@ async function refresh(){
     showHistory(list.conversations);
     $('knowledgeCount').textContent=state.knowledge?.documents||0;$('capabilityCount').textContent=(state.capabilities?.plugins?.length||0)+' / '+(state.capabilities?.skills?.length||0);
     const nextLibrary=JSON.stringify(state.capabilities);if(nextLibrary!==librarySignature){librarySignature=nextLibrary;renderLibrary()}
-    if(selected){const target=selected,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{const chat=await api('chat/conversations/'+target+(after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified)render(chat)}catch(error){if(error.status!==404)throw error;if(target===selected&&draftConversation===target){current=null;$('welcome').hidden=false;$('messages').hidden=true}else if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
+    if(selected){const target=selected,tail=current?.id===target&&current.turns.some(active)?current.turns.at(-1)?.request_id:null,after=current?.id===target&&!current.turns.some(active)?current.revision:null;try{let chat=await api('chat/conversations/'+target+(tail?'?tail='+encodeURIComponent(tail):after?'?after='+encodeURIComponent(after):''));if(target===selected&&!chat.not_modified){if(Number.isInteger(chat.turn_offset)){chat=current?.id===target&&chat.turn_offset>=0&&chat.turn_offset<=current.turns.length?{...chat,turns:current.turns.slice(0,chat.turn_offset).concat(chat.turns)}:await api('chat/conversations/'+target)}if(target===selected)render(chat)}}catch(error){if(error.status!==404)throw error;if(target===selected&&draftConversation===target){current=null;$('welcome').hidden=false;$('messages').hidden=true}else if(target===selected){current=null;$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','尚未找到会话记录。如刚才的请求状态不明确，请先到控制台核对，不要重复提交。','muted'))}}}
     controls();
   }catch(error){status=null;$('connection').textContent='连接中断';$('connection').className='connection offline';controls();notify(error.message)}
   finally{polling=false}
@@ -135,6 +166,7 @@ async function send(event){
 function init(){
   const fromURL=new URLSearchParams(location.search).get('chat');let remembered=null;try{remembered=localStorage.getItem('agentrt-chat')}catch{}
   selected=/^[a-f0-9]{32}$/.test(fromURL||remembered||'')?(fromURL||remembered):null;
+  $('jumpToLatest').onclick=()=>{window.scrollTo({top:document.documentElement.scrollHeight,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});$('jumpToLatest').hidden=true};window.addEventListener('scroll',()=>{if(nearLatest()||$('messages').hidden)$('jumpToLatest').hidden=true;else{$('jumpToLatest').hidden=false}},{passive:true});
   $('newChat').onclick=newChat;$('chatForm').onsubmit=send;$('mode').onchange=controls;
   $('attachFiles').onclick=()=>$('fileInput').click();$('fileInput').onchange=uploadFiles;
   new ResizeObserver(entries=>document.documentElement.style.setProperty('--composer-height',entries[0].contentRect.height+'px')).observe(document.querySelector('.composer-dock'));

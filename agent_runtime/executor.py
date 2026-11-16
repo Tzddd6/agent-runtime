@@ -51,9 +51,9 @@ class Executor:
                     total+=len(raw)
                     if total>16*1024**2:raise ValueError('Worker payload 超过 16 MiB')
                     target.write(raw)
-            environment = dict(os.environ)
-            environment.pop('DEEPSEEK_API_KEY', None)
-            environment.pop('AGENTRT_PROXY_TOKEN', None)
+            # Workers get an allowlist, not the coordinator's ambient secrets,
+            # proxy settings, SSH agents or provider credentials.
+            environment={'PATH':os.defpath,'LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
             if self.backend=='forkserver':
                 from .forkserver import ForkServer
                 if self.preloader is None:
