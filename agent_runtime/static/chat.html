@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Agent Runtime · 对话</title><meta name="theme-color" content="#191c20">
+  <title>Agent Runtime · 对话</title><meta name="theme-color" content="#ffffff">
   <link rel="stylesheet" href="static/chat.css"><link rel="stylesheet" href="static/workbench.css"><script src="static/markdown.js" defer></script><script src="static/chat.js" defer></script><script src="static/workbench.js" defer></script>
 </head>
 <body>
@@ -27,8 +27,11 @@
   <div class="composer-dock"><div class="composer-wrap">
     <div id="runStatus" class="run-status" hidden><span class="working-dot"></span><span id="runStatusText">正在协作…</span><a id="runLink" href="console">查看执行 ↗</a></div>
     <form id="chatForm" class="composer"><label class="sr-only" for="prompt">发送给 Agent Runtime 的消息</label><textarea id="prompt" rows="2" maxlength="20000" placeholder="向 Agent Runtime 提问…" required></textarea>
-      <div id="attachmentList" class="attachment-list" aria-label="待发送附件"></div><input id="fileInput" type="file" accept=".png,.jpg,.jpeg,.txt,.md,.py,.json,.csv,.log" multiple hidden><div class="composer-toolbar"><div class="composer-options"><button id="attachFiles" type="button" class="attachment-button" aria-label="添加图片或文件">＋</button><span class="auto-routing-label">⌘ 自动协作</span><label class="thinking-switch"><input id="deepThinking" type="checkbox" disabled> 深度思考</label><label class="thinking-switch"><input id="useKnowledge" type="checkbox" checked> 知识库</label><input id="mode" type="hidden" value="auto"><input id="project" type="hidden" value="pricing"></div>
+      <div id="attachmentList" class="attachment-list" aria-label="待发送附件"></div>
+      <div id="uploadProgress" class="upload-progress" role="status" hidden><span id="uploadLabel"></span><progress id="uploadMeter" value="0" max="1" aria-label="已验证并保存的文件数"></progress></div>
+      <input id="fileInput" type="file" accept=".png,.jpg,.jpeg,.webp,.bmp,.pdf,.doc,.docx,.txt,.md,.py,.json,.csv,.log" multiple hidden><div class="composer-toolbar"><div class="composer-options"><button id="attachFiles" type="button" class="attachment-button" aria-label="添加图片、PDF、Word或文本文件" title="添加图片、PDF、Word或文本 · 单文件8MiB · 支持拖拽及粘贴图片">＋</button><span class="auto-routing-label">⌘ 自动协作</span><label class="thinking-switch"><input id="deepThinking" type="checkbox" disabled> 深度思考</label><label class="thinking-switch"><input id="useKnowledge" type="checkbox" checked> 知识库</label><input id="mode" type="hidden" value="auto"><input id="project" type="hidden" value="pricing"></div>
       <button id="stop" type="button" class="stop-button" hidden>停止</button><button id="send" type="submit" class="send-button" aria-label="发送消息" disabled>↑</button></div>
+      <p class="upload-hint">可拖入图片、PDF、Word或文本 · 单文件8MiB · 最多4个文件 / 2张图片</p>
     </form><p id="composerHint" class="composer-hint">回答可能有误，请核实重要信息。不要在对话中发送密钥。</p>
   </div></div>
 </main>

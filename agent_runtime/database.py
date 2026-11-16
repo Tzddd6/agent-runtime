@@ -19,6 +19,8 @@ class RuntimeDatabase:
                 CREATE TABLE IF NOT EXISTS attachments(id TEXT PRIMARY KEY,conversation TEXT NOT NULL,name TEXT NOT NULL,
                     media TEXT NOT NULL,size INTEGER NOT NULL,sha256 TEXT NOT NULL,width INTEGER,height INTEGER,created REAL NOT NULL);
                 CREATE INDEX IF NOT EXISTS attachments_owner ON attachments(conversation);
+                CREATE TABLE IF NOT EXISTS attachment_text(id TEXT PRIMARY KEY,text TEXT NOT NULL,
+                    sha256 TEXT NOT NULL,note TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS observations(id INTEGER PRIMARY KEY,job TEXT NOT NULL,created REAL NOT NULL,data TEXT NOT NULL);
                 CREATE TABLE IF NOT EXISTS audit(id INTEGER PRIMARY KEY,job TEXT NOT NULL,action TEXT NOT NULL,decision TEXT NOT NULL,created REAL NOT NULL);
             ''')
@@ -32,7 +34,9 @@ class RuntimeDatabase:
         finally:db.close()
 
     def attachment(self,key,conversation):
-        with self.connect() as db:row=db.execute('SELECT * FROM attachments WHERE id=? AND conversation=?',(key,conversation)).fetchone()
+        with self.connect() as db:row=db.execute('''SELECT a.*,t.text AS extracted_text,
+            t.sha256 AS extracted_sha256,t.note AS extraction_note FROM attachments a
+            LEFT JOIN attachment_text t ON t.id=a.id WHERE a.id=? AND a.conversation=?''',(key,conversation)).fetchone()
         if row is None:raise ValueError('附件不存在或不属于当前会话')
         return dict(row)
 
@@ -47,6 +51,9 @@ class RuntimeDatabase:
             if count>=100 or size+row['size']>128*1024**2:raise ValueError('附件存储达到100个或128MiB上限，请先归档')
             db.execute('INSERT INTO attachments VALUES(?,?,?,?,?,?,?,?,?)',tuple(row[k] for k in
                 ('id','conversation','name','media','size','sha256','width','height','created')))
+            if 'extracted_text' in row:
+                db.execute('INSERT INTO attachment_text VALUES(?,?,?,?)',
+                           (row['id'],row['extracted_text'],row['extracted_sha256'],row['extraction_note']))
 
     def observe(self,job,sample):
         data=json.dumps({'reserved':sample.get('reserved'),'budget':sample.get('budget'),

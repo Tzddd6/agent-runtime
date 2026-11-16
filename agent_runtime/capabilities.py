@@ -120,6 +120,18 @@ def execute_plugin(task):
         if set(args)!={'project','edits'}:raise ValueError('表达式补丁参数无效')
         project=canonical_project(args['project']);source=compile_patch(json.dumps({'edits':args['edits']}),project)
         return {'edit_protocol':'ast_expressions',**execute_plugin({**task,'plugin':'project.patch_check','arguments':{'project':project,'source':source}})}
+    if name in ('file.write','artifact.write') and 'content_from' in args:
+        source=args['content_from']
+        if (set(args)!={'path','content_from'} or not isinstance(source,str)
+                or source not in task.get('inputs',[]) or source not in task.get('_inputs',{})):
+            raise ValueError('content_from必须引用当前任务已声明并授权的上游结果，不能同时提供content')
+        content=task['_inputs'][source]
+        if not isinstance(content,str) or not content.strip():raise ValueError('上游文件正文必须是非空文本')
+        if content.strip().startswith('```'):
+            lines=content.strip().splitlines()
+            if len(lines)<3 or lines[-1]!='```':raise ValueError('上游代码围栏不完整')
+            content='\n'.join(lines[1:-1])
+        args={'path':args['path'],'content':content}
     if name.startswith(('file.','web.','workspace.')) or name in ('command.run','artifact.write'):
         from .tooling import operate
         return {'plugin':name,**operate(task,name,args)}

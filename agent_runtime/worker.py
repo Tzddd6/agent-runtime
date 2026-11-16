@@ -91,8 +91,20 @@ def main():
             with urllib.request.urlopen(request, timeout=65) as response:
                 model_result = json.load(response)
         except urllib.error.HTTPError as exc:
-            if exc.code==429:raise RuntimeError('模型预算不足或本地调用槽位等待超时；未自动重试') from None
-            raise
+            from .failures import failure
+            try:body=json.loads(exc.read(8192))
+            except (ValueError,OSError):body={}
+            code=body.get('error_code') if isinstance(body,dict) else None
+            if code not in ('MODEL_UPSTREAM_FAILED','MODEL_TIMEOUT','MODEL_BUDGET_EXHAUSTED'):
+                code='MODEL_BUDGET_EXHAUSTED' if exc.code==429 else 'MODEL_UPSTREAM_FAILED'
+            if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure(code)}))
+            print(failure(code)['message'],file=sys.stderr)
+            return 1
+        if model_result.get('finish_reason')=='length':
+            from .failures import failure
+            if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure('MODEL_OUTPUT_INCOMPLETE')}))
+            print(failure('MODEL_OUTPUT_INCOMPLETE')['message'],file=sys.stderr)
+            return 1
     elif action == 'command':
         argv = task.get('argv')
         if not isinstance(argv, list) or not argv or not all(isinstance(s, str) for s in argv):

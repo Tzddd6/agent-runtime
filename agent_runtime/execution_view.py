@@ -59,6 +59,9 @@ def execution_view(job,now=None):
         elif event.get('state')!='waiting' or attempt:
             step['finished']=event.get('time',end)
         step['status']='retrying' if event.get('state')=='waiting' and attempt else event.get('state','waiting')
+        from .failures import event_failure
+        problem=event_failure(event)
+        if problem:step['failure']=problem
     for row in (job.get('monitor') or {}).get('tasks',[]):
         key=row['id'];pair=(key,row.get('attempt',0))
         if pair not in records and not any(s['id']==key for s in records.values()):

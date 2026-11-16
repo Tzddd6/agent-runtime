@@ -316,6 +316,12 @@ class Controller:
         attachments={a['id']:a for a in self.database.attachments_for(key)}
         for turn in chat['turns']:
             turn['attachment_names']=[attachments[a]['name'] for a in turn.get('attachments',[]) if a in attachments]
+            if turn['status']=='failed' and turn.get('job_id'):
+                try:
+                    historical=self.detail(turn['job_id']);turn['execution']=execution_view(historical)
+                    if turn.get('answer')=='本次运行未完成，请在控制台查看失败原因。':
+                        turn['answer']=answer_for(historical)
+                except KeyError:pass
             if turn['status']=='running' and turn.get('job_id'):
                 try:
                     job=self.detail(turn['job_id']);states=list(job.get('states',{}).values())
@@ -490,7 +496,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 self.respond(403,{'error':'请求校验失败，请刷新页面'})
                 return
             try:
-                self.connection.settimeout(5)
+                self.connection.settimeout(25 if self.path=='/api/attachments' else 5)
                 length=int(self.headers.get('Content-Length','0'))
                 maximum=12*1024**2 if self.path=='/api/attachments' else 1024**2 if self.path=='/api/knowledge/save' else 150000
                 if not 0<length<=maximum:raise ValueError('请求体过大或为空')
