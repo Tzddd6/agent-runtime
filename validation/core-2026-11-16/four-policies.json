@@ -1,0 +1,131 @@
+{
+  "rows": [
+    {
+      "repeat": 0,
+      "policy": "fifo",
+      "seconds": 0.7109241370053496,
+      "small_wait_seconds": 0.5102396011352539,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 0,
+      "policy": "resource_fit",
+      "seconds": 0.6203645869973116,
+      "small_wait_seconds": 0.003186941146850586,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 0,
+      "policy": "aging_fit",
+      "seconds": 0.6113633770000888,
+      "small_wait_seconds": 0.0023736953735351562,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 0,
+      "policy": "drf",
+      "seconds": 0.7056201539962785,
+      "small_wait_seconds": 0.5100405216217041,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 1,
+      "policy": "resource_fit",
+      "seconds": 0.6032109240040882,
+      "small_wait_seconds": 0.002377033233642578,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 1,
+      "policy": "aging_fit",
+      "seconds": 0.6101709130016388,
+      "small_wait_seconds": 0.0023458003997802734,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 1,
+      "policy": "drf",
+      "seconds": 0.7216431919950992,
+      "small_wait_seconds": 0.5070192813873291,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 1,
+      "policy": "fifo",
+      "seconds": 0.7037695259932661,
+      "small_wait_seconds": 0.5060348510742188,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 2,
+      "policy": "aging_fit",
+      "seconds": 0.6234451460040873,
+      "small_wait_seconds": 0.002395153045654297,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 2,
+      "policy": "drf",
+      "seconds": 0.7020514930045465,
+      "small_wait_seconds": 0.5050442218780518,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 2,
+      "policy": "fifo",
+      "seconds": 0.7046119660080876,
+      "small_wait_seconds": 0.49910545349121094,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    },
+    {
+      "repeat": 2,
+      "policy": "resource_fit",
+      "seconds": 0.6063100190076511,
+      "small_wait_seconds": 0.0021958351135253906,
+      "passed": true,
+      "reservation_within_budget": true,
+      "remaining_attempt_cgroups": 0
+    }
+  ],
+  "medians": {
+    "fifo": {
+      "seconds": 0.7046119660080876,
+      "small_wait_seconds": 0.5060348510742188
+    },
+    "resource_fit": {
+      "seconds": 0.6063100190076511,
+      "small_wait_seconds": 0.002377033233642578
+    },
+    "aging_fit": {
+      "seconds": 0.6113633770000888,
+      "small_wait_seconds": 0.0023736953735351562
+    },
+    "drf": {
+      "seconds": 0.7056201539962785,
+      "small_wait_seconds": 0.5070192813873291
+    }
+  },
+  "limits": "finite head-of-line sleep fixture, not universal strategy superiority or model generation preemption"
+}

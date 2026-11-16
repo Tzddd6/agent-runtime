@@ -1,0 +1,9 @@
+{
+  "frozen_commit": "55acb81c0334f74be8ab34997682dfe78c1eaf2f",
+  "cases": 8,
+  "passed": 7,
+  "supplier_calls": 10,
+  "remaining_sample_cgroups": [],
+  "raw_results_sha256": "00bec6209cf190ff2f2bb6399c15cc4fdef29ee1576dc90fc4d258bf79f660d0",
+  "limits": "independent acceptance, not a new paired comparison; before the bounded local rounding repair"
+}

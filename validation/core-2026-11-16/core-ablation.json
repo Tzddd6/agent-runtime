@@ -1,0 +1,121 @@
+{
+  "samples": 60,
+  "repeats": 5,
+  "all_passed": true,
+  "model_calls": 0,
+  "summary": {
+    "single": {
+      "legacy": {
+        "seconds": 0.09901139300200157,
+        "sample_total_seconds": 0.17664414399769157,
+        "cpu_usec": 134827,
+        "memory_peak_bytes": 19890176,
+        "result_json_bytes": 66,
+        "rpc_requests": 0
+      },
+      "batch_spawn": {
+        "seconds": 0.1174262739950791,
+        "sample_total_seconds": 0.1944867780111963,
+        "cpu_usec": 135550,
+        "memory_peak_bytes": 20488192,
+        "result_json_bytes": 70,
+        "rpc_requests": 0
+      },
+      "batch_fork": {
+        "seconds": 0.09376096600317396,
+        "sample_total_seconds": 0.16923645300266799,
+        "cpu_usec": 158312,
+        "memory_peak_bytes": 25432064,
+        "result_json_bytes": 70,
+        "rpc_requests": 0
+      }
+    },
+    "chain": {
+      "legacy": {
+        "seconds": 1.1878493749973131,
+        "sample_total_seconds": 1.2673959840030875,
+        "cpu_usec": 758133,
+        "memory_peak_bytes": 22151168,
+        "result_json_bytes": 794,
+        "rpc_requests": 0
+      },
+      "batch_spawn": {
+        "seconds": 1.0909938980039442,
+        "sample_total_seconds": 1.1769056799967075,
+        "cpu_usec": 759531,
+        "memory_peak_bytes": 22642688,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      },
+      "batch_fork": {
+        "seconds": 0.14722459700715262,
+        "sample_total_seconds": 0.2231773770035943,
+        "cpu_usec": 222742,
+        "memory_peak_bytes": 25317376,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      }
+    },
+    "fanout": {
+      "legacy": {
+        "seconds": 0.491936453996459,
+        "sample_total_seconds": 0.5627292260032846,
+        "cpu_usec": 797947,
+        "memory_peak_bytes": 50135040,
+        "result_json_bytes": 794,
+        "rpc_requests": 0
+      },
+      "batch_spawn": {
+        "seconds": 0.4941909220069647,
+        "sample_total_seconds": 0.5713468400062993,
+        "cpu_usec": 811081,
+        "memory_peak_bytes": 51019776,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      },
+      "batch_fork": {
+        "seconds": 0.1363477429986233,
+        "sample_total_seconds": 0.21592273999704048,
+        "cpu_usec": 219971,
+        "memory_peak_bytes": 25886720,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      }
+    },
+    "contexts": {
+      "legacy": {
+        "seconds": 0.62612329798867,
+        "sample_total_seconds": 0.7018482059938833,
+        "cpu_usec": 984088,
+        "memory_peak_bytes": 56377344,
+        "result_json_bytes": 1575698,
+        "rpc_requests": 48
+      },
+      "batch_spawn": {
+        "seconds": 0.5819396779988892,
+        "sample_total_seconds": 0.6558924190030666,
+        "cpu_usec": 944309,
+        "memory_peak_bytes": 54259712,
+        "result_json_bytes": 5474,
+        "rpc_requests": 12
+      },
+      "batch_fork": {
+        "seconds": 0.24328083200089168,
+        "sample_total_seconds": 0.3207959680003114,
+        "cpu_usec": 375892,
+        "memory_peak_bytes": 34795520,
+        "result_json_bytes": 5474,
+        "rpc_requests": 12
+      }
+    }
+  },
+  "limits": [
+    "finite synthetic local tasks, not real model latency comparison",
+    "memory includes isolated preloader, worker and new coordinator imports; common Python gate startup excluded",
+    "all 12 Workers remain separate processes; fewer interpreter execs, not fewer total processes",
+    "local Context transport/cache only; no provider KV control"
+  ],
+  "frozen_commit": "727a469c7627d39ea632baa09cf1daefc388f4e1",
+  "summary_sha256": "4f62078a0a3b2e722a6b95cf869c73ea44f4cbec53d9f59f20c26fde93693503",
+  "initial_harness_error": "initial mixed Worker cwd experiment excluded; protocol-corrected run uses the matching source cwd; failed run retained privately"
+}

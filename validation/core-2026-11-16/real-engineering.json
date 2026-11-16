@@ -1,0 +1,716 @@
+{
+  "summary": {
+    "direct_full": {
+      "cases": 8,
+      "passed": 7,
+      "calls": 10,
+      "input_tokens": 9596,
+      "output_tokens": 2411,
+      "cached_input_tokens": 3456,
+      "median_seconds": 2.147139654502098,
+      "median_cpu_seconds": 0.2940925,
+      "median_memory_peak_bytes": 23599104.0,
+      "median_non_model_seconds": 0.3074570314929588
+    },
+    "direct_compact": {
+      "cases": 8,
+      "passed": 6,
+      "calls": 12,
+      "input_tokens": 12725,
+      "output_tokens": 2084,
+      "cached_input_tokens": 2944,
+      "median_seconds": 2.832444558494899,
+      "median_cpu_seconds": 0.34132799999999996,
+      "median_memory_peak_bytes": 23234560.0,
+      "median_non_model_seconds": 0.35678109949367354
+    },
+    "runtime_spawn": {
+      "cases": 8,
+      "passed": 8,
+      "calls": 11,
+      "input_tokens": 11754,
+      "output_tokens": 2315,
+      "cached_input_tokens": 3328,
+      "median_seconds": 3.1703741639939835,
+      "median_cpu_seconds": 0.5275575,
+      "median_memory_peak_bytes": 36907008.0,
+      "median_non_model_seconds": 0.8114885350005352
+    },
+    "runtime_fork": {
+      "cases": 8,
+      "passed": 5,
+      "calls": 11,
+      "input_tokens": 11630,
+      "output_tokens": 2234,
+      "cached_input_tokens": 4480,
+      "median_seconds": 2.8390782864953508,
+      "median_cpu_seconds": 0.42587,
+      "median_memory_peak_bytes": 43014144.0,
+      "median_non_model_seconds": 0.5658429860122851
+    }
+  },
+  "paid_intents": 44,
+  "remaining_sample_cgroups": [],
+  "raw_results_sha256": "7608ebfa28b8ef7b5c21189418700fad8b4ff40cd54f0fa52716dcdcace3ea87",
+  "correction": "absolute checker path only; same samples, prompts, verification, oracle and expected values",
+  "new_model_calls": 0,
+  "original_results_unchanged": true,
+  "limits": [
+    "small declared workload, not statistical significance",
+    "model sampling/cache/network not controlled",
+    "do not claim lower tokens without also reporting quality and all failed samples"
+  ],
+  "frozen_commit": "ff5a06a89e227e2a0085f569696391fcd644d6a5",
+  "resources": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "max_model_calls_per_case": 2,
+  "max_output_tokens_per_call": 4096,
+  "thinking": false,
+  "rows": [
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "repeat": 0,
+      "arm": "direct_full",
+      "seconds": 1.6896274320024531,
+      "cpu_seconds": 0.303423,
+      "memory_peak_bytes": 27611136,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "repeat": 0,
+      "arm": "direct_compact",
+      "seconds": 1.5436457850009901,
+      "cpu_seconds": 0.291634,
+      "memory_peak_bytes": 23310336,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "repeat": 0,
+      "arm": "runtime_spawn",
+      "seconds": 1.9907908919994952,
+      "cpu_seconds": 0.517582,
+      "memory_peak_bytes": 36827136,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "repeat": 0,
+      "arm": "runtime_fork",
+      "seconds": 1.483369951005443,
+      "cpu_seconds": 0.421235,
+      "memory_peak_bytes": 43761664,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "repeat": 1,
+      "arm": "direct_compact",
+      "seconds": 3.0695903449959587,
+      "cpu_seconds": 0.401939,
+      "memory_peak_bytes": 23015424,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "repeat": 1,
+      "arm": "runtime_spawn",
+      "seconds": 4.055189013000927,
+      "cpu_seconds": 0.777036,
+      "memory_peak_bytes": 36204544,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "repeat": 1,
+      "arm": "runtime_fork",
+      "seconds": 3.348372060005204,
+      "cpu_seconds": 0.487857,
+      "memory_peak_bytes": 43917312,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "repeat": 1,
+      "arm": "direct_full",
+      "seconds": 1.5881726930092555,
+      "cpu_seconds": 0.298451,
+      "memory_peak_bytes": 24059904,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "repeat": 0,
+      "arm": "runtime_spawn",
+      "seconds": 3.2015096139948582,
+      "cpu_seconds": 0.495123,
+      "memory_peak_bytes": 37011456,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "repeat": 0,
+      "arm": "runtime_fork",
+      "seconds": 2.852091021995875,
+      "cpu_seconds": 0.391389,
+      "memory_peak_bytes": 41226240,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "repeat": 0,
+      "arm": "direct_full",
+      "seconds": 2.75736421799229,
+      "cpu_seconds": 0.252289,
+      "memory_peak_bytes": 23494656,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "repeat": 0,
+      "arm": "direct_compact",
+      "seconds": 2.7625268939882517,
+      "cpu_seconds": 0.239893,
+      "memory_peak_bytes": 22585344,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "repeat": 1,
+      "arm": "runtime_fork",
+      "seconds": 1.5892549269919982,
+      "cpu_seconds": 0.416629,
+      "memory_peak_bytes": 43216896,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "repeat": 1,
+      "arm": "direct_full",
+      "seconds": 1.4932324249966769,
+      "cpu_seconds": 0.289734,
+      "memory_peak_bytes": 22982656,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "repeat": 1,
+      "arm": "direct_compact",
+      "seconds": 1.131465334998211,
+      "cpu_seconds": 0.2908,
+      "memory_peak_bytes": 25006080,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "repeat": 1,
+      "arm": "runtime_spawn",
+      "seconds": 1.6877072229981422,
+      "cpu_seconds": 0.507887,
+      "memory_peak_bytes": 36986880,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "repeat": 0,
+      "arm": "direct_full",
+      "seconds": 1.4432618249993538,
+      "cpu_seconds": 0.281472,
+      "memory_peak_bytes": 22896640,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "repeat": 0,
+      "arm": "direct_compact",
+      "seconds": 2.7054930059966864,
+      "cpu_seconds": 0.391022,
+      "memory_peak_bytes": 23158784,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "repeat": 0,
+      "arm": "runtime_spawn",
+      "seconds": 3.139238713993109,
+      "cpu_seconds": 0.751393,
+      "memory_peak_bytes": 38113280,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "repeat": 0,
+      "arm": "runtime_fork",
+      "seconds": 1.9359071980143199,
+      "cpu_seconds": 0.430505,
+      "memory_peak_bytes": 42295296,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "repeat": 1,
+      "arm": "direct_compact",
+      "seconds": 2.9023622230015462,
+      "cpu_seconds": 0.400755,
+      "memory_peak_bytes": 24068096,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "repeat": 1,
+      "arm": "runtime_spawn",
+      "seconds": 3.6022821860096883,
+      "cpu_seconds": 0.772538,
+      "memory_peak_bytes": 36315136,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "repeat": 1,
+      "arm": "runtime_fork",
+      "seconds": 2.8424821789958514,
+      "cpu_seconds": 0.568446,
+      "memory_peak_bytes": 42811392,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "repeat": 1,
+      "arm": "direct_full",
+      "seconds": 2.9970189169980586,
+      "cpu_seconds": 0.314556,
+      "memory_peak_bytes": 24322048,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "repeat": 0,
+      "arm": "runtime_spawn",
+      "seconds": 3.61025646100461,
+      "cpu_seconds": 0.493132,
+      "memory_peak_bytes": 35442688,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "repeat": 0,
+      "arm": "runtime_fork",
+      "seconds": 3.25110888198833,
+      "cpu_seconds": 0.401788,
+      "memory_peak_bytes": 41324544,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "repeat": 0,
+      "arm": "direct_full",
+      "seconds": 2.604651877001743,
+      "cpu_seconds": 0.243444,
+      "memory_peak_bytes": 23339008,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "repeat": 0,
+      "arm": "direct_compact",
+      "seconds": 2.956354348003515,
+      "cpu_seconds": 0.251069,
+      "memory_peak_bytes": 23060480,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      },
+      "raw_quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "repeat": 0,
+      "arm": "runtime_fork",
+      "seconds": 2.83567439399485,
+      "cpu_seconds": 0.555764,
+      "memory_peak_bytes": 44445696,
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "repeat": 0,
+      "arm": "direct_full",
+      "seconds": 3.615197506995173,
+      "cpu_seconds": 0.414149,
+      "memory_peak_bytes": 23703552,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "repeat": 0,
+      "arm": "direct_compact",
+      "seconds": 3.003750294999918,
+      "cpu_seconds": 0.405104,
+      "memory_peak_bytes": 24788992,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "repeat": 0,
+      "arm": "runtime_spawn",
+      "seconds": 2.492798819002928,
+      "cpu_seconds": 0.537533,
+      "memory_peak_bytes": 37027840,
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "raw_quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    }
+  ]
+}

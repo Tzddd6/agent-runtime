@@ -1,0 +1,53 @@
+{
+  "case": "pricing_1",
+  "supplier_requests": 0,
+  "retained_model_output_sha256": "bc60810d02a51a2c9b7e84ce0e0c34f41bd43fa35665cb768febe89c6fe6ca73",
+  "all_states": {
+    "repair_prepare": "succeeded",
+    "repair_candidate_1": "succeeded",
+    "repair_check_1": "succeeded"
+  },
+  "accepted": true,
+  "verification": {
+    "plugin": "project.patch_check",
+    "project": "pricing",
+    "success": true,
+    "source_sha256": "6dc49791b7ebbe963b6ecf5bd7e192f3f16ef3daba2d705a9b0337d695312a7b",
+    "path": "verified/pricing_6dc49791b7ebbe963b6ecf5bd7e192f3f16ef3daba2d705a9b0337d695312a7b.py",
+    "bytes": 662,
+    "sha256": "6dc49791b7ebbe963b6ecf5bd7e192f3f16ef3daba2d705a9b0337d695312a7b",
+    "written": true,
+    "executed": true,
+    "public": {
+      "total": 9,
+      "passed": 9,
+      "failed": 0,
+      "errors": 0,
+      "failures_detail": []
+    },
+    "heldout": {
+      "total": 16,
+      "passed": 16,
+      "failed": 0,
+      "errors": 0
+    },
+    "tests_modified": false,
+    "local_repair": {
+      "method": "bounded_ast_hypotheses_with_unchanged_checker",
+      "candidates": [
+        {
+          "rule": "defer_integer_rounding",
+          "function": "line_total_cents",
+          "sha256": "203c5e763157f9d615a4d79c51b1c13aade7c6d14b5b1fd331753cfee7497904",
+          "success": true
+        }
+      ]
+    }
+  },
+  "independent_grade": {
+    "passed": true,
+    "external_passed": true,
+    "same_verified_source": true
+  },
+  "limits": "offline replay of a retained failure, not a fresh paid comparison or universal repair guarantee"
+}

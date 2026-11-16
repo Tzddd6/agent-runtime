@@ -1,0 +1,35 @@
+{
+  "frozen_commit": "eb11242e5312d54e3130d702bd00179212b5c482",
+  "cases": 12,
+  "functional_passed": 10,
+  "supplier_calls": 24,
+  "input_tokens": 25784,
+  "output_tokens": 2277,
+  "raw_results_sha256": "7200f5ec68033cef5599655a10aec580d8c4c48cffbbfae86789b1ac9419e473",
+  "failure_families": [
+    "integer arithmetic without tools",
+    "SVG placeholder and false completion"
+  ],
+  "passed_families": [
+    "strict JSON",
+    "writing constraints",
+    "CSV with real artifact",
+    "PDF+DOCX reading",
+    "long DOCX readback",
+    "project repair",
+    "four-Agent constraints",
+    "review",
+    "public HTTPS read",
+    "attachment prompt-injection refusal"
+  ],
+  "cleanup_harness_error": "baseline counted cgroup virtual files as child groups; original cleanup flags invalid; functional-only regrade unchanged; use the separate strict resource report",
+  "svg_independent_followup": {
+    "frozen_commit": "004ed110da07326dac20e90022a0398c81ddf053",
+    "passed": true,
+    "supplier_calls": 3,
+    "input_tokens": 3653,
+    "output_tokens": 939,
+    "seconds": 9.01,
+    "limits": "three-bar structural artifact; not the original complex aircraft illustration"
+  }
+}

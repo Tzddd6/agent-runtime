@@ -1,0 +1,27 @@
+{
+  "source_commit": "5859d953948bc8ba195dec3387d474cd19b9e488",
+  "regular": {
+    "discovered": 274,
+    "passed": 266,
+    "skipped": 8
+  },
+  "strict_resource": {
+    "passed": true,
+    "tests": 49,
+    "supplier_calls": 0,
+    "remaining_attempt_cgroups": []
+  },
+  "ui": {
+    "candidate_only": true,
+    "desktop_passed": true,
+    "mobile_width": 390,
+    "horizontal_overflow": false,
+    "capability_answer_supplier_calls": 0,
+    "history_delta_http_test_passed": true
+  },
+  "harness_notes": [
+    "an accidental root regression run could not enter the intentionally non-root document sandbox; rerun as tzd passed",
+    "first offline money replay shell had an invalid cgroup setup; normal Python delegated setup passed with zero supplier calls"
+  ],
+  "deployment": "candidate; live source stays at upload-fix until approved release"
+}
