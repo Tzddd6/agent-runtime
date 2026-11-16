@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/openai/human-eval",
+  "commit": "b9453e8f1865df0a0057a1383767caa400acfbcf",
+  "data_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+  "selection": "first five in official dataset order, fixed before model calls",
+  "ids": [
+    "HumanEval/0",
+    "HumanEval/1",
+    "HumanEval/2",
+    "HumanEval/3",
+    "HumanEval/4"
+  ],
+  "official_test_unchanged": true,
+  "repeats": 1,
+  "arms": [
+    "direct",
+    "runtime"
+  ],
+  "max_calls_per_arm": 1,
+  "max_output_tokens": 2048,
+  "limits": "pilot only; not full benchmark or evidence of overall agent ability"
+}

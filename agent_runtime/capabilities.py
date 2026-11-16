@@ -10,6 +10,8 @@ import re
 
 SKILL_ROOT=Path(__file__).resolve().parent/'skills'
 SKILLS={'python-review':'检查Python接口、边界与错误处理',
+        'benchmark-evaluation':'冻结数据与判分器，同预算对照并保留失败',
+        'streaming-review':'检查公式、代码、表格和长回答的增量与最终一致性',
         'computer-lab':'在专用实验电脑观察页面、操作并验证，拒绝凭据与高风险外发',
         'test-design':'设计正常、异常、并发与资源验收',
         'project-plan':'拆解需求、依赖、里程碑与交付物',
@@ -23,6 +25,7 @@ SKILLS={'python-review':'检查Python接口、边界与错误处理',
         'source-research':'使用本地资料与官方来源核对事实',
         'sql-review':'检查SQLite参数化、事务、NULL和数据契约'}
 PLUGINS={'text.stats':'统计文本字符、行与词数',
+         'csv.aggregate':'对CSV指定列做精确十进制求和，不调用模型',
          'computer.run':'在独立实验桌面进行限步浏览、截图、点击、输入和滚动，统一模型预算',
          'math.calculate':'计算有限的基础算术表达式',
          'python.syntax':'检查Python语法并提取函数和类名，不执行代码',
@@ -61,7 +64,7 @@ ARGUMENTS={
  'project.test':{'project':'pricing/intervals/text_normalization'},
  'project.patch_check':{'project':'pricing','source':'完整的固定项目补丁模块'},
  'text.search':{'text':'待查找文本','query':'字面关键词'},'text.diff':{'before':'原文','after':'修改稿'},
- 'json.validate':{'text':'JSON文本'},'csv.profile':{'text':'CSV文本'},
+ 'json.validate':{'text':'JSON文本'},'csv.profile':{'text':'CSV文本'},'csv.aggregate':{'text':'name,amount\nA,1.25','column':'amount'},
  'web.fetch':{'url':'https://example.com/'},'command.run':{'argv':['python3','-m','unittest'],'timeout':10},
  'file.read':{'path':'src/main.py','offset':0,'limit':12000},'file.write':{'path':'src/main.py','content':'文件内容'},'file.list':{},
  'file.copy':{'source':'uploads/附件id.py','target':'test_calc.py'},
@@ -113,6 +116,19 @@ def calculate(expression):
 def execute_plugin(task):
     name=task.get('plugin');args=task.get('arguments',{})
     normalizations=[]
+    if name=='csv.aggregate':
+        from decimal import Decimal,InvalidOperation,localcontext
+        if set(args)!={'text','column'} or not isinstance(args['text'],str) or len(args['text'])>20000 or not isinstance(args['column'],str):raise ValueError('需要有限CSV文本与column')
+        reader=csv.DictReader(io.StringIO(args['text']))
+        if not reader.fieldnames or len(set(reader.fieldnames))!=len(reader.fieldnames) or args['column'] not in reader.fieldnames:raise ValueError('列名不存在或重复')
+        with localcontext() as ctx:
+            ctx.prec=100;total=Decimal(0);count=0
+            for row in reader:
+                if None in row:raise ValueError('CSV行存在多余字段')
+                raw=row.get(args['column'])
+                if not isinstance(raw,str) or not re.fullmatch(r'[+-]?\d{1,30}(?:\.\d{1,20})?',raw.strip()):raise ValueError('求和列必须是有限十进制数，不跳过空值')
+                total+=Decimal(raw.strip());count+=1
+            return {'plugin':name,'executed':True,'rows':count,'sum_decimal':format(total,'f'),'column':args['column']}
     if name not in PLUGINS or not isinstance(args,dict):raise ValueError('插件或参数无效')
     if name=='computer.run':
         from .computer import execute

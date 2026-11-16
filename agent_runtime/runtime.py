@@ -135,7 +135,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9):
     validate(tasks)
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
@@ -169,7 +169,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                            workflow_id=root.name,model_budget=model_budget)
     agent_journal=(root/'agents.jsonl').open('w',encoding='utf-8');registry.journal=agent_journal
     executor.agent_roots=registry.groups
-    store = ContextStore(root / 'contexts')
+    store = ContextStore(root / 'contexts',compression_level=context_compression_level)
     tasks = [dict(t) for t in tasks]
     task_by_id = {t['id']: t for t in tasks}
     states = {t['id']: 'waiting' for t in tasks}

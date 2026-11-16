@@ -66,4 +66,14 @@ test('Math is preserved before Markdown escapes and code never renders math',()=
   const partial=render('暂未闭合 \\(x_1');assert(partial.textContent.includes('\\(x_1'));
   delete global.katex;
 });
+test('Table pipes inside math and multi-backtick code do not split cells',()=>{
+ const box=render('| 内容 | 值 |\n|---|---|\n| $|x|$ | ``a|b`` |\n| \\( |y| \\) | 2 |');
+ assert.equal(all(box,'td').length,4);assert.equal(all(box,'td')[0].textContent,'$|x|$');assert.equal(all(box,'code')[0].textContent,'a|b');
+ assert.equal(all(render('| A | B |\n|---|---|\n| $5 | $6 |'),'td').length,2);
+});
+test('Every prefix of mixed streamed output stays bounded and inert',()=>{
+ const source='## 流式验收\n\n\\[\\int_0^1 x^2 dx=1/3\\]\n\n```python\nx = "| ** $"\nprint(x)\n```\n\n| 内容 | 值 |\n|---|---|\n| $|x|$ | 1 |\n\n'+('长回答段落。 **重点**\n\n'.repeat(120));
+ for(let i=1;i<=source.length;i+=7){const box=render(source.slice(0,i));assert.equal(all(box,'script').length,0);}
+ const final=render(source);assert.equal(all(final,'pre')[0].textContent,'x = "| ** $"\nprint(x)\n');assert.equal(all(final,'td').length,2);
+});
 process.stdout.write(JSON.stringify({tests:cases,passed:cases,paid_model_calls:0})+'\n');

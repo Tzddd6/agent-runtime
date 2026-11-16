@@ -1,0 +1,16 @@
+{
+  "direct": {
+    "passed": 4,
+    "samples": 5,
+    "calls": 5,
+    "median_seconds": 1.110538466993603,
+    "tokens": 1066
+  },
+  "runtime": {
+    "passed": 5,
+    "samples": 5,
+    "calls": 5,
+    "median_seconds": 1.304694289006875,
+    "tokens": 1153
+  }
+}

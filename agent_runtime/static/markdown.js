@@ -61,8 +61,16 @@
     const rule=line=>/^ {0,3}(?:(?:\*\s*){3,}|(?:-\s*){3,}|(?:_\s*){3,})$/.test(line);
     function cells(line){
       let text=line.trim();if(text.startsWith('|'))text=text.slice(1);if(text.endsWith('|')&&!text.endsWith('\\|'))text=text.slice(0,-1);
-      const out=[];let value='',ticks=0;
-      for(let i=0;i<text.length;i++){const c=text[i];if(c==='\\'&&text[i+1]==='|'){value+='|';i++;continue}if(c==='`')ticks^=1;if(c==='|'&&!ticks){out.push(value.trim());value=''}else value+=c}out.push(value.trim());return out;
+      const out=[];let value='',ticks='',mathEnd='';
+      for(let i=0;i<text.length;i++){
+        if(text[i]==='`'&&!mathEnd){const mark=text.slice(i).match(/^`+/)[0];if(!ticks)ticks=mark;else if(ticks===mark)ticks='';value+=mark;i+=mark.length-1;continue}
+        if(!ticks){
+          if(mathEnd&&text.startsWith(mathEnd,i)){value+=mathEnd;i+=mathEnd.length-1;mathEnd='';continue}
+          if(!mathEnd){const pair=[['\\(','\\)'],['\\[','\\]'],['$$','$$'],['$','$']].find(([left])=>text.startsWith(left,i));const end=pair?closing(text,pair[1],i+pair[0].length):-1;if(pair&&end>=0&&(pair[0]!=='$'||end>i+1&&!/\s/.test(text[i+1])&&!/\s/.test(text[end-1]))){mathEnd=pair[1];value+=pair[0];i+=pair[0].length-1;continue}}
+        }
+        const c=text[i];if(c==='\\'&&text[i+1]==='|'&&!mathEnd){value+='|';i++;continue}
+        if(c==='|'&&!ticks&&!mathEnd){out.push(value.trim());value=''}else value+=c;
+      }out.push(value.trim());return out;
     }
     const divider=line=>{const a=cells(line);return a.length>1&&a.every(c=>/^:?-{3,}:?$/.test(c))};
     function blocks(parent,lines,depth=0){

@@ -8,7 +8,9 @@ import os
 
 
 class ContextStore:
-    def __init__(self, root, *, cache_bytes=8*1024**2, cache_policy='lru2', cache_max_entries=1024):
+    def __init__(self, root, *, cache_bytes=8*1024**2, cache_policy='lru2', cache_max_entries=1024,compression_level=9):
+        if type(compression_level) is not int or not 0<=compression_level<=9:raise ValueError('compression_level必须为0—9')
+        self.compression_level=compression_level
         if type(cache_bytes) is not int or cache_bytes < 0:
             raise ValueError('cache_bytes 必须为非负整数')
         if cache_policy not in ('lru','lru2'):
@@ -67,7 +69,9 @@ class ContextStore:
             self.metrics['puts'] += 1
             self.metrics['logical_bytes'] += len(raw)
             if not path.exists():
-                compressed = gzip.compress(raw, mtime=0) if len(raw) >= 1024 else raw
+                # Prefer bounded CPU cost for short-lived runtime objects. Readers
+                # still verify the same uncompressed SHA; compression is storage only.
+                compressed = gzip.compress(raw, compresslevel=self.compression_level, mtime=0) if len(raw) >= 1024 else raw
                 encoded = compressed if len(compressed) < len(raw) else raw
                 fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
                 with os.fdopen(fd,'wb') as file:file.write(encoded)

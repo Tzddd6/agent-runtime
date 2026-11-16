@@ -171,7 +171,8 @@ class ModelGateway:
         self.output_observer=None
         self.stream_tokens={}
         self.connections, self.connection_lock = set(), threading.Lock()
-        if hasattr(client,'cancel_event'):client.cancel_event=self.cancel_event
+        if hasattr(client,'for_request'):self.client=client.for_request(self.cancel_event)
+        elif hasattr(client,'cancel_event'):client.cancel_event=self.cancel_event
         owner = self
 
         class Handler(BaseHTTPRequestHandler):

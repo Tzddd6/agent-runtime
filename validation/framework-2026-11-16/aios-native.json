@@ -1,0 +1,7 @@
+{
+  "source": "agiresearch/AIOS292d98f",
+  "native_test": "tests/modules/memory/test_context_injector_access_matrix.py",
+  "native_exit_code": 1,
+  "status": "not_compatible",
+  "note": "Original file run unchanged in networkless sandbox. Import/interface compatibility failure is not an agent ability score. Separate adapted8-case contract is not native test parity."
+}

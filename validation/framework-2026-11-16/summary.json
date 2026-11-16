@@ -1,0 +1,37 @@
+{
+  "version": "v0.19.2",
+  "regular": {
+    "total": 304,
+    "passed": 295,
+    "skipped": 9
+  },
+  "strict": {
+    "source_base_commit": "5e6652db3c515ae5a78a6ad9c27e902dc57e10de",
+    "source_state": "post-fix candidate, see release source manifest",
+    "tests": 83,
+    "passed": true,
+    "remaining_attempt_cgroups": [],
+    "supplier_requests": 0,
+    "includes": [
+      "real browser virtual display/type/click/screenshot",
+      "host-home and local-network policy",
+      "real document extraction",
+      "CPU/OOM/PIDs/timeouts/descendants",
+      "Agent lifecycle and model budget",
+      "context authority",
+      "bounded tool recovery"
+    ],
+    "metadata_note": "Base field corrected from old report template; raw report retained."
+  },
+  "markdown_contracts": 10,
+  "tools": 33,
+  "skills": 15,
+  "framework_paired_samples": 80,
+  "fixed_results_all_passed": true,
+  "supplier_calls_for_framework": 0,
+  "aios_adapted_access_matrix": "8/8, adapted semantics only; not native AIOS score",
+  "native_aios_status": "not_compatible",
+  "performance": "No overall advantage proven. First40 showed regressions; experimental compression40 has mixed outcomes. Default stays9; level1 opt-in only.",
+  "model_benchmark": "HumanEval5 is a pipeline check, not framework advantage; sampling not controlled.",
+  "experimental_source": "Compression timings were measured with temporary level1 implementation; final API makes that policy explicit and keeps default9. Not timings for default final candidate."
+}

@@ -1,0 +1,86 @@
+{
+  "samples": 40,
+  "repeats": 5,
+  "all_passed": true,
+  "model_calls": 0,
+  "summary": {
+    "single": {
+      "baseline": {
+        "seconds": 0.09440465200168546,
+        "sample_total_seconds": 0.17456597401178442,
+        "cpu_usec": 161542,
+        "memory_peak_bytes": 26198016,
+        "result_json_bytes": 70,
+        "rpc_requests": 0
+      },
+      "candidate": {
+        "seconds": 0.09763040200050455,
+        "sample_total_seconds": 0.17412354299449362,
+        "cpu_usec": 163353,
+        "memory_peak_bytes": 25837568,
+        "result_json_bytes": 70,
+        "rpc_requests": 0
+      }
+    },
+    "chain": {
+      "baseline": {
+        "seconds": 0.14864791100262664,
+        "sample_total_seconds": 0.2319482400052948,
+        "cpu_usec": 230957,
+        "memory_peak_bytes": 26877952,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      },
+      "candidate": {
+        "seconds": 0.14844549799454398,
+        "sample_total_seconds": 0.23139879600785207,
+        "cpu_usec": 225747,
+        "memory_peak_bytes": 25595904,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      }
+    },
+    "fanout": {
+      "baseline": {
+        "seconds": 0.12998870400770102,
+        "sample_total_seconds": 0.20947431698732544,
+        "cpu_usec": 220065,
+        "memory_peak_bytes": 26767360,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      },
+      "candidate": {
+        "seconds": 0.13286521600093693,
+        "sample_total_seconds": 0.21577290999994148,
+        "cpu_usec": 229621,
+        "memory_peak_bytes": 28188672,
+        "result_json_bytes": 842,
+        "rpc_requests": 0
+      }
+    },
+    "contexts": {
+      "baseline": {
+        "seconds": 0.22534354400704615,
+        "sample_total_seconds": 0.3111255109979538,
+        "cpu_usec": 369270,
+        "memory_peak_bytes": 36708352,
+        "result_json_bytes": 5474,
+        "rpc_requests": 12
+      },
+      "candidate": {
+        "seconds": 0.23307796500739641,
+        "sample_total_seconds": 0.3140640929923393,
+        "cpu_usec": 380231,
+        "memory_peak_bytes": 37363712,
+        "result_json_bytes": 5474,
+        "rpc_requests": 12
+      }
+    }
+  },
+  "limits": [
+    "finite synthetic local tasks, not real model latency comparison",
+    "memory includes isolated preloader, worker and new coordinator imports; common Python gate startup excluded",
+    "all 12 Workers remain separate processes; fewer interpreter execs, not fewer total processes",
+    "local Context transport/cache only; no provider KV control"
+  ]
+}
