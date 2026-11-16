@@ -135,7 +135,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None):
     validate(tasks)
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
@@ -386,9 +386,9 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key,'failed',error=f'任务输入准备失败: {exc}')
                     continue
                 payload['_project_workspace']=str(project_workspace)
-                if refs or input_refs or task.get('action') in ('llm','send', 'receive') or task.get('plugin','').startswith(('runtime.','context.')):
+                if refs or input_refs or task.get('action') in ('llm','send', 'receive','memory_write','memory_read','memory_delete') or task.get('plugin','').startswith(('runtime.','context.','memory.')):
                     if broker is None:
-                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control,context_mode=context_mode)
+                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control,context_mode=context_mode,memory_repository=memory_repository)
                     payload['_ipc_url'] = broker.url
                     payload['_ipc_token'] = broker.issue(agent,configure=task.get('plugin')=='runtime.configure')
                 if task.get('action') == 'llm' or task.get('plugin')=='computer.run':
@@ -397,6 +397,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                             gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
                             gateway.budgets=registry.model_budgets
                             gateway.output_observer=output_observer
+                            gateway.memory_repository=memory_repository
                         payload['_gateway_url'] = gateway.url
                         payload['_gateway_token'] = gateway.issue(agent,stream_key=key if output_observer and task.get('action')=='llm' and key in ('auto_answer','assistant','review') else None)
                     except ModelError as exc:

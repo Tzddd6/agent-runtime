@@ -160,6 +160,8 @@ class DeepSeekClient:
 
 class ModelGateway:
     def __init__(self, client, log_path, concurrency=2):
+        self.memory_repository=None
+        self.memory_budget_bytes=8192
         self.client = client
         self.token = secrets.token_urlsafe(32)
         self.slots = threading.BoundedSemaphore(concurrency)
@@ -217,6 +219,7 @@ class ModelGateway:
                 queue_seconds = None
                 client_seconds = None
                 stream_token=None;stream=None
+                memory_diagnostics=None
                 try:
                     authorization=self.headers.get('Authorization','').removeprefix('Bearer ')
                     with owner.lock:capability=owner.capabilities.get(authorization)
@@ -240,6 +243,14 @@ class ModelGateway:
                     from .provider_stream import PREFIX
                     messages=[m for m in messages if not (m.get('role')=='system' and m['content'].startswith(PREFIX))]
                     if not messages:code=400;raise ModelError('消息缺少实际请求')
+                    if owner.memory_repository is not None:
+                        if capability is None:
+                            code=403;raise ModelError('记忆访问需要 Agent 临时凭证')
+                        try:
+                            messages,memory_diagnostics=owner.memory_repository.inject(
+                                capability['agent'],messages,owner.memory_budget_bytes)
+                        except Exception:
+                            code=503;raise ModelError('上下文存储不可用，已阻止模型调用') from None
                     if thinking:messages=[{'role':'system','content':THINKING_MARKER}]+messages
                     deadline=time.monotonic()+owner.client.timeout
                     while not entered:
@@ -296,7 +307,8 @@ class ModelGateway:
                             'total_seconds': time.monotonic()-started,
                             'gateway_queue_seconds':queue_seconds,'client_seconds':client_seconds,
                             'provider_http_seconds':numeric_timing(result.get('latency_seconds')),
-                            'transport_timings':public_timings(result.get('transport_timings'))}, ensure_ascii=False)+'\n')
+                            'transport_timings':public_timings(result.get('transport_timings')),
+                            'memory':{k:memory_diagnostics[k] for k in ('injected_count','injected_bytes','budget_kind')} if memory_diagnostics else None}, ensure_ascii=False)+'\n')
                 payload = json.dumps(result, ensure_ascii=False).encode()
                 try:
                     self.send_response(code)

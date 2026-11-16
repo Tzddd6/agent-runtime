@@ -67,6 +67,12 @@ def main():
         return 1
     if action == 'sleep':
         time.sleep(float(task.get('seconds', 0)))
+    elif action in ('memory_write','memory_read','memory_delete'):
+        arguments={'op':action}
+        fields={'memory_write':('content','policy'),'memory_read':('budget',),'memory_delete':('memory_id',)}[action]
+        for name in fields:
+            if name in task:arguments['id' if name=='memory_id' else name]=task[name]
+        output=ipc(task,**arguments)
     elif action=='clock':
         from .clock_tool import now
         output=now(task.get('timezone','Asia/Shanghai'))['display']

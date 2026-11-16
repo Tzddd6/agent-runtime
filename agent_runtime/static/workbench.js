@@ -1,6 +1,6 @@
 'use strict';
 let libraryTab='plugins',knowledgeEdit=null,knowledgeBusy=false,knowledgeSearchSequence=0;
-const titles={general:'常规与额度',appearance:'外观',permissions:'权限与安全',knowledge:'知识库',capabilities:'工具与 Skill',storage:'数据与存储'};
+const titles={memory:'Agent 记忆',general:'常规与额度',appearance:'外观',permissions:'权限与安全',knowledge:'知识库',capabilities:'工具与 Skill',storage:'数据与存储'};
 const permissionNames={sandboxed_command:'隔离命令',public_network:'公网读取',workspace_write:'工作目录写入',runtime_control:'Runtime 控制',bounded_read_or_compute:'限量读取 / 计算'};
 function panelNotice(text){$('workspaceNotice').textContent=text;$('workspaceNotice').hidden=!text}
 async function openWorkspace(panel){
@@ -8,7 +8,7 @@ async function openWorkspace(panel){
   for(const section of document.querySelectorAll('[data-settings]'))section.hidden=section.dataset.settings!==panel;
   for(const button of document.querySelectorAll('.settings-nav [data-panel]')){const chosen=button.dataset.panel===panel;button.classList.toggle('active',chosen);button.setAttribute('aria-current',String(chosen))}
   if(!$('workspaceDialog').open)$('workspaceDialog').showModal();
-  try{if(panel==='knowledge')await loadKnowledge();if(panel==='storage')await loadStorage();if(panel==='capabilities')renderLibrary()}catch(error){panelNotice(error.message)}
+  try{if(panel==='memory')await loadMemory();if(panel==='knowledge')await loadKnowledge();if(panel==='storage')await loadStorage();if(panel==='capabilities')renderLibrary()}catch(error){panelNotice(error.message)}
 }
 function renderLibrary(){
   const query=$('capabilityQuery').value.trim().toLowerCase(),box=$('capabilityList');box.replaceChildren();
@@ -93,7 +93,21 @@ function savePreferences(){
     calls:$('modelCalls').value,tokens:$('modelTokens').value,response:$('responseTokens').value,context:$('contextMode').value};
   try{localStorage.setItem('agentrt-preferences-v1',JSON.stringify(value))}catch{}applyAppearance();
 }
+async function loadMemory(){
+  const value=await api('memory'),box=$('memoryList');box.replaceChildren();
+  if(!value.memories.length){box.append(element('p','尚无记忆。保存后，后续模型调用会按权限和预算读取。','muted'));return}
+  for(const note of value.memories){
+    const row=element('article',null,'knowledge-row'),info=element('div',null,'document-info');
+    info.append(element('strong',note.policy==='shared'?'同用户共享':'assistant 私有'),element('p',note.content));
+    const remove=element('button','移除','outlined-button');remove.type='button';
+    remove.onclick=async()=>{remove.disabled=true;try{await api('memory/remove',{id:note.id});await loadMemory()}catch(error){panelNotice(error.message);remove.disabled=false}};
+    row.append(info,remove);box.append(row);
+  }
+}
 function initWorkbench(){
+  $('memoryEditor').onsubmit=async event=>{event.preventDefault();const button=event.submitter;button.disabled=true;
+    try{await api('memory/save',{content:$('memoryBody').value,policy:$('memoryPolicy').value});$('memoryBody').value='';await loadMemory();panelNotice('记忆已提交，后续调用自动按权限读取。')}
+    catch(error){panelNotice(error.message+'。未自动重试，请先刷新核对。')}finally{button.disabled=false}};
   for(const button of document.querySelectorAll('[data-panel]'))button.onclick=()=>openWorkspace(button.dataset.panel);
   $('closeWorkspace').onclick=()=>$('workspaceDialog').close();$('workspaceDialog').onclick=event=>{if(event.target===$('workspaceDialog'))$('workspaceDialog').close()};
   $('newKnowledge').onclick=newKnowledgeNote;$('cancelKnowledge').onclick=closeKnowledgeEditor;$('knowledgeEditor').onsubmit=saveKnowledge;

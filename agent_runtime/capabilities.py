@@ -25,6 +25,9 @@ SKILLS={'python-review':'检查Python接口、边界与错误处理',
         'source-research':'使用本地资料与官方来源核对事实',
         'sql-review':'检查SQLite参数化、事务、NULL和数据契约'}
 PLUGINS={'text.stats':'统计文本字符、行与词数',
+         'memory.remember':'将明确需长期保留的非敏感信息存入当前用户与Agent分区，默认私有',
+         'memory.recall':'按当前用户和Agent临时凭证读取预算内记忆',
+         'memory.forget':'删除当前Agent拥有的记忆，不接受用户或Agent身份参数',
          'csv.aggregate':'对CSV指定列做精确十进制求和，不调用模型',
          'computer.run':'在独立实验桌面进行限步浏览、截图、点击、输入和滚动，统一模型预算',
          'math.calculate':'计算有限的基础算术表达式',
@@ -71,6 +74,8 @@ ARGUMENTS={
  'file.replace':{'path':'calc.py','old':'return a - b','new':'return a + b','sha256':'file.read返回的原文件哈希'},
  'artifact.write':{'path':'report.md','content':'产物正文'},'runtime.observe':{},
  'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'},
+ 'memory.remember':{'content':'用户明确要求长期保留的非敏感信息','policy':'private'},
+ 'memory.recall':{'budget':8192},'memory.forget':{'id':'记忆id'},
  'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000},
  'workspace.inspect':{},'workspace.test':{},'workspace.import':{'files':[{'path':'uploads/附件id.py','name':'calc.py'},{'path':'uploads/测试附件id.py','name':'test_calc.py'}]},'workspace.apply_patch':{'patches':[{'path':'calc.py','sha256':'原SHA','content':'完整新源码'}]},
  'library.search':{'query':'Python测试','limit':4},'library.read':{'id':'python-testing'},'tools.discover':{'query':'file.read'},
@@ -184,6 +189,10 @@ def execute_plugin(task):
         required={'query'} if name=='context.search' else {'ref'}
         if set(args)-allowed or not required<=set(args):raise ValueError('上下文工具参数无效')
         return {'plugin':name,**ipc(task,op='context_search' if name=='context.search' else 'context_read',**args),'executed':True}
+    if name.startswith('memory.'):
+        from .worker import ipc
+        op={'memory.remember':'memory_write','memory.recall':'memory_read','memory.forget':'memory_delete'}[name]
+        return {'plugin':name,**ipc(task,op=op,**args),'executed':True}
     if name in ('text.search','text.diff','json.validate','csv.profile'):
         expected={'text','query'} if name=='text.search' else {'before','after'} if name=='text.diff' else {'text'}
         if set(args)!=expected or any(not isinstance(v,str) or len(v)>20000 for v in args.values()):raise ValueError('文本工具参数无效')

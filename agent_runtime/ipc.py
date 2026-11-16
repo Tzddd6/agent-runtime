@@ -6,11 +6,13 @@ import collections
 import json
 import secrets
 import threading
+import sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class Broker:
-    def __init__(self, store, agents, capacity=128, *, control=None,context_mode='balanced'):
+    def __init__(self, store, agents, capacity=128, *, control=None,context_mode='balanced',memory_repository=None):
+        self.memory_repository=memory_repository
         self.store, self.capacity = store, capacity
         self.agents = set(agents)
         self.tokens, self.mailboxes, self.receipts = {}, {}, {}
@@ -40,7 +42,7 @@ class Broker:
                     code = 200
                 except PermissionError:
                     code, result = 403, {'error': 'unauthorized capability or recipient'}
-                except (ValueError, TypeError, KeyError, AttributeError, OSError):
+                except (ValueError, TypeError, KeyError, AttributeError, OSError,sqlite3.Error):
                     code, result = 400, {'error': 'invalid RPC or mailbox capacity exceeded'}
                 raw = json.dumps(result, ensure_ascii=False).encode('utf-8')
                 with owner.lock:
@@ -85,6 +87,14 @@ class Broker:
             if agent is None:
                 raise PermissionError()
             op = value['op']
+            if op in ('memory_write','memory_read','memory_delete'):
+                if self.memory_repository is None:raise ValueError('Persistent memory unavailable')
+                allowed={'memory_write':{'op','content','policy'},'memory_read':{'op','budget'},'memory_delete':{'op','id'}}[op]
+                if set(value)-allowed:raise ValueError('Memory identity is capability-bound')
+                if op=='memory_write':return self.memory_repository.put(agent,value.get('content'),value.get('policy','private'))
+                if op=='memory_delete':return self.memory_repository.delete(agent,value.get('id'))
+                rows,diag=self.memory_repository.select(agent,value.get('budget',8192))
+                return {'memories':rows,'diagnostics':diag}
             if op=='materialize':
                 refs=value.get('context_refs',[]);inputs=value.get('input_refs',{})
                 if not isinstance(refs,list) or not isinstance(inputs,dict) or len(refs)+len(inputs)>128 or any(not isinstance(k,str) for k in inputs):raise ValueError('invalid batch')

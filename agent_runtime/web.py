@@ -9,6 +9,7 @@ import secrets
 import threading
 import time
 import uuid
+import sqlite3
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse,parse_qs,unquote
@@ -29,7 +30,9 @@ RECOVERY_MESSAGE = '执行资源回收状态未确认，已暂停新任务和模
 
 
 class Controller:
-    def __init__(self, root, cgroup_root=None):
+    def __init__(self, root, cgroup_root=None, *, user_identity='local'):
+        self.user_identity=user_identity
+        self.global_gate=None
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True)
         self.cgroup_root = cgroup_root
@@ -49,6 +52,8 @@ class Controller:
         self.knowledge=KnowledgeStore(self.database)
         self.attachments=AttachmentStore(self.root/'attachments',self.database)
         self.upload_slot=threading.BoundedSemaphore(1)
+        from .memory_repository import MemoryRepository
+        self.memory=MemoryRepository(self.root/'memory',user_identity)
         for job in self.store.load():
             self.jobs[job['id']]=job
             if job['status']=='recovery_required':self.recovery_required=True
@@ -76,6 +81,13 @@ class Controller:
         return {'cpu_milli':cpu,'memory_bytes':memory,'pids':pids}
 
     def submit(self, value, *, chat_messages=None, workspace_key=None, attachment_context=None):
+        if self.global_gate is not None:
+            with self.global_gate.lock:
+                self.global_gate.check_idle()
+                return self._submit(value,chat_messages=chat_messages,workspace_key=workspace_key,attachment_context=attachment_context)
+        return self._submit(value,chat_messages=chat_messages,workspace_key=workspace_key,attachment_context=attachment_context)
+
+    def _submit(self, value, *, chat_messages=None, workspace_key=None, attachment_context=None):
         preset = value.get('preset')
         context_mode=value.get('context_mode','balanced')
         if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
@@ -203,7 +215,7 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory)
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
@@ -447,7 +459,11 @@ class Controller:
             return job['_control'].request(identity,operation)
 
 
-def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
+def make_server(controller, host='127.0.0.1', port=18880, proxy_token='', *, tenant_routing=False,legacy_user='remote'):
+    base_controller=controller
+    if tenant_routing and not proxy_token:raise ValueError('用户分区必须配置受保护代理 token')
+    from .tenants import TenantRouter,authenticated_user
+    router=TenantRouter(controller,legacy_user) if tenant_routing else None
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
             self.request.settimeout(6)
@@ -471,10 +487,15 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
             if proxy_token and not hmac.compare_digest(self.headers.get('X-AgentRT-Proxy-Token',''),proxy_token):
                 self.respond(403,{'error':'需要通过受保护入口访问'})
                 return False
+            try:
+                self.controller=router.resolve(authenticated_user(self.headers)) if router else base_controller
+            except (PermissionError,ValueError):
+                self.respond(403,{'error':'登录身份缺失或用户分区不可用'});return False
             return True
 
         def do_GET(self):
             if not self.authorized():return
+            controller=self.controller
             path=urlparse(self.path).path
             if path in ('/','/console','/console/'):
                 name='chat.html' if path=='/' else 'index.html'
@@ -494,6 +515,10 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 else:self.respond(404,{'error':'Not found'})
             elif path=='/api/status':self.respond(200,controller.snapshot())
             elif path=='/api/chat/status':self.respond(200,controller.chat_status())
+            elif path=='/api/memory':
+                try:
+                    self.respond(200,{'memories':controller.memory.listing('assistant')})
+                except (ValueError,OSError,RuntimeError,sqlite3.Error):self.respond(503,{'error':'记忆存储不可用'})
             elif path=='/api/database/status':self.respond(200,controller.database.status())
             elif path=='/api/knowledge':self.respond(200,controller.knowledge.listing())
             elif path=='/api/knowledge/search':
@@ -533,6 +558,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
 
         def do_POST(self):
             if not self.authorized():return
+            controller=self.controller
             origin=self.headers.get('Origin')
             if (not hmac.compare_digest(self.headers.get('X-AgentRT-CSRF',''),controller.csrf)
                     or (origin and urlparse(origin).netloc != self.headers.get('Host'))):
@@ -545,7 +571,14 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 if not 0<length<=maximum:raise ValueError('请求体过大或为空')
                 value=json.loads(self.rfile.read(length))
                 if not isinstance(value,dict):raise ValueError('需要 JSON 对象')
-                if self.path in ('/api/knowledge/save','/api/knowledge/remove'):
+                if self.path in ('/api/memory/save','/api/memory/remove'):
+                    if self.path.endswith('/save'):
+                        if set(value)-{'content','policy'}:raise ValueError('记忆身份由服务端确定')
+                        self.respond(201,controller.memory.put('assistant',value.get('content'),value.get('policy','private')))
+                    else:
+                        if set(value)!={'id'}:raise ValueError('记忆参数无效')
+                        self.respond(200,controller.memory.delete('assistant',value['id']))
+                elif self.path in ('/api/knowledge/save','/api/knowledge/remove'):
                     if not controller.upload_slot.acquire(blocking=False):raise ValueError('正在处理其他资料，请稍后再试')
                     try:self.respond(200,controller.knowledge.save(value) if self.path.endswith('/save') else controller.knowledge.remove(value))
                     finally:controller.upload_slot.release()
@@ -554,6 +587,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                     try:self.respond(201,controller.attachments.upload(value))
                     finally:controller.upload_slot.release()
                 elif self.path=='/api/model-config':
+                    if router and controller is not base_controller:raise ValueError('只有主工作区可以管理共享模型配置')
                     key=value.get('key')
                     if not isinstance(key,str) or len(key)>512 or '\n' in key or '\r' in key:
                         raise ValueError('API Key 格式无效')
@@ -579,6 +613,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                     controller.cancel_job(key)
                     self.respond(200,{'ok':True})
                 else:self.respond(404,{'error':'未找到'})
+            except sqlite3.Error:self.respond(503,{'error':'记忆存储不可用，未自动重试'})
             except (ValueError,TypeError,OSError) as exc:self.respond(400,{'error':str(exc)})
 
     class BoundedServer(ThreadingHTTPServer):
@@ -618,7 +653,9 @@ def main():
     if args.host not in ('127.0.0.1','localhost') and not token:
         parser.error('非回环监听必须配置 AGENTRT_PROXY_TOKEN')
     attempts=delegated_attempts() if args.delegated else None
-    server=make_server(Controller(args.data_dir,attempts),args.host,args.port,token)
+    legacy_user=os.environ.get('AGENTRT_LEGACY_USER','remote')
+    server=make_server(Controller(args.data_dir,attempts,user_identity=legacy_user),args.host,args.port,token,
+                       tenant_routing=os.environ.get('AGENTRT_TENANT_ROUTING')=='1',legacy_user=legacy_user)
     try:server.serve_forever()
     finally:server.server_close()
 

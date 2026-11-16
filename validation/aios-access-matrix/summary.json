@@ -1,0 +1,180 @@
+{
+  "provider_calls": 0,
+  "results": {
+    "native": {
+      "exit_code": 1,
+      "output": "E\n======================================================================\nERROR: official_access_matrix (unittest.loader._FailedTest.official_access_matrix)\n----------------------------------------------------------------------\nImportError: Failed to import test module: official_access_matrix\nTraceback (most recent call last):\n  File \"/usr/lib64/python3.11/unittest/loader.py\", line 162, in loadTestsFromName\n    module = __import__(module_name)\n             ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/official_access_matrix.py\", line 53, in <module>\n    from cerebrum.llm.apis import LLMQuery\nModuleNotFoundError: No module named 'cerebrum'\n\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (errors=1)\n",
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "adapter": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "none",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.0087786959920777,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": false,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "drop-user-check": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "drop-user-check",
+      "tests": 26,
+      "failures": 11,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.012857733992859721,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": false,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [
+        "official_access_matrix.TestAccessMatrix.test_different_user_different_agent_shared",
+        "official_access_matrix.TestAccessMatrix.test_different_user_same_agent_private",
+        "official_access_matrix.TestAccessMatrix.test_different_user_same_agent_shared",
+        "official_access_matrix.TestAgentNameFallback.test_fallback_uses_agent_name_as_partition",
+        "official_access_matrix.TestExplicitUserBehavior.test_alice_gets_correct_memories",
+        "official_access_matrix.TestExplicitUserBehavior.test_injected_count_matches",
+        "official_access_matrix.TestNamespacedIdentities.test_alice_kernel_shared_excludes_bob_kernel_shared",
+        "official_access_matrix.TestNamespacedIdentities.test_alice_kernel_shared_excludes_plain",
+        "official_access_matrix.TestNamespacedIdentities.test_alice_plain_excludes_kernel_shared",
+        "official_access_matrix.TestRelevanceDoesNotOverrideIsolation.test_high_score_wrong_user_excluded",
+        "official_access_matrix.TestTokenBudgetInteraction.test_wrong_user_does_not_consume_budget"
+      ],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "drop-agent-check": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "drop-agent-check",
+      "tests": 26,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.01003795200085733,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": false,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [
+        "official_access_matrix.TestAccessMatrix.test_same_user_different_agent_private",
+        "official_access_matrix.TestExplicitUserBehavior.test_alice_gets_correct_memories",
+        "official_access_matrix.TestExplicitUserBehavior.test_injected_count_matches"
+      ],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "drop-budget": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "drop-budget",
+      "tests": 26,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.009082036005565897,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": false,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "extra": {
+      "exit_code": 0,
+      "output": "test_dedup_and_nonfinite_relevance (test_memory_access.MemoryAccessTests.test_dedup_and_nonfinite_relevance) ... ok\ntest_exact_utf8_budget_including_line (test_memory_access.MemoryAccessTests.test_exact_utf8_budget_including_line) ... ok\ntest_identity_pair_cannot_collide (test_memory_access.MemoryAccessTests.test_identity_pair_cannot_collide) ... ok\ntest_shared_grant_does_not_cross_user (test_memory_access.MemoryAccessTests.test_shared_grant_does_not_cross_user) ... ok\ntest_storage_acl_checked_and_user_namespaced (test_memory_access.MemoryAccessTests.test_storage_acl_checked_and_user_namespaced) ... ok\ntest_untrusted_metadata_types_fail_closed (test_memory_access.MemoryAccessTests.test_untrusted_metadata_types_fail_closed) ... ok\ntest_wrong_user_precedes_dedup_and_budget (test_memory_access.MemoryAccessTests.test_wrong_user_precedes_dedup_and_budget) ... ok\ntest_zero_limits (test_memory_access.MemoryAccessTests.test_zero_limits) ... ok\n\n----------------------------------------------------------------------\nRan 8 tests in 0.003s\n\nOK\n",
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "combined": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "none",
+      "tests": 34,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.011971273997914977,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": true,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    },
+    "budget-boundary-mutation": {
+      "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+      "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+      "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+      "mutation": "drop-budget",
+      "tests": 34,
+      "failures": 2,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.012433436000719666,
+      "supplier_calls": 0,
+      "native_aios": false,
+      "production_integrated": false,
+      "include_local": true,
+      "implementation_sha256": {
+        "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+        "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+        "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+        "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+      },
+      "failed_tests": [
+        "test_memory_access.MemoryAccessTests.test_exact_utf8_budget_including_line",
+        "test_memory_access.MemoryAccessTests.test_zero_limits"
+      ],
+      "isolation": "bubblewrap_user_mount_pid_network",
+      "network_enabled": false
+    }
+  }
+}

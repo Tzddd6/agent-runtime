@@ -1,0 +1,25 @@
+{
+  "normal_tests": 15,
+  "passed": true,
+  "mutations": {
+    "tenant_partition": {
+      "caught": true
+    },
+    "private_agent": {
+      "caught": true
+    },
+    "budget": {
+      "caught": true
+    },
+    "fail_open": {
+      "caught": true
+    }
+  },
+  "mutations_caught": 4,
+  "supplier_calls": 0,
+  "fixture_provider": true,
+  "real_chain": "HTTP -> per-user Controller -> Runtime -> Worker -> ModelGateway -> fixed provider",
+  "cgroup_v2": true,
+  "ranking": null,
+  "ranking_note": "Internal contract/chain checks, not an official leaderboard submission"
+}
