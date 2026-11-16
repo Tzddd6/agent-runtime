@@ -180,6 +180,15 @@ function testCountLine(label,counts){
   if(failed>0)row.append(node('small',failed+' 项失败 / 错误'));
   return row;
 }
+function renderExecutionOverhead(monitor){
+  const box=$('contextCacheStats'),execution=monitor?.execution,ipc=monitor?.ipc;
+  const metrics=[['执行后端',execution?.backend==='forkserver'?'预加载 / 独立子进程':execution?.backend==='spawn'?'独立解释器':'未记录'],
+    ['Worker尝试数',finite(execution?.launches)?String(execution.launches):'—'],
+    ['进程启动累计',finite(execution?.launch_seconds)?number(execution.launch_seconds,3)+' s':'—'],
+    ['IPC请求 / 响应正文',finite(ipc?.requests)?ipc.requests+' / '+bytes(ipc.response_bytes):'—']];
+  for(const [label,value] of metrics){const card=node('div',null,'cache-stat');card.append(node('span',label),node('b',value));box.append(card)}
+  if(execution?.backend==='forkserver')$('contextCacheNote').textContent+=' · 预加载器计入服务用量；Worker峰值不是整个Runtime峰值。';
+}
 function renderCheckGroup(id,title,report,baseline=false){
   const box=$(id);if(!box)return;box.replaceChildren(node('h3',title));
   const counts=engineeringCounts(report);
@@ -237,7 +246,7 @@ function renderEngineering(job){
   if($('engineeringOriginal'))$('engineeringOriginal').textContent=data.original_source||'—';
 }
 
-function renderDetailBase(job){currentDetail=job;renderEngineering(job);$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
+function renderDetailBase(job){currentDetail=job;renderEngineering(job);$('jobId').textContent=job.id+' · '+(names[job.status]||job.status);$('cancel').hidden=!['running','cancelling'].includes(job.status);$('cancel').disabled=job.status==='cancelling';const rows=taskRows(job);renderAllocations(job.monitor);renderContext(job.monitor);renderExecutionOverhead(job.monitor);renderCharts(job.monitor,job.history||[]);renderTasks(rows,job.events||[],Boolean(job.monitor?.stale));renderDependencies(rows);renderTimeline(job);const events=job.events||[];$('eventCount').textContent=events.length+' 条';$('events').textContent=events.length?events.map(e=>new Date(e.time*1000).toLocaleTimeString()+'  '+e.task_id+'  #'+e.attempt+'  '+(names[e.state]||e.state)+(e.reason?' · '+e.reason:'')+(e.error?' · '+e.error:'')).join('\n'):'等待第一个事件…';const outcomes=events.filter(e=>e.state==='succeeded'&&e.result);$('answer').hidden=!outcomes.length;$('answerText').textContent=outcomes.map(e=>e.task_id+': '+formatResult(e.result.result)).join('\n\n');if(job.error)$('notice').textContent=job.error}
 
 function markOffline(message){
   offline=true;

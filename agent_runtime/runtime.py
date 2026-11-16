@@ -23,6 +23,12 @@ TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
 DEFAULTS = {'cpu_milli': 1000, 'memory_bytes': 256 * 1024**2, 'pids': 32}
 
 
+def execution_kind(task):
+    """One execution identity/ledger for model, tool, process and local control."""
+    action=task.get('action','echo')
+    return 'model' if action=='llm' else 'tool' if action=='plugin' else 'process' if action=='command' else 'runtime'
+
+
 class _ObserverChannel:
     """Bounded, lossy telemetry delivery; it never gates Worker scheduling.
 
@@ -209,7 +215,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 else:
                     reason = '等待调度' if policy!='fifo' else '等待 FIFO 队列调度'
             metrics = sampler.sample(handle['group']) if handle else dict(terminal_usage.get(key,{}))
-            rows.append({'id':key,'agent':agent,'state':states[key],'attempt':attempts[key],
+            rows.append({'id':key,'agent':agent,'kind':execution_kind(t),'state':states[key],'attempt':attempts[key],
                          'depends_on':list(t.get('depends_on',[])),'resources':limits,'wait_reason':reason,
                          'pid':handle['proc'].pid if handle else None,'metrics':metrics})
         sample_sequence[0] += 1
@@ -221,6 +227,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'slots_total':max_workers,'policy':policy,
                   'context':store.stats(),'dataflow':dict(dataflow),
                   'execution':dict(executor.stats),
+                  'ipc':broker.stats() if broker else {'requests':0,'request_bytes':0,'response_bytes':0,'errors':0,'operations':{}},
                   'context_control':broker.contexts.stats() if broker else {'policy':context_mode,'views':0},
                   'model_resources':registry.model_budgets.snapshot(),
                   'scheduling':{'reason':scheduler.last_decision.reason,
@@ -235,6 +242,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         states[key] = state
         item = {'workflow_id': root.name, 'task_id': key, 'state': state,
                 'agent': task_by_id[key].get('agent', key),
+                'kind':execution_kind(task_by_id[key]),'action':task_by_id[key].get('action','echo'),
                 'time': time.time(), 'attempt': attempts[key], 'sequence':len(events)+1, **extra}
         events.append(item)
         journal.write(json.dumps(item, ensure_ascii=False) + '\n')
@@ -415,6 +423,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 dataflow['input_ref_deliveries'] += len(input_refs)
                 dataflow['semantic_ref_deliveries'] += len(shared_refs)
                 event(key, 'running', pid=handle['proc'].pid, resources=limits,
+                      cgroup_path=str(handle['group']) if handle.get('group') else None,
                       worker_backend=executor.backend,
                       enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs,
                       input_refs=input_refs,shared_refs=shared_refs)
@@ -551,6 +560,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                                 'dataflow':dataflow,'policy':policy,
                                                 'scheduling_stats':{**scheduling_stats,**completion.stats},
                                                 'execution_stats':executor.stats,
+                                                'ipc_stats':broker.stats() if broker else {'requests':0,'request_bytes':0,'response_bytes':0,'errors':0,'operations':{}},
                                                 'telemetry_stats':registry.telemetry_stats,
                                                 'model_resources':registry.model_budgets.snapshot(),
                                                 'context_stats': store.stats(),

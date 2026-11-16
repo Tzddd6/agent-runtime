@@ -64,7 +64,7 @@ class Executor:
                 proc = subprocess.Popen([sys.executable, '-X', 'utf8', '-m', 'agent_runtime.worker',
                                          str(directory / 'result.json'),str(payload_path)],
                                         stdin=subprocess.PIPE, stdout=output, stderr=subprocess.STDOUT,
-                                        text=True, encoding='utf-8', env=environment,
+                                        text=True, encoding='utf-8', env=environment,cwd=Path(__file__).resolve().parents[1],
                                         start_new_session=(os.name == 'posix'))
             self.stats['launches']+=1;self.stats['launch_seconds']+=time.monotonic()-started
             handle={'proc':proc,'output':output,'group':group,'directory':directory,

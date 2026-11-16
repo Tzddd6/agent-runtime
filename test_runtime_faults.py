@@ -52,7 +52,8 @@ class RuntimeFaultTests(unittest.TestCase):
 
     def test_delegation_launch_failure_still_fails_closed(self):
         class Backend:
-            def __init__(self,*args):pass
+            def __init__(self,*args,**kwargs):self.stats={};self.backend='fixture'
+            def close(self):pass
             def launch(self,*args):raise PermissionError('fixture cgroup permission denied')
         with patch('agent_runtime.runtime.Executor',Backend):
             with self.assertRaisesRegex(RuntimeError,'EXECUTION_BACKEND_FAILED'):
@@ -65,7 +66,8 @@ class RuntimeFaultTests(unittest.TestCase):
             def __init__(self,key):self.key=key;self.pid=101 if key=='first' else 102
             def poll(self):return 0 if self.key=='first' else None
         class Backend:
-            def __init__(self,*args):pass
+            def __init__(self,*args,**kwargs):self.stats={};self.backend='fixture'
+            def close(self):pass
             def launch(self,payload,directory,limits):
                 return {'proc':Process(payload['id']),'directory':directory,'group':None,
                         'started':time.monotonic(),'key':payload['id']}
@@ -102,7 +104,8 @@ class RuntimeFaultTests(unittest.TestCase):
             pid=101
             def poll(self):return 0
         class Backend:
-            def __init__(self,*args):pass
+            def __init__(self,*args,**kwargs):self.stats={};self.backend='fixture'
+            def close(self):pass
             def launch(self,payload,directory,limits):
                 self.timeout=payload['timeout']
                 flag=threading.Event();flag.set()

@@ -15,6 +15,7 @@ class Broker:
         self.agents = set(agents)
         self.tokens, self.mailboxes, self.receipts = {}, {}, {}
         self.lock = threading.RLock()
+        self.metrics={'requests':0,'request_bytes':0,'response_bytes':0,'errors':0,'operations':{}}
         self.control=control;self.control_tokens=set()
         from .context_control import ContextGovernor
         self.contexts=ContextGovernor(store,mode=context_mode)
@@ -26,12 +27,15 @@ class Broker:
 
             def do_POST(self):
                 self.connection.settimeout(5)
+                received=0;operation='invalid'
                 try:
                     size = int(self.headers.get('Content-Length', 0))
                     if self.path != '/rpc' or not 0 < size <= 1024 * 1024:
                         raise ValueError('invalid RPC request')
                     token = self.headers.get('Authorization', '').removeprefix('Bearer ')
-                    value = json.loads(self.rfile.read(size))
+                    body=self.rfile.read(size);received=len(body);value = json.loads(body)
+                    if isinstance(value,dict) and value.get('op') in ('materialize','context_view','context_search','context_read','observe','configure','send','receive','ack','get'):
+                        operation=value['op']
                     result = owner.dispatch(token, value)
                     code = 200
                 except PermissionError:
@@ -39,6 +43,10 @@ class Broker:
                 except (ValueError, TypeError, KeyError, AttributeError, OSError):
                     code, result = 400, {'error': 'invalid RPC or mailbox capacity exceeded'}
                 raw = json.dumps(result, ensure_ascii=False).encode('utf-8')
+                with owner.lock:
+                    owner.metrics['requests']+=1;owner.metrics['request_bytes']+=received
+                    owner.metrics['response_bytes']+=len(raw);owner.metrics['errors']+=code!=200
+                    operations=owner.metrics['operations'];operations[operation]=operations.get(operation,0)+1
                 try:
                     self.send_response(code)
                     self.send_header('Content-Type', 'application/json')
@@ -54,6 +62,9 @@ class Broker:
                                        kwargs={'poll_interval':.02},daemon=True)
         self.thread.start()
         self.url = f'http://127.0.0.1:{self.server.server_port}/rpc'
+
+    def stats(self):
+        with self.lock:return {**self.metrics,'operations':dict(self.metrics['operations'])}
 
     def issue(self, agent, *, configure=False):
         with self.lock:
