@@ -1,9 +1,9 @@
 {
-  "regular_discovered": 229,
-  "regular_passed": 221,
+  "regular_discovered": 230,
+  "regular_passed": 222,
   "regular_skipped": 8,
   "strict_tests_passed": 16,
+  "enforcement": "cgroup_v2",
   "residual_attempts": 0,
-  "paid_model_calls": 0,
-  "enforcement": "cgroup_v2"
+  "paid_model_calls": 0
 }

@@ -11,6 +11,15 @@ from agent_runtime.ipc import Broker
 
 
 class ContextControlTests(unittest.TestCase):
+    def test_shipped_mailbox_example_runs_and_preserves_both_claims(self):
+        from agent_runtime.runtime import run
+        tasks=json.loads((Path(__file__).parent/'examples/context-sharing.json').read_text(encoding='utf-8'))
+        with tempfile.TemporaryDirectory() as tmp:
+            states,events=run(tasks,quiet=True,output_dir=tmp,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            self.assertTrue(all(state=='succeeded' for state in states.values()),states)
+            outcome=next(e['result']['result'] for e in events if e['task_id']=='inspect_conflict' and e['state']=='succeeded')
+            self.assertEqual({item['value'] for item in outcome['conflicts'][0]['alternatives']},{2,3})
+
     def test_small_inputs_remain_exact_and_duplicate_contexts_removed(self):
         with tempfile.TemporaryDirectory() as tmp:
             store=ContextStore(Path(tmp));ref=store.put({'user_request':'保留接口','facts':[1,2]},['a'])
