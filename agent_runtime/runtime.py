@@ -153,7 +153,13 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     scheduler = AdmissionScheduler(policy,budget,DEFAULTS)
     root = Path(output_dir or tempfile.mkdtemp(prefix='agentrt-')).resolve() / uuid.uuid4().hex
     root.mkdir(parents=True)
-    executor = Executor(cgroup_root,backend=worker_backend,workflow_root=root)
+    # A single fixed leaf cannot amortize a preloader's extra resident memory.
+    # Dynamic control stages and multi-task graphs can reuse preloaded imports.
+    resolved_backend=worker_backend
+    fixed_actions={'echo','sleep','load','llm','command','plugin','analyze_text','index_text','clock','send','receive'}
+    if worker_backend=='auto' and len(tasks)==1 and not tasks[0].get('spawn') and tasks[0].get('action','echo') in fixed_actions:
+        resolved_backend='spawn'
+    executor = Executor(cgroup_root,backend=resolved_backend,workflow_root=root)
     control=control or RuntimeControl()
     control.worker_ceiling=max_workers;control.settings={'workers':max_workers,'policy':policy}
     project_workspace=Path(workspace).resolve() if workspace is not None else root/'workspace'

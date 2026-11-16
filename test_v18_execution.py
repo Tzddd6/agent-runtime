@@ -12,6 +12,16 @@ PRICING_EDITS={'edits':[
 
 
 class V18Tests(unittest.TestCase):
+    def test_auto_backend_uses_no_preloader_for_single_leaf_but_reuses_dynamic_graph(self):
+        from agent_runtime.runtime import run
+        with tempfile.TemporaryDirectory() as folder:
+            for index,tasks in enumerate(([{'id':'one'}],[{'id':'parent','spawn':[{'id':'child','depends_on':['parent']}]}])):
+                path=Path(folder)/str(index)
+                states,_=run(tasks,quiet=True,output_dir=path)
+                self.assertTrue(all(s=='succeeded' for s in states.values()))
+                summary=json.loads(next(path.glob('*/summary.json')).read_text())
+                self.assertEqual(summary['execution_stats']['backend'],'spawn' if index==0 or sys.platform!='linux' else 'forkserver')
+
     def test_expression_patch_preserves_guards_and_rejects_unsafe_or_stale_sites(self):
         source=compile_patch(json.dumps(PRICING_EDITS),'pricing')
         self.assertIn('unit_cents < 0',source);self.assertNotIn('if False',source)
