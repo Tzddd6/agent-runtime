@@ -101,11 +101,11 @@ def child(folder,index,arm,attempts):
             else:
                 from agent_runtime.chat_store import answer_for
                 with patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=lambda p:ModelGateway(client,p)):
-                    states,events=run(auto_tasks(case['prompt']),quiet=True,workers=2,output_dir=sample/'runs',cgroup_root=attempts,workspace=workspace,budget={'cpu_milli':2000,'memory_bytes':1073741824,'pids':128})
+                    states,events=run(auto_tasks(case['prompt']),quiet=True,max_workers=2,output_dir=sample/'runs',cgroup_root=attempts,workspace=workspace,budget={'cpu_milli':2000,'memory_bytes':1073741824,'pids':128})
                 answer=answer_for({'preset':'auto','status':'succeeded' if all(v=='succeeded' for v in states.values()) else 'failed','events':events})
         elif arm=='runtime':
             with patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=lambda p:ModelGateway(client,p)):
-                states,events=run(auto_tasks(case['prompt'],workspace=workspace),quiet=True,workers=2,output_dir=sample/'runs',cgroup_root=attempts,workspace=workspace,budget={'cpu_milli':2000,'memory_bytes':1073741824,'pids':128})
+                states,events=run(auto_tasks(case['prompt'],workspace=workspace),quiet=True,max_workers=2,output_dir=sample/'runs',cgroup_root=attempts,workspace=workspace,budget={'cpu_milli':2000,'memory_bytes':1073741824,'pids':128})
             candidates=[e['result']['result'] for e in events if e['state']=='succeeded' and e['task_id'].startswith('repair_check_')]
             final=candidates[-1] if candidates else {};source=final.get('source')
         else:

@@ -10,6 +10,17 @@ FIXED=BASELINE_SOURCE.replace('unit_cents * quantity - discount_pct','unit_cents
 
 
 class EngineeringLoopTests(unittest.TestCase):
+    def test_benchmark_runtime_child_actually_executes_with_offline_supplier(self):
+        import io
+        from tools.benchmark_engineering_loop import child
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'dataset.json').write_text(json.dumps({'cases':[{'group':'plain','prompt':'不需要工具，只输出JSON。','expected':{'value':5}}]}))
+            with patch('sys.stdin',io.StringIO('READY\n')),patch.dict(os.environ,{'AGENTRT_MODEL_BROKER_URL':'http://127.0.0.1:18886','AGENTRT_PROXY_TOKEN':'offline-fixture-only'}),patch('agent_runtime.model_broker.BrokerClient.complete',return_value={'content':'{"value":5}','usage':{}}):
+                child(tmp,0,'runtime',None)
+            result=json.loads((root/'00-runtime-result.json').read_text())
+            self.assertEqual(result['status'],'completed');self.assertEqual(len(result['calls']),1)
+            self.assertEqual(json.loads(result['answer']),{'value':5})
+
     def test_local_profiles_preserve_intent_and_skip_paid_router(self):
         prompt='修复这个项目。'+json.dumps(manifest('pricing'),ensure_ascii=False)
         self.assertEqual(detect_controlled(prompt),'pricing')
