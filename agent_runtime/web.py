@@ -197,6 +197,10 @@ class Controller:
                                 budget=budget,observer=observe,control=job['_control'],
                                 agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode)
                 for e in completed_events:
+                    phase=e.get('result',{}).get('result',{})
+                    if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
+                        try:self.database.audit(key,'engineering.'+phase['phase'],'accepted' if phase.get('accepted') else 'observed')
+                        except Exception:self.storage_warning=True
                     plugin=e.get('result',{}).get('result',{}).get('plugin') if isinstance(e.get('result',{}).get('result'),dict) else None
                     if isinstance(plugin,str):
                         value=e['result']['result']

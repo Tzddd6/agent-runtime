@@ -5,6 +5,7 @@ from .capabilities import catalog,PLUGINS,SKILLS,ARGUMENTS,load_skill
 from .knowledge import GUIDANCE as KNOWLEDGE_GUIDANCE
 
 ROLES={'analyst':'分析','coder':'代码方案','tester':'测试设计','reviewer':'评审','researcher':'资料分析'}
+DIRECT_SYSTEM='遵守用户指定的输出格式。未调用工具。'
 PLAN_PROTOCOL=('严格计划协议：最终完成仅输出{"route":"direct","answer":"完整答案"}；'
  '需要操作仅输出{"route":"collaborate","reason":"原因","tasks":[{"id":"a","plugin":"file.read",'
  '"arguments":{"path":"calc.py"},"depends_on":[]}]}。每轮1—12项，每项必须有唯一id和depends_on。'
@@ -46,7 +47,11 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
             return repair_tasks(prompt,None,response_tokens,deep_thinking,python_files)
         if root.is_dir() and (any(root.glob('test*.py')) or (root/'tests').is_dir()):
             return repair_tasks(prompt,None,response_tokens,deep_thinking)
-    if re.search(r'不需要工具|无需系统操作|直接只回答|直接简短回答',prompt) and not re.search(r'修复|修改|执行|运行|部署|写入',prompt):
+    if (re.search(r'不需要工具|无需系统操作|直接只回答|直接简短回答',prompt) or re.fullmatch(r'\s*(?:你好|您好|hello|hi)[！!。.\s]*',prompt,re.I)) and not re.search(r'修复|修改|执行|运行|部署|写入',prompt):
+        if not conversation and not attachments:
+            return [{'id':'auto_answer','agent':'assistant','action':'llm','timeout':75,'max_tokens':response_tokens,'thinking':deep_thinking,
+                     'messages':[{'role':'system','content':DIRECT_SYSTEM},{'role':'user','content':prompt}],
+                     'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16}}]
         return [{'id':'auto_answer','agent':'assistant','action':'llm','timeout':75,'max_tokens':response_tokens,'thinking':deep_thinking,
                  'contexts':[context],'messages':[{'role':'system','content':'直接回答用户问题，遵守格式要求。没有执行工具，不能声称已执行操作。'+KNOWLEDGE_GUIDANCE}],
                  'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16}}]

@@ -10,6 +10,18 @@ FIXED=BASELINE_SOURCE.replace('unit_cents * quantity - discount_pct','unit_cents
 
 
 class EngineeringLoopTests(unittest.TestCase):
+    def test_duplicate_patch_json_and_credential_attachment_are_rejected(self):
+        from agent_runtime.repair_loop import execute
+        from agent_runtime.attachments import AttachmentStore
+        from agent_runtime.database import RuntimeDatabase
+        import base64
+        with tempfile.TemporaryDirectory() as tmp:
+            value,_=execute({'action':'repair_check','repair_project':'pricing','round':2,'candidate_id':'bad','_inputs':{'bad':'{"source":"a","source":"b"}'},'_contexts':[{'user_request':'修复pricing'}]})
+            self.assertFalse(value['accepted']);self.assertIn('duplicate',value['answer'])
+            store=AttachmentStore(Path(tmp)/'uploads',RuntimeDatabase(Path(tmp)/'metadata'))
+            data=base64.b64encode(('secret='+'sk-'+'x'*32).encode()).decode()
+            with self.assertRaises(ValueError):store.upload({'conversation_id':'a'*32,'name':'config.py','data':data})
+
     def test_benchmark_runtime_child_actually_executes_with_offline_supplier(self):
         import io
         from tools.benchmark_engineering_loop import child
@@ -27,6 +39,10 @@ class EngineeringLoopTests(unittest.TestCase):
         self.assertEqual(auto_tasks(prompt)[0]['action'],'repair_prepare')
         self.assertIsNone(detect_controlled('只分析，不要修改。'+json.dumps(manifest('pricing'))))
         self.assertEqual(auto_tasks('不需要工具，只输出JSON: 2+3')[0]['id'],'auto_answer')
+        direct=auto_tasks('不需要工具，只输出JSON: 2+3')[0]
+        self.assertNotIn('contexts',direct);self.assertEqual(direct['messages'][-1]['content'],'不需要工具，只输出JSON: 2+3')
+        self.assertTrue(auto_tasks('不需要工具，只输出JSON',conversation=[{'role':'user','content':'history'}])[0]['contexts'])
+        self.assertEqual(auto_tasks('你好')[0]['id'],'auto_answer')
         self.assertEqual(auto_tasks('不需要工具，执行命令检查')[0]['id'],'route')
         self.assertLess(len(compact_catalog('你好')),len(json.dumps(catalog(),ensure_ascii=False))/3)
 

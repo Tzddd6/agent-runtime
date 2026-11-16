@@ -97,7 +97,7 @@ def child(folder,index,arm,attempts):
     client=Client.from_env();events=[];states={};answer='';final={};status='completed';source=None
     try:
         if case['group']=='plain':
-            if arm=='direct_verified':answer=client.complete([{'role':'user','content':case['prompt']}],4096)['content']
+            if arm=='direct_verified':answer=client.complete(([{'role':'system','content':case['system']}] if case.get('system') else [])+[{'role':'user','content':case['prompt']}],4096)['content']
             else:
                 from agent_runtime.chat_store import answer_for
                 with patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=lambda p:ModelGateway(client,p)):

@@ -66,14 +66,20 @@ def execute(task):
     raw=task['_inputs'][task['candidate_id']];context=dict(task['_contexts'][0]);project=task.get('repair_project');round_number=task['round']
     error=None;result={};source=None
     try:
-        value=json.loads(raw)
         if project:
-            source=validate_patch(value,project)
+            source=validate_patch(raw,project)
             fingerprint=hashlib.sha256(source.encode()).hexdigest()
             if context.get('previous_failed_source_sha256')==fingerprint:
                 result={**context['previous_failed_verification'],'reused_from_previous_failed_check':True}
             else:result=tool('project.patch_check',{'project':project,'source':source})
         else:
+            def unique(pairs):
+                value={}
+                for key,item in pairs:
+                    if key in value:raise ValueError('补丁包含重复JSON字段')
+                    value[key]=item
+                return value
+            value=json.loads(raw,object_pairs_hook=unique)
             applied=tool('workspace.apply_patch',value)
             result=tool('workspace.test',{})
             if result.get('test_hashes')!=context['original_test_hashes']:raise ValueError('测试哈希变化，拒绝交付')

@@ -51,7 +51,7 @@ class AttachmentStore:
             if len(raw)>1024**2:raise ValueError('文本附件超过1MiB')
             try:text=raw.decode('utf-8')
             except UnicodeError:raise ValueError('文本附件需为UTF-8') from None
-            if '\x00' in text or re.search(r'-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',text):raise ValueError('拒绝二进制或私钥附件')
+            if '\x00' in text or re.search(r'-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----|\bsk-[A-Za-z0-9_-]{20,}',text):raise ValueError('拒绝二进制、私钥或疑似API密钥附件')
             media='text/plain'
         else:raise ValueError('仅支持PNG/JPEG和UTF-8文本、代码、JSON、CSV')
         key=uuid.uuid4().hex;path=self.root/(key+'.bin')
