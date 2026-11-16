@@ -26,7 +26,7 @@ def detect_controlled(prompt):
     return canonical_project(hit[1].lower()) if hit else None
 
 
-def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=None,protocol='compact'):
+def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=None,protocol='full'):
     if protocol not in ('compact','full'):raise ValueError('补丁协议无效')
     return [{'id':'repair_prepare','agent':'repair-control','action':'repair_prepare','timeout':40,'resources':RES,
              'repair_project':project,'repair_protocol':protocol,'contexts':[{'user_request':prompt}],'repair_attachments':attachments,'response_tokens':response_tokens,'thinking':thinking}]
@@ -34,7 +34,7 @@ def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=No
 
 def candidate(parent,context,round_number):
     key=f'repair_candidate_{round_number}'
-    compact=parent.get('repair_protocol','compact')=='compact'
+    compact=parent.get('repair_protocol','full')=='compact'
     instruction=PATCH_SYSTEM+(
         '仅输出内部协议{"edits":[{"site":"列出的表达式位置","expression":"新表达式"}]}。Runtime重建并交付完整源码。'
         '不重新输出整个模块；不支持if/else三元表达式；必须保持需求指定的运算顺序与取整位置。' if parent.get('repair_project') and compact else
@@ -45,7 +45,7 @@ def candidate(parent,context,round_number):
            'messages':[{'role':'system','content':instruction}],'max_tokens':parent.get('response_tokens',4096),'thinking':parent.get('thinking',False),
            'depends_on':[parent['id']]}
     gate={'id':f'repair_check_{round_number}','agent':'repair-control','action':'repair_check','timeout':40,'resources':RES,
-          'depends_on':[key,parent['id']],'inputs':[key],'repair_project':parent.get('repair_project'),'repair_protocol':parent.get('repair_protocol','compact'),'round':round_number,
+          'depends_on':[key,parent['id']],'inputs':[key],'repair_project':parent.get('repair_project'),'repair_protocol':parent.get('repair_protocol','full'),'round':round_number,
           'contexts':[context],'candidate_id':key,'response_tokens':parent.get('response_tokens',4096),'thinking':parent.get('thinking',False)}
     return [model,gate]
 
@@ -58,7 +58,7 @@ def execute(task):
         context=dict(task['_contexts'][0]);project=task.get('repair_project')
         if project:
             baseline=tool('project.test',{'project':project});info=manifest(project)
-            if task.get('repair_protocol','compact')=='compact':
+            if task.get('repair_protocol','full')=='compact':
                 from .compact_patch import describe
                 # Remove only a structurally exact canonical manifest, keeping
                 # every user-authored instruction outside that known object.

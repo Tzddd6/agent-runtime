@@ -67,8 +67,11 @@ def child(folder,index,arm,attempts):
     client=Client.from_env();states={};final={};status='completed';execution={}
     try:
         if arm.startswith('runtime_'):
+            planned=auto_tasks(case['prompt'],workspace=workspace)
+            for task in planned:
+                if task.get('action')=='repair_prepare':task['repair_protocol']='full' if arm=='runtime_fork_full' else 'compact'
             with patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=lambda path:ModelGateway(client,path)):
-                states,events=run(auto_tasks(case['prompt'],workspace=workspace),quiet=True,max_workers=2,
+                states,events=run(planned,quiet=True,max_workers=2,
                     output_dir=sample/'runs',cgroup_root=attempts,workspace=workspace,
                     budget={'cpu_milli':2000,'memory_bytes':1073741824,'pids':128},
                     model_budget={'calls':2,'output_tokens':8192},worker_backend='spawn' if arm=='runtime_spawn' else 'forkserver')
@@ -103,7 +106,7 @@ def run_study(folder):
     (base/'controller').mkdir();(base/'controller/cgroup.procs').write_text(str(os.getpid()));(base/'cgroup.subtree_control').write_text('+cpu +memory +pids')
     for index,case in enumerate(json.loads((folder/'dataset.json').read_text())['cases']):
         for arm in case['order']:
-            assert used+2<=64
+            assert used+2<=protocol['global_max_paid_intents']
             deadline=time.monotonic()+60
             while client.status()['busy']:
                 if time.monotonic()>deadline:raise RuntimeError('broker busy; no new request started')
@@ -132,7 +135,7 @@ def run_study(folder):
 
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--prepare');parser.add_argument('--run');parser.add_argument('--child');parser.add_argument('--index',type=int);parser.add_argument('--arm',choices=ARMS);parser.add_argument('--attempts');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--prepare');parser.add_argument('--run');parser.add_argument('--child');parser.add_argument('--index',type=int);parser.add_argument('--arm',choices=ARMS+['runtime_fork_full']);parser.add_argument('--attempts');args=parser.parse_args()
     if args.prepare:prepare(args.prepare)
     elif args.run:run_study(args.run)
     elif args.child:child(args.child,args.index,args.arm,args.attempts)
