@@ -9,6 +9,7 @@ import threading
 import time
 import uuid
 import os
+import math
 from contextlib import contextmanager
 from pathlib import Path
 from .benchmark_transport import encode
@@ -23,7 +24,8 @@ class EvaluationBudget:
     Flash rates. Known costs conservatively use peak rates even off-peak.
     """
     def __init__(self, cny, max_calls, ledger=None):
-        if cny<=0 or max_calls<1:raise ValueError('Positive budget required')
+        if type(cny) not in (int,float) or not math.isfinite(cny) or cny<=0 or type(max_calls) is not int or max_calls<1:
+            raise ValueError('Finite positive budget required')
         self.limit=cny;self.max_calls=max_calls;self.spent=0.;self.calls=0;self.lock=threading.Lock()
         self.ledger=Path(ledger) if ledger else None
 
@@ -44,6 +46,9 @@ class EvaluationBudget:
                     state=json.loads(self.ledger.read_text())
                     if state['limit_cny']!=self.limit:raise ValueError('Shared evaluation budget limit mismatch')
                     self.spent=state['spent_or_reserved_cny'];self.calls=state['calls']
+                    if (type(self.spent) not in (int,float) or not math.isfinite(self.spent)
+                            or self.spent<0 or self.spent>self.limit+1e-8 or type(self.calls) is not int or self.calls<0):
+                        raise ValueError('Invalid budget ledger; refusing new calls')
                 yield
                 temporary=self.ledger.with_name(self.ledger.name+'.'+uuid.uuid4().hex)
                 descriptor=os.open(temporary,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
@@ -51,6 +56,9 @@ class EvaluationBudget:
                     json.dump({'limit_cny':self.limit,'spent_or_reserved_cny':self.spent,'calls':self.calls},stream)
                     stream.flush();os.fsync(stream.fileno())
                 os.replace(temporary,self.ledger)
+                parent=os.open(self.ledger.parent,os.O_DIRECTORY)
+                try:os.fsync(parent)
+                finally:os.close(parent)
 
     def reserve(self, output_tokens):
         reserve=(1048576*2.+output_tokens*8.)/1000000

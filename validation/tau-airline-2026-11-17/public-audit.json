@@ -1,0 +1,15 @@
+{
+  "findings": [],
+  "files_sha256": {
+    "paired-analysis.json": "2fbce113bd64343021cea174a71866c4c3a31d9894e10d7963401dd69e3b9b44",
+    "direct-results.json": "a6dc8b552bd579df7d50b36581fae8ad86f3bae60055ff5eb36b7873ba320aa5",
+    "README.md": "4b0b3aba6ef4685dd5b65ac90446e38363db7d91cc70266dfcf32f3ae90a4d61",
+    "local-validation.json": "091309d01dd0e1e3742669d3c39dc3590ffb6e95e489fb3a5b109d69509b76ee",
+    "submission.json": "88de7cb9b42d6d8cdca8983480033987f2fe40e7b0394ead60e014b8acb7fc57",
+    "trajectories/agentruntime_deepseek_flash_airline_v101_1trial.json": "4dbff511a59744f3ce5931b1125985b7b084814a323f90b5d62b4a60a7bc259f"
+  },
+  "synthetic_official_task_data": true,
+  "attempt_payloads_included": false,
+  "private_contact_included": false,
+  "frozen_source": "cf4a11a0ed65d95b83b86971d1924093b007d554"
+}

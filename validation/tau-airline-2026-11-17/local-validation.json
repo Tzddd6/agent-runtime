@@ -1,0 +1,12 @@
+{
+  "official_format": true,
+  "all_tasks_identical": true,
+  "trial_counts_valid": true,
+  "metrics_recomputed": true,
+  "non_cost_trajectory_sha256": "c75175b0007cafe9d1245f87c74f916952ab18da9ce30f820d826ad4d58c20ae",
+  "private_email_included": false,
+  "supplier_key_included": false,
+  "contact_policy": "GitHub contact only; maintainer acceptance not assumed",
+  "ranking": null,
+  "review_status": "not_submitted"
+}

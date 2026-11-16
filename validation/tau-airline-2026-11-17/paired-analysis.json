@@ -1,0 +1,443 @@
+{
+  "benchmark": "tau2 v1.0.1 airline base, ALL evaluator",
+  "upstream": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+  "runtime_source": "cf4a11a0ed65d95b83b86971d1924093b007d554",
+  "trials_per_task": 1,
+  "arms": {
+    "runtime": {
+      "success": 39,
+      "tasks": 50,
+      "pass_1": 0.78,
+      "wilson95": [
+        0.6475818431054045,
+        0.8724621377569771
+      ],
+      "roles": {
+        "simulator": {
+          "calls": 296,
+          "prompt_tokens": 274194,
+          "completion_tokens": 12932,
+          "cache_hit_tokens": 204794,
+          "peak_cost_cny": 0.25044776,
+          "turn_seconds": 397.15427011510474
+        },
+        "agent": {
+          "calls": 432,
+          "prompt_tokens": 2978365,
+          "completion_tokens": 59792,
+          "cache_hit_tokens": 2805248,
+          "peak_cost_cny": 0.9367799200000007,
+          "turn_seconds": 757.2108762989374
+        }
+      },
+      "task_seconds_median": 24.050415018500644,
+      "task_seconds_sum": 1200.50225315,
+      "coordinator_cpu_seconds": 223.649148453,
+      "children_cpu_seconds": 29.152063,
+      "coordinator_maxrss_kib_max": 391748,
+      "children_maxrss_kib_max": 302356,
+      "peak_cost_cny": 1.1872276800000001
+    },
+    "direct": {
+      "success": 41,
+      "tasks": 50,
+      "pass_1": 0.82,
+      "wilson95": [
+        0.6920368054529739,
+        0.902299172675462
+      ],
+      "roles": {
+        "simulator": {
+          "calls": 296,
+          "prompt_tokens": 285873,
+          "completion_tokens": 13860,
+          "cache_hit_tokens": 214656,
+          "peak_cost_cny": 0.26190023999999995,
+          "turn_seconds": 402.64428482504445
+        },
+        "agent": {
+          "calls": 441,
+          "prompt_tokens": 3355122,
+          "completion_tokens": 64695,
+          "cache_hit_tokens": 3152256,
+          "peak_cost_cny": 1.0493822399999992,
+          "turn_seconds": 719.9848981039977
+        }
+      },
+      "task_seconds_median": 20.28980370350473,
+      "task_seconds_sum": 1167.9550765019521,
+      "coordinator_cpu_seconds": 212.717531637,
+      "children_cpu_seconds": 0.05049,
+      "coordinator_maxrss_kib_max": 370080,
+      "children_maxrss_kib_max": 295292,
+      "peak_cost_cny": 1.31128248
+    }
+  },
+  "paired": {
+    "runtime_only_success": 2,
+    "direct_only_success": 4,
+    "mcnemar_exact_p_two_sided": 0.6875,
+    "median_task_seconds_delta_runtime_minus_direct": 1.9796693834941834
+  },
+  "caveats": [
+    "Single trial per task, no pass^2/3/4 claim",
+    "DeepSeek simulator differs from default GPT-4.1; custom configuration",
+    "API sampling and adaptive tool paths can differ despite equal settings; not a pure causal framework-speed experiment",
+    "CPU and RSS cover local coordinators/workers; external inference and key broker excluded; coordinator CPU and task seconds exclude initial imports",
+    "CNY expenses use peak list rates as a conservative upper estimate, not the actual invoice"
+  ],
+  "ranking": null,
+  "official_review_status": "not_submitted",
+  "tasks": [
+    {
+      "task_index": 0,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 14.735669016998145,
+      "direct_seconds": 14.291499949002173
+    },
+    {
+      "task_index": 1,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 17.176168916994357,
+      "direct_seconds": 16.51171777199488
+    },
+    {
+      "task_index": 2,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 27.981778111992753,
+      "direct_seconds": 38.89008172600006
+    },
+    {
+      "task_index": 3,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 17.502758913993603,
+      "direct_seconds": 15.489562863993342
+    },
+    {
+      "task_index": 4,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 23.215551725996193,
+      "direct_seconds": 20.357541737001156
+    },
+    {
+      "task_index": 5,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 26.60138469398953,
+      "direct_seconds": 26.55268939099915
+    },
+    {
+      "task_index": 6,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 26.080151485002716,
+      "direct_seconds": 23.180164896999486
+    },
+    {
+      "task_index": 7,
+      "runtime_success": 0,
+      "direct_success": 1,
+      "runtime_seconds": 26.855202413004008,
+      "direct_seconds": 18.20782718800183
+    },
+    {
+      "task_index": 8,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 21.09873479900125,
+      "direct_seconds": 20.283311556006083
+    },
+    {
+      "task_index": 9,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 26.203246218006825,
+      "direct_seconds": 18.483172231994104
+    },
+    {
+      "task_index": 10,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 35.645415306004,
+      "direct_seconds": 48.80050843198842
+    },
+    {
+      "task_index": 11,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 19.83638291299576,
+      "direct_seconds": 16.8662552540045
+    },
+    {
+      "task_index": 12,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 20.61239373200806,
+      "direct_seconds": 17.561775591995683
+    },
+    {
+      "task_index": 13,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 14.1241215570044,
+      "direct_seconds": 8.747799745993689
+    },
+    {
+      "task_index": 14,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 37.32785986500676,
+      "direct_seconds": 31.323522492995835
+    },
+    {
+      "task_index": 15,
+      "runtime_success": 1,
+      "direct_success": 0,
+      "runtime_seconds": 21.34674706700025,
+      "direct_seconds": 19.04356905700115
+    },
+    {
+      "task_index": 16,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 17.968154782996862,
+      "direct_seconds": 15.85696334199747
+    },
+    {
+      "task_index": 17,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 32.72374401301204,
+      "direct_seconds": 33.68023566099873
+    },
+    {
+      "task_index": 18,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 27.10842981899623,
+      "direct_seconds": 26.74513201699301
+    },
+    {
+      "task_index": 19,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 19.08600594800373,
+      "direct_seconds": 18.860703197991825
+    },
+    {
+      "task_index": 20,
+      "runtime_success": 1,
+      "direct_success": 0,
+      "runtime_seconds": 29.39155312399089,
+      "direct_seconds": 50.128489857001114
+    },
+    {
+      "task_index": 21,
+      "runtime_success": 0,
+      "direct_success": 1,
+      "runtime_seconds": 35.71518560600816,
+      "direct_seconds": 35.80986676100292
+    },
+    {
+      "task_index": 22,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 28.035782532999292,
+      "direct_seconds": 20.769325226996443
+    },
+    {
+      "task_index": 23,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 33.66323923399614,
+      "direct_seconds": 43.123592910997104
+    },
+    {
+      "task_index": 24,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 24.885278311005095,
+      "direct_seconds": 31.561894348997157
+    },
+    {
+      "task_index": 25,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 25.518328864010982,
+      "direct_seconds": 19.472777116010548
+    },
+    {
+      "task_index": 26,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 17.73300785300671,
+      "direct_seconds": 16.187264941007015
+    },
+    {
+      "task_index": 27,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 19.857573115994455,
+      "direct_seconds": 11.297143593998044
+    },
+    {
+      "task_index": 28,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 13.534019421000266,
+      "direct_seconds": 14.967770663002739
+    },
+    {
+      "task_index": 29,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 20.694388796997373,
+      "direct_seconds": 38.170510589989135
+    },
+    {
+      "task_index": 30,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 21.445160225994186,
+      "direct_seconds": 20.426307204004843
+    },
+    {
+      "task_index": 31,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 16.47073304699734,
+      "direct_seconds": 12.678334890006226
+    },
+    {
+      "task_index": 32,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 24.93928993100417,
+      "direct_seconds": 34.4124125699891
+    },
+    {
+      "task_index": 33,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 36.65865916099574,
+      "direct_seconds": 34.992188586998964
+    },
+    {
+      "task_index": 34,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 29.46824781000032,
+      "direct_seconds": 26.85969588100852
+    },
+    {
+      "task_index": 35,
+      "runtime_success": 0,
+      "direct_success": 1,
+      "runtime_seconds": 41.23123303998727,
+      "direct_seconds": 37.785857936003595
+    },
+    {
+      "task_index": 36,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 17.41507621500932,
+      "direct_seconds": 13.395659652000177
+    },
+    {
+      "task_index": 37,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 26.498701638993225,
+      "direct_seconds": 21.629011836994323
+    },
+    {
+      "task_index": 38,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 27.936179094002,
+      "direct_seconds": 22.0349433329975
+    },
+    {
+      "task_index": 39,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 22.16159388500091,
+      "direct_seconds": 19.793026405997807
+    },
+    {
+      "task_index": 40,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 20.123329347989056,
+      "direct_seconds": 15.076809588004835
+    },
+    {
+      "task_index": 41,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 13.797412150001037,
+      "direct_seconds": 14.78704895300325
+    },
+    {
+      "task_index": 42,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 27.8107141010114,
+      "direct_seconds": 20.124517994991038
+    },
+    {
+      "task_index": 43,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 22.242438567991485,
+      "direct_seconds": 20.29629585100338
+    },
+    {
+      "task_index": 44,
+      "runtime_success": 0,
+      "direct_success": 0,
+      "runtime_seconds": 28.106588048991398,
+      "direct_seconds": 29.767295152996667
+    },
+    {
+      "task_index": 45,
+      "runtime_success": 0,
+      "direct_success": 1,
+      "runtime_seconds": 28.346863412007224,
+      "direct_seconds": 19.046686461995705
+    },
+    {
+      "task_index": 46,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 9.306098881002981,
+      "direct_seconds": 9.11303409699758
+    },
+    {
+      "task_index": 47,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 19.398254961008206,
+      "direct_seconds": 27.136311363996356
+    },
+    {
+      "task_index": 48,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 17.753853877991787,
+      "direct_seconds": 17.057231683007558
+    },
+    {
+      "task_index": 49,
+      "runtime_success": 1,
+      "direct_success": 1,
+      "runtime_seconds": 27.133567597004003,
+      "direct_seconds": 20.31973694699991
+    }
+  ]
+}

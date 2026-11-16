@@ -15,6 +15,16 @@ class FixedNativeClient:
 
 
 class BudgetTests(unittest.TestCase):
+    def test_nonfinite_limits_rejected(self):
+        for value in (float('nan'),float('inf'),-1,0,True):
+            with self.assertRaises(ValueError):EvaluationBudget(value,2)
+
+    @unittest.skipUnless(os.name=='posix','requires flock')
+    def test_corrupt_nan_ledger_fails_closed(self):
+        with tempfile.TemporaryDirectory() as folder:
+            ledger=Path(folder)/'budget.json'
+            ledger.write_text(json.dumps({'limit_cny':10.,'spent_or_reserved_cny':float('nan'),'calls':0}))
+            with self.assertRaises(ValueError):EvaluationBudget(10.,4,ledger).reserve(256)
     @unittest.skipUnless(os.name=='posix','requires flock')
     def test_new_process_budget_object_cannot_reset_shared_cap(self):
         with tempfile.TemporaryDirectory() as folder:
