@@ -10,6 +10,7 @@ import re
 
 SKILL_ROOT=Path(__file__).resolve().parent/'skills'
 SKILLS={'python-review':'检查Python接口、边界与错误处理',
+        'computer-lab':'在专用实验电脑观察页面、操作并验证，拒绝凭据与高风险外发',
         'test-design':'设计正常、异常、并发与资源验收',
         'project-plan':'拆解需求、依赖、里程碑与交付物',
         'technical-writing':'形成结构清晰、区分事实与建议的技术说明',
@@ -22,6 +23,7 @@ SKILLS={'python-review':'检查Python接口、边界与错误处理',
         'source-research':'使用本地资料与官方来源核对事实',
         'sql-review':'检查SQLite参数化、事务、NULL和数据契约'}
 PLUGINS={'text.stats':'统计文本字符、行与词数',
+         'computer.run':'在独立实验桌面进行限步浏览、截图、点击、输入和滚动，统一模型预算',
          'math.calculate':'计算有限的基础算术表达式',
          'python.syntax':'检查Python语法并提取函数和类名，不执行代码',
          'project.inspect':'读取三个固定示例项目的只读源码',
@@ -53,6 +55,7 @@ PLUGINS={'text.stats':'统计文本字符、行与词数',
          'clock.now':'读取实际服务器时间，明确IANA时区与来源',
          'project.apply_edits':'编译受检AST表达式补丁并执行原项目验证'}
 ARGUMENTS={
+ 'computer.run':{'goal':'打开网页、根据观察完成操作并核对','url':'https://agentrt-lab.invalid/','max_steps':8},
  'text.stats':{'text':'可选文本，省略时使用用户请求'},'math.calculate':{'expression':'(12+3)*2'},
  'python.syntax':{'source':'def add(a,b):\n return a+b'},'project.inspect':{'project':'pricing/intervals/text_normalization'},
  'project.test':{'project':'pricing/intervals/text_normalization'},
@@ -74,7 +77,7 @@ ARGUMENTS={
 def catalog():
     return {'skills':[{'id':key,'description':value} for key,value in SKILLS.items()],
             'plugins':[{'id':key,'description':value,'arguments_example':ARGUMENTS[key],
-                'permissions':['sandboxed_command' if key=='command.run' else 'public_network' if key=='web.fetch'
+                'permissions':['isolated_desktop_and_model_budget' if key=='computer.run' else 'sandboxed_command' if key=='command.run' else 'public_network' if key=='web.fetch'
                     else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch','workspace.import','project.patch_check','project.apply_edits') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
                 for key,value in PLUGINS.items()],
             'host_arbitrary_code_execution':False,'external_plugins_installed':False}
@@ -110,6 +113,9 @@ def calculate(expression):
 def execute_plugin(task):
     name=task.get('plugin');args=task.get('arguments',{})
     if name not in PLUGINS or not isinstance(args,dict):raise ValueError('插件或参数无效')
+    if name=='computer.run':
+        from .computer import execute
+        return execute(task,args)
     if name=='clock.now':
         from .clock_tool import now
         if set(args)-{'timezone'}:raise ValueError('时间工具参数无效')

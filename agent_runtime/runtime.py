@@ -390,7 +390,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control,context_mode=context_mode)
                     payload['_ipc_url'] = broker.url
                     payload['_ipc_token'] = broker.issue(agent,configure=task.get('plugin')=='runtime.configure')
-                if task.get('action') == 'llm':
+                if task.get('action') == 'llm' or task.get('plugin')=='computer.run':
                     try:
                         if gateway is None:
                             gateway = ModelGateway.from_env(root / 'model-calls.jsonl')

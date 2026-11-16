@@ -119,8 +119,9 @@ def answer_for(job):
     mode=job['preset']
     if mode=='auto':
         answer=next((v for k,v in reversed(results) if k=='auto_answer'),None)
+        if isinstance(answer,dict) and answer.get('plugin')=='computer.run':answer=answer.get('answer')
         if answer is None:
-            gate=next((v for k,v in reversed(results) if (k=='route_gate' or k.startswith(('auto_cycle_','repair_check_'))) and isinstance(v,dict) and 'answer' in v),{})
+            gate=next((v for k,v in reversed(results) if (k in ('route_gate','auto_web_gate') or k.startswith(('auto_cycle_','repair_check_','route_fix_gate_'))) and isinstance(v,dict) and 'answer' in v),{})
             answer=gate.get('answer')
     elif mode=='llm':answer=next((v for k,v in reversed(results) if k=='assistant'),None)
     elif mode=='team':answer=next((v for k,v in reversed(results) if k=='review'),None)

@@ -3,6 +3,7 @@ import time
 
 ACTIVE={'running','cancelling'}
 LABELS={'route':'判断需求与规划路由','route_gate':'校验协作计划','auto_answer':'汇总最终回答',
+        'auto_web_gate':'核对网页读取结果',
         'assistant':'生成回答','plan':'制定计划','analyze':'分析内容','index':'索引文本',
         'test_plan':'设计测试','review':'评审与汇总','baseline':'复现原始测试',
         'repair':'生成补丁','validate':'执行真实测试','gate':'核对最终结论'}
@@ -13,6 +14,7 @@ def execution_view(job,now=None):
     records={}
     routing=None
     artifacts=[]
+    computer=None
     def model_step(key):
         if key.startswith('repair_'):return key.startswith('repair_candidate_')
         mode=job.get('preset')
@@ -41,7 +43,8 @@ def execution_view(job,now=None):
             if event.get('action')=='clock':step['label']='读取服务器实际时间'
             if event.get('action')=='capabilities':step['label']='核对 Runtime 已注册工具能力'
         if event.get('agent')=='clock':step.update(kind='local',label='读取服务器时间')
-        if key.startswith('auto_') and key!='auto_answer' and not key.startswith(('auto_decide_','auto_cycle_')):
+        if event.get('agent')=='computer-operator':step.update(kind='local',label='电脑Bot · 观察、操作与核对')
+        if key.startswith('auto_') and key not in ('auto_answer','auto_web_gate') and not key.startswith(('auto_decide_','auto_cycle_')):
             role=step['agent'].split('_',1)[0]
             title={'analyst':'分析','coder':'代码方案','tester':'测试设计','reviewer':'评审','researcher':'资料分析','tool':'调用工具'}.get(role,'协作任务')
             step['label']=title+' · '+key[5:]
@@ -49,6 +52,11 @@ def execution_view(job,now=None):
             if event.get('kind'):step['kind']='model' if event['kind']=='model' else 'local'
         call=event.get('result',{}).get('model_call',{})
         value=event.get('result',{}).get('result',{})
+        if isinstance(value,dict) and value.get('plugin')=='computer.run':
+            step.update(kind='local',label='电脑Bot · 观察、操作与核对')
+            computer={k:value[k] for k in ('steps','scope','completion_claimed','semantic_quality_verified','artifacts','network','error_type') if k in value}
+            for item in value.get('artifacts',[]):
+                if item.get('written'):artifacts.append({k:item[k] for k in ('path','bytes','sha256') if k in item})
         if isinstance(value,dict) and key.startswith('repair_check_') and value.get('accepted'):
             verified=value.get('verification',{})
             if verified.get('written'):artifacts.append({k:verified[k] for k in ('path','bytes','sha256') if k in verified})
@@ -66,7 +74,10 @@ def execution_view(job,now=None):
         step['status']='retrying' if event.get('state')=='waiting' and attempt else event.get('state','waiting')
         from .failures import event_failure
         problem=event_failure(event)
-        if problem:step['failure']=problem
+        if problem:
+            step['failure']=problem
+            if isinstance(value,dict) and (value.get('plugin') and value.get('ok') is False or value.get('error_code')=='PLAN_INVALID'):
+                step['execution_status']=step['status'];step['status']='failed'
     for row in (job.get('monitor') or {}).get('tasks',[]):
         key=row['id'];pair=(key,row.get('attempt',0))
         if pair not in records and not any(s['id']==key for s in records.values()):
@@ -83,4 +94,4 @@ def execution_view(job,now=None):
     return {'status':job['status'],'elapsed_seconds':max(0,end-job['created']),
             'context_control':job.get('context_control_summary') or (job.get('monitor') or {}).get('context_control'),
             'steps':steps,'model_admitted':resources.get('used',{}).get('calls'),
-            'source':'runtime_events','thinking_content':False,'routing':routing,'artifacts':artifacts}
+            'source':'runtime_events','thinking_content':False,'routing':routing,'artifacts':artifacts,'computer':computer}

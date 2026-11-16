@@ -17,6 +17,21 @@ def ipc(task, **value):
     with urllib.request.urlopen(request, timeout=6) as response:
         return json.load(response)
 
+def perform_plugin(task):
+    from .capabilities import execute_plugin
+    try:
+        output=execute_plugin(task)
+        if task.get('expect_failure') and task.get('plugin')=='command.run':
+            output['expected_failure_observed']=bool(output.get('executed') and output.get('exit_code') not in (None,0))
+        return output
+    except (ValueError,SyntaxError,OSError,RuntimeError,ArithmeticError) as exc:
+        detail=str(exc)[:500] if type(exc) is ValueError else '工具未完成，按类型检查参数、权限或运行结果'
+        detail=re.sub(r'(?i)sk-[a-z0-9_-]{12,}|bearer\s+\S+|(?:api[_-]?key|password|secret|token)\s*[=:]\s*[^\s,;]+','[redacted]',detail)
+        return {'plugin':task.get('plugin'),'ok':False,'executed':False,'error_type':type(exc).__name__,
+                'error_code':'TOOL_INVALID_ARGUMENTS' if isinstance(exc,(ValueError,SyntaxError,ArithmeticError)) else 'TOOL_EXECUTION_REJECTED',
+                'error':('参数必须使用合法的有限算术表达式，不能使用英文描述、变量或占位句。' if isinstance(exc,SyntaxError) and task.get('plugin')=='math.calculate' else
+                         detail)}
+
 
 def main():
     if len(sys.argv)>2:
@@ -131,17 +146,14 @@ def main():
                 raise TimeoutError('等待 Agent 消息超时')
             time.sleep(.05)
     elif action == 'plugin':
-        from .capabilities import execute_plugin
-        try:
-            output=execute_plugin(task)
-            if task.get('expect_failure') and task.get('plugin')=='command.run':
-                output['expected_failure_observed']=bool(output.get('executed') and output.get('exit_code') not in (None,0))
-        except (ValueError,OSError,RuntimeError,ArithmeticError) as exc:
-            output={'plugin':task.get('plugin'),'ok':False,'executed':False,'error_type':type(exc).__name__,
-                    'error':str(exc) if type(exc) is ValueError else '工具未完成，按类型检查参数、权限或运行结果'}
+        output=perform_plugin(task)
     elif action == 'route_gate':
-        from .routing import route_plan
-        output, children = route_plan(task)
+        from .routing import route_plan,repair_plan
+        try:output, children = route_plan(task)
+        except ValueError as exc:output,children=repair_plan(task,exc)
+    elif action == 'web_gate':
+        from .web_flow import finish
+        output,children=finish(task)
     elif action in ('repair_prepare','repair_check'):
         from .repair_loop import execute
         output,children=execute(task)

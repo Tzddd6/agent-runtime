@@ -29,6 +29,8 @@ button:focus-visible,a:focus-visible,summary:focus-visible{outline:2px solid var
 @media(max-width:760px){.attachment-chip>span:nth-child(2){max-width:155px}.upload-hint{font-size:9px}.attachment-button,.attachment-chip>button{min-width:40px;min-height:40px}}
 
 /* Stable reading position and independent panel scrolling. */
+.computer-session{margin:18px 0;border:1px solid var(--line,#dfe4eb);border-radius:16px;padding:16px;background:var(--surface,#fff)}
+.computer-session summary{cursor:pointer;font-weight:600}.computer-session img{display:block;width:100%;height:auto;border:1px solid #e1e7ef;border-radius:10px;margin:12px 0}.computer-steps{display:flex;flex-wrap:wrap;gap:8px 24px;font-size:12px;color:#5b697c;padding-left:20px}.computer-session p{font-size:12px;line-height:1.7}
 html{scrollbar-gutter:stable}#chatHistory,.settings-content,.settings-nav,.code-block pre{overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 .jump-latest{position:fixed;right:28px;bottom:calc(var(--composer-height,230px) + 15px);z-index:12;min-height:42px;padding:8px 15px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--accent);box-shadow:0 4px 18px #1b294514;font-size:12px;cursor:pointer}
 .jump-latest[hidden]{display:none}.jump-latest:hover{background:var(--soft-accent);border-color:var(--accent)}.process-step-label .step-error{color:#b25c4d;line-height:1.7;max-width:510px}

@@ -1,5 +1,10 @@
 """Allowlisted public diagnostics. Never expose arbitrary exceptions or stderr."""
 MESSAGES={
+    'COMPUTER_SESSION_FAILED':'专用电脑会话没有完成，请检查执行端、页面或资源情况；没有自动重试模型请求。',
+    'COMPUTER_STEP_LIMIT':'电脑操作已达到限步或时间上限；保留实际操作与截图，尚未确认任务完成。',
+    'PLAN_INVALID':'协作计划未通过格式或工具权限校验，未执行其中的操作。',
+    'TOOL_INVALID_ARGUMENTS':'工具参数无效；错误已返回给控制流程，需要修正参数后再验证。',
+    'TOOL_EXECUTION_REJECTED':'工具未完成，需核对参数、权限或运行结果；没有确认任务交付。',
     'MODEL_UPSTREAM_FAILED':'模型服务调用未完成（本地网关 HTTP 502）。底层原因未保留，无法确定是供应商异常还是超时；远端计费状态未知，未自动重试。',
     'MODEL_TIMEOUT':'模型调用等待超时；远端计算和计费状态未知，未自动重试。',
     'MODEL_BUDGET_EXHAUSTED':'模型累计预算不足或调用槽位等待超时；请求未自动重试。',
@@ -26,6 +31,10 @@ def model_code(error):
 
 
 def event_failure(event):
+    value=event.get('result',{}).get('result',{})
+    if isinstance(value,dict) and value.get('error_code')=='PLAN_INVALID':return failure('PLAN_INVALID')
+    if isinstance(value,dict) and value.get('plugin') and value.get('ok') is False and value.get('error_code') in MESSAGES:
+        return failure(value['error_code'])
     if event.get('state') not in ('failed','timeout','cancelled'):return None
     structured=event.get('result',{}).get('failure',{})
     if isinstance(structured,dict) and structured.get('code') in MESSAGES:return failure(structured['code'])
@@ -34,6 +43,7 @@ def event_failure(event):
     # Recover the known old Worker failure without displaying its traceback.
     if 'HTTP Error 502' in str(event.get('output','')):return failure('MODEL_UPSTREAM_FAILED')
     if 'HTTP Error 429' in str(event.get('output','')):return failure('MODEL_BUDGET_EXHAUSTED')
+    if 'SyntaxError:' in str(event.get('output','')):return failure('TOOL_INVALID_ARGUMENTS')
     return failure('TASK_FAILED')
 
 

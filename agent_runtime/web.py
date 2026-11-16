@@ -154,6 +154,9 @@ class Controller:
             service = self.machine.sample()['service']
             # Worker count changes concurrency only; keep the same resource envelope.
             budget = self.resource_budget(service)
+            if any(task.get('plugin')=='computer.run' for task in tasks):
+                ceiling=service.get('pids_limit') or service.get('pids_limit_count') or 256
+                budget['pids']=max(budget['pids'],min(224,max(1,ceiling-32)))
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
                    'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'context_mode':context_mode,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key,'workspace_key':workspace_key}
@@ -341,6 +344,21 @@ class Controller:
             if job is None:raise ValueError('工作流不存在')
             scope=identity(job.get('workspace_key',key))
         from .tooling import operate
+        if name.endswith('.jpg') and name.startswith('computer/'):
+            from .tooling import scoped_path,parent_descriptor
+            import hashlib,stat
+            scope_root=self.root/'workspaces'/scope
+            scoped_path(scope_root,name)
+            descriptor,leaf=parent_descriptor(scope_root,name)
+            try:
+                fd=os.open(leaf,os.O_RDONLY|os.O_NOFOLLOW,dir_fd=descriptor)
+                with os.fdopen(fd,'rb') as image:
+                    info=os.fstat(image.fileno())
+                    if not stat.S_ISREG(info.st_mode) or not 0<info.st_size<=256*1024:raise ValueError('截图大小无效')
+                    data=image.read(256*1024+1)
+            finally:os.close(descriptor)
+            if not data.startswith(b'\xff\xd8\xff') or digest is None or hashlib.sha256(data).hexdigest()!=digest:raise ValueError('截图校验失败')
+            return data
         result=operate({'_project_workspace':str(self.root/'workspaces'/scope),'_download_full':True},'file.read',{'path':name})
         if digest is not None and result['sha256']!=digest:raise ValueError('文件已变化，请查看最新运行产物')
         return result['content'].encode('utf-8')
@@ -489,7 +507,8 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 try:
                     key,name=path.removeprefix('/api/jobs/').split('/files/',1)
                     digest=parse_qs(urlparse(self.path).query).get('sha',[None])[0]
-                    self.respond(200,controller.project_file(key,unquote(name),digest),'application/octet-stream',download=True)
+                    name=unquote(name);is_image=name.startswith('computer/') and name.endswith('.jpg')
+                    self.respond(200,controller.project_file(key,name,digest),'image/jpeg' if is_image else 'application/octet-stream',download=not is_image)
                 except (ValueError,OSError,UnicodeError):self.respond(400,{'error':'无法读取此项目产物'})
             elif path.startswith('/api/jobs/'):
                 try:self.respond(200,controller.detail(path.rsplit('/',1)[1]))

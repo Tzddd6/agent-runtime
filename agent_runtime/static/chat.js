@@ -72,6 +72,15 @@ function processPanel(turn){
   view.append(stages);return view;
 }
 function nearLatest(){return window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-140}
+function computerPanel(turn){
+  const data=turn.execution?.computer;if(!data)return null;
+  const box=element('details',null,'computer-session');box.open=true;
+  box.append(element('summary','实验电脑 · '+(data.completion_claimed?'会话已结束':'需要检查')+' · '+(data.steps?.length||0)+' 步'),element('p',data.scope||'专用实验浏览器，未连接个人桌面','muted'));
+  const steps=element('ol',null,'computer-steps');for(const step of data.steps||[])steps.append(element('li',(step.succeeded?'✓ ':'! ')+(step.action||'操作')+(step.error?' · '+step.error:'')));box.append(steps);
+  const shot=data.artifacts?.find(a=>/^computer\/[a-f0-9]{32}\/latest\.jpg$/.test(a.path)&&/^[a-f0-9]{64}$/.test(a.sha256));
+  if(shot&&turn.job_id){const image=element('img');image.alt='专用实验电脑最后一次实际截图';image.loading='lazy';image.src='api/jobs/'+encodeURIComponent(turn.job_id)+'/files/'+shot.path.split('/').map(encodeURIComponent).join('/')+'?sha='+encodeURIComponent(shot.sha256);box.append(image)}
+  box.append(element('small','截图和步骤来自实际执行；模型结束声明不等于全部语义要求已验证。','muted'));return box;
+}
 function updateTurn(record,turn){
   if(record.source===turn)return false;
   const stamp=JSON.stringify(turn);if(record.stamp===stamp){record.source=turn;return false}
@@ -89,6 +98,8 @@ function updateTurn(record,turn){
     if(turn.knowledge){record.sources=knowledgeSources(turn);record.assistant.insertBefore(record.sources,record.actions);linkKnowledgeCitations(record.body,turn)}
   }
   const artifacts=JSON.stringify(turn.execution?.artifacts||[]);
+  const computerStamp=JSON.stringify(turn.execution?.computer||null);
+  if(record.computerStamp!==computerStamp){record.computer?.remove();record.computer=computerPanel(turn);if(record.computer)record.assistant.insertBefore(record.computer,record.actions);record.computerStamp=computerStamp}
   if(!record.source||record.source.answer!==turn.answer||record.source.job_id!==turn.job_id||record.artifacts!==artifacts){
     record.actions.replaceChildren();
     if(turn.answer){const button=element('button','复制回答','small-button');button.type='button';button.onclick=()=>copy(turn.answer,button);record.actions.append(button)}
