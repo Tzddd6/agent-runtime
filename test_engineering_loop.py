@@ -103,7 +103,9 @@ class EngineeringLoopTests(unittest.TestCase):
     def test_identical_failed_correction_reuses_failed_verification(self):
         from agent_runtime.runtime import run
         from agent_runtime.model_gateway import ModelGateway
-        broken=FIXED.replace('unit_cents * quantity * (100 - discount_pct) // 100','unit_cents * quantity - (unit_cents * quantity * discount_pct) // 100')
+        # Keep this a non-repairable-by-rounding counterexample; the former
+        # subtraction pattern now has its own successful local-repair test.
+        broken=FIXED.replace('unit_cents * quantity * (100 - discount_pct) // 100','unit_cents * quantity * (100 - discount_pct) // 100 + 1')
         class Client:
             model='offline';timeout=2;calls=0
             def complete(self,messages,*args):

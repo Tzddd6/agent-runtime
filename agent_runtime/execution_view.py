@@ -39,6 +39,7 @@ def execution_view(job,now=None):
         if event.get('kind'):
             step['execution_kind']=event['kind'];step['kind']='model' if event['kind']=='model' else 'local'
             if event.get('action')=='clock':step['label']='读取服务器实际时间'
+            if event.get('action')=='capabilities':step['label']='核对 Runtime 已注册工具能力'
         if event.get('agent')=='clock':step.update(kind='local',label='读取服务器时间')
         if key.startswith('auto_') and key!='auto_answer' and not key.startswith(('auto_decide_','auto_cycle_')):
             role=step['agent'].split('_',1)[0]

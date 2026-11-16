@@ -68,6 +68,9 @@ def main():
             while time.monotonic()<interval:counter=(counter+1)%1000003
             time.sleep(.04)
         output={'allocated_mib':memory,'work_units':counter,'seconds':seconds}
+    elif action == 'capabilities':
+        from .runtime_capabilities import network_answer
+        output=network_answer()
     elif action == 'fail':
         print('模拟 Worker 失败', file=sys.stderr)
         return 1

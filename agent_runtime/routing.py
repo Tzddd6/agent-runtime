@@ -3,6 +3,7 @@ import json
 import re
 from .capabilities import catalog,PLUGINS,SKILLS,ARGUMENTS,load_skill
 from .knowledge import GUIDANCE as KNOWLEDGE_GUIDANCE
+from .runtime_capabilities import NETWORK_GUIDANCE,network_question
 
 ROLES={'analyst':'分析','coder':'代码方案','tester':'测试设计','reviewer':'评审','researcher':'资料分析'}
 DIRECT_SYSTEM='遵守用户指定的输出格式。未调用工具。'
@@ -26,7 +27,7 @@ PLAN_PROTOCOL+=(' file.write/artifact.write可使用arguments:{"path":"输出文
 def compact_catalog(prompt):
     families=[]
     if re.search(r'代码|源码|修复|文件|python|测试|工程',prompt,re.I):families+=['workspace.','file.','project.','python.','command.']
-    if re.search(r'资料|网页|知识|来源|搜索|检索',prompt):families+=['library.','web.','context.']
+    if re.search(r'资料|网页|知识|来源|搜索|检索|联网|上网|浏览|网址|https?://',prompt,re.I):families+=['library.','web.','context.']
     if re.search(r'资源|并发|调度|runtime|cgroup',prompt,re.I):families+=['runtime.']
     if re.search(r'几点|时间|日期|时区|clock',prompt,re.I):families+=['clock.']
     if re.search(r'计算|算术|数据|json|csv|差异',prompt,re.I):families+=['math.','json.','csv.','text.']
@@ -36,6 +37,9 @@ def compact_catalog(prompt):
 
 
 def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking=False, attachments=None,workspace=None):
+    if network_question(prompt) and not attachments:
+        return [{'id':'auto_answer','agent':'runtime-guide','action':'capabilities','timeout':10,
+                 'resources':{'cpu_milli':100,'memory_bytes':32*1024**2,'pids':8}}]
     if re.fullmatch(r'\s*(?:请问)?(?:现在(?:是)?几点(?:了|钟)?|今天(?:是)?(?:几号|什么日期))[？?。！!\s]*',prompt):
         return [{'id':'auto_answer','agent':'clock','action':'clock','timezone':'Asia/Shanghai','timeout':10,
                  'resources':{'cpu_milli':100,'memory_bytes':32*1024**2,'pids':8}}]
@@ -67,6 +71,7 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
          'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16},
          'contexts':[context],'messages':[{'role':'system','content':
             '你是Runtime任务路由器。简单问题直接回答；复杂任务拆分给专长Agent，并行处理无依赖部分。'
+            + (NETWORK_GUIDANCE if re.search(r'联网|上网|浏览|网页|https?://',prompt,re.I) else '') +
             '只输出JSON，不要代码围栏。直接回答格式：{"route":"direct","answer":"完整答案"}。'
             '协作格式：{"route":"collaborate","reason":"简短原因","tasks":['
             '{"id":"a","role":"analyst","instruction":"具体交付物","depends_on":[]}]}。'

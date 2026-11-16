@@ -10,6 +10,7 @@ from agent_runtime.model_gateway import ModelGateway
 
 class AgentTests(unittest.TestCase):
     def start(self,tasks,specs=None,workers=2,cgroup=None):
+        if cgroup is None:cgroup=os.environ.get('AGENTRT_TEST_CGROUP')
         temporary=tempfile.TemporaryDirectory();self.addCleanup(temporary.cleanup)
         control=RuntimeControl();cancel=threading.Event();samples=[];out={}
         def execute():

@@ -103,6 +103,19 @@ def execute(task):
             result=tool('workspace.test',{})
             if result.get('test_hashes')!=context['original_test_hashes']:raise ValueError('测试哈希变化，拒绝交付')
             result['files']=applied['files']
+        if project and source and result.get('success') is False:
+            # Cheap, bounded tool hypotheses before spending another model call.
+            # Original guards, signatures, AST restrictions and all tests remain.
+            from .local_repair import rounding_candidates
+            functions={row.get('function') for row in (result.get('public') or {}).get('failures_detail',[]) if isinstance(row,dict) and isinstance(row.get('function'),str)}
+            tried=[]
+            for proposal in rounding_candidates(source,functions):
+                checked=tool('project.patch_check',{'project':project,'source':proposal['source']})
+                tried.append({k:proposal[k] for k in ('rule','function','sha256')}|{'success':checked.get('success') is True})
+                if checked.get('success') is True:
+                    source=proposal['source'];result=checked
+                    result['local_repair']={'method':'bounded_ast_hypotheses_with_unchanged_checker','candidates':tried}
+                    break
         accepted=result.get('success') is True
     except (ValueError,TypeError,SyntaxError,KeyError) as exc:
         accepted=False;error=str(exc)[:1800]
