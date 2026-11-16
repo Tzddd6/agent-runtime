@@ -14,10 +14,14 @@ def execution_view(job,now=None):
     routing=None
     artifacts=[]
     def model_step(key):
+        if key.startswith('repair_'):return key.startswith('repair_candidate_')
         mode=job.get('preset')
         return (mode=='auto' and key!='route_gate' and not key.startswith('auto_cycle_') or mode in ('llm','team') or mode=='review' and key.startswith(('writer-','critic-'))
                 or mode=='engineering' and key in ('analyze','test_plan','repair','review'))
     def label(key):
+        if key=='repair_prepare':return '观察工程并复现原始测试'
+        if key.startswith('repair_candidate_'):return '生成源码补丁 · 第 '+key.rsplit('_',1)[-1]+' 次'
+        if key.startswith('repair_check_'):return '真实验证与交付 · 第 '+key.rsplit('_',1)[-1]+' 次'
         if key.startswith('auto_decide_'):return '检查工具结果 · 第 '+key.rsplit('_',1)[-1]+' 轮'
         if key.startswith('auto_cycle_'):return '校验后续计划 · 第 '+key.rsplit('_',1)[-1]+' 轮'
         for prefix,title in (('writer-','起草'),('critic-','评审'),('gate-','核对')):
@@ -39,6 +43,11 @@ def execution_view(job,now=None):
             if role=='tool':step['kind']='local'
         call=event.get('result',{}).get('model_call',{})
         value=event.get('result',{}).get('result',{})
+        if isinstance(value,dict) and key.startswith('repair_check_') and value.get('accepted'):
+            verified=value.get('verification',{})
+            if verified.get('written'):artifacts.append({k:verified[k] for k in ('path','bytes','sha256') if k in verified})
+            for item in verified.get('files',[]):
+                if item.get('written'):artifacts.append({k:item[k] for k in ('path','bytes','sha256') if k in item})
         if isinstance(value,dict) and value.get('plugin') in ('file.write','file.copy','file.replace','artifact.write','project.patch_check') and value.get('written'):
             artifacts.append({k:value[k] for k in ('path','bytes','sha256') if k in value})
         if call:

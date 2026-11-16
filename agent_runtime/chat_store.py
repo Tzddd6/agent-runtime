@@ -120,7 +120,7 @@ def answer_for(job):
     if mode=='auto':
         answer=next((v for k,v in reversed(results) if k=='auto_answer'),None)
         if answer is None:
-            gate=next((v for k,v in reversed(results) if (k=='route_gate' or k.startswith('auto_cycle_')) and isinstance(v,dict)),{})
+            gate=next((v for k,v in reversed(results) if (k=='route_gate' or k.startswith(('auto_cycle_','repair_check_'))) and isinstance(v,dict) and 'answer' in v),{})
             answer=gate.get('answer')
     elif mode=='llm':answer=next((v for k,v in reversed(results) if k=='assistant'),None)
     elif mode=='team':answer=next((v for k,v in reversed(results) if k=='review'),None)

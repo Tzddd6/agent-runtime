@@ -17,7 +17,10 @@ SKILLS={'python-review':'检查Python接口、边界与错误处理',
         'workspace-engineering':'在隔离项目中修改文件、运行命令并验证',
         'data-validation':'检查JSON、CSV和计算的输入与结论',
         'runtime-operations':'先观测资源与失败，再有限调整Runtime配置',
-        'knowledge-analysis':'基于命中资料回答、交叉检查并引用可核对的来源'}
+        'knowledge-analysis':'基于命中资料回答、交叉检查并引用可核对的来源',
+        'engineering-repair':'用最少模型生成完成原始失败、补丁、测试和同版本交付',
+        'source-research':'使用本地资料与官方来源核对事实',
+        'sql-review':'检查SQLite参数化、事务、NULL和数据契约'}
 PLUGINS={'text.stats':'统计文本字符、行与词数',
          'math.calculate':'计算有限的基础算术表达式',
          'python.syntax':'检查Python语法并提取函数和类名，不执行代码',
@@ -39,7 +42,13 @@ PLUGINS={'text.stats':'统计文本字符、行与词数',
          'runtime.observe':'读取当前工作流资源和Agent状态',
          'runtime.configure':'在当前服务上限内调整工作流并发数或调度策略',
          'context.search':'检索当前Agent已获授权的上下文语义片段、来源与冲突主张',
-         'context.read':'按不可变引用分页读取已获授权的完整原始上下文'}
+         'context.read':'按不可变引用分页读取已获授权的完整原始上下文',
+         'workspace.inspect':'读取当前Python项目的源码、测试清单与哈希',
+         'workspace.apply_patch':'校验整批哈希后修改已有源码，禁止修改测试',
+         'workspace.test':'隔离运行unittest，拒绝0测试或全部跳过的假成功',
+         'library.search':'检索版本化的Python、SQL、Git、HTTP和Linux资料',
+         'library.read':'按ID读取带官方来源的本地资料条目',
+         'tools.discover':'按名称或关键词读取工具参数与权限'}
 ARGUMENTS={
  'text.stats':{'text':'可选文本，省略时使用用户请求'},'math.calculate':{'expression':'(12+3)*2'},
  'python.syntax':{'source':'def add(a,b):\n return a+b'},'project.inspect':{'project':'pricing/intervals/text_normalization'},
@@ -53,14 +62,16 @@ ARGUMENTS={
  'file.replace':{'path':'calc.py','old':'return a - b','new':'return a + b','sha256':'file.read返回的原文件哈希'},
  'artifact.write':{'path':'report.md','content':'产物正文'},'runtime.observe':{},
  'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'},
- 'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000}}
+ 'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000},
+ 'workspace.inspect':{},'workspace.test':{},'workspace.apply_patch':{'patches':[{'path':'calc.py','sha256':'原SHA','content':'完整新源码'}]},
+ 'library.search':{'query':'Python测试','limit':4},'library.read':{'id':'python-testing'},'tools.discover':{'query':'file.read'}}
 
 
 def catalog():
     return {'skills':[{'id':key,'description':value} for key,value in SKILLS.items()],
             'plugins':[{'id':key,'description':value,'arguments_example':ARGUMENTS[key],
                 'permissions':['sandboxed_command' if key=='command.run' else 'public_network' if key=='web.fetch'
-                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write') else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
+                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
                 for key,value in PLUGINS.items()],
             'host_arbitrary_code_execution':False,'external_plugins_installed':False}
 
@@ -95,9 +106,18 @@ def calculate(expression):
 def execute_plugin(task):
     name=task.get('plugin');args=task.get('arguments',{})
     if name not in PLUGINS or not isinstance(args,dict):raise ValueError('插件或参数无效')
-    if name.startswith(('file.','web.')) or name in ('command.run','artifact.write'):
+    if name.startswith(('file.','web.','workspace.')) or name in ('command.run','artifact.write'):
         from .tooling import operate
         return {'plugin':name,**operate(task,name,args)}
+    if name=='tools.discover':
+        query=args.get('query')
+        if set(args)!={'query'} or not isinstance(query,str) or not 1<=len(query)<=200:raise ValueError('需要有限的query')
+        return {'plugin':name,'tools':[row for row in catalog()['plugins'] if query.lower() in (row['id']+' '+row['description']).lower()][:6],'executed':True}
+    if name.startswith('library.'):
+        from . import library
+        if name=='library.read' and set(args)=={'id'}:return {'plugin':name,**library.read(args['id']),'executed':True}
+        if name=='library.search' and not set(args)-{'query','limit'} and 'query' in args:return {'plugin':name,'sources':library.search(**args),'executed':True}
+        raise ValueError('资料工具参数无效')
     if name.startswith('runtime.'):
         from .worker import ipc
         if name=='runtime.observe':

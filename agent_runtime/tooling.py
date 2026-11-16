@@ -166,7 +166,7 @@ def command(task,args):
 
 
 def operate(task,name,args):
-    if (name.startswith('file.') or name in ('command.run','artifact.write')) and not task.get('_workspace_locked'):
+    if (name.startswith(('file.','workspace.')) or name in ('command.run','artifact.write')) and not task.get('_workspace_locked'):
         if os.name!='posix':raise ValueError('文件与命令权限工具要求Linux隔离环境')
         import fcntl
         root=workspace(task);locks=root.parent/'.agentrt-locks';locks.mkdir(exist_ok=True,mode=0o700)
@@ -179,6 +179,9 @@ def operate(task,name,args):
     if name=='web.fetch':
         if set(args)!={'url'}:raise ValueError('需要url参数')
         return fetch_public(args['url'])
+    if name.startswith('workspace.'):
+        from .workspace_tools import execute
+        return execute(task,name,args)
     if name=='command.run':
         if set(args)-{'argv','timeout'}:raise ValueError('未知命令参数')
         return command(task,args)

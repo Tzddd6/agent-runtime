@@ -124,6 +124,9 @@ def main():
     elif action == 'route_gate':
         from .routing import route_plan
         output, children = route_plan(task)
+    elif action in ('repair_prepare','repair_check'):
+        from .repair_loop import execute
+        output,children=execute(task)
     elif action == 'review_gate':
         from .conversation import route_review
         output, children = route_review(task)

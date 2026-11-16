@@ -122,7 +122,8 @@ class Controller:
             if preset=='auto':
                 from .routing import auto_tasks
                 tasks=auto_tasks(prompt,response_tokens=response_tokens,
-                    conversation=chat_messages[:-1] if chat_messages else None,deep_thinking=deep_thinking,attachments=attachment_context)
+                    conversation=chat_messages[:-1] if chat_messages else None,deep_thinking=deep_thinking,attachments=attachment_context,
+                    workspace=self.root/'workspaces'/identity(workspace_key) if workspace_key else None)
             elif preset == 'team':
                 from .scenarios import team_tasks
                 tasks = team_tasks(prompt,final_tokens=response_tokens)
