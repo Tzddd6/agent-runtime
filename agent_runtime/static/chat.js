@@ -9,27 +9,37 @@ const uuid=()=>crypto.randomUUID().replaceAll('-','');
 function element(tag,text,cls){const el=document.createElement(tag);if(text!=null)el.textContent=text;if(cls)el.className=cls;return el}
 function notify(text){$('notice').textContent=text;$('notice').hidden=!text}
 async function api(path,body){
-  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),10000);
+  const abort=new AbortController(),timer=setTimeout(()=>abort.abort(),path==='attachments'?60000:10000);
   try{
     const response=await fetch('api/'+path,{signal:abort.signal,cache:'no-store',...(body===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json','X-AgentRT-CSRF':csrf},body:JSON.stringify(body)})});
-    let value;try{value=await response.json()}catch{throw Error('无法读取服务响应，请重新登录或打开控制台核对')}
+    if(response.status===413)throw Error('上传被网关大小限制拦截，请联系管理员；单文件上限8MiB');
+    if(response.status===401)throw Error('登录已过期，请重新登录后上传');
+    if(response.status===504)throw Error('文件处理超过网关等待时间，请拆分文档后重试');
+    let value;try{value=await response.json()}catch{throw Error('服务返回异常，请检查登录状态或稍后重试')}
     if(!response.ok){const error=Error(value.error||'请求失败');error.status=response.status;throw error}return value;
   }catch(error){if(error.name==='AbortError')throw Error('请求超时，请核对记录，不会自动重发');throw error}
   finally{clearTimeout(timer)}
 }
-function showAttachments(){const box=$('attachmentList');box.replaceChildren();for(const file of pendingAttachments){const chip=element('span',null,'attachment-chip');chip.append(element('span',file.name));const remove=element('button','×');remove.type='button';remove.setAttribute('aria-label','移除附件 '+file.name);remove.onclick=()=>{pendingAttachments=pendingAttachments.filter(a=>a.id!==file.id);showAttachments();controls()};chip.append(remove);box.append(chip)}}
-async function uploadFiles(){
-  const files=Array.from($('fileInput').files||[]);$('fileInput').value='';if(!files.length)return;
+function showAttachments(){const box=$('attachmentList');box.replaceChildren();for(const file of pendingAttachments){const chip=element('span',null,'attachment-chip');chip.title=file.note||file.name;chip.append(element('span',file.media.startsWith('image/')?'▧':'▤','attachment-kind'),element('span',file.name),element('small',file.text_chars?file.text_chars.toLocaleString()+' 字':'已就绪'));const remove=element('button','×');remove.type='button';remove.disabled=uploading;remove.setAttribute('aria-label','移除附件 '+file.name);remove.onclick=()=>{pendingAttachments=pendingAttachments.filter(a=>a.id!==file.id);showAttachments();controls()};chip.append(remove);box.append(chip)}}
+async function uploadFiles(provided){
+  if(uploading||$('attachFiles').disabled)return;
+  const files=Array.from(provided instanceof Event?$('fileInput').files||[]:provided||$('fileInput').files||[]);$('fileInput').value='';if(!files.length)return;
   if(files.length+pendingAttachments.length>4){notify('每次最多4个附件，其中最多2张图片');return}
+  const supported=/\.(png|jpe?g|webp|bmp|pdf|docx?|txt|md|py|json|csv|log)$/i;
+  const invalid=files.find(file=>!supported.test(file.name)||file.size>8*1024**2||!file.size);
+  if(invalid){notify(invalid.name+'：支持图片、PDF、Word和文本；单文件1字节至8MiB，HEIC请转为JPEG。');return}
+  if(pendingAttachments.filter(f=>f.media.startsWith('image/')).length+files.filter(f=>/\.(png|jpe?g|webp|bmp)$/i.test(f.name)).length>2){notify('每次最多2张图片，请分次发送');return}
   const target=selected||uuid();if(!current||current.id!==target)draftConversation=target;selected=target;address(target);uploading=true;controls();notify('正在验证和保存附件…');
-  try{for(const file of files){if(file.size>8*1024**2)throw Error('单文件最多8MiB');const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',',2)[1]);reader.onerror=()=>reject(Error('读取文件失败'));reader.readAsDataURL(file)});const result=await api('attachments',{conversation_id:target,name:file.name,data});if(selected===target)pendingAttachments.push(result)}showAttachments();notify('附件已保存，将用于本次模型请求。请勿上传密钥。')}
-  catch(error){showAttachments();notify(error.message+'。上传不会自动重试。')}
-  finally{uploading=false;controls()}
+  const progress=$('uploadProgress'),label=$('uploadLabel'),meter=$('uploadMeter');progress.hidden=false;meter.max=files.length;meter.value=0;let completed=0,filename='';
+  try{for(const file of files){filename=file.name;label.textContent='正在处理 '+(completed+1)+' / '+files.length+' · '+filename;const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',',2)[1]);reader.onerror=()=>reject(Error('读取文件失败'));reader.readAsDataURL(file)});const result=await api('attachments',{conversation_id:target,name:file.name,data});if(selected===target)pendingAttachments.push(result);meter.value=++completed;showAttachments()}
+    const notes=pendingAttachments.map(a=>a.note).filter(Boolean);notify('已保存 '+completed+' 个附件，将随下一条消息发送。'+(notes.length?notes.join(' '):'请勿上传密钥。'))}
+  catch(error){showAttachments();notify(filename+'：'+error.message+'。已保存 '+completed+' 个附件，失败文件不会自动重试。')}
+  finally{uploading=false;progress.hidden=true;showAttachments();controls()}
 }
 function address(id){const url=new URL(location.href);if(id)url.searchParams.set('chat',id);else url.searchParams.delete('chat');history.replaceState(null,'',url);try{if(id)localStorage.setItem('agentrt-chat',id);else localStorage.removeItem('agentrt-chat')}catch{}}
 function closeMenu(){$('sidebar').classList.remove('open');$('shade').hidden=true}
-function newChat(){draftConversation=null;selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
-async function selectChat(id){draftConversation=null;selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
+function newChat(){if(uploading)return;draftConversation=null;selected=null;current=null;signature='';pendingAttachments=[];showAttachments();address(null);$('messages').replaceChildren();$('messages').hidden=true;$('welcome').hidden=false;$('consoleLink').href='console';notify('');closeMenu();controls();$('prompt').focus()}
+async function selectChat(id){if(uploading)return;draftConversation=null;selected=id;current=null;signature='';pendingAttachments=[];showAttachments();address(id);closeMenu();notify('');$('welcome').hidden=true;$('messages').hidden=false;$('messages').replaceChildren(element('p','正在读取对话…','muted'));await refresh()}
 function showHistory(list){
   const box=$('chatHistory');box.replaceChildren();if(!list.length)box.append(element('p','新的对话会保存在这里','muted'));
   for(const chat of list){const button=element('button',chat.title,'history-item'+(chat.id===selected?' active':''));button.type='button';button.title=chat.title;button.setAttribute('aria-current',String(chat.id===selected));button.onclick=()=>selectChat(chat.id);box.append(button)}
@@ -87,6 +97,8 @@ function controls(){
   const pending=current?.turns.find(active),online=Boolean(status),busy=Boolean(status?.busy)||sending||Boolean(pending),free=$('mode').value==='document';
   $('send').disabled=!online||busy||uploading||Boolean(status?.recovery_required)||(!free&&!status?.configured);
   $('attachFiles').disabled=!online||busy||uploading;
+  $('newChat').disabled=uploading;
+  for(const button of $('chatHistory').querySelectorAll('button'))button.disabled=uploading;
   $('prompt').required=pendingAttachments.length===0;
   $('deepThinking').disabled=!status?.native_thinking||busy;
   $('send').title=!free&&!status?.configured?'请在运行控制台配置模型密钥':'发送消息';
@@ -124,6 +136,13 @@ function init(){
   selected=/^[a-f0-9]{32}$/.test(fromURL||remembered||'')?(fromURL||remembered):null;
   $('newChat').onclick=newChat;$('chatForm').onsubmit=send;$('mode').onchange=controls;
   $('attachFiles').onclick=()=>$('fileInput').click();$('fileInput').onchange=uploadFiles;
+  new ResizeObserver(entries=>document.documentElement.style.setProperty('--composer-height',entries[0].contentRect.height+'px')).observe(document.querySelector('.composer-dock'));
+  let dragDepth=0;const composer=$('chatForm');
+  document.addEventListener('dragenter',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();dragDepth++;composer.classList.add('drop-ready')}});
+  document.addEventListener('dragover',event=>{if(event.dataTransfer?.types.includes('Files')){event.preventDefault();event.dataTransfer.dropEffect=$('attachFiles').disabled?'none':'copy'}});
+  document.addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;composer.classList.remove('drop-ready')}});
+  document.addEventListener('drop',event=>{if(event.dataTransfer?.files.length){event.preventDefault();dragDepth=0;composer.classList.remove('drop-ready');uploadFiles(event.dataTransfer.files)}});
+  $('prompt').addEventListener('paste',event=>{const files=Array.from(event.clipboardData?.files||[]);if(files.length){event.preventDefault();uploadFiles(files)}});
   $('prompt').onkeydown=event=>{if(event.key==='Enter'&&!event.shiftKey&&!event.isComposing){event.preventDefault();$('chatForm').requestSubmit()}};
   $('stop').onclick=async()=>{const turn=current?.turns.find(active);if(!turn?.job_id)return;$('stop').disabled=true;try{await api('jobs/'+turn.job_id+'/cancel',{});await refresh()}catch(error){notify(error.message)}finally{$('stop').disabled=false}};
   $('menu').onclick=()=>{const open=$('sidebar').classList.toggle('open');$('shade').hidden=!open};$('shade').onclick=closeMenu;

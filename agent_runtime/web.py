@@ -490,7 +490,7 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token=''):
                 self.respond(403,{'error':'请求校验失败，请刷新页面'})
                 return
             try:
-                self.connection.settimeout(5)
+                self.connection.settimeout(25 if self.path=='/api/attachments' else 5)
                 length=int(self.headers.get('Content-Length','0'))
                 maximum=12*1024**2 if self.path=='/api/attachments' else 1024**2 if self.path=='/api/knowledge/save' else 150000
                 if not 0<length<=maximum:raise ValueError('请求体过大或为空')

@@ -1,0 +1,21 @@
+{
+  "date": "2026-11-16",
+  "scope": "v0.17 upload fix, v0.18 experiments excluded",
+  "regular": {"discovered": 248, "passed": 240, "skipped": 8},
+  "focused_upload_and_engineering": {"passed": 21},
+  "final_upload_database": {"passed": 9},
+  "live_model": {
+    "admitted_calls": 1,
+    "elapsed_seconds": 1.3397328853607178,
+    "image_code": "QUARTZ-729",
+    "shapes": ["red square", "blue circle"],
+    "pdf_budget": 95,
+    "docx_budget": 73,
+    "expected_fields_correct": true,
+    "purpose": "functional acceptance only, not comparative benchmark"
+  },
+  "browser": {"chooser_uploaded": ["PNG", "PDF", "DOCX"], "ready_files": 3, "route": "loopback SSH QA relay to live service"},
+  "gateway": {"previous_body_limit": "24k", "body_limit": "12m", "unauthenticated_64KiB_post_status": 401},
+  "credential_handling": {"supplier_key_read": false, "supplier_key_exported": false, "broker_restarted": false},
+  "limitations": ["DOC requires conversion to DOCX on this host", "PDF first 60 pages of text layer only", "no PDF OCR", "text up to 120000 characters", "preview is 4000 characters; full extracted text paginated via file.read"]
+}
