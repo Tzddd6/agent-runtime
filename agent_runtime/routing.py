@@ -7,6 +7,7 @@ from .runtime_capabilities import network_guidance,network_question
 
 ROLES={'analyst':'分析','coder':'代码方案','tester':'测试设计','reviewer':'评审','researcher':'资料分析'}
 DIRECT_SYSTEM='遵守用户指定的输出格式。未调用工具。'
+JSON_GUIDANCE=' JSON中金额与数量保持数值类型，编号与验证码保持字符串；用户明确指定的类型优先。'
 
 def repair_plan(task,error):
     count=task.get('plan_repairs',0)
@@ -78,6 +79,15 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
     from .repair_loop import detect_controlled,tasks as repair_tasks
     project=detect_controlled(prompt)
     if project:return repair_tasks(prompt,project,response_tokens,deep_thinking)
+    if re.search(r'(?<![A-Za-z0-9_])SVG(?![A-Za-z0-9_])',prompt,re.I) and re.search(r'制作|生成|绘制|画|创建',prompt) and not re.search(r'不要生成|仅分析|只分析|不需要工具|无需工具',prompt):
+        return [
+            {'id':'svg_generate','agent':'svg-author','action':'llm','timeout':270,'max_tokens':response_tokens,'continuation_limit':3 if len(prompt)>1500 else 1,'thinking':deep_thinking,
+             'contexts':[context],'messages':[{'role':'system','content':'根据用户完整要求生成一份可独立打开的SVG XML。只输出完整SVG，不要JSON包装、Markdown围栏或省略号。禁止脚本、foreignObject、外部资源和循环引用。所有数量、题目数据与计算必须相互一致；数据有歧义时在图中明确标注待核实，不编造已验证结论。'}],
+             'resources':{'cpu_milli':500,'memory_bytes':192*1024**2,'pids':32}},
+            {'id':'svg_save','agent':'artifact-control','action':'plugin','plugin':'file.write','arguments':{'path':'illustration.svg','content_from':'svg_generate'},
+             'depends_on':['svg_generate'],'inputs':['svg_generate'],'timeout':20,'resources':{'cpu_milli':250,'memory_bytes':128*1024**2,'pids':16}},
+            {'id':'auto_answer','agent':'artifact-control','action':'artifact_gate','depends_on':['svg_save','svg_generate'],'inputs':['svg_save','svg_generate'],
+             'resources':{'cpu_milli':100,'memory_bytes':64*1024**2,'pids':8}}]
     if workspace is not None and re.search(r'修复|修好|\bfix\b',prompt,re.I) and not re.search(r'不要修改(?!测试)|只分析|仅评审|建议',prompt):
         from pathlib import Path
         root=Path(workspace)
@@ -87,13 +97,19 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
             return repair_tasks(prompt,None,response_tokens,deep_thinking,python_files)
         if root.is_dir() and (any(root.glob('test*.py')) or (root/'tests').is_dir()):
             return repair_tasks(prompt,None,response_tokens,deep_thinking)
+    explanation=len(prompt)<=250 and re.search(r'介绍|解释|讲解|说明|阐述|科普|原理|推导|是什么|怎么理解|区别',prompt) and not re.search(r'网页|浏览|联网|打开|文件|修复|修改|运行|执行|上传|保存|插件|skill|多.?agent',prompt,re.I)
+    if explanation:
+        return [{'id':'auto_answer','agent':'assistant','action':'llm','timeout':140,'max_tokens':response_tokens,'continuation_limit':1,'thinking':deep_thinking,
+                 'contexts':[context] if (conversation and re.search(r'刚才|前面|上文|上述|这个|那个|其中|继续|这些|它',prompt)) or attachments and ((attachments.get('knowledge') or {}).get('sources') or attachments.get('attachments') or attachments.get('_images')) else [],
+                 'messages':[{'role':'system','content':'直接完整回答用户的讲解问题，条理清楚、公式准确，并给出必要例子。避免不必要的重复，遵守用户篇幅要求。'+KNOWLEDGE_GUIDANCE},{'role':'user','content':prompt}],
+                 'resources':{'cpu_milli':250,'memory_bytes':128*1024**2,'pids':16}}]
     if (re.search(r'不需要工具|无需系统操作|直接只回答|直接简短回答|不要联网|禁止联网',prompt) or re.fullmatch(r'\s*(?:你好|您好|hello|hi)[！!。.\s]*',prompt,re.I)) and not re.search(r'修复|修改|执行|运行|部署|写入',prompt):
         if not conversation and not attachments:
             return [{'id':'auto_answer','agent':'assistant','action':'llm','timeout':75,'max_tokens':response_tokens,'thinking':deep_thinking,
-                     'messages':[{'role':'system','content':DIRECT_SYSTEM},{'role':'user','content':prompt}],
+                     'messages':[{'role':'system','content':DIRECT_SYSTEM+(JSON_GUIDANCE if re.search('json',prompt,re.I) else '')},{'role':'user','content':prompt}],
                      'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16}}]
         return [{'id':'auto_answer','agent':'assistant','action':'llm','timeout':75,'max_tokens':response_tokens,'thinking':deep_thinking,
-                 'contexts':[context],'messages':[{'role':'system','content':'直接回答用户问题，遵守格式要求。没有执行工具，不能声称已执行操作。'+KNOWLEDGE_GUIDANCE}],
+                 'contexts':[context],'messages':[{'role':'system','content':'直接回答用户问题，遵守格式要求。没有执行工具，不能声称已执行操作。'+(JSON_GUIDANCE if re.search('json',prompt,re.I) else '')+KNOWLEDGE_GUIDANCE}],
                  'resources':{'cpu_milli':250,'memory_bytes':96*1024**2,'pids':16}}]
     return [
         {'id':'route','agent':'router','action':'llm','timeout':75,'max_tokens':4096 if deep_thinking else 2048,'thinking':deep_thinking,
@@ -145,6 +161,9 @@ def route_plan(task):
         return {'route':'stopped','answer':'已达到3轮工具观察与调整上限，仍有事项需要继续核对。',
                 'termination':'max_rounds','tasks':0},[]
     rows=plan.get('tasks')
+    if isinstance(rows,list):
+        # A narrowly defined protocol alias, never arbitrary dynamic tool loading.
+        rows=[{**row,'plugin':'web.fetch'} if isinstance(row,dict) and row.get('plugin')=='web.read' else row for row in rows]
     if plan.get('route')!='collaborate' or not isinstance(rows,list) or not 1<=len(rows)<=12:
         raise ValueError('协作计划需包含1—12项任务')
     names=set()

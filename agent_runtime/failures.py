@@ -1,5 +1,6 @@
 """Allowlisted public diagnostics. Never expose arbitrary exceptions or stderr."""
 MESSAGES={
+    'ARTIFACT_INVALID':'生成文件没有通过完整性或安全结构检查，未作为成功产物交付。',
     'COMPUTER_SESSION_FAILED':'专用电脑会话没有完成，请检查执行端、页面或资源情况；没有自动重试模型请求。',
     'COMPUTER_STEP_LIMIT':'电脑操作已达到限步或时间上限；保留实际操作与截图，尚未确认任务完成。',
     'PLAN_INVALID':'协作计划未通过格式或工具权限校验，未执行其中的操作。',
@@ -32,7 +33,7 @@ def model_code(error):
 
 def event_failure(event):
     value=event.get('result',{}).get('result',{})
-    if isinstance(value,dict) and value.get('error_code')=='PLAN_INVALID':return failure('PLAN_INVALID')
+    if isinstance(value,dict) and value.get('error_code') in MESSAGES:return failure(value['error_code'])
     if isinstance(value,dict) and value.get('plugin') and value.get('ok') is False and value.get('error_code') in MESSAGES:
         return failure(value['error_code'])
     if event.get('state') not in ('failed','timeout','cancelled'):return None

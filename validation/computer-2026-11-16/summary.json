@@ -1,0 +1,107 @@
+{
+  "version": "v0.19",
+  "date": "2026-11-16",
+  "regular": {
+    "total": 295,
+    "passed": 286,
+    "skipped": 9,
+    "run_user": "tzd",
+    "initial_harness_failure": "root run caused 3 parser-launch errors; rerun as production user passed"
+  },
+  "strict": {
+    "source_base_commit": "59263361160e226980e60fb98e32b6b01d86a857",
+    "source_state": "post-fix candidate, see release source manifest",
+    "tests": 74,
+    "passed": true,
+    "remaining_attempt_cgroups": [],
+    "supplier_requests": 0,
+    "includes": [
+      "real browser virtual display/type/click/screenshot",
+      "host-home and local-network policy",
+      "real document extraction",
+      "CPU/OOM/PIDs/timeouts/descendants",
+      "Agent lifecycle and model budget",
+      "context authority",
+      "bounded tool recovery"
+    ]
+  },
+  "desktop": {
+    "verified": true,
+    "version": "157.0.8103.78",
+    "isolation": {
+      "actual_click": true,
+      "browser_version": "157.0.8103.78",
+      "host_home_blocked": true,
+      "host_loopback_blocked": true,
+      "chromium_sandbox_verified": true
+    }
+  },
+  "ui": {
+    "files_uploaded": [
+      {
+        "name": "facts.pdf",
+        "text_chars": 31
+      },
+      {
+        "name": "facts.docx",
+        "text_chars": 24
+      }
+    ],
+    "invalid_files_rejected": [
+      {
+        "file": "fake.pdf",
+        "status": 400
+      },
+      {
+        "file": "bad.docx",
+        "status": 400
+      },
+      {
+        "file": "bad.png",
+        "status": 400
+      }
+    ],
+    "real_docs_answer": {
+      "pdf_budget": 95,
+      "word_budget": 73
+    },
+    "screenshot_hash_verified": true
+  },
+  "long_ui": {
+    "status": "succeeded",
+    "characters": 2362,
+    "seconds": 6.557404912993661,
+    "steps": 1,
+    "model_admitted": 1,
+    "api_path_verified": true
+  },
+  "laplace_standalone": {
+    "calls": 1,
+    "seconds": 8.30829784499656,
+    "characters": 2949,
+    "prompt_tokens": 109,
+    "completion_tokens": 1584,
+    "all_mathematical_claims_verified": false
+  },
+  "private_svg_recovery": {
+    "supplier_requests_added": 1,
+    "generated_text_bytes": 41840,
+    "written": true,
+    "artifact_bytes": 41860,
+    "structure": {
+      "xml_valid": true,
+      "standalone": true,
+      "elements": 476,
+      "semantic_constraints_verified": false
+    },
+    "remaining_attempt_cgroups": []
+  },
+  "private_svg_prior_failures": [
+    "2048-token routing length cut",
+    "two 4096-token chunks still length cut",
+    "four generated chunks ended normally but invalid XML",
+    "first local quote fix insufficient; later one scoped model syntax patch passed"
+  ],
+  "performance_conclusion": "No overall Runtime advantage: 20/20 vs18/20, medians2.138s vs2.546s; total tokens28563 vs29446. Type ambiguity and sampling/cache/network limitations retained.",
+  "source_note": "comparison frozen5926336; post-fix checks independent; no private prompts, generated full text, database, credentials or provider key exported"
+}

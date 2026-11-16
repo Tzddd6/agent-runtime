@@ -112,6 +112,7 @@ def calculate(expression):
 
 def execute_plugin(task):
     name=task.get('plugin');args=task.get('arguments',{})
+    normalizations=[]
     if name not in PLUGINS or not isinstance(args,dict):raise ValueError('插件或参数无效')
     if name=='computer.run':
         from .computer import execute
@@ -137,10 +138,15 @@ def execute_plugin(task):
             lines=content.strip().splitlines()
             if len(lines)<3 or lines[-1]!='```':raise ValueError('上游代码围栏不完整')
             content='\n'.join(lines[1:-1])
+        if isinstance(args.get('path'),str) and args['path'].lower().endswith('.svg'):
+            from .svg_artifact import normalize_generated_svg
+            content,normalizations=normalize_generated_svg(content)
         args={'path':args['path'],'content':content}
     if name.startswith(('file.','web.','workspace.')) or name in ('command.run','artifact.write'):
         from .tooling import operate
-        return {'plugin':name,**operate(task,name,args)}
+        result={'plugin':name,**operate(task,name,args)}
+        if normalizations:result['generated_syntax_repairs']=normalizations
+        return result
     if name=='tools.discover':
         query=args.get('query')
         if set(args)!={'query'} or not isinstance(query,str) or not 1<=len(query)<=200:raise ValueError('需要有限的query')

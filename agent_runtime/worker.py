@@ -101,27 +101,14 @@ def main():
             body={'context':contexts,'upstream_results':task.get('_inputs',{})}
             if context_view and context_view['body'].get('context_control'):body['context_control']=context_view['body']['context_control']
             messages.append({'role':'user', 'content':json.dumps(body,ensure_ascii=False)})
-        request = urllib.request.Request(task['_gateway_url'],
-            data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256),'thinking':task.get('thinking',False)},ensure_ascii=False).encode(),
-            headers={'Authorization':'Bearer '+task['_gateway_token'], 'Content-Type':'application/json'})
-        # 只请求控制进程的本地网关，不直接访问供应商或读取其密钥。
+        from .model_exchange import complete,CompletionFailure
         try:
-            with urllib.request.urlopen(request, timeout=65) as response:
-                model_result = json.load(response)
-        except urllib.error.HTTPError as exc:
+            model_result=complete(task,messages)
+        except CompletionFailure as exc:
             from .failures import failure
-            try:body=json.loads(exc.read(8192))
-            except (ValueError,OSError):body={}
-            code=body.get('error_code') if isinstance(body,dict) else None
-            if code not in ('MODEL_UPSTREAM_FAILED','MODEL_TIMEOUT','MODEL_BUDGET_EXHAUSTED'):
-                code='MODEL_BUDGET_EXHAUSTED' if exc.code==429 else 'MODEL_UPSTREAM_FAILED'
+            code=exc.code
             if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure(code)}))
             print(failure(code)['message'],file=sys.stderr)
-            return 1
-        if model_result.get('finish_reason')=='length':
-            from .failures import failure
-            if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure('MODEL_OUTPUT_INCOMPLETE')}))
-            print(failure('MODEL_OUTPUT_INCOMPLETE')['message'],file=sys.stderr)
             return 1
     elif action == 'command':
         argv = task.get('argv')
@@ -153,6 +140,9 @@ def main():
         except ValueError as exc:output,children=repair_plan(task,exc)
     elif action == 'web_gate':
         from .web_flow import finish
+        output,children=finish(task)
+    elif action == 'artifact_gate':
+        from .svg_workflow import finish
         output,children=finish(task)
     elif action in ('repair_prepare','repair_check'):
         from .repair_loop import execute

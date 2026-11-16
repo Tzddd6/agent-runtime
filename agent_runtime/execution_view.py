@@ -64,7 +64,10 @@ def execution_view(job,now=None):
                 if item.get('written'):artifacts.append({k:item[k] for k in ('path','bytes','sha256') if k in item})
         if isinstance(value,dict) and value.get('plugin') in ('file.write','file.copy','file.replace','artifact.write','project.patch_check') and value.get('written'):
             artifacts.append({k:value[k] for k in ('path','bytes','sha256') if k in value})
+        if isinstance(value,dict) and value.get('structure_verified') is True and isinstance(value.get('artifact'),dict):
+            artifacts.append({k:value['artifact'][k] for k in ('path','bytes','sha256') if k in value['artifact']})
         if call:
+            step['provider_calls']=call.get('provider_calls',1);step['continuation_calls']=call.get('continuation_calls',0)
             step['thinking_requested']=bool(call.get('thinking_requested'))
             usage=call.get('usage',{})
             step['reasoning_tokens']=usage.get('completion_tokens_details',{}).get('reasoning_tokens',0)
@@ -76,7 +79,7 @@ def execution_view(job,now=None):
         problem=event_failure(event)
         if problem:
             step['failure']=problem
-            if isinstance(value,dict) and (value.get('plugin') and value.get('ok') is False or value.get('error_code')=='PLAN_INVALID'):
+            if isinstance(value,dict) and (value.get('ok') is False or value.get('error_code')=='PLAN_INVALID'):
                 step['execution_status']=step['status'];step['status']='failed'
     for row in (job.get('monitor') or {}).get('tasks',[]):
         key=row['id'];pair=(key,row.get('attempt',0))

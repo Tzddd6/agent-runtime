@@ -1,0 +1,740 @@
+{
+  "protocol": {
+    "source_commit": "59263361160e226980e60fb98e32b6b01d86a857",
+    "runner_sha256": "8cfb87dc93dfd335bd66907a5b4995936523ba565a1be409df5f55c65180201d",
+    "dataset_sha256": "420e6a77931ee3e6f098ffcfad5540eaeec9a2c5b91d4dff9a4842066b7b88ef",
+    "cases": 10,
+    "repeats": 2,
+    "samples": 40,
+    "arms": [
+      "direct_loop",
+      "runtime"
+    ],
+    "resources": {
+      "cpu_milli": 2000,
+      "memory_bytes": 1073741824,
+      "pids": 256
+    },
+    "runtime_admission_pids": 224,
+    "runtime_workers": 2,
+    "per_sample_model_calls": 6,
+    "global_model_intent_cap": 120,
+    "single_call_output_max": 4096,
+    "computer_call_output_max": 1024,
+    "thinking": false,
+    "order": "case/repeat rotated paired order; fresh process/cgroup per sample",
+    "quality": "actual page result or attachment witness or exact file JSON; engineering must pass protected original and external oracle, unchanged tests and delivered hashes",
+    "fairness": "same auto_tasks, registered tools, ContextGovernor, protected checker and model broker; direct sequential tool loop excludes Runtime Worker orchestration",
+    "limits": [
+      "small synthetic tasks, two repetitions, not significance",
+      "supplier sampling/cache/network uncontrolled",
+      "shared broker/cloud outside local sample cgroup",
+      "public sites may change; source digests recorded",
+      "browser done is not quality proof"
+    ]
+  },
+  "summary": {
+    "direct_loop": {
+      "samples": 20,
+      "passed": 20,
+      "calls": 25,
+      "median_seconds": 2.1379219040027237,
+      "input_tokens": 24346,
+      "output_tokens": 4217,
+      "cached_input_tokens": 11520,
+      "median_cpu_seconds": 0.209755,
+      "median_memory_peak_bytes": 23400448.0
+    },
+    "runtime": {
+      "samples": 20,
+      "passed": 18,
+      "calls": 26,
+      "median_seconds": 2.546444519495708,
+      "input_tokens": 25198,
+      "output_tokens": 4248,
+      "cached_input_tokens": 8064,
+      "median_cpu_seconds": 0.35880900000000004,
+      "median_memory_peak_bytes": 38064128.0
+    }
+  },
+  "raw_results_sha256": "33616e0af8b8260d0c4a6a44acabe3ec8b7b30fdb068e6271aaecc0f34c58097",
+  "correction": {
+    "supplier_requests_added": 0,
+    "raw_results_unchanged": true,
+    "reason": "oracle output parent missing; same delivered artifacts regraded; original scores retained privately"
+  },
+  "rows": [
+    {
+      "case": "web_bare",
+      "group": "web",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "ed4d03e121f0ad2a1e5fe8a0354f4ec8cdfd729820e91744767ed0615bbe285e"
+        ]
+      },
+      "seconds": 2.089351233007619,
+      "cpu_seconds": 0.192431,
+      "memory_peak_bytes": 23498752,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_bare",
+      "group": "web",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "ed4d03e121f0ad2a1e5fe8a0354f4ec8cdfd729820e91744767ed0615bbe285e"
+        ]
+      },
+      "seconds": 2.616695141987293,
+      "cpu_seconds": 0.314971,
+      "memory_peak_bytes": 35717120,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_python",
+      "group": "web",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "fd64b1bb2e38191f076b3efffecc46261ac5a1fc7aef75383e03d62a8eb7e8f0"
+        ]
+      },
+      "seconds": 3.049108742008684,
+      "cpu_seconds": 0.309978,
+      "memory_peak_bytes": 36139008,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_python",
+      "group": "web",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "fd64b1bb2e38191f076b3efffecc46261ac5a1fc7aef75383e03d62a8eb7e8f0"
+        ]
+      },
+      "seconds": 3.4180875970050693,
+      "cpu_seconds": 0.197122,
+      "memory_peak_bytes": 18341888,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_auth",
+      "group": "web",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "c55b046d15e5617c81977629f420c9ce1b761f441e41f176e4fde3d74a5e3186"
+        ]
+      },
+      "seconds": 0.21408916500513442,
+      "cpu_seconds": 0.135402,
+      "memory_peak_bytes": 18776064,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_auth",
+      "group": "web",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "c55b046d15e5617c81977629f420c9ce1b761f441e41f176e4fde3d74a5e3186"
+        ]
+      },
+      "seconds": 0.3146541949972743,
+      "cpu_seconds": 0.227933,
+      "memory_peak_bytes": 38334464,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_docs",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 1.6297573170013493,
+      "cpu_seconds": 0.297496,
+      "memory_peak_bytes": 28430336,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_docs",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 0.9751240070036147,
+      "cpu_seconds": 0.216228,
+      "memory_peak_bytes": 24817664,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_image",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 1.1751711780088954,
+      "cpu_seconds": 0.154618,
+      "memory_peak_bytes": 18350080,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_image",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 1.1240526320034405,
+      "cpu_seconds": 0.229464,
+      "memory_peak_bytes": 31236096,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_csv",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_artifact_checked": true
+      },
+      "seconds": 4.202246564003872,
+      "cpu_seconds": 0.408743,
+      "memory_peak_bytes": 37793792,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_csv",
+      "group": "upload",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_artifact_checked": true
+      },
+      "seconds": 3.4446825070044724,
+      "cpu_seconds": 0.188355,
+      "memory_peak_bytes": 16302080,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_pricing",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_delivered_sha": true
+      },
+      "seconds": 1.7851527229940984,
+      "cpu_seconds": 0.304616,
+      "memory_peak_bytes": 23429120,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_pricing",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_delivered_sha": true
+      },
+      "seconds": 2.19062739200308,
+      "cpu_seconds": 0.440815,
+      "memory_peak_bytes": 42037248,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "browser_lab",
+      "group": "computer",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_observation_checked": true
+      },
+      "seconds": 5.502504254007363,
+      "cpu_seconds": 2.709375,
+      "memory_peak_bytes": 320667648,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "browser_lab",
+      "group": "computer",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_observation_checked": true
+      },
+      "seconds": 4.748090337001486,
+      "cpu_seconds": 2.568066,
+      "memory_peak_bytes": 324653056,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_config",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      },
+      "seconds": 2.6967287300067255,
+      "cpu_seconds": 0.310389,
+      "memory_peak_bytes": 23625728,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_config",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      },
+      "seconds": 3.1782346019899705,
+      "cpu_seconds": 0.445508,
+      "memory_peak_bytes": 41390080,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_logs",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      },
+      "seconds": 2.476193897004123,
+      "cpu_seconds": 0.428685,
+      "memory_peak_bytes": 41652224,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_logs",
+      "group": "repair",
+      "repeat": 0,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      },
+      "seconds": 2.074156838003546,
+      "cpu_seconds": 0.297109,
+      "memory_peak_bytes": 23371776,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_bare",
+      "group": "web",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "ed4d03e121f0ad2a1e5fe8a0354f4ec8cdfd729820e91744767ed0615bbe285e"
+        ]
+      },
+      "seconds": 2.3888984030054417,
+      "cpu_seconds": 0.301254,
+      "memory_peak_bytes": 35655680,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_bare",
+      "group": "web",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "ed4d03e121f0ad2a1e5fe8a0354f4ec8cdfd729820e91744767ed0615bbe285e"
+        ]
+      },
+      "seconds": 2.1864925749978283,
+      "cpu_seconds": 0.191888,
+      "memory_peak_bytes": 18628608,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_python",
+      "group": "web",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "fd64b1bb2e38191f076b3efffecc46261ac5a1fc7aef75383e03d62a8eb7e8f0"
+        ]
+      },
+      "seconds": 7.7880441500019515,
+      "cpu_seconds": 0.201299,
+      "memory_peak_bytes": 18288640,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_python",
+      "group": "web",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "fd64b1bb2e38191f076b3efffecc46261ac5a1fc7aef75383e03d62a8eb7e8f0"
+        ]
+      },
+      "seconds": 3.098464756985777,
+      "cpu_seconds": 0.316201,
+      "memory_peak_bytes": 35139584,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_auth",
+      "group": "web",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "c55b046d15e5617c81977629f420c9ce1b761f441e41f176e4fde3d74a5e3186"
+        ]
+      },
+      "seconds": 0.3145992670033593,
+      "cpu_seconds": 0.227387,
+      "memory_peak_bytes": 35954688,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "web_auth",
+      "group": "web",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_http_checked": true,
+        "source_sha256": [
+          "c55b046d15e5617c81977629f420c9ce1b761f441e41f176e4fde3d74a5e3186"
+        ]
+      },
+      "seconds": 0.2142167120036902,
+      "cpu_seconds": 0.128511,
+      "memory_peak_bytes": 17629184,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_docs",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 1.1227383819932584,
+      "cpu_seconds": 0.218764,
+      "memory_peak_bytes": 25079808,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_docs",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": false,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 0.9211165309970966,
+      "cpu_seconds": 0.282799,
+      "memory_peak_bytes": 26914816,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_image",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 1.3270655530068325,
+      "cpu_seconds": 0.230929,
+      "memory_peak_bytes": 30347264,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_image",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_attachment_witness_checked": true
+      },
+      "seconds": 0.9734128810086986,
+      "cpu_seconds": 0.148804,
+      "memory_peak_bytes": 18087936,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_csv",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_artifact_checked": true
+      },
+      "seconds": 4.716453140004887,
+      "cpu_seconds": 0.203282,
+      "memory_peak_bytes": 16322560,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "upload_csv",
+      "group": "upload",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_artifact_checked": true
+      },
+      "seconds": 4.208377788992948,
+      "cpu_seconds": 0.401417,
+      "memory_peak_bytes": 38363136,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_pricing",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "seconds": 3.759265676999348,
+      "cpu_seconds": 0.541784,
+      "memory_peak_bytes": 43008000,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_pricing",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      },
+      "seconds": 2.0825598829978844,
+      "cpu_seconds": 0.359459,
+      "memory_peak_bytes": 25493504,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "browser_lab",
+      "group": "computer",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_observation_checked": true
+      },
+      "seconds": 4.8450253090122715,
+      "cpu_seconds": 2.582433,
+      "memory_peak_bytes": 321974272,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "browser_lab",
+      "group": "computer",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "actual_observation_checked": true
+      },
+      "seconds": 6.015071501999046,
+      "cpu_seconds": 2.688835,
+      "memory_peak_bytes": 321605632,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_config",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      },
+      "seconds": 3.4937133109924616,
+      "cpu_seconds": 0.464821,
+      "memory_peak_bytes": 43302912,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_config",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      },
+      "seconds": 2.4364353580022,
+      "cpu_seconds": 0.308142,
+      "memory_peak_bytes": 25788416,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_logs",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "direct_loop",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      },
+      "seconds": 2.3914690570090897,
+      "cpu_seconds": 0.307916,
+      "memory_peak_bytes": 25276416,
+      "remaining_sample_cgroups": 0
+    },
+    {
+      "case": "repair_logs",
+      "group": "repair",
+      "repeat": 1,
+      "arm": "runtime",
+      "status": "completed",
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      },
+      "seconds": 2.4351512959983665,
+      "cpu_seconds": 0.441319,
+      "memory_peak_bytes": 44175360,
+      "remaining_sample_cgroups": 0
+    }
+  ]
+}

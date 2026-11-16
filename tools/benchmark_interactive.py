@@ -97,6 +97,7 @@ def direct(tasks,workspace,sample,client):
 
 def grade(case,answer,values,workspace,folder,tag):
     if case['group']=='repair':
+        (folder/'external-oracle').mkdir(parents=True,exist_ok=True)
         from tools.benchmark_engineering_loop import grade as engineering_grade
         final=next((v for v in reversed(values) if isinstance(v,dict) and v.get('phase') in ('verified_delivery','unresolved')), {})
         result={'status':'completed','accepted':final.get('accepted',False),'source':final.get('source'),'verification':final.get('verification'),

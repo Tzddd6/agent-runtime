@@ -63,6 +63,7 @@ function processPanel(turn){
   if(execution?.steps?.length){
     for(const step of execution.steps){const row=element('div',null,'process-step '+step.status);
       const description=element('div',null,'process-step-label');description.append(element('span',step.label),element('small',(step.kind==='model'?'模型请求':'本地执行')+(step.thinking_requested?' · 深度思考':'')+(step.reasoning_tokens>0?' · 推理 '+step.reasoning_tokens+' token':'')+(step.attempt>1?' · 第 '+step.attempt+' 次尝试':'')));
+      if(step.continuation_calls>0)description.append(element('small','按长度上限续写 '+step.continuation_calls+' 次 · 已计入调用与token'));
       if(step.failure)description.append(element('small',step.failure.message,'step-error'));
       row.append(element('span',step.status==='succeeded'?'✓':step.status==='running'?'◌':'·','process-step-icon'),description,
                  element('span',(states[step.status]||step.status)+(typeof step.elapsed_seconds==='number'?' · '+step.elapsed_seconds.toFixed(2)+' 秒':''),'process-step-time'));stages.append(row)}

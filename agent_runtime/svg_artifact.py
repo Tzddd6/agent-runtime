@@ -3,6 +3,25 @@ import re
 import xml.etree.ElementTree as ET
 
 
+def fix_duplicate_quotes(text):
+    """At most four redundant attribute quotes; never recover/drop XML nodes."""
+    count=0
+    def tag(match):
+        nonlocal count
+        fixed,number=re.subn(r'(\b[A-Za-z_][\w:.-]*="[^"<>\n]*")"(?=\s+[A-Za-z_][\w:.-]*=)',r'\1',match[0])
+        count+=number
+        return fixed
+    fixed=re.sub(r'<[^<>]*>',tag,text)
+    if count>4:raise ValueError('SVG生成语法修复超过4处，不自动恢复')
+    return fixed,([{'kind':'redundant_attribute_quote','count':count}] if count else [])
+
+
+def normalize_generated_svg(text):
+    fixed,repairs=fix_duplicate_quotes(text)
+    validate_svg(fixed)
+    return fixed,repairs
+
+
 def validate_svg(text):
     if not isinstance(text,str) or len(text.encode('utf-8'))>1024**2:
         raise ValueError('SVG超过1MiB上限')

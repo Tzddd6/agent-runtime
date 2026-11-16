@@ -1,9 +1,15 @@
 import unittest
 from unittest.mock import patch
 from agent_runtime.web_flow import requested_urls,tasks,finish
-from agent_runtime.routing import auto_tasks,repair_plan
+from agent_runtime.routing import auto_tasks,repair_plan,route_plan
 
 class WebFlowTests(unittest.TestCase):
+    def test_legacy_read_alias_maps_only_to_registered_https_reader(self):
+        import json
+        task={'id':'route_gate','_inputs':{'route':json.dumps({'route':'collaborate','tasks':[{'id':'read','plugin':'web.read','arguments':{'url':'https://example.com/'}}]})}}
+        _,children=route_plan(task);self.assertEqual(children[0]['plugin'],'web.fetch')
+        task['_inputs']['route']=json.dumps({'route':'collaborate','tasks':[{'id':'read','plugin':'host.read','arguments':{'path':'/etc/shadow'}}]})
+        with self.assertRaises(ValueError):route_plan(task)
     def test_domain_protocol_punctuation_and_explicit_no_network(self):
         examples={'你去读下mc.tzddd.cn':['https://mc.tzddd.cn'],'读一下 https://www.python.org/。':['https://www.python.org/'],
                   '看看example.com和www.python.org':['https://example.com','https://www.python.org'],

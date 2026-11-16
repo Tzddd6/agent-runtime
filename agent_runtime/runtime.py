@@ -106,6 +106,7 @@ def validate(tasks):
             value = task.get(field, 0)
             if type(value) is not int or not 0 <= value <= 3:
                 raise ValueError(f'{field} 必须为 0—3 的整数')
+        if type(task.get('continuation_limit',0)) is not int or not 0<=task.get('continuation_limit',0)<=3:raise ValueError('续写上限必须为0—3')
         if not isinstance(task.get('agent', key), str) or not isinstance(task.get('contexts', []), list):
             raise ValueError('agent 必须为字符串，contexts 必须为数组')
         agent_id(task.get('agent',key))
@@ -515,7 +516,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         outputs[key] = output_ref
                         call=result.get('model_call')
                         if call:
-                            acb=registry.agents[task.get('agent',key)];acb.model_calls+=1
+                            acb=registry.agents[task.get('agent',key)];acb.model_calls+=call.get('provider_calls',1)
                             for field,value in call.get('usage',{}).items():
                                 if type(value) is int and value>=0:acb.token_usage[field]=acb.token_usage.get(field,0)+value
                     event(key, state, exit_code=code, output=diagnostic, result=result,

@@ -118,8 +118,8 @@ def answer_for(job):
     results=[(e['task_id'],e.get('result',{}).get('result')) for e in job.get('events',[]) if e['state']=='succeeded']
     mode=job['preset']
     if mode=='auto':
-        answer=next((v for k,v in reversed(results) if k=='auto_answer'),None)
-        if isinstance(answer,dict) and answer.get('plugin')=='computer.run':answer=answer.get('answer')
+        answer=next((v for k,v in reversed(results) if k=='auto_answer' or k.startswith('svg_check_')),None)
+        if isinstance(answer,dict) and isinstance(answer.get('answer'),str):answer=answer['answer']
         if answer is None:
             gate=next((v for k,v in reversed(results) if (k in ('route_gate','auto_web_gate') or k.startswith(('auto_cycle_','repair_check_','route_fix_gate_'))) and isinstance(v,dict) and 'answer' in v),{})
             answer=gate.get('answer')
