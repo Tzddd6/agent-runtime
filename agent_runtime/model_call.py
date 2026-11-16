@@ -61,7 +61,11 @@ def main():
                               base=request['base'],local_test=request.get('local_test',False))
         from .provider_stream import extract,complete as stream_complete
         messages,callback=extract(request['messages'])
-        value=stream_complete(client,messages,request['max_tokens'],callback) if callback else client._complete_direct(messages,request['max_tokens'])
+        from .benchmark_transport import PREFIX as TOOLWIRE_PREFIX,complete as native_complete
+        if len(messages)==1 and messages[0].get('content','').startswith(TOOLWIRE_PREFIX):
+            value=native_complete(client,messages,request['max_tokens'])
+        else:
+            value=stream_complete(client,messages,request['max_tokens'],callback) if callback else client._complete_direct(messages,request['max_tokens'])
     except ModelError as exc:value={'error':str(exc)}
     except Exception:value={'error':'模型代理子进程请求失败'}
     sys.stdout.write(json.dumps(value,ensure_ascii=False))
