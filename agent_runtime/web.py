@@ -316,6 +316,12 @@ class Controller:
         attachments={a['id']:a for a in self.database.attachments_for(key)}
         for turn in chat['turns']:
             turn['attachment_names']=[attachments[a]['name'] for a in turn.get('attachments',[]) if a in attachments]
+            if turn['status']=='failed' and turn.get('job_id'):
+                try:
+                    historical=self.detail(turn['job_id']);turn['execution']=execution_view(historical)
+                    if turn.get('answer')=='本次运行未完成，请在控制台查看失败原因。':
+                        turn['answer']=answer_for(historical)
+                except KeyError:pass
             if turn['status']=='running' and turn.get('job_id'):
                 try:
                     job=self.detail(turn['job_id']);states=list(job.get('states',{}).values())

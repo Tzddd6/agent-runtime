@@ -245,14 +245,16 @@ class ModelGateway:
                 except (ModelError, ValueError, TypeError, AttributeError, OSError) as exc:
                     if code == 200:
                         code = 502
-                    result = {'error': str(exc) if isinstance(exc, ModelError) else '本地模型请求格式错误'}
+                    from .failures import failure,model_code
+                    public=failure(model_code(exc))
+                    result = {'error':public['message'],'error_code':public['code']}
                 finally:
                     if entered:
                         owner.slots.release()
                 # 不记录密钥、临时 token、提示词或模型正文。
                 with owner.lock:
                     with owner.log_path.open('a', encoding='utf-8') as log:
-                        log.write(json.dumps({'time': time.time(), 'status': code,
+                        log.write(json.dumps({'time': time.time(), 'status': code,'error_code':result.get('error_code'),
                             'model': owner.client.model, 'usage': result.get('usage', {}),
                             'total_seconds': time.monotonic()-started,
                             'gateway_queue_seconds':queue_seconds,'client_seconds':client_seconds,

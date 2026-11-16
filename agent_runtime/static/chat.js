@@ -52,7 +52,7 @@ function processPanel(turn){
   const execution=turn.execution,working=active(turn),view=element('details',null,'process-panel'+(working?' working':''));
   view.open=processOpen.has(turn.request_id)?processOpen.get(turn.request_id):working;
   view.ontoggle=()=>processOpen.set(turn.request_id,view.open);
-  const labels={running:'正在处理',cancelling:'正在停止',succeeded:'处理完成',failed:'执行未完成',cancelled:'已停止',interrupted:'运行已中断',recovery_required:'需要管理员检查'};
+  const labels={running:'正在处理',cancelling:'正在停止',succeeded:'本轮回复完成',failed:'执行未完成',cancelled:'已停止',interrupted:'运行已中断',recovery_required:'需要管理员检查'};
   const elapsed=execution?.elapsed_seconds,summary=element('summary');
   summary.append(element('span',working?'◎':turn.status==='succeeded'?'✓':'!','process-icon'),
                  element('span',(labels[turn.status]||turn.status)+(typeof elapsed==='number'?' · '+elapsed.toFixed(1)+' 秒':'')),element('span','⌄','process-chevron'));
@@ -62,6 +62,7 @@ function processPanel(turn){
   if(execution?.steps?.length){
     for(const step of execution.steps){const row=element('div',null,'process-step '+step.status);
       const description=element('div',null,'process-step-label');description.append(element('span',step.label),element('small',(step.kind==='model'?'模型请求':'本地执行')+(step.thinking_requested?' · 深度思考':'')+(step.reasoning_tokens>0?' · 推理 '+step.reasoning_tokens+' token':'')+(step.attempt>1?' · 第 '+step.attempt+' 次尝试':'')));
+      if(step.failure)description.append(element('small',step.failure.message,'step-error'));
       row.append(element('span',step.status==='succeeded'?'✓':step.status==='running'?'◌':'·','process-step-icon'),description,
                  element('span',(states[step.status]||step.status)+(typeof step.elapsed_seconds==='number'?' · '+step.elapsed_seconds.toFixed(2)+' 秒':''),'process-step-time'));stages.append(row)}
   }else stages.append(element('p',working?'请求已提交，正在等待执行记录。':'该历史记录没有步骤快照，可打开执行记录查看。','process-note'));

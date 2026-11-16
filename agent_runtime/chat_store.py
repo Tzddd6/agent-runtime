@@ -141,6 +141,7 @@ def answer_for(job):
         answer=('修复已通过测试与评审。' if verdict.get('accepted') else '本次修复未获接受，请查看测试与评审结果。')
         answer+='\n\n可在独立控制台查看补丁源码、真实测试和评审记录。'
     if job['status']!='succeeded':
-        problem=job.get('error') or ('运行已停止。' if job['status']=='cancelled' else '本次运行未完成，请在控制台查看失败原因。')
+        from .failures import job_failure
+        problem=job.get('error') or ('运行已停止。' if job['status']=='cancelled' else job_failure(job)['message'])
         return problem+('\n\n已完成部分：\n'+str(answer) if answer else '')
     return str(answer) if answer is not None else '运行已完成。详细结果见控制台。'

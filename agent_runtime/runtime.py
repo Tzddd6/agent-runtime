@@ -438,6 +438,16 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 if oom and int(oom.group(1)):
                     error = 'OOM: cgroup 内存超限，不按原预算盲目重试'
                 result_file = handle['directory'] / 'result.json'
+                if code != 0 and not expired and result_file.exists() and not result_file.is_symlink():
+                    try:
+                        from .failures import MESSAGES,failure
+                        raw=result_file.read_bytes() if result_file.stat().st_size<=8192 else b''
+                        value=json.loads(raw)
+                        diagnostic_code=value.get('failure',{}).get('code')
+                        if value.get('task_id')==key and diagnostic_code in MESSAGES:
+                            result={'task_id':key,'failure':failure(diagnostic_code)}
+                            if error is None:error=result['failure']['message']
+                    except (ValueError,OSError,TypeError,AttributeError):pass
                 if code == 0 and not expired:
                     try:
                         if result_file.stat().st_size > 1024 * 1024:

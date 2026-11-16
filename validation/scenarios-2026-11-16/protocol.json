@@ -1,0 +1,17 @@
+{
+  "source_base": "44945898692b5b7a38fe0cf237415bfe53402d35",
+  "runner_sha256": "366150a7baaa33f2afca109cfea39ee098cf20d0f63da8a60653977ad017cd74",
+  "cases": 12,
+  "max_paid_calls": 40,
+  "per_case_calls": 8,
+  "per_case_admitted_output_tokens": 24576,
+  "same_model_broker": true,
+  "supplier_key_access": false,
+  "repeat_paid_post": false,
+  "purpose": "multi-scenario functional acceptance, not direct API speed comparison",
+  "quality": "independent strict answers, real files/test execution, source evidence, explicit failure retention",
+  "limitations": [
+    "one attempt per declared case",
+    "human visual quality of complex SVG is not assessed by the small chart case"
+  ]
+}
