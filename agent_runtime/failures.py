@@ -20,6 +20,7 @@ def model_code(error):
     # Error text is inspected, never returned. Arbitrary clients may include secrets.
     message=str(error).lower()
     if any(s in message for s in ('预算','budget','槽位')):return 'MODEL_BUDGET_EXHAUSTED'
+    if '连接失败或超时' in message:return 'MODEL_UPSTREAM_FAILED'
     if any(s in message for s in ('deadline','timeout','超时','期限')):return 'MODEL_TIMEOUT'
     return 'MODEL_UPSTREAM_FAILED'
 

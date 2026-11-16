@@ -1,4 +1,5 @@
 import tempfile
+import os
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -35,7 +36,8 @@ class FailureScenarioTests(unittest.TestCase):
                     return {'content':'<svg><g>incomplete','finish_reason':'length','usage':{'completion_tokens':256}}
             with tempfile.TemporaryDirectory() as tmp,patch.object(runtime.ModelGateway,'from_env',side_effect=lambda path:ModelGateway(Client(),path)):
                 states,events=run([{'id':'route','action':'llm','messages':[{'role':'user','content':'generate SVG'}],'max_tokens':256},
-                                   {'id':'independent','action':'echo','payload':'healthy'}],quiet=True,output_dir=tmp)
+                                   {'id':'independent','action':'echo','payload':'healthy'}],quiet=True,output_dir=tmp,
+                                  cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
                 self.assertEqual(states,{'route':'failed','independent':'succeeded'})
                 self.assertEqual(len(calls),1)
                 event=next(e for e in events if e['task_id']=='route' and e['state']=='failed')

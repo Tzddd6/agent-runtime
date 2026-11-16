@@ -18,6 +18,9 @@ PLAN_PROTOCOL=('严格计划协议：最终完成仅输出{"route":"direct","ans
 PLAN_PROTOCOL+=(' 受控项目的project只能用pricing/intervals/text_normalization；project_id是权威标识。'
  '上下文partial=true时，先用context.search查已授权语义片段，必要时context.read按source_ref分页读原文。'
  '工具返回verified路径与sha256时，直接引用已测产物，不重新生成不同源码冒充同一已测版本。')
+PLAN_PROTOCOL+=(' file.write/artifact.write可使用arguments:{"path":"输出文件","content_from":"前置任务id"}，'
+ '从depends_on声明的生成任务绑定真实文本，不能与content同时使用。上游正文未知时禁止写“待提供内容”等占位文字。'
+ '生成SVG必须提供完整、无脚本和外部引用的XML；创建文件不等于所有语义约束通过。')
 
 
 def compact_catalog(prompt):
@@ -95,7 +98,8 @@ def route_plan(task):
             and isinstance(value,dict) and value.get('plugin') and not value.get('expected_failure_observed')
             and (value.get('ok') is False or value.get('executed') is False)]
         result={'route':'direct','answer':answer,'tasks':0}
-        if failed_tools:result.update(termination='tool_failures',failed_tools=failed_tools)
+        if failed_tools:result.update(termination='tool_failures',failed_tools=failed_tools,
+            answer='部分工具操作没有成功，不能确认任务交付完成。请查看执行记录中的工具错误；未把模型的完成声明作为验证结果。')
         return result,[]
     round_number=task.get('route_round',1)
     if type(round_number) is not int or not 1<=round_number<=4:raise ValueError('迭代轮数无效')
@@ -159,8 +163,13 @@ def route_plan(task):
     for row in rows:
         deps=[prefix+d for d in row.get('depends_on',[])]
         if 'plugin' in row:
+            arguments=dict(row.get('arguments',{}))
+            if 'content_from' in arguments:
+                if row['plugin'] not in ('file.write','artifact.write') or not isinstance(arguments['content_from'],str) or arguments['content_from'] not in row.get('depends_on',[]):
+                    raise ValueError('content_from必须引用本工具的直接依赖任务')
+                arguments['content_from']=prefix+arguments['content_from']
             children.append({'id':prefix+row['id'],'agent':'tool_r'+str(round_number)+'_'+row['id'],'action':'plugin',
-                'plugin':row['plugin'],'arguments':row.get('arguments',{}),'timeout':30,
+                'plugin':row['plugin'],'arguments':arguments,'timeout':30,
                 'expect_failure':row.get('expect_failure',False),
                 'depends_on':[gate_id]+deps,'inputs':deps,'contexts':contexts,
                 'resources':{'cpu_milli':500 if row['plugin'] in ('command.run','project.test','project.patch_check') else 250,

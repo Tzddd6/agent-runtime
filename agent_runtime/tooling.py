@@ -222,6 +222,10 @@ def operate(task,name,args):
                 'sha256':hashlib.sha256(raw).hexdigest(),'executed':True}
         content=args.get('content')
         if not isinstance(content,str) or len(content.encode())>MAX_FILE:raise ValueError('写入内容超过1MiB上限')
+        svg=None
+        if target.suffix.lower()=='.svg':
+            from .svg_artifact import validate_svg
+            svg=validate_svg(content)
         if re.search(r'-----BEGIN (?:RSA |OPENSSH |EC )?PRIVATE KEY-----',content):raise ValueError('拒绝生成或保存私钥内容')
         raw=content.encode();used=workspace_usage(root)
         if used+len(raw)>32*1024**2:raise ValueError('项目目录配额不足')
@@ -246,5 +250,7 @@ def operate(task,name,args):
             try:os.unlink(temporary,dir_fd=directory)
             except FileNotFoundError:pass
             os.close(directory)
-        return {'path':args['path'],'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'written':True,'executed':True}
+        result={'path':args['path'],'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'written':True,'executed':True}
+        if svg:result['svg_validation']=svg
+        return result
     raise ValueError('未知系统工具')

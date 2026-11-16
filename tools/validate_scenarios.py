@@ -61,6 +61,7 @@ def main():
                 write(output/'calls.json',calls);raise
     client=Client.from_env()
     def scenario(name,prompt,*,files=None,mode='auto',judge=None,conversation=None):
+        if len(sys.argv)>2 and name not in sys.argv[2].split(','):return
         case_name[0]=name;sample=output/name;sample.mkdir(mode=0o700);workspace=sample/'workspace';workspace.mkdir()
         attachment_context=None
         if files:
@@ -83,7 +84,9 @@ def main():
             row['passed']=bool(status=='succeeded' and judge(answer,workspace,events))
         except Exception as error:row.update(status='exception',error_type=type(error).__name__)
         row.update(seconds=time.monotonic()-start,model_calls=len(calls)-before)
-        row['cgroup_cleanup']=not any(attempts.iterdir())
+        row['quality_passed']=row['passed']
+        row['remaining_cgroup_directories']=[p.name for p in attempts.iterdir() if p.is_dir()]
+        row['cgroup_cleanup']=not row['remaining_cgroup_directories']
         row['passed']=row['passed'] and row['cgroup_cleanup']
         results.append(row);write(output/'results.json',results)
         print(json.dumps({'case':name,'passed':row['passed'],'status':row['status'],'calls':row['model_calls'],'seconds':round(row['seconds'],3)}),flush=True)
