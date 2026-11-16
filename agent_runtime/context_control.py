@@ -19,14 +19,15 @@ def encoded(value):return json.dumps(value,ensure_ascii=False,separators=(',',':
 
 
 class ContextGovernor:
-    def __init__(self,store,mode='balanced',soft_bytes=18000,hard_bytes=98304):
+    def __init__(self,store,mode='balanced',soft_bytes=18000,hard_bytes=256*1024):
         if mode not in ('balanced','full'):raise ValueError('上下文策略需为balanced或full')
         if type(soft_bytes) is not int or type(hard_bytes) is not int or not 4096<=soft_bytes<=hard_bytes<=512*1024:
             raise ValueError('上下文字节预算无效')
         self.store,self.mode,self.soft,self.hard=store,mode,soft_bytes,hard_bytes
         self.lock=threading.RLock();self.cache=collections.OrderedDict();self.cache_size=0
         self.metrics={'views':0,'raw_text_bytes':0,'sent_text_bytes':0,'deduplicated_objects':0,
-                      'projected_objects':0,'searches':0,'page_reads':0,'budget_rejections':0,'conflicts_observed':0}
+                      'projected_objects':0,'searches':0,'page_reads':0,'budget_rejections':0,'conflicts_observed':0,
+                      'history_requests_preserved':0}
 
     def stats(self):
         with self.lock:return {**self.metrics,'policy':self.mode,'soft_bytes':self.soft,'hard_bytes':self.hard,
@@ -120,18 +121,27 @@ class ContextGovernor:
         inputs={key:values[ref] for key,ref in input_refs.items()}
         original={'context':[v for _,v in contexts],'upstream_results':inputs};before=len(encoded(original))
         raw_before=len(encoded({'context':[{k:v for k,v in values[r].items() if k!='_images'} if isinstance(values[r],dict) else values[r] for r in context_refs],'upstream_results':inputs}))
-        result=original;projected=0
+        result=original;projected=0;history_preserved=0
         if self.mode=='balanced' and before>self.soft:
             context_out=[];input_out={};groups=[]
             for ref,value in contexts:
                 pinned={k:value[k] for k in ('user_request','constraints','requirements') if k in value} if isinstance(value,dict) else {}
                 rest={k:v for k,v in value.items() if k not in pinned} if isinstance(value,dict) else value
+                if isinstance(value,dict) and isinstance(value.get('conversation'),list):
+                    history=value['conversation']
+                    # User requirements remain verbatim, in chronological order.
+                    # Only prior assistant text is eligible for lossy selection.
+                    requests=[item['content'] for item in history if isinstance(item,dict) and item.get('role')=='user' and isinstance(item.get('content'),str)]
+                    if requests:
+                        pinned['prior_user_requests']=requests;history_preserved+=len(requests)
+                        rest['conversation']=[item for item in history if not (isinstance(item,dict) and item.get('role')=='user')]
                 target={**pinned,'source_ref':ref,'selected':[],'partial':True}
                 context_out.append(target);groups.append((ref,rest,target))
             for key,ref in input_refs.items():
                 target={'source_ref':ref,'selected':[],'partial':True};input_out[key]=target;groups.append((ref,values[ref],target))
             result={'context':context_out,'upstream_results':input_out,
-                    'context_control':{'instruction':GUIDANCE,'partial':True,'soft_bytes':self.soft}}
+                    'context_control':{'instruction':GUIDANCE+' prior_user_requests按历史时间排列，本轮user_request优先；原始用户请求没有摘要改写。',
+                        'partial':True,'soft_bytes':self.soft,'history_requests_preserved':history_preserved}}
             # Round robin gives each input a relevant span before filling other spans.
             ranked=[]
             for ref,value,target in groups:
@@ -152,5 +162,6 @@ class ContextGovernor:
         with self.lock:
             self.metrics['views']+=1;self.metrics['raw_text_bytes']+=raw_before;self.metrics['sent_text_bytes']+=sent
             self.metrics['deduplicated_objects']+=len(context_refs)-len(contexts);self.metrics['projected_objects']+=projected
+            self.metrics['history_requests_preserved']+=history_preserved
         return {'body':result,'images':images,'stats':{'raw_text_bytes':raw_before,'sent_text_bytes':sent,
                 'projected_objects':projected,'policy':self.mode},'instruction':GUIDANCE}

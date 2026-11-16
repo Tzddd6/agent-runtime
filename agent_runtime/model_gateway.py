@@ -129,7 +129,7 @@ class DeepSeekClient:
         messages=normal
         data = json.dumps({'model': self.model, 'messages': messages,
                            'max_tokens': max_tokens, 'stream': False,
-                           **options}).encode()
+                           **options},ensure_ascii=False).encode()
         if len(data) > MAX_BYTES:
             raise ModelError('模型请求超过 1 MiB')
         req = urllib.request.Request(self.base+'/chat/completions', data=data,

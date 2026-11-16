@@ -37,7 +37,7 @@ def compact_catalog(prompt):
 
 
 def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking=False, attachments=None,workspace=None):
-    if network_question(prompt) and not attachments:
+    if network_question(prompt) and not ((attachments or {}).get('attachments') or (attachments or {}).get('_images')):
         return [{'id':'auto_answer','agent':'runtime-guide','action':'capabilities','timeout':10,
                  'resources':{'cpu_milli':100,'memory_bytes':32*1024**2,'pids':8}}]
     if re.fullmatch(r'\s*(?:请问)?(?:现在(?:是)?几点(?:了|钟)?|今天(?:是)?(?:几号|什么日期))[？?。！!\s]*',prompt):

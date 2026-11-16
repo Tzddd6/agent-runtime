@@ -12,7 +12,7 @@ import re
 
 
 def ipc(task, **value):
-    request = urllib.request.Request(task['_ipc_url'], data=json.dumps(value).encode(),
+    request = urllib.request.Request(task['_ipc_url'], data=json.dumps(value,ensure_ascii=False).encode(),
         headers={'Authorization': 'Bearer ' + task['_ipc_token'], 'Content-Type': 'application/json'})
     with urllib.request.urlopen(request, timeout=6) as response:
         return json.load(response)
@@ -87,7 +87,7 @@ def main():
             if context_view and context_view['body'].get('context_control'):body['context_control']=context_view['body']['context_control']
             messages.append({'role':'user', 'content':json.dumps(body,ensure_ascii=False)})
         request = urllib.request.Request(task['_gateway_url'],
-            data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256),'thinking':task.get('thinking',False)}).encode(),
+            data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256),'thinking':task.get('thinking',False)},ensure_ascii=False).encode(),
             headers={'Authorization':'Bearer '+task['_gateway_token'], 'Content-Type':'application/json'})
         # 只请求控制进程的本地网关，不直接访问供应商或读取其密钥。
         try:

@@ -17,6 +17,7 @@ class CapabilityTruthTests(unittest.TestCase):
     def test_runtime_truth_answer_is_local_and_does_not_spend_or_claim_a_web_read(self):
         tasks=auto_tasks('你有联网浏览能力吗？')
         self.assertEqual(tasks[0]['action'],'capabilities')
+        self.assertEqual(auto_tasks('你有联网能力吗？',attachments={'knowledge':{'sources':[]}})[0]['action'],'capabilities')
         with tempfile.TemporaryDirectory() as folder,patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=AssertionError('No model call permitted')):
             states,events=run(tasks,quiet=True,output_dir=folder,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
             answer=answer_for({'preset':'auto','status':'succeeded','events':events})
