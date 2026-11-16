@@ -157,7 +157,8 @@ def run_study(folder):
     base=Path(delegated_attempts());client=BrokerClient.from_env();report={'protocol':protocol,'rows':[],'finished':False};write_json(root/'results.json',report);used=0
     for index,case in enumerate(cases):
         for arm in case['order']:
-            assert used+2<=protocol['global_paid_intent_cap']
+            required=1 if case['group']=='plain' or arm=='direct_verified' else 2
+            assert used+required<=protocol['global_paid_intent_cap']
             end=time.monotonic()+60
             while True:
                 req=urllib.request.Request('http://127.0.0.1:18880/api/chat/status',headers={'X-AgentRT-Proxy-Token':os.environ['AGENTRT_PROXY_TOKEN']})
