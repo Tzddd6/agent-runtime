@@ -90,7 +90,7 @@ function applyAppearance(){
 }
 function savePreferences(){
   const value={theme:$('themeSelect').value,font:$('fontSelect').value,knowledge:$('useKnowledge').checked,
-    calls:$('modelCalls').value,tokens:$('modelTokens').value,response:$('responseTokens').value};
+    calls:$('modelCalls').value,tokens:$('modelTokens').value,response:$('responseTokens').value,context:$('contextMode').value};
   try{localStorage.setItem('agentrt-preferences-v1',JSON.stringify(value))}catch{}applyAppearance();
 }
 function initWorkbench(){
@@ -102,7 +102,8 @@ function initWorkbench(){
   let searchTimer;$('knowledgeQuery').oninput=()=>{clearTimeout(searchTimer);++knowledgeSearchSequence;searchTimer=setTimeout(searchKnowledge,250)};
   $('capabilityQuery').oninput=renderLibrary;for(const button of document.querySelectorAll('[data-library]'))button.onclick=()=>{libraryTab=button.dataset.library;for(const b of document.querySelectorAll('[data-library]'))b.classList.toggle('active',b===button);renderLibrary()};
   try{const p=JSON.parse(localStorage.getItem('agentrt-preferences-v1')||'{}');if(['light','dark','system'].includes(p.theme))$('themeSelect').value=p.theme;if(['14','16','18'].includes(p.font))$('fontSelect').value=p.font;if(typeof p.knowledge==='boolean')$('useKnowledge').checked=p.knowledge;for(const [key,id,max,min] of [['calls','modelCalls',128,0],['tokens','modelTokens',262144,0],['response','responseTokens',4096,256]])if(/^\d+$/.test(p[key])&&+p[key]<=max&&+p[key]>=min)$(id).value=p[key]}catch{}
-  for(const id of ['themeSelect','fontSelect','useKnowledge','modelCalls','modelTokens','responseTokens'])$(id).addEventListener('change',savePreferences);applyAppearance();
+  try{const p=JSON.parse(localStorage.getItem('agentrt-preferences-v1')||'{}');if(['balanced','full'].includes(p.context))$('contextMode').value=p.context}catch{}
+  for(const id of ['themeSelect','fontSelect','useKnowledge','modelCalls','modelTokens','responseTokens','contextMode'])$(id).addEventListener('change',savePreferences);applyAppearance();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyAppearance);
   document.addEventListener('keydown',event=>{if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='n'&&!$('workspaceDialog').open){event.preventDefault();newChat()}});
 }

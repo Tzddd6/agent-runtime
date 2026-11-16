@@ -1,6 +1,10 @@
-# Agent Runtime v0.15 开发版
+# Agent Runtime v0.16 开发版
 
-本项目对应 OS 功能挑战 proj3，与 ICT 算子竞赛无关。Python 3.9+，核心仅用标准库；图片与隔离命令需要下述发行版组件。
+本项目对应 OS 功能挑战 proj3，与 ICT 算子竞赛无关。当前交付与验收要求 Python 3.11+，核心仅用标准库；图片与隔离命令需要下述发行版组件。
+
+v0.16 补强上下文调控、Agent 通信和失败隔离：带字节预算的上下文视图、按授权引用分页回读、保留来源与冲突的结构化主张共享、动态子任务显式转授，以及发布前的可声明结果契约。当前 22 个工具、9 份 Skill。新增环境检查和免费通信示例，见 [快速开始](快速开始.md)、[上下文调控与语义共享](docs/上下文调控与语义共享-v0.16.md)、[赛题覆盖自查](docs/赛题覆盖与验收-v0.16.md)。
+
+本轮 openEuler 验收：229 项常规测试中 221 通过、8 项环境跳过，另外 16 项严格 cgroup 检查通过。长上下文专项中两模式各 3 次，关键字段均正确，实际输入 token 合计 62,512 降为 8,869。原始失败和独立修正验证见 `validation/context-2026-11-16/`。这是特定上下文负载的改进，尚未证明 v0.16 全面优于直接 API。
 
 v0.14 将聊天入口统一为自动路由，支持模型按需选择20个受控工具与8个Skill，并根据真实工具结果最多迭代3轮。新增原生深度思考、PNG/JPEG与文本附件、SQLite元数据/观测/审计、项目文件与下载、bubblewrap隔离命令、公网HTTPS读取及当前工作流调度配置。图片解码需要发行版Pillow，命令执行必须安装bubblewrap，缺失时拒绝降级。能力、权限和实测边界见 [自动Agent与插件技能运行指南](docs/自动Agent与插件技能-v0.14.md)。
 
@@ -39,6 +43,8 @@ python3 -m agent_runtime
 python3 -m agent_runtime --tasks examples/dynamic.json --workers 2 --output-dir runs
 python3 -m unittest -v
 python3 -m agent_runtime --tasks examples/ipc.json
+python3 -m agent_runtime --tasks examples/context-sharing.json --context-mode balanced
+python3 tools/doctor.py --json
 python3 tools/run_document.py README.md
 python3 -m agent_runtime.web --host 127.0.0.1 --port 18881
 ```
@@ -50,6 +56,8 @@ python3 -m agent_runtime.web --host 127.0.0.1 --port 18881
 - runtime.py：依赖校验、动态批次、状态、有限重试、资源准入和事件。
 - executor.py：独立 Worker、启动许可、进程组清理和可选 cgroup 后端。
 - context.py：工作流内不可变 JSON 对象、哈希去重和 API 读取授权。
+- context_control.py：有损预算视图、来源标注、结构化主张检索、冲突提示和授权原文分页。
+- contracts.py：可声明的 JSON/非空语义主张契约，在发布任务结果前检查。
 - ipc.py：按工作流隔离的本机 HTTP mailbox、Attempt 临时凭据、请求去重、读取/确认和引用传递。
 - model_gateway.py：集中模型调用、并发限流、供应商密钥隔离和调用用量记录。
 - web.py：浏览器提交、状态、事件、取消和内存中的模型配置。

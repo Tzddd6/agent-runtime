@@ -56,6 +56,7 @@ function processPanel(turn){
                  element('span',(states[step.status]||step.status)+(typeof step.elapsed_seconds==='number'?' · '+step.elapsed_seconds.toFixed(2)+' 秒':''),'process-step-time'));stages.append(row)}
   }else stages.append(element('p',working?'请求已提交，正在等待执行记录。':'该历史记录没有步骤快照，可打开执行记录查看。','process-note'));
   stages.append(element('p','展示实际执行步骤与耗时，不包含模型内部思考内容。'+(typeof execution?.model_admitted==='number'?'已放行模型请求 '+execution.model_admitted+' 次。':''),'process-note'));
+  const context=execution?.context_control;if(context?.views)stages.append(element('p','上下文视图 '+context.views+' 次 · 原文 '+(context.raw_text_bytes/1024).toFixed(1)+' KiB → 发送片段 '+(context.sent_text_bytes/1024).toFixed(1)+' KiB · 分页读取 '+context.page_reads+' 次。此处为文本字节，不是供应商 token。','process-note'));
   view.append(stages);return view;
 }
 function render(chat){
@@ -112,7 +113,7 @@ async function send(event){
   event.preventDefault();if($('send').disabled||sending)return;
   const prompt=$('prompt').value.trim()||(pendingAttachments.length?'请分析这些附件并回答。':'');if(!prompt)return;
   const target=selected||uuid();selected=target;address(target);sending=true;notify('');controls();
-  const payload={conversation_id:target,request_id:uuid(),prompt,mode:$('mode').value,project:$('project').value,response_tokens:Number($('responseTokens').value),deep_thinking:$('deepThinking').checked,use_knowledge:$('useKnowledge').checked,attachments:pendingAttachments.map(a=>a.id),
+  const payload={conversation_id:target,request_id:uuid(),prompt,mode:$('mode').value,project:$('project').value,response_tokens:Number($('responseTokens').value),deep_thinking:$('deepThinking').checked,use_knowledge:$('useKnowledge').checked,context_mode:$('contextMode').value,attachments:pendingAttachments.map(a=>a.id),
                  model_budget:{calls:Number($('modelCalls').value),output_tokens:Number($('modelTokens').value)}};
   try{draftConversation=null;await api('chat/turns',payload);if(selected===target){$('prompt').value='';pendingAttachments=[];showAttachments()}signature='';await refresh()}
   catch(error){notify(error.message+'。不会自动重复提交。');await refresh()}

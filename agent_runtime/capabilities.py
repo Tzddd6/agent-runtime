@@ -37,7 +37,9 @@ PLUGINS={'text.stats':'统计文本字符、行与词数',
          'file.list':'列出项目目录文件',
          'artifact.write':'在项目目录生成可下载的文本产物',
          'runtime.observe':'读取当前工作流资源和Agent状态',
-         'runtime.configure':'在当前服务上限内调整工作流并发数或调度策略'}
+         'runtime.configure':'在当前服务上限内调整工作流并发数或调度策略',
+         'context.search':'检索当前Agent已获授权的上下文语义片段、来源与冲突主张',
+         'context.read':'按不可变引用分页读取已获授权的完整原始上下文'}
 ARGUMENTS={
  'text.stats':{'text':'可选文本，省略时使用用户请求'},'math.calculate':{'expression':'(12+3)*2'},
  'python.syntax':{'source':'def add(a,b):\n return a+b'},'project.inspect':{'project':'pricing/intervals/text_normalization'},
@@ -50,7 +52,8 @@ ARGUMENTS={
  'file.copy':{'source':'uploads/附件id.py','target':'test_calc.py'},
  'file.replace':{'path':'calc.py','old':'return a - b','new':'return a + b','sha256':'file.read返回的原文件哈希'},
  'artifact.write':{'path':'report.md','content':'产物正文'},'runtime.observe':{},
- 'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'}}
+ 'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'},
+ 'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000}}
 
 
 def catalog():
@@ -101,6 +104,12 @@ def execute_plugin(task):
             if args:raise ValueError('观测工具不接收参数')
             return {'plugin':name,**ipc(task,op='observe'),'executed':True}
         return {'plugin':name,**ipc(task,op='configure',settings=args),'executed':True}
+    if name.startswith('context.'):
+        from .worker import ipc
+        allowed={'query','limit'} if name=='context.search' else {'ref','offset','limit'}
+        required={'query'} if name=='context.search' else {'ref'}
+        if set(args)-allowed or not required<=set(args):raise ValueError('上下文工具参数无效')
+        return {'plugin':name,**ipc(task,op='context_search' if name=='context.search' else 'context_read',**args),'executed':True}
     if name in ('text.search','text.diff','json.validate','csv.profile'):
         expected={'text','query'} if name=='text.search' else {'before','after'} if name=='text.diff' else {'text'}
         if set(args)!=expected or any(not isinstance(v,str) or len(v)>20000 for v in args.values()):raise ValueError('文本工具参数无效')
@@ -119,10 +128,17 @@ def execute_plugin(task):
     if name in ('project.test','project.patch_check'):
         expected={'project','source'} if name=='project.patch_check' else {'project'}
         if set(args)!=expected:raise ValueError('项目测试参数无效')
-        from .engineering import manifest,run_check
-        project=args['project'];source=args.get('source',manifest(project)['source'])
+        from .engineering import manifest,run_check,canonical_project,validate_patch
+        project=canonical_project(args['project']);source=args.get('source',manifest(project)['source'])
         report=run_check(source,Path(task['_workspace'])/'plugin-tests',project=project)
-        return {'plugin':name,'project':project,'success':report['success'],'source_sha256':report['source_sha256'],
+        artifact={}
+        import os
+        if name=='project.patch_check' and report['success'] and os.name=='posix':
+            from .tooling import operate
+            normalized=validate_patch({'source':source},project)
+            artifact=operate(task,'file.write',{'path':'verified/'+project+'_'+report['source_sha256']+'.py','content':normalized})
+            if artifact['sha256']!=report['source_sha256']:raise ValueError('已测源码与产物哈希不一致')
+        return {'plugin':name,'project':project,'success':report['success'],'source_sha256':report['source_sha256'],**artifact,
             'public':{k:v for k,v in report['public'].items() if k!='stdout'} if report['public'] else None,
             'heldout':{k:v for k,v in report['heldout'].items() if k!='stdout'} if report['heldout'] else None,
             'executed':True,'tests_modified':False}
@@ -133,9 +149,9 @@ def execute_plugin(task):
         if set(args)!={'project'}:raise ValueError('需要project参数')
         sources={'pricing':'pricing.py','intervals':'intervals/intervals.py','text_normalization':'text_normalization/normalizer.py'}
         project=args.get('project')
-        if not isinstance(project,str) or project not in sources:raise ValueError('只允许固定示例项目')
         # project_workflow keeps the authoritative file names.
-        from .engineering import manifest
+        from .engineering import manifest,canonical_project
+        project=canonical_project(project)
         source=manifest(project)['source']
         if len(source)>24000:raise ValueError('示例源码超过上限')
         return {'plugin':name,'project':project,'source':source,'read_only':True,'executed':True}

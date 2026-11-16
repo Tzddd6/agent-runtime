@@ -30,11 +30,17 @@ def main():
     else:
         # Compatibility for the original trusted JSON-stdin entry point.
         task = json.loads(sys.stdin.read())
+    action = task.get('action', 'echo');context_view=None;view_images=[]
+    # Model tasks receive one bounded authenticated view rather than N full RPCs.
+    if action=='llm' and '_context_refs' in task:
+        context_view=ipc(task,op='context_view',context_refs=task.get('_context_refs',[]),input_refs=task.get('_input_refs',{}),
+                         query=task.get('_context_query') or '\n'.join(m.get('content','') for m in task.get('messages',[]) if isinstance(m,dict))[:2000])
+        task['_contexts']=context_view['body']['context'];task['_inputs']=context_view['body']['upstream_results'];view_images=context_view['images']
     # Transport references, materialize only inside the consuming Attempt.
     # Broker binds the bearer capability to the real Agent identity.
-    if '_context_refs' in task:
+    if '_context_refs' in task and context_view is None:
         task['_contexts'] = [ipc(task,op='get',ref=ref)['data'] for ref in task['_context_refs']]
-    if '_input_refs' in task:
+    if '_input_refs' in task and context_view is None:
         task['_inputs'] = {key:ipc(task,op='get',ref=ref)['data']
                            for key,ref in task['_input_refs'].items()}
     action = task.get('action', 'echo')
@@ -64,16 +70,16 @@ def main():
         return 1
     elif action == 'llm':
         messages = list(task.get('messages', []))
-        images=[];contexts=[]
+        images=list(view_images);contexts=[]
         for context in task.get('_contexts',[]):
             if isinstance(context,dict) and '_images' in context:
                 images.extend(context['_images']);contexts.append({k:v for k,v in context.items() if k!='_images'})
             else:contexts.append(context)
         if images:messages.append({'role':'system','content':'agentrt-internal-images-v1:'+json.dumps(images)})
         if task.get('_contexts') or task.get('_inputs'):
-            messages.append({'role':'user', 'content':json.dumps(
-                {'context':contexts, 'upstream_results':task.get('_inputs', {})},
-                ensure_ascii=False)})
+            body={'context':contexts,'upstream_results':task.get('_inputs',{})}
+            if context_view and context_view['body'].get('context_control'):body['context_control']=context_view['body']['context_control']
+            messages.append({'role':'user', 'content':json.dumps(body,ensure_ascii=False)})
         request = urllib.request.Request(task['_gateway_url'],
             data=json.dumps({'messages':messages, 'max_tokens':task.get('max_tokens',256),'thinking':task.get('thinking',False)}).encode(),
             headers={'Authorization':'Bearer '+task['_gateway_token'], 'Content-Type':'application/json'})
@@ -145,6 +151,7 @@ def main():
     if model_result is not None:
         result['result'] = model_result['content']
         result['model_call'] = model_result
+        if context_view:result['context_view']=context_view['stats']
     if len(sys.argv) > 1:
         Path(sys.argv[1]).write_text(json.dumps(result, ensure_ascii=False), encoding='utf-8')
     print(json.dumps({'task_id': task['id'], 'result': result['result']}, ensure_ascii=False))

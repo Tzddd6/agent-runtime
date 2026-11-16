@@ -55,6 +55,14 @@ def project_ids():
     return ('pricing','intervals','text_normalization')
 
 
+def canonical_project(project):
+    aliases={'integer-pricing':'pricing','time-intervals':'intervals','text-normalization':'text_normalization'}
+    if not isinstance(project,str):raise ValueError('unknown controlled project')
+    result=aliases.get(project,project)
+    if result not in project_ids():raise ValueError('unknown controlled project')
+    return result
+
+
 def _spec(project):
     if not isinstance(project,str) or project not in PROJECTS:
         raise ValueError('unknown controlled project')
@@ -70,8 +78,9 @@ def project_metadata(project=None):
 
 
 def manifest(project='pricing'):
+    project=canonical_project(project)
     spec=_spec(project)
-    return {'project':spec['name'],'file':spec['file'],'requirements':spec['requirements'],
+    return {'project_id':project,'project':spec['name'],'file':spec['file'],'requirements':spec['requirements'],
             'source':spec['source'],'public_examples':spec['examples'],
             'patch_schema':{'source':'complete '+spec['file']+' source; JSON only'}}
 

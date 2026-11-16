@@ -78,17 +78,17 @@ class ChatStore:
                 except (ValueError,OSError,KeyError,TypeError):continue
         return sorted(values,key=lambda c:c['updated'],reverse=True)
 
-    def intent(self,key,request,prompt,mode,project,budget,*,response_tokens=4096,deep_thinking=False,attachments=None,use_knowledge=False):
+    def intent(self,key,request,prompt,mode,project,budget,*,response_tokens=4096,deep_thinking=False,attachments=None,use_knowledge=False,context_mode='balanced'):
         identity(key);identity(request)
         with self.lock:
             try:chat=self.read(key)
             except FileNotFoundError:
                 if len(list(self.root.glob('*.json')))>=100:raise ValueError('已达到 100 个会话上限，请管理员归档记录')
                 chat={'id':key,'title':prompt[:32] or '项目修复','updated':time.time(),'turns':[]}
-            signature={'prompt':prompt,'mode':mode,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking,'attachments':attachments or [],'use_knowledge':use_knowledge}
+            signature={'prompt':prompt,'mode':mode,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking,'attachments':attachments or [],'use_knowledge':use_knowledge,'context_mode':context_mode}
             for turn in chat['turns']:
                 if turn['request_id']==request:
-                    if any(turn.get(k,4096 if k=='response_tokens' else False if k in ('deep_thinking','use_knowledge') else [] if k=='attachments' else None)!=v for k,v in signature.items()):raise ValueError('同一请求 ID 不允许更改内容')
+                    if any(turn.get(k,'full' if k=='context_mode' else 4096 if k=='response_tokens' else False if k in ('deep_thinking','use_knowledge') else [] if k=='attachments' else None)!=v for k,v in signature.items()):raise ValueError('同一请求 ID 不允许更改内容')
                     if not turn.get('job_id'):raise ValueError('原请求的执行状态尚未确认，请打开控制台核对，不要重复提交')
                     return chat,turn,True
             if any(t['status']=='running' for t in chat['turns']):raise ValueError('请先等待当前回答或停止运行')

@@ -76,6 +76,8 @@ class Controller:
 
     def submit(self, value, *, chat_messages=None, workspace_key=None, attachment_context=None):
         preset = value.get('preset')
+        context_mode=value.get('context_mode','balanced')
+        if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
         deep_thinking=value.get('deep_thinking',False)
         if type(deep_thinking) is not bool or deep_thinking and os.environ.get('AGENTRT_NATIVE_THINKING')!='1':
             raise ValueError('深度思考参数无效或服务尚未启用')
@@ -152,7 +154,7 @@ class Controller:
             # Worker count changes concurrency only; keep the same resource envelope.
             budget = self.resource_budget(service)
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
-                   'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'monitor':None,'history':[],
+                   'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'context_mode':context_mode,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key,'workspace_key':workspace_key}
             job['_control']=RuntimeControl()
             if preset=='engineering':job['project']=project
@@ -192,7 +194,7 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode)
                 for e in completed_events:
                     plugin=e.get('result',{}).get('result',{}).get('plugin') if isinstance(e.get('result',{}).get('result'),dict) else None
                     if isinstance(plugin,str):
@@ -207,6 +209,7 @@ class Controller:
                         job['agent_summary']=summary.get('agents',[])
                         job['agent_control_summary']=summary.get('agent_controls',[])
                         job['model_resource_summary']=summary.get('model_resources')
+                        job['context_control_summary']=summary.get('context_control')
                     semantic=True
                     if preset=='auto':
                         semantic=not any(e.get('result',{}).get('result',{}).get('termination') in ('max_rounds','tool_failures')
@@ -259,6 +262,8 @@ class Controller:
         if deep_thinking and response_tokens<4096:raise ValueError('深度思考需要4096 token额度，含推理与答案')
         attachment_ids=value.get('attachments',[])
         use_knowledge=value.get('use_knowledge',True)
+        context_mode=value.get('context_mode','balanced')
+        if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
         if type(use_knowledge) is not bool:raise ValueError('知识库开关需为布尔值')
         if not isinstance(attachment_ids,list) or len(attachment_ids)>4 or any(not isinstance(a,str) for a in attachment_ids) or len(set(attachment_ids))!=len(attachment_ids):raise ValueError('附件列表无效')
         for a in attachment_ids:
@@ -267,7 +272,7 @@ class Controller:
         if type(response_tokens) is not int or not 256<=response_tokens<=4096:raise ValueError('单次回答额度需为 256—4096 token')
         if any(budget[k]>DEFAULT_WORKFLOW_MODEL_BUDGET[k] for k in budget):raise ValueError('模型预算超出服务上限')
         with self.chat_lock:
-            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget,response_tokens=response_tokens,deep_thinking=deep_thinking,attachments=attachment_ids,use_knowledge=use_knowledge)
+            chat,turn,reused=self.chats.intent(key,request,prompt,mode,project,budget,response_tokens=response_tokens,deep_thinking=deep_thinking,attachments=attachment_ids,use_knowledge=use_knowledge,context_mode=context_mode)
             if reused:return {'conversation_id':key,'job_id':turn['job_id'],'reused':True}
             messages=history_messages(chat)+[{'role':'user','content':prompt}]
             try:
@@ -277,7 +282,7 @@ class Controller:
                     attachment_context={**(attachment_context or {}),'knowledge':knowledge}
                     # Immutable per-turn excerpts survive document edits and removal.
                     self.chats.update(key,request,knowledge=knowledge)
-                job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking},chat_messages=messages,workspace_key=key,attachment_context=attachment_context)
+                job_id=self.submit({'preset':mode,'prompt':prompt,'project':project,'model_budget':budget,'response_tokens':response_tokens,'deep_thinking':deep_thinking,'context_mode':context_mode},chat_messages=messages,workspace_key=key,attachment_context=attachment_context)
             except (ValueError,OSError) as exc:
                 self.chats.update(key,request,status='failed',answer=str(exc))
                 raise

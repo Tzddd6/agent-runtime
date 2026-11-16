@@ -4,6 +4,7 @@ import gzip
 import json
 import re
 import threading
+import os
 
 
 class ContextStore:
@@ -15,8 +16,11 @@ class ContextStore:
         if type(cache_max_entries) is not int or cache_max_entries < 1:
             raise ValueError('cache_max_entries 必须为正整数')
         self.root = root
-        self.root.mkdir(parents=True, exist_ok=True)
+        if self.root.is_symlink():raise ValueError('上下文目录不能是符号链接')
+        self.root.mkdir(parents=True, exist_ok=True,mode=0o700)
+        if os.name=='posix':self.root.chmod(0o700)
         self.grants = {}
+        self.sources = {}
         self.lock = threading.RLock()
         self.metrics = {'puts': 0, 'unique_objects': 0, 'logical_bytes': 0, 'stored_bytes': 0}
         # Cache raw immutable JSON, never the caller's mutable Python objects.
@@ -59,12 +63,14 @@ class ContextStore:
         ref = hashlib.sha256(raw).hexdigest()
         with self.lock:
             path = self.root / ref
+            if path.is_symlink():raise ValueError('上下文对象不能是符号链接')
             self.metrics['puts'] += 1
             self.metrics['logical_bytes'] += len(raw)
             if not path.exists():
                 compressed = gzip.compress(raw, mtime=0) if len(raw) >= 1024 else raw
                 encoded = compressed if len(compressed) < len(raw) else raw
-                path.write_bytes(encoded)
+                fd=os.open(path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|getattr(os,'O_NOFOLLOW',0),0o600)
+                with os.fdopen(fd,'wb') as file:file.write(encoded)
                 self.metrics['unique_objects'] += 1
                 self.metrics['stored_bytes'] += len(encoded)
             self.grants.setdefault(ref, set()).update(readers)
@@ -76,6 +82,7 @@ class ContextStore:
                     or agent not in self.grants.get(ref, set())):
                 raise PermissionError('上下文未授权')
             path = self.root / ref
+            if path.is_symlink():raise ValueError('上下文对象不能是符号链接')
             info = path.stat()
             if info.st_size>1024*1024:
                 self._drop(ref,'cache_invalidations')
@@ -94,7 +101,8 @@ class ContextStore:
                 self.metrics['cache_misses'] += 1
                 # The stat check is advisory: bound the read as well in case a
                 # same-user writer grows/replaces the file between stat/open.
-                with path.open('rb') as source:
+                fd=os.open(path,os.O_RDONLY|getattr(os,'O_NOFOLLOW',0))
+                with os.fdopen(fd,'rb') as source:
                     raw = source.read(1024*1024+1)
                 self.metrics['disk_reads'] += 1
                 self.metrics['disk_read_bytes'] += len(raw)
@@ -126,6 +134,26 @@ class ContextStore:
             if owner not in self.grants.get(ref,set()):
                 raise PermissionError('上下文未授权')
             self.grants[ref].add(reader)
+
+    def authorized(self,agent):
+        with self.lock:return [ref for ref,readers in self.grants.items() if agent in readers]
+
+    def get_many(self,refs,agent):
+        if not isinstance(refs,list) or len(refs)>164:raise ValueError('引用批次数超过限制')
+        with self.lock:
+            if any(not isinstance(ref,str) or not re.fullmatch('[0-9a-f]{64}',ref) or agent not in self.grants.get(ref,set()) for ref in refs):
+                raise PermissionError('上下文未授权')
+            return {ref:self.get(ref,agent) for ref in dict.fromkeys(refs)}
+
+    def label_source(self,ref,metadata):
+        if (ref not in self.grants or not isinstance(metadata,dict) or set(metadata)-{'task_id','agent','action','attempt','kind'}
+                or len(json.dumps(metadata))>1024):raise ValueError('来源描述无效')
+        with self.lock:
+            entries=self.sources.setdefault(ref,[])
+            if metadata not in entries:entries.append(dict(metadata));del entries[:-16]
+
+    def source_info(self,ref):
+        with self.lock:return [dict(row) for row in self.sources.get(ref,[])]
 
     def revoke_agent(self,agent):
         with self.lock:

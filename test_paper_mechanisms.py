@@ -81,7 +81,7 @@ class PaperMechanismTests(unittest.TestCase):
             self.assertEqual(result['result']['report'],{'source':{'text':large}})
             self.assertEqual(result['contexts'],[{'text':large}])
             summary=json.loads(next(Path(tmp).glob('*/summary.json')).read_text(encoding='utf-8'))
-            self.assertEqual(summary['dataflow'],{'context_ref_deliveries':1,'input_ref_deliveries':1})
+            self.assertEqual(summary['dataflow'],{'context_ref_deliveries':1,'input_ref_deliveries':1,'semantic_ref_deliveries':0})
 
     def test_drf_web_entry_uses_same_runtime_policy(self):
         from agent_runtime.web import Controller

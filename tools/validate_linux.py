@@ -23,13 +23,24 @@ attempts=root/'attempts'
 attempts.mkdir(exist_ok=True)
 (attempts/'cgroup.subtree_control').write_text('+cpu +memory +pids')
 env=dict(os.environ,AGENTRT_TEST_CGROUP=str(attempts))
-ret=subprocess.run([sys.executable,'-m','unittest','-v',
+strict_names=[
+ 'test_execution_speed.ExecutionSpeedTests.test_dependency_chain_dispatches_after_cleanup_and_records_scheduler_stats',
+ 'test_chat.ChatTests.test_real_document_chat_restores_and_repeated_post_does_not_execute_again',
+ 'test_model_budget.ModelBudgetTests.test_runtime_cross_task_agent_budget_does_not_block_independent_agent',
+ 'test_model_budget.ModelBudgetTests.test_dynamic_agent_identity_cannot_bypass_workflow_budget',
+ 'test_paper_mechanisms.PaperMechanismTests.test_real_workers_receive_refs_and_materialize_identical_inputs',
+ 'test_agents.AgentTests.test_linux_aggregate_agent_cgroup_and_cleanup',
  'test_extended.ExtendedTests.test_linux_cgroup_oom',
  'test_features.FeatureTests.test_linux_pids_limit',
  'test_features.FeatureTests.test_linux_detached_descendant_cleanup',
  'test_features.FeatureTests.test_linux_timeout_cleanup_and_retry',
  'test_telemetry.TelemetryTests.test_linux_real_measurements',
- 'test_executor_lifecycle.ExecutorLifecycleTests.test_linux_tiny_cpu_budget_large_payload_still_has_a_deadline'],env=env)
+ 'test_executor_lifecycle.ExecutorLifecycleTests.test_linux_tiny_cpu_budget_large_payload_still_has_a_deadline',
+ 'test_context_control.ContextControlTests.test_real_workers_share_semantic_facts_only_after_explicit_delegation',
+ 'test_context_control.ContextControlTests.test_forged_delegation_fails_without_stopping_independent_agent',
+ 'test_context_control.ContextControlTests.test_real_model_worker_uses_bounded_view_and_preserves_evidence',
+ 'test_context_control.ContextControlTests.test_empty_claim_contract_is_isolated_before_publication']
+ret=subprocess.run([sys.executable,'-m','unittest','-v',*strict_names],env=env)
 if ret.returncode:raise SystemExit(ret.returncode)
 from agent_runtime.runtime import run
 start=time.monotonic()
@@ -44,7 +55,7 @@ assert int(usage['nr_throttled'])>0,usage
 assert not list(attempts.iterdir()) or all(not p.is_dir() for p in attempts.iterdir())
 report={'states':states,'wall_seconds':elapsed,'cpu_core_ratio':ratio,'cpu_stat':usage,'oom_test':'passed','enforcement':'cgroup_v2','runtime_user':os.getuid(),
         'regular_discovered':regular_tests,'regular_passed':regular_tests-regular_skipped,
-        'regular_skipped':regular_skipped,'strict_tests_passed':6}
+        'regular_skipped':regular_skipped,'strict_tests_passed':len(strict_names)}
 from tools.run_document import tasks_for
 with contextlib.redirect_stdout(io.StringIO()):
  doc_states,doc_events=run(tasks_for((project/'README.md').read_text(encoding='utf-8')),

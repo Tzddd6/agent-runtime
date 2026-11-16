@@ -1,0 +1,23 @@
+{
+  "job_id": "50b54cb32702432f9c1f94d587e50148",
+  "status": "succeeded",
+  "context_mode": "balanced",
+  "context_control": {
+    "views": 1,
+    "raw_text_bytes": 132,
+    "sent_text_bytes": 132,
+    "deduplicated_objects": 0,
+    "projected_objects": 0,
+    "searches": 0,
+    "page_reads": 0,
+    "budget_rejections": 0,
+    "conflicts_observed": 0,
+    "policy": "balanced",
+    "soft_bytes": 18000,
+    "hard_bytes": 98304,
+    "index_bytes": 0,
+    "index_limit_bytes": 2097152
+  },
+  "answer_contains_witness": true,
+  "fixture": "synthetic UI acceptance; not a performance comparison"
+}

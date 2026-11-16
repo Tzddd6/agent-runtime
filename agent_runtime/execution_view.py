@@ -39,7 +39,7 @@ def execution_view(job,now=None):
             if role=='tool':step['kind']='local'
         call=event.get('result',{}).get('model_call',{})
         value=event.get('result',{}).get('result',{})
-        if isinstance(value,dict) and value.get('plugin') in ('file.write','file.copy','file.replace','artifact.write') and value.get('written'):
+        if isinstance(value,dict) and value.get('plugin') in ('file.write','file.copy','file.replace','artifact.write','project.patch_check') and value.get('written'):
             artifacts.append({k:value[k] for k in ('path','bytes','sha256') if k in value})
         if call:
             step['thinking_requested']=bool(call.get('thinking_requested'))
@@ -63,5 +63,6 @@ def execution_view(job,now=None):
         steps.append(step)
     resources=job.get('model_resources') or (job.get('monitor') or {}).get('model_resources') or {}
     return {'status':job['status'],'elapsed_seconds':max(0,end-job['created']),
+            'context_control':job.get('context_control_summary') or (job.get('monitor') or {}).get('context_control'),
             'steps':steps,'model_admitted':resources.get('used',{}).get('calls'),
             'source':'runtime_events','thinking_content':False,'routing':routing,'artifacts':artifacts}

@@ -1,0 +1,7 @@
+[
+  {"id":"claim_a","agent":"alpha","action":"send","to":"judge","request_id":"claim-a","data":{"semantic_facts":[{"subject":"deployment","predicate":"workers","value":2}]}},
+  {"id":"claim_b","agent":"beta","action":"send","to":"judge","request_id":"claim-b","data":{"semantic_facts":[{"subject":"deployment","predicate":"workers","value":3}]}},
+  {"id":"receive_a","agent":"judge","action":"receive","seconds":3,"depends_on":["claim_a","claim_b"]},
+  {"id":"receive_b","agent":"judge","action":"receive","seconds":3,"depends_on":["receive_a"]},
+  {"id":"inspect_conflict","agent":"judge","action":"plugin","plugin":"context.search","arguments":{"query":"deployment workers","limit":6},"depends_on":["receive_b"],"inputs":["receive_a","receive_b"]}
+]

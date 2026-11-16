@@ -16,6 +16,7 @@ from .telemetry import CgroupSampler
 from .scheduling import AdmissionScheduler
 from .agents import AgentRegistry,RuntimeControl,agent_id
 from .completion import CompletionWaiter
+from .contracts import NAMES as CONTRACTS,validate_result
 
 
 TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
@@ -84,6 +85,8 @@ def validate(tasks):
         raise ValueError('任务必须为非空数组')
     pending = {}
     for task in tasks:
+        if not isinstance(task,dict):raise ValueError('每个任务必须为JSON对象')
+        if task.get('result_contract') is not None and task['result_contract'] not in CONTRACTS:raise ValueError('未知结果契约')
         if not isinstance(task, dict):
             raise ValueError('每个任务必须为 JSON 对象')
         key = task.get('id')
@@ -125,8 +128,9 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced'):
     validate(tasks)
+    if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
             or policy not in AdmissionScheduler.POLICIES
@@ -161,7 +165,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     running, events = {}, []
     gateway = broker = None
     outputs = {} # task ID -> immutable ContextStore reference
-    dataflow = {'context_ref_deliveries':0,'input_ref_deliveries':0}
+    dataflow = {'context_ref_deliveries':0,'input_ref_deliveries':0,'semantic_ref_deliveries':0}
     sampler, last_telemetry, terminal_usage = CgroupSampler(), [0], {}
     journal = (root / 'events.jsonl').open('w', encoding='utf-8')
     channel = _ObserverChannel(observer) if observer is not None else None
@@ -216,6 +220,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'budget':dict(budget),'reserved':dict(used),'slots_used':len(running),
                   'slots_total':max_workers,'policy':policy,
                   'context':store.stats(),'dataflow':dict(dataflow),
+                  'context_control':broker.contexts.stats() if broker else {'policy':context_mode,'views':0},
                   'model_resources':registry.model_budgets.snapshot(),
                   'scheduling':{'reason':scheduler.last_decision.reason,
                     'dominant_shares':{a.id:max(a.reserved[k]/budget[k] for k in budget)
@@ -350,21 +355,24 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 try:
                     refs = [store.put(data, [agent]) for data in task.get('contexts', [])]
                     input_refs = {name:outputs[name] for name in task.get('inputs', [])}
+                    shared_refs=task.get('_shared_refs',[])
+                    store.get_many(shared_refs,agent) # No digest-only implicit authority.
                     for name,ref in input_refs.items():
                         store.grant(ref,'$runtime',agent)
                     payload.pop('contexts',None)
                     payload.pop('_contexts',None);payload.pop('_inputs',None)
                     payload['_context_refs'] = refs
                     payload['_input_refs'] = input_refs
+                    payload['_context_query']=str(task.get('context_query',''))[:2000]
                     # Catch non-JSON Python API configuration before OS launch.
                     json.dumps(payload,ensure_ascii=False)
                 except (ValueError,TypeError,KeyError,PermissionError,FileNotFoundError) as exc:
                     event(key,'failed',error=f'任务输入准备失败: {exc}')
                     continue
                 payload['_project_workspace']=str(project_workspace)
-                if refs or input_refs or task.get('action') in ('send', 'receive') or task.get('plugin','').startswith('runtime.'):
+                if refs or input_refs or task.get('action') in ('llm','send', 'receive') or task.get('plugin','').startswith(('runtime.','context.')):
                     if broker is None:
-                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control)
+                        broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control,context_mode=context_mode)
                     payload['_ipc_url'] = broker.url
                     payload['_ipc_token'] = broker.issue(agent,configure=task.get('plugin')=='runtime.configure')
                 if task.get('action') == 'llm':
@@ -396,7 +404,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     continue
                 handle['ipc_token'] = payload.get('_ipc_token')
                 handle['gateway_token'] = payload.get('_gateway_token')
-                registry.reserve(agent,key,handle['proc'].pid,limits,refs+list(input_refs.values()))
+                registry.reserve(agent,key,handle['proc'].pid,limits,refs+list(input_refs.values())+shared_refs)
                 for k in used:
                     used[k] += limits[k]
                 running[key] = (handle, task, limits)
@@ -404,9 +412,10 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 scheduler.started(key)
                 dataflow['context_ref_deliveries'] += len(refs)
                 dataflow['input_ref_deliveries'] += len(input_refs)
+                dataflow['semantic_ref_deliveries'] += len(shared_refs)
                 event(key, 'running', pid=handle['proc'].pid, resources=limits,
                       enforcement='cgroup_v2' if cgroup_root else 'admission_only', context_refs=refs,
-                      input_refs=input_refs)
+                      input_refs=input_refs,shared_refs=shared_refs)
             if len(events)!=cycle_sequence:observe(force=True)
             dispatched_sequence=len(events)
             for key, (handle, task, limits) in list(running.items()):
@@ -438,17 +447,26 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                             raise ValueError('结果 task_id 不匹配')
                         # Committed outputs outlive producer termination; only
                         # the coordinator can grant explicit DAG consumers.
+                        validate_result(task.get('result_contract'),result.get('result'))
                         output_ref = store.put(result.get('result'),[task.get('agent',key),'$runtime'])
+                        store.label_source(output_ref,{'task_id':key,'agent':task.get('agent',key),'action':task.get('action','echo'),
+                            'attempt':attempts[key],'kind':'model_claim' if task.get('action')=='llm' else 'tool_observation' if task.get('action') in ('plugin','project_validate','project_baseline') else 'task_output'})
                         children = result.get('spawn', [])
                         if not isinstance(children, list) or len(tasks) + len(children) > max_tasks:
                             raise ValueError('动态任务批次超过限制')
                         if children:
                             # 在更新任何状态前验证整批，失败不留下半张图。
                             validate(tasks + children)
+                            for child in children:
+                                sharing=child.get('_shared_refs',[])
+                                if not isinstance(sharing,list) or len(sharing)>64:raise ValueError('共享引用超过限制')
+                                store.get_many(sharing,task.get('agent',key))
                             new_owners={c.get('agent',c['id']) for c in children}-registry.agents.keys()
                             if len(registry.agents)+len(new_owners)>100:raise ValueError('Agent 数量超过上限')
                             try:
-                                for child in children:registry.attach(child)
+                                for child in children:
+                                    registry.attach(child)
+                                    for ref in child.get('_shared_refs',[]):store.grant(ref,task.get('agent',key),child.get('agent',child['id']))
                             except OSError as exc:raise RuntimeError('EXECUTION_BACKEND_FAILED: dynamic Agent registration failed') from exc
                             tasks.extend(children)
                             for child in children:
@@ -522,6 +540,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                                 'scheduling_stats':{**scheduling_stats,**completion.stats},
                                                 'telemetry_stats':registry.telemetry_stats,
                                                 'model_resources':registry.model_budgets.snapshot(),
-                                                'context_stats': store.stats()},
+                                                'context_stats': store.stats(),
+                                                'context_control':broker.contexts.stats() if broker else {'policy':context_mode,'views':0}},
                                                 ensure_ascii=False, indent=2), encoding='utf-8')
     return states, events

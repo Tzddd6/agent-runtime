@@ -10,12 +10,14 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class Broker:
-    def __init__(self, store, agents, capacity=128, *, control=None):
+    def __init__(self, store, agents, capacity=128, *, control=None,context_mode='balanced'):
         self.store, self.capacity = store, capacity
         self.agents = set(agents)
         self.tokens, self.mailboxes, self.receipts = {}, {}, {}
         self.lock = threading.RLock()
         self.control=control;self.control_tokens=set()
+        from .context_control import ContextGovernor
+        self.contexts=ContextGovernor(store,mode=context_mode)
         owner = self
 
         class Handler(BaseHTTPRequestHandler):
@@ -72,6 +74,9 @@ class Broker:
             if agent is None:
                 raise PermissionError()
             op = value['op']
+            if op=='context_view':return self.contexts.view(agent,value.get('context_refs',[]),value.get('input_refs',{}),value.get('query',''))
+            if op=='context_search':return self.contexts.search(agent,value.get('query'),value.get('limit',6))
+            if op=='context_read':return self.contexts.read(agent,value.get('ref'),value.get('offset',0),value.get('limit',4000))
             if op=='observe' and self.control is not None:return self.control.observe()
             if op=='configure' and self.control is not None:
                 if token not in self.control_tokens:raise PermissionError()
@@ -93,6 +98,7 @@ class Broker:
                 if len(mailbox) >= self.capacity or len(self.receipts) >= 4096:
                     raise ValueError('capacity exceeded')
                 ref = self.store.put(value['data'], [agent, peer])
+                self.store.label_source(ref,{'agent':agent,'kind':'agent_message','action':'send'})
                 receipt = {'from': agent, 'to': peer, 'request_id': request, 'ref': ref,
                            'message_id':secrets.token_hex(24)}
                 mailbox.append(receipt)

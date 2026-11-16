@@ -14,6 +14,9 @@ PLAN_PROTOCOL=('严格计划协议：最终完成仅输出{"route":"direct","ans
  '未来工具结果未知时，先规划观测，再下一轮使用实际值；禁止使用<哈希>等占位参数。'
  '已知源码可直接用file.write修复；勿要求coder角色代替执行。报告只能在真实结果到达后另轮生成，禁止预写成功结论。'
  'runtime_evidence是已核实的历史工具记录，必须使用，不得因当前轮没有重复输出就重新执行或撤销已完成步骤。')
+PLAN_PROTOCOL+=(' 受控项目的project只能用pricing/intervals/text_normalization；project_id是权威标识。'
+ '上下文partial=true时，先用context.search查已授权语义片段，必要时context.read按source_ref分页读原文。'
+ '工具返回verified路径与sha256时，直接引用已测产物，不重新生成不同源码冒充同一已测版本。')
 
 
 def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking=False, attachments=None):
@@ -107,6 +110,7 @@ def route_plan(task):
         if isinstance(value,dict) and value.get('plugin'):
             record={'task':key,**{k:value[k] for k in ('plugin','ok','executed','exit_code','expected_failure_observed',
                 'path','sha256','before_sha256','written','success','value','settings','http_status','url') if k in value}}
+            if key in task.get('_input_refs',{}):record['source_ref']=task['_input_refs'][key]
             for k in ('output','content','text','error'):
                 if isinstance(value.get(k),str):record[k]=value[k][:800]
             evidence.append(record)
@@ -115,6 +119,8 @@ def route_plan(task):
         while len(json.dumps(evidence,ensure_ascii=False).encode())>49152:evidence.pop(0)
         clean.append({'runtime_evidence':evidence})
     contexts=clean
+    sharing=sorted({r['source_ref'] for r in evidence if isinstance(r.get('source_ref'),str) and re.fullmatch('[a-f0-9]{64}',r['source_ref'])})
+    sharing=sorted(set(sharing)|set(task.get('_shared_refs',[])))[:64]
     observations=plan.get('image_observations','')
     if not isinstance(observations,str) or len(observations)>6000:raise ValueError('图片观察字段无效')
     if observations:contexts.append({'image_observations':observations})
@@ -130,6 +136,7 @@ def route_plan(task):
                     'pids':64 if row['plugin']=='command.run' else 16}})
             continue
         children.append({'id':prefix+row['id'],'agent':row['role']+'_'+row['id'],
+            'context_query':row['instruction'][:2000],
             'action':'llm','timeout':75,'max_tokens':1024,'depends_on':[gate_id]+deps,
             'inputs':deps,'contexts':contexts,
             'messages':[{'role':'system','content':'你负责'+ROLES[row['role']]+'。'
@@ -158,6 +165,7 @@ def route_plan(task):
             'resources':{'cpu_milli':100,'memory_bytes':64*1024**2,'pids':8}})
     reason=plan.get('reason','')
     if not isinstance(reason,str) or len(reason)>500:raise ValueError('路由原因无效')
+    for child in children:child['_shared_refs']=sharing
     return {'route':'collaborate','reason':reason,'tasks':len(rows),'roles':[r.get('role','tool') for r in rows],
             'plugins':[r['plugin'] for r in rows if 'plugin' in r],
             'skills':[r.get('skill','technical-writing') for r in rows if 'plugin' not in r]},children
