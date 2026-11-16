@@ -1,0 +1,37 @@
+{
+  "states": {
+    "known_bad": "succeeded",
+    "repair_check_1": "succeeded",
+    "repair_candidate_2": "succeeded",
+    "repair_check_2": "succeeded"
+  },
+  "first_failed": true,
+  "public_failures": [
+    {
+      "function": "line_total_cents",
+      "args": [
+        199,
+        3,
+        10
+      ],
+      "expected": 537,
+      "assertion": "AssertionError: 538 != 537"
+    }
+  ],
+  "last_accepted": false,
+  "actual_model_calls": 1,
+  "usage": [
+    {
+      "prompt_tokens": 1120,
+      "completion_tokens": 256,
+      "total_tokens": 1376,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 1120
+    }
+  ],
+  "verification": {},
+  "independent_acceptance_not_AB": true
+}

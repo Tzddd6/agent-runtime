@@ -1,0 +1,25 @@
+{
+  "primary_rows": 44,
+  "primary_requests": 45,
+  "primary_dataset_hash_verified": true,
+  "all_primary_requests_have_usage_and_stop": true,
+  "stateless_messages_byte_identical": true,
+  "stateless": {
+    "direct_verified": {
+      "n": 4,
+      "passed": 4,
+      "median_seconds": 1.0340269209991675,
+      "input_tokens": 136,
+      "output_tokens": 24
+    },
+    "runtime": {
+      "n": 4,
+      "passed": 4,
+      "median_seconds": 1.0861361454881262,
+      "input_tokens": 136,
+      "output_tokens": 24
+    }
+  },
+  "runtime_model_wait_share_of_total_engineering_seconds": 0.7695410956181993,
+  "no_residual_sample_groups": true
+}

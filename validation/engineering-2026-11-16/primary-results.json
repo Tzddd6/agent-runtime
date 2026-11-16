@@ -1,0 +1,1787 @@
+{
+  "protocol": {
+    "seed": 20261116017,
+    "date": "2026-11-16 Asia/Shanghai",
+    "source_commit": "da120c0fb0737e743b6042113aabe2ff9f9ac019",
+    "dataset_sha256": "fa7220733577304b7ec431f349a4bd5c2dd4d4da65996b021c9b6f8e3efa6213",
+    "runner_sha256": "794c58a61c546197ea6dd47044819ee971b2c45bd4f83f47610735cdc687f1cb",
+    "fixture_sha256": "c955aa84357896e959c9102afed9639b4a252d59e7e7c4df014ebec7e6f18071",
+    "engineering_cases": 12,
+    "engineering_executions": 36,
+    "plain_cases": 4,
+    "plain_executions": 8,
+    "arms": {
+      "direct_verified": "single model completion + identical local validation; no correction",
+      "lean_loop": "same task-specific state machine and prompts, at most one correction, no Runtime DAG",
+      "runtime": "public auto_tasks entry, actual Workers and cgroups, at most one correction"
+    },
+    "model": "same existing broker default; native thinking disabled",
+    "output_per_call": 4096,
+    "max_calls": {
+      "direct_verified": 1,
+      "lean_loop": 2,
+      "runtime": 2
+    },
+    "sample_resources": {
+      "cpu_milli": 2000,
+      "memory_bytes": 1073741824,
+      "pids": 128
+    },
+    "runtime_workers": 2,
+    "global_paid_intent_cap": 68,
+    "global_requested_output_cap": 393216,
+    "timing": "fresh process start to terminal verification and artifact; provider completion timings reported separately; external oracle grade excluded in every arm",
+    "quality": "prevalidated red/green oracle; preserved tests, matching delivered source hashes, local verification and independent unseen tests all required",
+    "fairness": "same initial task data, same system instructions and validation for engineering; lean loop uses same trusted state machine to isolate orchestration overhead",
+    "failure_policy": "retain every sample; transport uncertainty halts study, no paid replay; no prompt tuning after observing results",
+    "limits": [
+      "small synthetic multi-file projects and fixed controlled fixtures",
+      "model sampling and supplier cache uncontrolled",
+      "local cgroup excludes shared broker and cloud",
+      "not industrial repositories or statistical significance"
+    ],
+    "prior_invalid_harness_paid_intents": 28,
+    "retest_reason": "Runtime called with unsupported workers keyword in prior harness. Product code and prompts unchanged."
+  },
+  "rows": [
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.7136151869926834,
+      "cpu_seconds": 0.302625,
+      "memory_peak_bytes": 27869184,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.3849676020035986,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 84,
+            "total_tokens": 617,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 1.4673035779997008,
+      "cpu_seconds": 0.28492,
+      "memory_peak_bytes": 23400448,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.1728514930000529,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 1.8432719129923498,
+      "cpu_seconds": 0.51154,
+      "memory_peak_bytes": 36405248,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "9d742451b6a25238cd3b0dc8de652ea9d85843c6f706a6814bc3b0d9fd7a0e33",
+          "seconds": 1.0400638229912147,
+          "usage": {
+            "prompt_tokens": 532,
+            "completion_tokens": 88,
+            "total_tokens": 620,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 532
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "lean_loop",
+      "wall_seconds": 2.5694209869980114,
+      "cpu_seconds": 0.244342,
+      "memory_peak_bytes": 25354240,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "e3d80f2c68b4728d15ac07fc6ae20cfff3d87c3e06c51b1de5f0f89412948456",
+          "seconds": 2.2779069039970636,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 552,
+            "total_tokens": 2119,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 3.116854637002689,
+      "cpu_seconds": 0.486178,
+      "memory_peak_bytes": 36417536,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "36bee30d80580bfaccfbcf1cc305481b11f80a693aa6b5f6cc45ee05305d489a",
+          "seconds": 2.49098751899146,
+          "usage": {
+            "prompt_tokens": 1565,
+            "completion_tokens": 608,
+            "total_tokens": 2173,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1565
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 2.811028782001813,
+      "cpu_seconds": 0.242369,
+      "memory_peak_bytes": 24039424,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "84a6ad194896239cf8720c944b5fb3db72d3a02c2220314f905e10f66d5eb6be",
+          "seconds": 2.492821901993011,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 532,
+            "total_tokens": 2099,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 2.1488342359953094,
+      "cpu_seconds": 0.513113,
+      "memory_peak_bytes": 37376000,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "c1e6c47a05f5383125ab9dafc2619042b639744f4cd7e691841e811f9a85c3ce",
+          "seconds": 1.4111896740068914,
+          "usage": {
+            "prompt_tokens": 630,
+            "completion_tokens": 213,
+            "total_tokens": 843,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 630
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.6018089959979989,
+      "cpu_seconds": 0.282065,
+      "memory_peak_bytes": 23597056,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.3187778840074316,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 217,
+            "total_tokens": 848,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.6945288159913616,
+      "cpu_seconds": 0.286318,
+      "memory_peak_bytes": 24854528,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.4159348730026977,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 160,
+            "total_tokens": 791,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 2.257937298010802,
+      "cpu_seconds": 0.2342,
+      "memory_peak_bytes": 22540288,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6504,
+          "messages_sha256": "e54b85df1f298fa452fd8b6bd7d6806ca8ab9987c385dc42c2bf1be3fb0c6147",
+          "seconds": 1.9424432720115874,
+          "usage": {
+            "prompt_tokens": 1772,
+            "completion_tokens": 407,
+            "total_tokens": 2179,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 492
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 2.463085305993445,
+      "cpu_seconds": 0.241566,
+      "memory_peak_bytes": 23650304,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "dfa9348209315b3485b406aef958f7680f5be10f03972e97a4a504ab73bb6755",
+          "seconds": 2.1390191499958746,
+          "usage": {
+            "prompt_tokens": 1772,
+            "completion_tokens": 424,
+            "total_tokens": 2196,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 492
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 2.551891217008233,
+      "cpu_seconds": 0.464728,
+      "memory_peak_bytes": 36458496,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "cf3b23a1bf10d9dcac70b606247118d19c3717b574c85c0beea4fb9e9d587c59",
+          "seconds": 1.9279052039928501,
+          "usage": {
+            "prompt_tokens": 1770,
+            "completion_tokens": 415,
+            "total_tokens": 2185,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1770
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 2.613408327990328,
+      "cpu_seconds": 0.241829,
+      "memory_peak_bytes": 23515136,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6502,
+          "messages_sha256": "10b806883acb2c8f1057296618994dfffafae05d4d31a72d9c22c62cadad4350",
+          "seconds": 2.359560730008525,
+          "usage": {
+            "prompt_tokens": 1781,
+            "completion_tokens": 401,
+            "total_tokens": 2182,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 501
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 2.5439238580001984,
+      "cpu_seconds": 0.473244,
+      "memory_peak_bytes": 37851136,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "5423d211a9f5e7430f56820c221feb52a5235232dd18443c43ce2d6c76a4223a",
+          "seconds": 1.9795986329991138,
+          "usage": {
+            "prompt_tokens": 1779,
+            "completion_tokens": 423,
+            "total_tokens": 2202,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 1267
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 2.3679762789979577,
+      "cpu_seconds": 0.234351,
+      "memory_peak_bytes": 22654976,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "b42497f863f9316f392fc2399bc1be4991d4f5d87363b8a9e69f89aef144b5ae",
+          "seconds": 2.081195976003073,
+          "usage": {
+            "prompt_tokens": 1781,
+            "completion_tokens": 375,
+            "total_tokens": 2156,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 501
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "runtime",
+      "wall_seconds": 1.384470983990468,
+      "cpu_seconds": 0.195598,
+      "memory_peak_bytes": 26267648,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 648,
+          "messages_sha256": "94863e5359f781c2a7accd537981a834872e9d14aaef5ccc1382ec3aec8827b5",
+          "seconds": 1.0927569280029275,
+          "usage": {
+            "prompt_tokens": 132,
+            "completion_tokens": 6,
+            "total_tokens": 138,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 132
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "direct_verified",
+      "wall_seconds": 1.1848530110000866,
+      "cpu_seconds": 0.118708,
+      "memory_peak_bytes": 15921152,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "d0c7a5b1c624f817fef742ba49df5faf2b120454a15ed759c8b0dc1d42b1f6b3",
+          "seconds": 1.0493982969928766,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 6,
+            "total_tokens": 29,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 2.810178660991369,
+      "cpu_seconds": 0.248579,
+      "memory_peak_bytes": 23879680,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "153e480f2211c9897e79ec90eb9dec704cc45020ef91632e3937b15aa0ddc885",
+          "seconds": 2.5599154090014054,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 518,
+            "total_tokens": 2085,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 3.0122497329866746,
+      "cpu_seconds": 0.24827,
+      "memory_peak_bytes": 23613440,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5915,
+          "messages_sha256": "c4e3eb867e85c2b44cc32bcee07f3bba796693b9e7c664bd5eceb476d9e7df46",
+          "seconds": 2.715017495007487,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 614,
+            "total_tokens": 2181,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 3.307874878999428,
+      "cpu_seconds": 0.499707,
+      "memory_peak_bytes": 36995072,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "4b73a034064c6c24c4ce4601f225bab8660cba3042b7bfa6d68f31846d8763a9",
+          "seconds": 2.6598550970084034,
+          "usage": {
+            "prompt_tokens": 1565,
+            "completion_tokens": 624,
+            "total_tokens": 2189,
+            "prompt_tokens_details": {
+              "cached_tokens": 128
+            },
+            "prompt_cache_hit_tokens": 128,
+            "prompt_cache_miss_tokens": 1437
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.6965173770004185,
+      "cpu_seconds": 0.296785,
+      "memory_peak_bytes": 24608768,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.363563303995761,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 2.036868565992336,
+      "cpu_seconds": 0.51886,
+      "memory_peak_bytes": 38678528,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "9d742451b6a25238cd3b0dc8de652ea9d85843c6f706a6814bc3b0d9fd7a0e33",
+          "seconds": 1.2531193750037346,
+          "usage": {
+            "prompt_tokens": 532,
+            "completion_tokens": 84,
+            "total_tokens": 616,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 148
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.4936673280026298,
+      "cpu_seconds": 0.28918,
+      "memory_peak_bytes": 24379392,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.2013424089964246,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 2.449939498997992,
+      "cpu_seconds": 0.521624,
+      "memory_peak_bytes": 36847616,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "c1e6c47a05f5383125ab9dafc2619042b639744f4cd7e691841e811f9a85c3ce",
+          "seconds": 1.6590406850009458,
+          "usage": {
+            "prompt_tokens": 630,
+            "completion_tokens": 186,
+            "total_tokens": 816,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 246
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.9958308579953155,
+      "cpu_seconds": 0.290095,
+      "memory_peak_bytes": 25276416,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.7091830409917748,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 189,
+            "total_tokens": 820,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 1.6078102169994963,
+      "cpu_seconds": 0.279867,
+      "memory_peak_bytes": 22061056,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.3083733719977317,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 213,
+            "total_tokens": 844,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.438541298994096,
+      "cpu_seconds": 0.285354,
+      "memory_peak_bytes": 23777280,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.1494045100116637,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 213,
+            "total_tokens": 952,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.4917430680070538,
+      "cpu_seconds": 0.285952,
+      "memory_peak_bytes": 25264128,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.2041440759930992,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 211,
+            "total_tokens": 950,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 4.0706898419884965,
+      "cpu_seconds": 0.778498,
+      "memory_peak_bytes": 36159488,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fa34d08ed1b2d398464ede12f831558ca87e7c436d31be460c188389dde38065",
+          "seconds": 1.357738277001772,
+          "usage": {
+            "prompt_tokens": 738,
+            "completion_tokens": 216,
+            "total_tokens": 954,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 738
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        },
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 3743,
+          "messages_sha256": "337d6c31714dc910986395a89c867940577d9af1cec1af2fff546844f3e326f0",
+          "seconds": 1.71070435900765,
+          "usage": {
+            "prompt_tokens": 1011,
+            "completion_tokens": 216,
+            "total_tokens": 1227,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1011
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 2.7582204159989487,
+      "cpu_seconds": 0.251876,
+      "memory_peak_bytes": 23736320,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "36412849a99aa19209b94b0215f9a65f8a34577e9d8ce92c36d8f06494baba95",
+          "seconds": 2.4605252070032293,
+          "usage": {
+            "prompt_tokens": 1552,
+            "completion_tokens": 574,
+            "total_tokens": 2126,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 400
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 3.305408165004337,
+      "cpu_seconds": 0.493454,
+      "memory_peak_bytes": 37203968,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "aae01e007a162c50972bd3da2ad700e1ced6322506ba0920dd1e521dfc1cc295",
+          "seconds": 2.6988456169929123,
+          "usage": {
+            "prompt_tokens": 1550,
+            "completion_tokens": 603,
+            "total_tokens": 2153,
+            "prompt_tokens_details": {
+              "cached_tokens": 128
+            },
+            "prompt_cache_hit_tokens": 128,
+            "prompt_cache_miss_tokens": 1422
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.948087001001113,
+      "cpu_seconds": 0.239508,
+      "memory_peak_bytes": 25288704,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5915,
+          "messages_sha256": "fa734e6378d100dfc3595b389c59188581327482725561bbf315b94d6def5c9d",
+          "seconds": 1.620587619006983,
+          "usage": {
+            "prompt_tokens": 1552,
+            "completion_tokens": 323,
+            "total_tokens": 1875,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 400
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": "F..........F.\n======================================================================\nFAIL: test_bad (test_config.ConfigTests.test_bad)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 9, in test_bad\n    with self.assertRaises(ValueError): load_config({'workers':'0'})\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_worker_range (test_extra.Extra.test_worker_range)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 22, in test_worker_range\n    with self.assertRaises(ValueError): load_config({'workers':value})\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nFAILED (failures=2)\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 1.283148093993077,
+      "cpu_seconds": 0.195451,
+      "memory_peak_bytes": 26357760,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 648,
+          "messages_sha256": "5cf653c6095aeca7237247f6f3540818de6ada309cd9e253c8128be9e762a9c3",
+          "seconds": 0.9889947629999369,
+          "usage": {
+            "prompt_tokens": 132,
+            "completion_tokens": 6,
+            "total_tokens": 138,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 132
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 0.9326243099931162,
+      "cpu_seconds": 0.113528,
+      "memory_peak_bytes": 15716352,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "61c2cb0505907a13c59d25715629db222b69134bba313cc1d8ada53f660cf2bc",
+          "seconds": 0.7849443750019418,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 1,
+            "total_tokens": 24,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": true
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 2.4113163800066104,
+      "cpu_seconds": 0.237103,
+      "memory_peak_bytes": 23298048,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "64beb218fcc5a08c85193fd44f2852e914ba6ac89692f757ce98faf491722e21",
+          "seconds": 2.089150059997337,
+          "usage": {
+            "prompt_tokens": 1790,
+            "completion_tokens": 389,
+            "total_tokens": 2179,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 510
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "lean_loop",
+      "wall_seconds": 2.402759564007283,
+      "cpu_seconds": 0.242694,
+      "memory_peak_bytes": 25092096,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "75a6ddacdc70eb940424166f6664bf673a691a6235114a9e9df99710eac0ebe3",
+          "seconds": 2.0928182109928457,
+          "usage": {
+            "prompt_tokens": 1790,
+            "completion_tokens": 390,
+            "total_tokens": 2180,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 510
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 7.407489543998963,
+      "cpu_seconds": 0.593865,
+      "memory_peak_bytes": 37699584,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "e1b456c0da70cd536f0d68724f2e0e2f9eb07abc52cca0696a5e6ec236819cb6",
+          "seconds": 6.806238837001729,
+          "usage": {
+            "prompt_tokens": 1788,
+            "completion_tokens": 373,
+            "total_tokens": 2161,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 1276
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 1.4459574620123021,
+      "cpu_seconds": 0.189087,
+      "memory_peak_bytes": 25427968,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 648,
+          "messages_sha256": "c5a56b1ebf5fd0bf34bbf66fa87e2d2fbe719812f213f114d2456d249924e33e",
+          "seconds": 1.1983199180103838,
+          "usage": {
+            "prompt_tokens": 132,
+            "completion_tokens": 6,
+            "total_tokens": 138,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 132
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 0.8856028869922739,
+      "cpu_seconds": 0.112656,
+      "memory_peak_bytes": 16404480,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "1eec85aef0a47b76a23a7ba833a71ee2750093f16f2fae1f4ddda3fbd9785d06",
+          "seconds": 0.7340311579901027,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 6,
+            "total_tokens": 29,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 0.9827944389980985,
+      "cpu_seconds": 0.116715,
+      "memory_peak_bytes": 16244736,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "82fb678cba665a4d903840cb1386be3182dfd0c7ea2da461d48b2e03ed006ae9",
+          "seconds": 0.8438925200025551,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 1,
+            "total_tokens": 24,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 1.238449573997059,
+      "cpu_seconds": 0.187689,
+      "memory_peak_bytes": 25833472,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 648,
+          "messages_sha256": "e26eaf0cb9648cca671b262c264908f00b65f7b903d071888ceee313c52f2439",
+          "seconds": 0.9926552580000134,
+          "usage": {
+            "prompt_tokens": 132,
+            "completion_tokens": 6,
+            "total_tokens": 138,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 132
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.8417294149985537,
+      "cpu_seconds": 0.292361,
+      "memory_peak_bytes": 24145920,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.459567899000831,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 216,
+            "total_tokens": 955,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 2.043796548998216,
+      "cpu_seconds": 0.294508,
+      "memory_peak_bytes": 24547328,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.7223928440071177,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 211,
+            "total_tokens": 950,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 2.1948248129920103,
+      "cpu_seconds": 0.523485,
+      "memory_peak_bytes": 37785600,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fa34d08ed1b2d398464ede12f831558ca87e7c436d31be460c188389dde38065",
+          "seconds": 1.460704393000924,
+          "usage": {
+            "prompt_tokens": 738,
+            "completion_tokens": 208,
+            "total_tokens": 946,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 226
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    }
+  ],
+  "finished": true,
+  "paid_intents": 45,
+  "remaining_sample_cgroups": 0
+}

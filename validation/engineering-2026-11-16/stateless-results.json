@@ -1,0 +1,349 @@
+{
+  "protocol": {
+    "seed": 20261116017,
+    "date": "2026-11-16 Asia/Shanghai",
+    "source_commit": "eb639a0abe931e67a4fa5a7a91d28034ac32147c",
+    "dataset_sha256": "20cf86314ba8f1721fe0ee972ce11578c8b5d3c98b64b4bd1540e9cf336dcbc1",
+    "runner_sha256": "bcf13e68e6effa2266eeb0e4355db3568bd9b9996d00408d8f92382ebc8b002a",
+    "fixture_sha256": "c955aa84357896e959c9102afed9639b4a252d59e7e7c4df014ebec7e6f18071",
+    "engineering_cases": 0,
+    "engineering_executions": 0,
+    "plain_cases": 4,
+    "plain_executions": 8,
+    "arms": {
+      "direct_verified": "single model completion + identical local validation; no correction",
+      "lean_loop": "same task-specific state machine and prompts, at most one correction, no Runtime DAG",
+      "runtime": "public auto_tasks entry, actual Workers and cgroups, at most one correction"
+    },
+    "model": "same existing broker default; native thinking disabled",
+    "output_per_call": 4096,
+    "max_calls": {
+      "direct_verified": 1,
+      "lean_loop": 2,
+      "runtime": 2
+    },
+    "sample_resources": {
+      "cpu_milli": 2000,
+      "memory_bytes": 1073741824,
+      "pids": 128
+    },
+    "runtime_workers": 2,
+    "global_paid_intent_cap": 8,
+    "global_requested_output_cap": 393216,
+    "timing": "fresh process start to terminal verification and artifact; provider completion timings reported separately; external oracle grade excluded in every arm",
+    "quality": "prevalidated red/green oracle; preserved tests, matching delivered source hashes, local verification and independent unseen tests all required",
+    "fairness": "same initial task data, same system instructions and validation for engineering; lean loop uses same trusted state machine to isolate orchestration overhead",
+    "failure_policy": "retain every sample; transport uncertainty halts study, no paid replay; no prompt tuning after observing results",
+    "limits": [
+      "small synthetic multi-file projects and fixed controlled fixtures",
+      "model sampling and supplier cache uncontrolled",
+      "local cgroup excludes shared broker and cloud",
+      "not industrial repositories or statistical significance"
+    ],
+    "prior_invalid_harness_paid_intents": 28,
+    "retest_reason": "Runtime called with unsupported workers keyword in prior harness. Product code and prompts unchanged.",
+    "prior_task_paid_requests": 74,
+    "supplemental_purpose": "Stateless path after removing wrapper. Direct and Runtime receive byte-identical short system+user messages. Separate from main engineering study."
+  },
+  "rows": [
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "direct_verified",
+      "wall_seconds": 1.122938921005698,
+      "cpu_seconds": 0.126973,
+      "memory_peak_bytes": 20312064,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "71c87c784ee8e7658bf15976aeca966ec5e45219dfa9ba855952557823cd5ed9",
+          "seconds": 0.9911771920014871,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "runtime",
+      "wall_seconds": 1.0860980469878996,
+      "cpu_seconds": 0.188502,
+      "memory_peak_bytes": 26353664,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "71c87c784ee8e7658bf15976aeca966ec5e45219dfa9ba855952557823cd5ed9",
+          "seconds": 0.8859082849958213,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 1.0861742439883528,
+      "cpu_seconds": 0.182088,
+      "memory_peak_bytes": 25939968,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "c60c4bc3a2feb8e691a1b8f304fa4e589bd072d43e8b82d7147903b268d70527",
+          "seconds": 0.8368061499932082,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.0369770969991805,
+      "cpu_seconds": 0.114701,
+      "memory_peak_bytes": 15585280,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "c60c4bc3a2feb8e691a1b8f304fa4e589bd072d43e8b82d7147903b268d70527",
+          "seconds": 0.8974779519921867,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 1.0310767449991545,
+      "cpu_seconds": 0.117518,
+      "memory_peak_bytes": 16830464,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "4b11907705ea30e155f354be201d57094244566a29cd10c5c3ac021c28853070",
+          "seconds": 0.8881864539871458,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 1.2392133740067948,
+      "cpu_seconds": 0.187828,
+      "memory_peak_bytes": 26181632,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "4b11907705ea30e155f354be201d57094244566a29cd10c5c3ac021c28853070",
+          "seconds": 0.9487977650132962,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.8321297029906418,
+      "cpu_seconds": 0.175521,
+      "memory_peak_bytes": 26005504,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "e189a7cf9b3dc8be38e8a627d03ab346774ef12bd7301828b93682a208cde843",
+          "seconds": 0.5777729349938454,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 0.8838136119884439,
+      "cpu_seconds": 0.112656,
+      "memory_peak_bytes": 16580608,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 187,
+          "messages_sha256": "e189a7cf9b3dc8be38e8a627d03ab346774ef12bd7301828b93682a208cde843",
+          "seconds": 0.7338320039998507,
+          "usage": {
+            "prompt_tokens": 34,
+            "completion_tokens": 6,
+            "total_tokens": 40,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 34
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    }
+  ],
+  "finished": true,
+  "paid_intents": 8,
+  "remaining_sample_cgroups": 0
+}

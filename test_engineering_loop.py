@@ -38,6 +38,7 @@ class EngineeringLoopTests(unittest.TestCase):
         self.assertEqual(detect_controlled(prompt),'pricing')
         self.assertEqual(auto_tasks(prompt)[0]['action'],'repair_prepare')
         self.assertIsNone(detect_controlled('只分析，不要修改。'+json.dumps(manifest('pricing'))))
+        self.assertEqual(detect_controlled('修复，不要修改测试。'+json.dumps(manifest('pricing'),ensure_ascii=False)),'pricing')
         self.assertEqual(auto_tasks('不需要工具，只输出JSON: 2+3')[0]['id'],'auto_answer')
         direct=auto_tasks('不需要工具，只输出JSON: 2+3')[0]
         self.assertNotIn('contexts',direct);self.assertEqual(direct['messages'][-1]['content'],'不需要工具，只输出JSON: 2+3')

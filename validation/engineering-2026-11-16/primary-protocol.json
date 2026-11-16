@@ -1,0 +1,44 @@
+{
+  "seed": 20261116017,
+  "date": "2026-11-16 Asia/Shanghai",
+  "source_commit": "da120c0fb0737e743b6042113aabe2ff9f9ac019",
+  "dataset_sha256": "fa7220733577304b7ec431f349a4bd5c2dd4d4da65996b021c9b6f8e3efa6213",
+  "runner_sha256": "794c58a61c546197ea6dd47044819ee971b2c45bd4f83f47610735cdc687f1cb",
+  "fixture_sha256": "c955aa84357896e959c9102afed9639b4a252d59e7e7c4df014ebec7e6f18071",
+  "engineering_cases": 12,
+  "engineering_executions": 36,
+  "plain_cases": 4,
+  "plain_executions": 8,
+  "arms": {
+    "direct_verified": "single model completion + identical local validation; no correction",
+    "lean_loop": "same task-specific state machine and prompts, at most one correction, no Runtime DAG",
+    "runtime": "public auto_tasks entry, actual Workers and cgroups, at most one correction"
+  },
+  "model": "same existing broker default; native thinking disabled",
+  "output_per_call": 4096,
+  "max_calls": {
+    "direct_verified": 1,
+    "lean_loop": 2,
+    "runtime": 2
+  },
+  "sample_resources": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "runtime_workers": 2,
+  "global_paid_intent_cap": 68,
+  "global_requested_output_cap": 393216,
+  "timing": "fresh process start to terminal verification and artifact; provider completion timings reported separately; external oracle grade excluded in every arm",
+  "quality": "prevalidated red/green oracle; preserved tests, matching delivered source hashes, local verification and independent unseen tests all required",
+  "fairness": "same initial task data, same system instructions and validation for engineering; lean loop uses same trusted state machine to isolate orchestration overhead",
+  "failure_policy": "retain every sample; transport uncertainty halts study, no paid replay; no prompt tuning after observing results",
+  "limits": [
+    "small synthetic multi-file projects and fixed controlled fixtures",
+    "model sampling and supplier cache uncontrolled",
+    "local cgroup excludes shared broker and cloud",
+    "not industrial repositories or statistical significance"
+  ],
+  "prior_invalid_harness_paid_intents": 28,
+  "retest_reason": "Runtime called with unsupported workers keyword in prior harness. Product code and prompts unchanged."
+}

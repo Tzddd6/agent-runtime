@@ -1,0 +1,1441 @@
+{
+  "protocol": {
+    "seed": 20261116017,
+    "date": "2026-11-16 Asia/Shanghai",
+    "source_commit": "ab1ceb02d4e761427b6be79de920bf4af706a691",
+    "dataset_sha256": "fa7220733577304b7ec431f349a4bd5c2dd4d4da65996b021c9b6f8e3efa6213",
+    "runner_sha256": "539341c667a0e7a4b0e5affea22f612340cf4dd0536d67f65df89028d82c8bd9",
+    "fixture_sha256": "c955aa84357896e959c9102afed9639b4a252d59e7e7c4df014ebec7e6f18071",
+    "engineering_cases": 12,
+    "engineering_executions": 36,
+    "plain_cases": 4,
+    "plain_executions": 8,
+    "arms": {
+      "direct_verified": "single model completion + identical local validation; no correction",
+      "lean_loop": "same task-specific state machine and prompts, at most one correction, no Runtime DAG",
+      "runtime": "public auto_tasks entry, actual Workers and cgroups, at most one correction"
+    },
+    "model": "same existing broker default; native thinking disabled",
+    "output_per_call": 4096,
+    "max_calls": {
+      "direct_verified": 1,
+      "lean_loop": 2,
+      "runtime": 2
+    },
+    "sample_resources": {
+      "cpu_milli": 2000,
+      "memory_bytes": 1073741824,
+      "pids": 128
+    },
+    "runtime_workers": 2,
+    "global_paid_intent_cap": 96,
+    "global_requested_output_cap": 393216,
+    "timing": "fresh process start to terminal verification and artifact; provider completion timings reported separately; external oracle grade excluded in every arm",
+    "quality": "prevalidated red/green oracle; preserved tests, matching delivered source hashes, local verification and independent unseen tests all required",
+    "fairness": "same initial task data, same system instructions and validation for engineering; lean loop uses same trusted state machine to isolate orchestration overhead",
+    "failure_policy": "retain every sample; transport uncertainty halts study, no paid replay; no prompt tuning after observing results",
+    "limits": [
+      "small synthetic multi-file projects and fixed controlled fixtures",
+      "model sampling and supplier cache uncontrolled",
+      "local cgroup excludes shared broker and cloud",
+      "not industrial repositories or statistical significance"
+    ]
+  },
+  "rows": [
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.532942613994237,
+      "cpu_seconds": 0.300303,
+      "memory_peak_bytes": 27774976,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.202789364993805,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 533
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 1.7078382319887169,
+      "cpu_seconds": 0.288857,
+      "memory_peak_bytes": 24469504,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 1.416871135996189,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_0",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.12904322399117518,
+      "cpu_seconds": 0.094823,
+      "memory_peak_bytes": 13946880,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "lean_loop",
+      "wall_seconds": 2.5928960429882864,
+      "cpu_seconds": 0.245338,
+      "memory_peak_bytes": 24342528,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "7e9a74d060db96be2aa63144fbb102b938733360c06a182006a1a46f2a19bc2a",
+          "seconds": 2.2694784049963346,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 581,
+            "total_tokens": 2148,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1567
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 0.13110362199950032,
+      "cpu_seconds": 0.09494,
+      "memory_peak_bytes": 13946880,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 13,
+        "oracle_output": "FFFFFF.FFE.F.\n======================================================================\nERROR: test_sizes (test_extra.Extra.test_sizes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 15, in test_sizes\n    for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n                                                                                         ^^^^^^^^^^^^^^^^^\n  File \"/workspace/config.py\", line 5, in parse_limit\n    return int(value.rstrip(\"KMkm\"))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: invalid literal for int() with base 10: ' 7K '\n\n======================================================================\nFAIL: test_bad (test_config.ConfigTests.test_bad)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 9, in test_bad\n    with self.assertRaises(ValueError): load_config({'workers':'0'})\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_false (test_config.ConfigTests.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 5, in test_false\n    def test_false(self): self.assertIs(parse_bool(' false '),False)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_limit (test_config.ConfigTests.test_limit)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 6, in test_limit\n    def test_limit(self): self.assertEqual(parse_limit('10k'),10240)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 10 != 10240\n\n======================================================================\nFAIL: test_load (test_config.ConfigTests.test_load)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 7, in test_load\n    def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'7'}),{'enabled':True,'limit':2097152,'workers':7})\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 2, 'workers': 7} != {'enabled': True, 'limit': 2097152, 'workers': 7}\n- {'enabled': True, 'limit': 2, 'workers': 7}\n+ {'enabled': True, 'limit': 2097152, 'workers': 7}\n?                            ++++++\n\n\n======================================================================\nFAIL: test_bad_bool (test_extra.Extra.test_bad_bool)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_bad_bool\n    with self.assertRaises(ValueError): parse_bool(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_bad_size (test_extra.Extra.test_bad_size)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 18, in test_bad_size\n    with self.assertRaises(ValueError): parse_limit(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_defaults (test_extra.Extra.test_defaults)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 19, in test_defaults\n    def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 64, 'workers': 1} != {'enabled': False, 'limit': 64, 'workers': 1}\n- {'enabled': True, 'limit': 64, 'workers': 1}\n?             ^^^\n\n+ {'enabled': False, 'limit': 64, 'workers': 1}\n?             ^^^^\n\n\n======================================================================\nFAIL: test_false (test_extra.Extra.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 8, in test_false\n    for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_worker_range (test_extra.Extra.test_worker_range)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 22, in test_worker_range\n    with self.assertRaises(ValueError): load_config({'workers':value})\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 13 tests in 0.003s\n\nFAILED (failures=9, errors=1)\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_2",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 2.554547414998524,
+      "cpu_seconds": 0.243645,
+      "memory_peak_bytes": 24293376,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "5fa000b8446dde482da0bac2e6e00f5ef797411e49b178b75f6f1ed8a25ae316",
+          "seconds": 2.281873304003966,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 593,
+            "total_tokens": 2160,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.12238188600167632,
+      "cpu_seconds": 0.09788,
+      "memory_peak_bytes": 16044032,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.7631097370031057,
+      "cpu_seconds": 0.294411,
+      "memory_peak_bytes": 24481792,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.4371523719892139,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 177,
+            "total_tokens": 808,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 631
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_1",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.4101708269881783,
+      "cpu_seconds": 0.285291,
+      "memory_peak_bytes": 23121920,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.1211930129938992,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 160,
+            "total_tokens": 791,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 2.3830577119952068,
+      "cpu_seconds": 0.230501,
+      "memory_peak_bytes": 21979136,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "4ae334710ddd066b29de2b2d738b2a92cab8138e81b063d599c0081e64322195",
+          "seconds": 2.075142119996599,
+          "usage": {
+            "prompt_tokens": 1772,
+            "completion_tokens": 394,
+            "total_tokens": 2166,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1772
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 2.0912657910084818,
+      "cpu_seconds": 0.234013,
+      "memory_peak_bytes": 23912448,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "52d8326042df98b12ef0f55444fbaf174f7ead5b9b3e008b7f37a443b3288a6f",
+          "seconds": 1.814961365002091,
+          "usage": {
+            "prompt_tokens": 1772,
+            "completion_tokens": 376,
+            "total_tokens": 2148,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 492
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_0",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.12330689500959124,
+      "cpu_seconds": 0.103592,
+      "memory_peak_bytes": 15519744,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 12,
+        "oracle_output": "EFFF.EF.EFFF\n======================================================================\nERROR: test_blank (test_extra.Extra.test_blank)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 11, in test_blank\n    def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n                                           ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_no_match (test_extra.Extra.test_no_match)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 10, in test_no_match\n    def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_empty (test_report.ReportTests.test_empty)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 8, in test_empty\n    def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                           ^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nFAIL: test_every_duration (test_extra.Extra.test_every_duration)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 12, in test_every_duration\n    def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 3, 'errors': 2, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?                        ^            ^              ^\n\n+ {'count': 3, 'errors': 2, 'max_ms': 7, 'total_ms': 9}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter_error (test_extra.Extra.test_filter_error)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_filter_error\n    def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 2, 'errors': 1, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?           ^            ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 7, 'total_ms': 9}\n?           ^            ^            ^              ^\n\n\n======================================================================\nFAIL: test_invalid (test_extra.Extra.test_invalid)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 7, in test_invalid\n    with self.assertRaises(ValueError): parse_event(text)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_spaces (test_extra.Extra.test_spaces)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 9, in test_spaces\n    def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' db ', 13, ' error ') != ('db', 13, 'error')\n\nFirst differing element 0:\n' db '\n'db'\n\n- (' db ', 13, ' error ')\n?   -  -        -     -\n\n+ ('db', 13, 'error')\n\n======================================================================\nFAIL: test_errors (test_report.ReportTests.test_errors)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 6, in test_errors\n    def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 2, 'errors': 0, 'total_ms': 3, 'max_ms': 3} != {'count': 2, 'errors': 1, 'total_ms': 8, 'max_ms': 5}\n- {'count': 2, 'errors': 0, 'max_ms': 3, 'total_ms': 3}\n?                        ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 5, 'total_ms': 8}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter (test_report.ReportTests.test_filter)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 7, in test_filter\n    def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 2 != 1\n\n======================================================================\nFAIL: test_parse (test_report.ReportTests.test_parse)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 5, in test_parse\n    def test_parse(self): self.assertEqual(parse_event(' api , 51 ,ok'),('api',51,'ok'))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' api ', 51, 'ok') != ('api', 51, 'ok')\n\nFirst differing element 0:\n' api '\n'api'\n\n- (' api ', 51, 'ok')\n?   -   -\n\n+ ('api', 51, 'ok')\n\n----------------------------------------------------------------------\nRan 12 tests in 0.003s\n\nFAILED (failures=7, errors=3)\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 2.448180987004889,
+      "cpu_seconds": 0.243319,
+      "memory_peak_bytes": 24465408,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "b16a6adc8c3bdd4049e7702457806e852a821baabf04813c5704eb5e171f22b0",
+          "seconds": 2.1675681859924225,
+          "usage": {
+            "prompt_tokens": 1781,
+            "completion_tokens": 411,
+            "total_tokens": 2192,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 1397
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.13195980200544,
+      "cpu_seconds": 0.093659,
+      "memory_peak_bytes": 13684736,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 12,
+        "oracle_output": "EFFF.EF.EFFF\n======================================================================\nERROR: test_blank (test_extra.Extra.test_blank)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 11, in test_blank\n    def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n                                           ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_no_match (test_extra.Extra.test_no_match)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 10, in test_no_match\n    def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_empty (test_report.ReportTests.test_empty)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 8, in test_empty\n    def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                           ^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nFAIL: test_every_duration (test_extra.Extra.test_every_duration)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 12, in test_every_duration\n    def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 3, 'errors': 2, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?                        ^            ^              ^\n\n+ {'count': 3, 'errors': 2, 'max_ms': 7, 'total_ms': 9}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter_error (test_extra.Extra.test_filter_error)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_filter_error\n    def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 2, 'errors': 1, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?           ^            ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 7, 'total_ms': 9}\n?           ^            ^            ^              ^\n\n\n======================================================================\nFAIL: test_invalid (test_extra.Extra.test_invalid)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 7, in test_invalid\n    with self.assertRaises(ValueError): parse_event(text)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_spaces (test_extra.Extra.test_spaces)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 9, in test_spaces\n    def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' db ', 13, ' error ') != ('db', 13, 'error')\n\nFirst differing element 0:\n' db '\n'db'\n\n- (' db ', 13, ' error ')\n?   -  -        -     -\n\n+ ('db', 13, 'error')\n\n======================================================================\nFAIL: test_errors (test_report.ReportTests.test_errors)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 6, in test_errors\n    def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 2, 'errors': 0, 'total_ms': 3, 'max_ms': 3} != {'count': 2, 'errors': 1, 'total_ms': 8, 'max_ms': 5}\n- {'count': 2, 'errors': 0, 'max_ms': 3, 'total_ms': 3}\n?                        ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 5, 'total_ms': 8}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter (test_report.ReportTests.test_filter)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 7, in test_filter\n    def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 2 != 1\n\n======================================================================\nFAIL: test_parse (test_report.ReportTests.test_parse)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 5, in test_parse\n    def test_parse(self): self.assertEqual(parse_event(' api , 62 ,ok'),('api',62,'ok'))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' api ', 62, 'ok') != ('api', 62, 'ok')\n\nFirst differing element 0:\n' api '\n'api'\n\n- (' api ', 62, 'ok')\n?   -   -\n\n+ ('api', 62, 'ok')\n\n----------------------------------------------------------------------\nRan 12 tests in 0.003s\n\nFAILED (failures=7, errors=3)\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_1",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 2.493280295995646,
+      "cpu_seconds": 0.243376,
+      "memory_peak_bytes": 23937024,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "f3e92a41c860a6503f2a91075acfab4b3541a2b5aadec26fffab170935eef364",
+          "seconds": 2.1675003739946987,
+          "usage": {
+            "prompt_tokens": 1781,
+            "completion_tokens": 401,
+            "total_tokens": 2182,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 501
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.001s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "runtime",
+      "wall_seconds": 0.11972388598951511,
+      "cpu_seconds": 0.104573,
+      "memory_peak_bytes": 16568320,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": false
+      }
+    },
+    {
+      "case": "plain_3",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 3,
+      "arm": "direct_verified",
+      "wall_seconds": 0.7284770249971189,
+      "cpu_seconds": 0.114367,
+      "memory_peak_bytes": 16310272,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "d0c7a5b1c624f817fef742ba49df5faf2b120454a15ed759c8b0dc1d42b1f6b3",
+          "seconds": 0.5780254679993959,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 1,
+            "total_tokens": 24,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": true
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 2.883038394997129,
+      "cpu_seconds": 0.241919,
+      "memory_peak_bytes": 22642688,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5915,
+          "messages_sha256": "8f6acc0d46c3e219903a3aeeb6c47b2e3646129c91fd2eb8e7ad31321628a96f",
+          "seconds": 2.5739104300009785,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 569,
+            "total_tokens": 2136,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 1183
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 3.070620479003992,
+      "cpu_seconds": 0.248629,
+      "memory_peak_bytes": 22867968,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5915,
+          "messages_sha256": "442d2a3af783a297798100c30393b38e16e8d0243f42fa889cf3a6042b3c19d7",
+          "seconds": 2.777173947994015,
+          "usage": {
+            "prompt_tokens": 1567,
+            "completion_tokens": 607,
+            "total_tokens": 2174,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 415
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_1",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.12198128800082486,
+      "cpu_seconds": 0.102877,
+      "memory_peak_bytes": 16306176,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 13,
+        "oracle_output": "FFFFFF.FFE.F.\n======================================================================\nERROR: test_sizes (test_extra.Extra.test_sizes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 15, in test_sizes\n    for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n                                                                                         ^^^^^^^^^^^^^^^^^\n  File \"/workspace/config.py\", line 5, in parse_limit\n    return int(value.rstrip(\"KMkm\"))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: invalid literal for int() with base 10: ' 7K '\n\n======================================================================\nFAIL: test_bad (test_config.ConfigTests.test_bad)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 9, in test_bad\n    with self.assertRaises(ValueError): load_config({'workers':'0'})\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_false (test_config.ConfigTests.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 5, in test_false\n    def test_false(self): self.assertIs(parse_bool(' false '),False)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_limit (test_config.ConfigTests.test_limit)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 6, in test_limit\n    def test_limit(self): self.assertEqual(parse_limit('15k'),15360)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 15 != 15360\n\n======================================================================\nFAIL: test_load (test_config.ConfigTests.test_load)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 7, in test_load\n    def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'5'}),{'enabled':True,'limit':2097152,'workers':5})\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 2, 'workers': 5} != {'enabled': True, 'limit': 2097152, 'workers': 5}\n- {'enabled': True, 'limit': 2, 'workers': 5}\n+ {'enabled': True, 'limit': 2097152, 'workers': 5}\n?                            ++++++\n\n\n======================================================================\nFAIL: test_bad_bool (test_extra.Extra.test_bad_bool)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_bad_bool\n    with self.assertRaises(ValueError): parse_bool(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_bad_size (test_extra.Extra.test_bad_size)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 18, in test_bad_size\n    with self.assertRaises(ValueError): parse_limit(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_defaults (test_extra.Extra.test_defaults)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 19, in test_defaults\n    def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 64, 'workers': 1} != {'enabled': False, 'limit': 64, 'workers': 1}\n- {'enabled': True, 'limit': 64, 'workers': 1}\n?             ^^^\n\n+ {'enabled': False, 'limit': 64, 'workers': 1}\n?             ^^^^\n\n\n======================================================================\nFAIL: test_false (test_extra.Extra.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 8, in test_false\n    for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_worker_range (test_extra.Extra.test_worker_range)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 22, in test_worker_range\n    with self.assertRaises(ValueError): load_config({'workers':value})\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 13 tests in 0.003s\n\nFAILED (failures=9, errors=1)\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.2383639549952932,
+      "cpu_seconds": 0.293995,
+      "memory_peak_bytes": 25231360,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 0.940041306996136,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.1298657320003258,
+      "cpu_seconds": 0.093929,
+      "memory_peak_bytes": 13946880,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "text_normalization_1",
+      "family": "text_normalization",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.2373898279911373,
+      "cpu_seconds": 0.28439,
+      "memory_peak_bytes": 24748032,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2213,
+          "messages_sha256": "050d64e3dcd9df49496363b162840183725dc26c72f97fc073ca0dfe0a92d4ab",
+          "seconds": 0.9443959619966336,
+          "usage": {
+            "prompt_tokens": 533,
+            "completion_tokens": 63,
+            "total_tokens": 596,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 149
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.12376913700427394,
+      "cpu_seconds": 0.100297,
+      "memory_peak_bytes": 15257600,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.694599399008439,
+      "cpu_seconds": 0.292904,
+      "memory_peak_bytes": 24346624,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.3642395689967088,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 161,
+            "total_tokens": 792,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "intervals_0",
+      "family": "intervals",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 1.7427945309900679,
+      "cpu_seconds": 0.291791,
+      "memory_peak_bytes": 24363008,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2442,
+          "messages_sha256": "1a7b45e113176fe2a95130aabfde6e913706bcfc6786176779c287089ad05b81",
+          "seconds": 1.4102341919933679,
+          "usage": {
+            "prompt_tokens": 631,
+            "completion_tokens": 160,
+            "total_tokens": 791,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 247
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.8451681800070219,
+      "cpu_seconds": 0.298222,
+      "memory_peak_bytes": 24727552,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.518466018998879,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 217,
+            "total_tokens": 956,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 739
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "lean_loop",
+      "wall_seconds": 1.9992728819925105,
+      "cpu_seconds": 0.292601,
+      "memory_peak_bytes": 23965696,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.6755842249986017,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 211,
+            "total_tokens": 950,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_1",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.12342810600239318,
+      "cpu_seconds": 0.101102,
+      "memory_peak_bytes": 15257600,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 3.071729740011506,
+      "cpu_seconds": 0.247323,
+      "memory_peak_bytes": 23261184,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5914,
+          "messages_sha256": "2f705ef9e5ee72bf53d3fb3cbea9cb1aea3650af7e7856264300d952a2c3ad3d",
+          "seconds": 2.7942137439968064,
+          "usage": {
+            "prompt_tokens": 1552,
+            "completion_tokens": 612,
+            "total_tokens": 2164,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 1168
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": ".............\n----------------------------------------------------------------------\nRan 13 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.1254210979968775,
+      "cpu_seconds": 0.101036,
+      "memory_peak_bytes": 14733312,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 13,
+        "oracle_output": "FFFFFF.FFE.F.\n======================================================================\nERROR: test_sizes (test_extra.Extra.test_sizes)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 15, in test_sizes\n    for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n                                                                                         ^^^^^^^^^^^^^^^^^\n  File \"/workspace/config.py\", line 5, in parse_limit\n    return int(value.rstrip(\"KMkm\"))\n           ^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: invalid literal for int() with base 10: ' 7K '\n\n======================================================================\nFAIL: test_bad (test_config.ConfigTests.test_bad)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 9, in test_bad\n    with self.assertRaises(ValueError): load_config({'workers':'0'})\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_false (test_config.ConfigTests.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 5, in test_false\n    def test_false(self): self.assertIs(parse_bool(' false '),False)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_limit (test_config.ConfigTests.test_limit)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 6, in test_limit\n    def test_limit(self): self.assertEqual(parse_limit('13k'),13312)\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 13 != 13312\n\n======================================================================\nFAIL: test_load (test_config.ConfigTests.test_load)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_config.py\", line 7, in test_load\n    def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'2'}),{'enabled':True,'limit':2097152,'workers':2})\n                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 2, 'workers': 2} != {'enabled': True, 'limit': 2097152, 'workers': 2}\n- {'enabled': True, 'limit': 2, 'workers': 2}\n+ {'enabled': True, 'limit': 2097152, 'workers': 2}\n?                            ++++++\n\n\n======================================================================\nFAIL: test_bad_bool (test_extra.Extra.test_bad_bool)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_bad_bool\n    with self.assertRaises(ValueError): parse_bool(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_bad_size (test_extra.Extra.test_bad_size)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 18, in test_bad_size\n    with self.assertRaises(ValueError): parse_limit(value)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_defaults (test_extra.Extra.test_defaults)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 19, in test_defaults\n    def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'enabled': True, 'limit': 64, 'workers': 1} != {'enabled': False, 'limit': 64, 'workers': 1}\n- {'enabled': True, 'limit': 64, 'workers': 1}\n?             ^^^\n\n+ {'enabled': False, 'limit': 64, 'workers': 1}\n?             ^^^^\n\n\n======================================================================\nFAIL: test_false (test_extra.Extra.test_false)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 8, in test_false\n    for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: True is not False\n\n======================================================================\nFAIL: test_worker_range (test_extra.Extra.test_worker_range)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 22, in test_worker_range\n    with self.assertRaises(ValueError): load_config({'workers':value})\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 13 tests in 0.003s\n\nFAILED (failures=9, errors=1)\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "config_0",
+      "family": "config",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 2.972950362993288,
+      "cpu_seconds": 0.251116,
+      "memory_peak_bytes": 24018944,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 5915,
+          "messages_sha256": "c0a9dcaf77f2c32804cdf5ffa984cf1b3c20b31330a0bcfe1df27c4a54ab6c38",
+          "seconds": 2.6605474880052498,
+          "usage": {
+            "prompt_tokens": 1552,
+            "completion_tokens": 569,
+            "total_tokens": 2121,
+            "prompt_tokens_details": {
+              "cached_tokens": 1152
+            },
+            "prompt_cache_hit_tokens": 1152,
+            "prompt_cache_miss_tokens": 400
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 13,
+        "oracle_output": "...........F.\n======================================================================\nFAIL: test_worker_range (test_extra.Extra.test_worker_range)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 22, in test_worker_range\n    with self.assertRaises(ValueError): load_config({'workers':value})\nAssertionError: ValueError not raised\n\n----------------------------------------------------------------------\nRan 13 tests in 0.001s\n\nFAILED (failures=1)\nAGENTRT_TEST_COUNT=13\n"
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "runtime",
+      "wall_seconds": 0.12434579599357676,
+      "cpu_seconds": 0.09895,
+      "memory_peak_bytes": 14733312,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": false
+      }
+    },
+    {
+      "case": "plain_1",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 1,
+      "arm": "direct_verified",
+      "wall_seconds": 1.187052011009655,
+      "cpu_seconds": 0.118818,
+      "memory_peak_bytes": 16175104,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "61c2cb0505907a13c59d25715629db222b69134bba313cc1d8ada53f660cf2bc",
+          "seconds": 1.0443048929882934,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 1,
+            "total_tokens": 24,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": true
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 2.3692537949973485,
+      "cpu_seconds": 0.234593,
+      "memory_peak_bytes": 22200320,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6503,
+          "messages_sha256": "1b3c0d22eaa9460d1677ba31eb12a37e653297797b478451f72a1e2d071f20f1",
+          "seconds": 2.0451433370035375,
+          "usage": {
+            "prompt_tokens": 1790,
+            "completion_tokens": 396,
+            "total_tokens": 2186,
+            "prompt_tokens_details": {
+              "cached_tokens": 384
+            },
+            "prompt_cache_hit_tokens": 384,
+            "prompt_cache_miss_tokens": 1406
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "lean_loop",
+      "wall_seconds": 2.5692257759947097,
+      "cpu_seconds": 0.237098,
+      "memory_peak_bytes": 22487040,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 6504,
+          "messages_sha256": "c4b18564c74decf292a49af711df6923c6a54ab1aebb6bc0c142cf631e1893ca",
+          "seconds": 2.29089338099584,
+          "usage": {
+            "prompt_tokens": 1790,
+            "completion_tokens": 426,
+            "total_tokens": 2216,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 510
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "tests_unchanged": true,
+        "same_verified_source": true,
+        "oracle_tests": 12,
+        "oracle_output": "............\n----------------------------------------------------------------------\nRan 12 tests in 0.000s\n\nOK\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "logs_2",
+      "family": "logs",
+      "group": "engineering",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 0.12252878899744246,
+      "cpu_seconds": 0.098332,
+      "memory_peak_bytes": 16044032,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "external_passed": false,
+        "tests_unchanged": true,
+        "same_verified_source": false,
+        "oracle_tests": 12,
+        "oracle_output": "EFFF.EF.EFFF\n======================================================================\nERROR: test_blank (test_extra.Extra.test_blank)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 11, in test_blank\n    def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n                                           ^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_no_match (test_extra.Extra.test_no_match)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 10, in test_no_match\n    def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nERROR: test_empty (test_report.ReportTests.test_empty)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 8, in test_empty\n    def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n                                           ^^^^^^^^^^^^^\n  File \"/workspace/report.py\", line 5, in summarize\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n                                                                              ^^^^^^^^^^^^^^\nValueError: max() arg is an empty sequence\n\n======================================================================\nFAIL: test_every_duration (test_extra.Extra.test_every_duration)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 12, in test_every_duration\n    def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 3, 'errors': 2, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?                        ^            ^              ^\n\n+ {'count': 3, 'errors': 2, 'max_ms': 7, 'total_ms': 9}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter_error (test_extra.Extra.test_filter_error)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 13, in test_filter_error\n    def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 3, 'errors': 0, 'total_ms': 2, 'max_ms': 2} != {'count': 2, 'errors': 1, 'total_ms': 9, 'max_ms': 7}\n- {'count': 3, 'errors': 0, 'max_ms': 2, 'total_ms': 2}\n?           ^            ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 7, 'total_ms': 9}\n?           ^            ^            ^              ^\n\n\n======================================================================\nFAIL: test_invalid (test_extra.Extra.test_invalid)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 7, in test_invalid\n    with self.assertRaises(ValueError): parse_event(text)\nAssertionError: ValueError not raised\n\n======================================================================\nFAIL: test_spaces (test_extra.Extra.test_spaces)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_extra.py\", line 9, in test_spaces\n    def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' db ', 13, ' error ') != ('db', 13, 'error')\n\nFirst differing element 0:\n' db '\n'db'\n\n- (' db ', 13, ' error ')\n?   -  -        -     -\n\n+ ('db', 13, 'error')\n\n======================================================================\nFAIL: test_errors (test_report.ReportTests.test_errors)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 6, in test_errors\n    def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: {'count': 2, 'errors': 0, 'total_ms': 3, 'max_ms': 3} != {'count': 2, 'errors': 1, 'total_ms': 8, 'max_ms': 5}\n- {'count': 2, 'errors': 0, 'max_ms': 3, 'total_ms': 3}\n?                        ^            ^              ^\n\n+ {'count': 2, 'errors': 1, 'max_ms': 5, 'total_ms': 8}\n?                        ^            ^              ^\n\n\n======================================================================\nFAIL: test_filter (test_report.ReportTests.test_filter)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 7, in test_filter\n    def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: 2 != 1\n\n======================================================================\nFAIL: test_parse (test_report.ReportTests.test_parse)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/workspace/test_report.py\", line 5, in test_parse\n    def test_parse(self): self.assertEqual(parse_event(' api , 42 ,ok'),('api',42,'ok'))\n                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: Tuples differ: (' api ', 42, 'ok') != ('api', 42, 'ok')\n\nFirst differing element 0:\n' api '\n'api'\n\n- (' api ', 42, 'ok')\n?   -   -\n\n+ ('api', 42, 'ok')\n\n----------------------------------------------------------------------\nRan 12 tests in 0.003s\n\nFAILED (failures=7, errors=3)\nAGENTRT_TEST_COUNT=12\n"
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "runtime",
+      "wall_seconds": 0.1260288759949617,
+      "cpu_seconds": 0.094876,
+      "memory_peak_bytes": 14471168,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": false
+      }
+    },
+    {
+      "case": "plain_2",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 2,
+      "arm": "direct_verified",
+      "wall_seconds": 0.7316177690081531,
+      "cpu_seconds": 0.106351,
+      "memory_peak_bytes": 15855616,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "1eec85aef0a47b76a23a7ba833a71ee2750093f16f2fae1f4ddda3fbd9785d06",
+          "seconds": 0.5784025930042844,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 6,
+            "total_tokens": 29,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": true,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 0.9873569150076946,
+      "cpu_seconds": 0.118088,
+      "memory_peak_bytes": 16863232,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 98,
+          "messages_sha256": "82fb678cba665a4d903840cb1386be3182dfd0c7ea2da461d48b2e03ed006ae9",
+          "seconds": 0.8768166810041294,
+          "usage": {
+            "prompt_tokens": 23,
+            "completion_tokens": 1,
+            "total_tokens": 24,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 23
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": true
+      }
+    },
+    {
+      "case": "plain_0",
+      "family": "plain",
+      "group": "plain",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.12206823099404573,
+      "cpu_seconds": 0.101361,
+      "memory_peak_bytes": 16306176,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "json_format": false
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "direct_verified",
+      "wall_seconds": 1.6537548060005065,
+      "cpu_seconds": 0.285095,
+      "memory_peak_bytes": 22654976,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.35972727900662,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 211,
+            "total_tokens": 950,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "lean_loop",
+      "wall_seconds": 1.7423011739883805,
+      "cpu_seconds": 0.299494,
+      "memory_peak_bytes": 26066944,
+      "status": "completed",
+      "calls": [
+        {
+          "status": "returned",
+          "max_tokens": 4096,
+          "message_bytes": 2805,
+          "messages_sha256": "fd433d238ca50debe00a77a55e593481156a3aa7c3b4d80f75847e57763f6fc5",
+          "seconds": 1.413422591998824,
+          "usage": {
+            "prompt_tokens": 739,
+            "completion_tokens": 211,
+            "total_tokens": 950,
+            "prompt_tokens_details": {
+              "cached_tokens": 512
+            },
+            "prompt_cache_hit_tokens": 512,
+            "prompt_cache_miss_tokens": 227
+          },
+          "finish_reason": "stop",
+          "model": "deepseek-flash"
+        }
+      ],
+      "accepted": true,
+      "quality": {
+        "passed": true,
+        "external_passed": true,
+        "same_verified_source": true
+      }
+    },
+    {
+      "case": "pricing_0",
+      "family": "pricing",
+      "group": "engineering",
+      "repeat": 0,
+      "arm": "runtime",
+      "wall_seconds": 0.12120933900587261,
+      "cpu_seconds": 0.103641,
+      "memory_peak_bytes": 16306176,
+      "status": "error",
+      "calls": [],
+      "accepted": false,
+      "quality": {
+        "passed": false,
+        "patch_rejected": true
+      }
+    }
+  ],
+  "finished": true,
+  "paid_intents": 28,
+  "remaining_sample_cgroups": 0
+}

@@ -1,0 +1,46 @@
+{
+  "seed": 20261116017,
+  "date": "2026-11-16 Asia/Shanghai",
+  "source_commit": "eb639a0abe931e67a4fa5a7a91d28034ac32147c",
+  "dataset_sha256": "20cf86314ba8f1721fe0ee972ce11578c8b5d3c98b64b4bd1540e9cf336dcbc1",
+  "runner_sha256": "bcf13e68e6effa2266eeb0e4355db3568bd9b9996d00408d8f92382ebc8b002a",
+  "fixture_sha256": "c955aa84357896e959c9102afed9639b4a252d59e7e7c4df014ebec7e6f18071",
+  "engineering_cases": 0,
+  "engineering_executions": 0,
+  "plain_cases": 4,
+  "plain_executions": 8,
+  "arms": {
+    "direct_verified": "single model completion + identical local validation; no correction",
+    "lean_loop": "same task-specific state machine and prompts, at most one correction, no Runtime DAG",
+    "runtime": "public auto_tasks entry, actual Workers and cgroups, at most one correction"
+  },
+  "model": "same existing broker default; native thinking disabled",
+  "output_per_call": 4096,
+  "max_calls": {
+    "direct_verified": 1,
+    "lean_loop": 2,
+    "runtime": 2
+  },
+  "sample_resources": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "runtime_workers": 2,
+  "global_paid_intent_cap": 8,
+  "global_requested_output_cap": 393216,
+  "timing": "fresh process start to terminal verification and artifact; provider completion timings reported separately; external oracle grade excluded in every arm",
+  "quality": "prevalidated red/green oracle; preserved tests, matching delivered source hashes, local verification and independent unseen tests all required",
+  "fairness": "same initial task data, same system instructions and validation for engineering; lean loop uses same trusted state machine to isolate orchestration overhead",
+  "failure_policy": "retain every sample; transport uncertainty halts study, no paid replay; no prompt tuning after observing results",
+  "limits": [
+    "small synthetic multi-file projects and fixed controlled fixtures",
+    "model sampling and supplier cache uncontrolled",
+    "local cgroup excludes shared broker and cloud",
+    "not industrial repositories or statistical significance"
+  ],
+  "prior_invalid_harness_paid_intents": 28,
+  "retest_reason": "Runtime called with unsupported workers keyword in prior harness. Product code and prompts unchanged.",
+  "prior_task_paid_requests": 74,
+  "supplemental_purpose": "Stateless path after removing wrapper. Direct and Runtime receive byte-identical short system+user messages. Separate from main engineering study."
+}

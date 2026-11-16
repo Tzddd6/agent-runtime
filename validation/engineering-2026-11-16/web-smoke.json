@@ -1,0 +1,33 @@
+{
+  "status": "succeeded",
+  "conversation_id": "63e67dfa1f45416bb762b9dd0068bf16",
+  "job_id": "0f649c7326754f0f922e61a16e47d1cf",
+  "accepted": true,
+  "actual_model_calls": 1,
+  "usage": [
+    {
+      "prompt_tokens": 857,
+      "completion_tokens": 66,
+      "total_tokens": 923,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      },
+      "prompt_cache_hit_tokens": 0,
+      "prompt_cache_miss_tokens": 857
+    }
+  ],
+  "tests_unchanged": true,
+  "test_cases": 3,
+  "artifacts": [
+    {
+      "path": "calc.py",
+      "sha256": "4fd6a7977fc2ed0a50031ea6f20d922c91fea8903a823a043aa4d76530a731cf"
+    }
+  ],
+  "capabilities": {
+    "plugins": 29,
+    "skills": 12
+  },
+  "knowledge_documents": 7,
+  "fixture": "synthetic upload of two-file Python project; real web API and real model"
+}

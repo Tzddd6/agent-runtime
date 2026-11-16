@@ -14,7 +14,7 @@ PATCH_SYSTEM=('修复给定Python工程，只输出合法JSON，不要代码围�
 
 
 def detect_controlled(prompt):
-    if not re.search(r'修复|修好|\bfix\b',prompt,re.I) or re.search(r'不要修改|只分析|仅评审',prompt):return None
+    if not re.search(r'修复|修好|\bfix\b',prompt,re.I) or re.search(r'不要修改(?!测试)|只分析|仅评审',prompt):return None
     for match in re.finditer(r'\{',prompt):
         try:
             data,_=json.JSONDecoder().raw_decode(prompt[match.start():])

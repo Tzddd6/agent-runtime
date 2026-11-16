@@ -1,0 +1,106 @@
+{
+  "engineering": {
+    "direct_verified": {
+      "n": 12,
+      "passed": 10,
+      "calls": 12,
+      "usage": {
+        "prompt_tokens": 13835,
+        "completion_tokens": 3526,
+        "total_tokens": 17361,
+        "prompt_cache_hit_tokens": 9856,
+        "prompt_cache_miss_tokens": 3979
+      },
+      "median_seconds": 1.9719589294982143,
+      "median_cpu_seconds": 0.265322,
+      "median_memory_mib": 22.849609375,
+      "median_model_seconds": 1.6648853299993789,
+      "median_non_model_seconds": 0.30390947250270983,
+      "failures": [
+        "config_0",
+        "pricing_0"
+      ]
+    },
+    "lean_loop": {
+      "n": 12,
+      "passed": 12,
+      "calls": 12,
+      "usage": {
+        "prompt_tokens": 13835,
+        "completion_tokens": 3876,
+        "total_tokens": 17711,
+        "prompt_cache_hit_tokens": 9856,
+        "prompt_cache_miss_tokens": 3979
+      },
+      "median_seconds": 2.2232780565027497,
+      "median_cpu_seconds": 0.2658715,
+      "median_memory_mib": 23.0234375,
+      "median_model_seconds": 1.9076055274999817,
+      "median_non_model_seconds": 0.29746372348745354,
+      "failures": []
+    },
+    "runtime": {
+      "n": 12,
+      "passed": 11,
+      "calls": 13,
+      "usage": {
+        "prompt_tokens": 14828,
+        "completion_tokens": 4257,
+        "total_tokens": 19085,
+        "prompt_cache_hit_tokens": 2560,
+        "prompt_cache_miss_tokens": 12268
+      },
+      "median_seconds": 2.5479075375042157,
+      "median_cpu_seconds": 0.5123265,
+      "median_memory_mib": 35.380859375,
+      "median_model_seconds": 1.953751918495982,
+      "median_non_model_seconds": 0.6910701009910554,
+      "failures": [
+        "pricing_1"
+      ]
+    }
+  },
+  "plain": {
+    "direct_verified": {
+      "n": 4,
+      "passed": 2,
+      "calls": 4,
+      "usage": {
+        "prompt_tokens": 92,
+        "completion_tokens": 14,
+        "total_tokens": 106,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 92
+      },
+      "median_seconds": 0.9577093744956073,
+      "median_cpu_seconds": 0.1151215,
+      "median_memory_mib": 15.337890625,
+      "median_model_seconds": 0.8144184475022485,
+      "median_non_model_seconds": 0.14329092699335888,
+      "failures": [
+        "plain_1",
+        "plain_0"
+      ]
+    },
+    "runtime": {
+      "n": 4,
+      "passed": 4,
+      "calls": 4,
+      "usage": {
+        "prompt_tokens": 528,
+        "completion_tokens": 24,
+        "total_tokens": 552,
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 528
+      },
+      "median_seconds": 1.3338095389917726,
+      "median_cpu_seconds": 0.19226900000000002,
+      "median_memory_mib": 24.84375,
+      "median_model_seconds": 1.0427060930014704,
+      "median_non_model_seconds": 0.26967579999472946,
+      "failures": []
+    }
+  },
+  "total_requests": 45,
+  "invalid_harness_requests": 28
+}

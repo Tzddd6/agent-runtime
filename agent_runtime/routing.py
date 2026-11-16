@@ -38,7 +38,7 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
     from .repair_loop import detect_controlled,tasks as repair_tasks
     project=detect_controlled(prompt)
     if project:return repair_tasks(prompt,project,response_tokens,deep_thinking)
-    if workspace is not None and re.search(r'修复|修好|\bfix\b',prompt,re.I) and not re.search(r'不要修改|只分析|仅评审|建议',prompt):
+    if workspace is not None and re.search(r'修复|修好|\bfix\b',prompt,re.I) and not re.search(r'不要修改(?!测试)|只分析|仅评审|建议',prompt):
         from pathlib import Path
         root=Path(workspace)
         items=(attachments or {}).get('attachments',[])

@@ -1,0 +1,252 @@
+{
+  "cases": [
+    {
+      "id": "text_normalization_0",
+      "group": "engineering",
+      "family": "text_normalization",
+      "project": "text_normalization",
+      "repeat": 0,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"text_normalization\", \"project\": \"text-normalization\", \"file\": \"text_utils.py\", \"requirements\": \"All arguments are strings. normalize_label: split on arbitrary Unicode whitespace, join words with one ASCII space and lowercase. word_count: count whitespace-separated words; empty/whitespace-only gives zero. starts_with: trim and lowercase both text and prefix, then return bool for prefix match; empty prefix is true. Keep three signatures. Only safe str methods strip/lower/split/join/startswith and len; safe method chains and local variables allowed. No imports, subscripts, loops, dunder, reflection, function aliases or arbitrary calls.\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"public_examples\": [[\"normalize_label\", [\"  Hello   WORLD  \"], \"hello world\"], [\"word_count\", [\"one  two\"], 2], [\"starts_with\", [\"  Hi\", \" HI \"], true]], \"patch_schema\": {\"source\": \"complete text_utils.py source; JSON only\"}}",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    },
+    {
+      "id": "config_2",
+      "group": "engineering",
+      "family": "config",
+      "project": null,
+      "repeat": 2,
+      "files": {
+        "config.py": "def parse_bool(value):\n    return bool(value)\n\ndef parse_limit(value):\n    return int(value.rstrip(\"KMkm\"))\n",
+        "server.py": "from config import parse_bool,parse_limit\ndef load_config(values):\n    return {\"enabled\":parse_bool(values.get(\"enabled\",\"false\")),\"limit\":parse_limit(values.get(\"limit\",\"64\")),\"workers\":int(values.get(\"workers\") or \"1\")}\n",
+        "test_config.py": "import unittest\nfrom server import load_config\nfrom config import parse_bool,parse_limit\nclass ConfigTests(unittest.TestCase):\n def test_false(self): self.assertIs(parse_bool(' false '),False)\n def test_limit(self): self.assertEqual(parse_limit('10k'),10240)\n def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'7'}),{'enabled':True,'limit':2097152,'workers':7})\n def test_bad(self):\n  with self.assertRaises(ValueError): load_config({'workers':'0'})\n"
+      },
+      "extra_test": "import unittest\nfrom config import parse_bool,parse_limit\nfrom server import load_config\nclass Extra(unittest.TestCase):\n def test_truth(self):\n  for text in ('TRUE',' yes ','1','On'): self.assertIs(parse_bool(text),True)\n def test_false(self):\n  for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n def test_bool(self):\n  self.assertIs(parse_bool(True),True);self.assertIs(parse_bool(False),False)\n def test_bad_bool(self):\n  for value in ('maybe','',None,1):\n   with self.assertRaises(ValueError): parse_bool(value)\n def test_sizes(self):\n  for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n def test_bad_size(self):\n  for value in ('-1','1.5K','x','2G','1 K',None):\n   with self.assertRaises(ValueError): parse_limit(value)\n def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n def test_worker_range(self):\n  for value in ('0','65','-3','1.5','',None,True):\n   with self.assertRaises(ValueError): load_config({'workers':value})\n def test_worker_valid(self): self.assertEqual(load_config({'workers':' 64 '})['workers'],64)\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_bool接受bool原样返回，或去空白且不区分大小写的true/yes/1/on和false/no/0/off字符串，其余输入ValueError。parse_limit只接受去首尾空白的非负十进制整数字符串，可带K/M（大小写均可），单位分别1024/1048576；中间空格、小数、负数及其他类型均ValueError。load_config使用缺失默认enabled=false、limit=64、workers=1；workers必须是去首尾空白后仅十进制数字的字符串且在1..64，其他类型/空串/越界拒绝。保留接口与测试。",
+      "order": [
+        "lean_loop",
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "intervals_1",
+      "group": "engineering",
+      "family": "intervals",
+      "project": "intervals",
+      "repeat": 1,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"intervals\", \"project\": \"time-intervals\", \"file\": \"intervals.py\", \"requirements\": \"All inputs are integers. overlap_seconds: length of intersection of half-open intervals; reject end<start; non-overlap or empty interval gives zero. bucket_index: floor((timestamp-origin)/width), including negatives; width must be positive. remaining_ttl: ttl minus elapsed time, clamped to 0..ttl; future-created item retains ttl; reject ttl<0. Invalid values raise ValueError. Keep three signatures. Only integer arithmetic //, comparisons, if/return, ValueError/min/max; no imports, attributes, loops or other calls.\", \"source\": \"def overlap_seconds(start_a, end_a, start_b, end_b):\\n    if end_a < start_a or end_b < start_b:\\n        raise ValueError(\\\"invalid\\\")\\n    return min(end_a, end_b) - max(start_a, start_b)\\ndef bucket_index(timestamp, origin, width):\\n    if width <= 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return timestamp // width - origin // width\\ndef remaining_ttl(now, created, ttl):\\n    if ttl < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return max(0, ttl - (now - created))\\n\", \"public_examples\": [[\"overlap_seconds\", [0, 3, 5, 8], 0], [\"bucket_index\", [10, 3, 4], 1], [\"remaining_ttl\", [8, 10, 5], 5]], \"patch_schema\": {\"source\": \"complete intervals.py source; JSON only\"}}",
+      "order": [
+        "runtime",
+        "direct_verified",
+        "lean_loop"
+      ]
+    },
+    {
+      "id": "logs_0",
+      "group": "engineering",
+      "family": "logs",
+      "project": null,
+      "repeat": 0,
+      "files": {
+        "events.py": "def parse_event(line):\n    service,duration,status=line.split(',')\n    return service,int(duration),status\n",
+        "report.py": "from events import parse_event\ndef summarize(lines,service=None):\n    events=[parse_event(line) for line in lines if line.strip()]\n    durations=[duration for name,duration,status in events if status=='ok']\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n",
+        "test_report.py": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass ReportTests(unittest.TestCase):\n def test_parse(self): self.assertEqual(parse_event(' api , 51 ,ok'),('api',51,'ok'))\n def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n"
+      },
+      "extra_test": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass Extra(unittest.TestCase):\n def test_invalid(self):\n  for text in ('a,-1,ok',',2,ok','a,2,bad','a,1.5,ok','a,3,ok,x'):\n   with self.assertRaises(ValueError): parse_event(text)\n def test_zero(self): self.assertEqual(parse_event('a,0,error'),('a',0,'error'))\n def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n def test_invalid_unselected(self):\n  with self.assertRaises(ValueError): summarize(['db,-1,error'],'api')\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_event接收恰好3个逗号分隔字段，逐项strip，服务名非空，时长为非负整数字符串，状态仅ok或error；格式错误ValueError。summarize忽略空白行，先验证所有其他行再按service精确筛选（None表示全部）。count、errors、total_ms、max_ms均针对筛选后的所有状态，空集四项均0。保留接口与测试。",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    },
+    {
+      "id": "logs_1",
+      "group": "engineering",
+      "family": "logs",
+      "project": null,
+      "repeat": 1,
+      "files": {
+        "events.py": "def parse_event(line):\n    service,duration,status=line.split(',')\n    return service,int(duration),status\n",
+        "report.py": "from events import parse_event\ndef summarize(lines,service=None):\n    events=[parse_event(line) for line in lines if line.strip()]\n    durations=[duration for name,duration,status in events if status=='ok']\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n",
+        "test_report.py": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass ReportTests(unittest.TestCase):\n def test_parse(self): self.assertEqual(parse_event(' api , 62 ,ok'),('api',62,'ok'))\n def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n"
+      },
+      "extra_test": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass Extra(unittest.TestCase):\n def test_invalid(self):\n  for text in ('a,-1,ok',',2,ok','a,2,bad','a,1.5,ok','a,3,ok,x'):\n   with self.assertRaises(ValueError): parse_event(text)\n def test_zero(self): self.assertEqual(parse_event('a,0,error'),('a',0,'error'))\n def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n def test_invalid_unselected(self):\n  with self.assertRaises(ValueError): summarize(['db,-1,error'],'api')\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_event接收恰好3个逗号分隔字段，逐项strip，服务名非空，时长为非负整数字符串，状态仅ok或error；格式错误ValueError。summarize忽略空白行，先验证所有其他行再按service精确筛选（None表示全部）。count、errors、total_ms、max_ms均针对筛选后的所有状态，空集四项均0。保留接口与测试。",
+      "order": [
+        "lean_loop",
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "plain_3",
+      "group": "plain",
+      "family": "plain",
+      "repeat": 3,
+      "prompt": "不需要工具。只输出JSON字段value，值为(80+3)*8//2。",
+      "expected": {
+        "value": 332
+      },
+      "order": [
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "config_1",
+      "group": "engineering",
+      "family": "config",
+      "project": null,
+      "repeat": 1,
+      "files": {
+        "config.py": "def parse_bool(value):\n    return bool(value)\n\ndef parse_limit(value):\n    return int(value.rstrip(\"KMkm\"))\n",
+        "server.py": "from config import parse_bool,parse_limit\ndef load_config(values):\n    return {\"enabled\":parse_bool(values.get(\"enabled\",\"false\")),\"limit\":parse_limit(values.get(\"limit\",\"64\")),\"workers\":int(values.get(\"workers\") or \"1\")}\n",
+        "test_config.py": "import unittest\nfrom server import load_config\nfrom config import parse_bool,parse_limit\nclass ConfigTests(unittest.TestCase):\n def test_false(self): self.assertIs(parse_bool(' false '),False)\n def test_limit(self): self.assertEqual(parse_limit('15k'),15360)\n def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'5'}),{'enabled':True,'limit':2097152,'workers':5})\n def test_bad(self):\n  with self.assertRaises(ValueError): load_config({'workers':'0'})\n"
+      },
+      "extra_test": "import unittest\nfrom config import parse_bool,parse_limit\nfrom server import load_config\nclass Extra(unittest.TestCase):\n def test_truth(self):\n  for text in ('TRUE',' yes ','1','On'): self.assertIs(parse_bool(text),True)\n def test_false(self):\n  for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n def test_bool(self):\n  self.assertIs(parse_bool(True),True);self.assertIs(parse_bool(False),False)\n def test_bad_bool(self):\n  for value in ('maybe','',None,1):\n   with self.assertRaises(ValueError): parse_bool(value)\n def test_sizes(self):\n  for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n def test_bad_size(self):\n  for value in ('-1','1.5K','x','2G','1 K',None):\n   with self.assertRaises(ValueError): parse_limit(value)\n def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n def test_worker_range(self):\n  for value in ('0','65','-3','1.5','',None,True):\n   with self.assertRaises(ValueError): load_config({'workers':value})\n def test_worker_valid(self): self.assertEqual(load_config({'workers':' 64 '})['workers'],64)\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_bool接受bool原样返回，或去空白且不区分大小写的true/yes/1/on和false/no/0/off字符串，其余输入ValueError。parse_limit只接受去首尾空白的非负十进制整数字符串，可带K/M（大小写均可），单位分别1024/1048576；中间空格、小数、负数及其他类型均ValueError。load_config使用缺失默认enabled=false、limit=64、workers=1；workers必须是去首尾空白后仅十进制数字的字符串且在1..64，其他类型/空串/越界拒绝。保留接口与测试。",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    },
+    {
+      "id": "text_normalization_1",
+      "group": "engineering",
+      "family": "text_normalization",
+      "project": "text_normalization",
+      "repeat": 1,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"text_normalization\", \"project\": \"text-normalization\", \"file\": \"text_utils.py\", \"requirements\": \"All arguments are strings. normalize_label: split on arbitrary Unicode whitespace, join words with one ASCII space and lowercase. word_count: count whitespace-separated words; empty/whitespace-only gives zero. starts_with: trim and lowercase both text and prefix, then return bool for prefix match; empty prefix is true. Keep three signatures. Only safe str methods strip/lower/split/join/startswith and len; safe method chains and local variables allowed. No imports, subscripts, loops, dunder, reflection, function aliases or arbitrary calls.\", \"source\": \"def normalize_label(text):\\n    return text.strip().lower()\\ndef word_count(text):\\n    return len(text.split(\\\" \\\"))\\ndef starts_with(text, prefix):\\n    return text.startswith(prefix)\\n\", \"public_examples\": [[\"normalize_label\", [\"  Hello   WORLD  \"], \"hello world\"], [\"word_count\", [\"one  two\"], 2], [\"starts_with\", [\"  Hi\", \" HI \"], true]], \"patch_schema\": {\"source\": \"complete text_utils.py source; JSON only\"}}",
+      "order": [
+        "lean_loop",
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "intervals_0",
+      "group": "engineering",
+      "family": "intervals",
+      "project": "intervals",
+      "repeat": 0,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"intervals\", \"project\": \"time-intervals\", \"file\": \"intervals.py\", \"requirements\": \"All inputs are integers. overlap_seconds: length of intersection of half-open intervals; reject end<start; non-overlap or empty interval gives zero. bucket_index: floor((timestamp-origin)/width), including negatives; width must be positive. remaining_ttl: ttl minus elapsed time, clamped to 0..ttl; future-created item retains ttl; reject ttl<0. Invalid values raise ValueError. Keep three signatures. Only integer arithmetic //, comparisons, if/return, ValueError/min/max; no imports, attributes, loops or other calls.\", \"source\": \"def overlap_seconds(start_a, end_a, start_b, end_b):\\n    if end_a < start_a or end_b < start_b:\\n        raise ValueError(\\\"invalid\\\")\\n    return min(end_a, end_b) - max(start_a, start_b)\\ndef bucket_index(timestamp, origin, width):\\n    if width <= 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return timestamp // width - origin // width\\ndef remaining_ttl(now, created, ttl):\\n    if ttl < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    return max(0, ttl - (now - created))\\n\", \"public_examples\": [[\"overlap_seconds\", [0, 3, 5, 8], 0], [\"bucket_index\", [10, 3, 4], 1], [\"remaining_ttl\", [8, 10, 5], 5]], \"patch_schema\": {\"source\": \"complete intervals.py source; JSON only\"}}",
+      "order": [
+        "runtime",
+        "direct_verified",
+        "lean_loop"
+      ]
+    },
+    {
+      "id": "pricing_1",
+      "group": "engineering",
+      "family": "pricing",
+      "project": "pricing",
+      "repeat": 1,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"pricing\", \"project\": \"integer-pricing\", \"file\": \"pricing.py\", \"requirements\": \"Inputs are integers; money is non-negative cents. line_total_cents(unit_cents,quantity,discount_pct): unit_cents and quantity >=0, discount_pct in 0..100; apply percentage discount to the whole line and floor once to integer cents. shipping_cents(subtotal_cents): reject negatives, free shipping for subtotal >=5000, otherwise 599. refund_cents(paid_cents,returned_qty,total_qty): paid_cents>=0, total_qty>0, 0<=returned_qty<=total_qty; prorate the whole paid amount and floor once. Invalid values must raise ValueError. Keep exactly these three signatures. No imports, attributes, subscripts, loops, decorators or arbitrary calls; only integer arithmetic, comparisons, if/return, and ValueError/min/max are supported.\", \"source\": \"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    return unit_cents * quantity - discount_pct\\n\\ndef shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents > 5000:\\n        return 0\\n    return 599\\n\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\n        raise ValueError(\\\"invalid\\\")\\n    return paid_cents // total_qty * returned_qty\\n\", \"public_examples\": [[\"line_total_cents\", [199, 3, 10], 537], [\"shipping_cents\", [5000], 0], [\"refund_cents\", [100, 2, 3], 66]], \"patch_schema\": {\"source\": \"complete pricing.py source; JSON only\"}}",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    },
+    {
+      "id": "config_0",
+      "group": "engineering",
+      "family": "config",
+      "project": null,
+      "repeat": 0,
+      "files": {
+        "config.py": "def parse_bool(value):\n    return bool(value)\n\ndef parse_limit(value):\n    return int(value.rstrip(\"KMkm\"))\n",
+        "server.py": "from config import parse_bool,parse_limit\ndef load_config(values):\n    return {\"enabled\":parse_bool(values.get(\"enabled\",\"false\")),\"limit\":parse_limit(values.get(\"limit\",\"64\")),\"workers\":int(values.get(\"workers\") or \"1\")}\n",
+        "test_config.py": "import unittest\nfrom server import load_config\nfrom config import parse_bool,parse_limit\nclass ConfigTests(unittest.TestCase):\n def test_false(self): self.assertIs(parse_bool(' false '),False)\n def test_limit(self): self.assertEqual(parse_limit('13k'),13312)\n def test_load(self): self.assertEqual(load_config({'enabled':'yes','limit':'2M','workers':'2'}),{'enabled':True,'limit':2097152,'workers':2})\n def test_bad(self):\n  with self.assertRaises(ValueError): load_config({'workers':'0'})\n"
+      },
+      "extra_test": "import unittest\nfrom config import parse_bool,parse_limit\nfrom server import load_config\nclass Extra(unittest.TestCase):\n def test_truth(self):\n  for text in ('TRUE',' yes ','1','On'): self.assertIs(parse_bool(text),True)\n def test_false(self):\n  for text in (' FALSE ','no','0','OFF'): self.assertIs(parse_bool(text),False)\n def test_bool(self):\n  self.assertIs(parse_bool(True),True);self.assertIs(parse_bool(False),False)\n def test_bad_bool(self):\n  for value in ('maybe','',None,1):\n   with self.assertRaises(ValueError): parse_bool(value)\n def test_sizes(self):\n  for text,value in [('0',0),(' 7K ',7168),('3m',3145728),('91',91)]: self.assertEqual(parse_limit(text),value)\n def test_bad_size(self):\n  for value in ('-1','1.5K','x','2G','1 K',None):\n   with self.assertRaises(ValueError): parse_limit(value)\n def test_defaults(self): self.assertEqual(load_config({}),{'enabled':False,'limit':64,'workers':1})\n def test_worker_range(self):\n  for value in ('0','65','-3','1.5','',None,True):\n   with self.assertRaises(ValueError): load_config({'workers':value})\n def test_worker_valid(self): self.assertEqual(load_config({'workers':' 64 '})['workers'],64)\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_bool接受bool原样返回，或去空白且不区分大小写的true/yes/1/on和false/no/0/off字符串，其余输入ValueError。parse_limit只接受去首尾空白的非负十进制整数字符串，可带K/M（大小写均可），单位分别1024/1048576；中间空格、小数、负数及其他类型均ValueError。load_config使用缺失默认enabled=false、limit=64、workers=1；workers必须是去首尾空白后仅十进制数字的字符串且在1..64，其他类型/空串/越界拒绝。保留接口与测试。",
+      "order": [
+        "lean_loop",
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "plain_1",
+      "group": "plain",
+      "family": "plain",
+      "repeat": 1,
+      "prompt": "不需要工具。只输出JSON字段value，值为(32+3)*2//2。",
+      "expected": {
+        "value": 35
+      },
+      "order": [
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "logs_2",
+      "group": "engineering",
+      "family": "logs",
+      "project": null,
+      "repeat": 2,
+      "files": {
+        "events.py": "def parse_event(line):\n    service,duration,status=line.split(',')\n    return service,int(duration),status\n",
+        "report.py": "from events import parse_event\ndef summarize(lines,service=None):\n    events=[parse_event(line) for line in lines if line.strip()]\n    durations=[duration for name,duration,status in events if status=='ok']\n    return {'count':len(events),'errors':0,'total_ms':sum(durations),'max_ms':max(durations)}\n",
+        "test_report.py": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass ReportTests(unittest.TestCase):\n def test_parse(self): self.assertEqual(parse_event(' api , 42 ,ok'),('api',42,'ok'))\n def test_errors(self): self.assertEqual(summarize(['api,3,ok','api,5,error']),{'count':2,'errors':1,'total_ms':8,'max_ms':5})\n def test_filter(self): self.assertEqual(summarize(['api,3,ok','db,5,error'],'api')['count'],1)\n def test_empty(self): self.assertEqual(summarize([]),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n"
+      },
+      "extra_test": "import unittest\nfrom events import parse_event\nfrom report import summarize\nclass Extra(unittest.TestCase):\n def test_invalid(self):\n  for text in ('a,-1,ok',',2,ok','a,2,bad','a,1.5,ok','a,3,ok,x'):\n   with self.assertRaises(ValueError): parse_event(text)\n def test_zero(self): self.assertEqual(parse_event('a,0,error'),('a',0,'error'))\n def test_spaces(self): self.assertEqual(parse_event(' db , 13 , error '),('db',13,'error'))\n def test_no_match(self): self.assertEqual(summarize(['db,8,error'],'api'),{'count':0,'errors':0,'total_ms':0,'max_ms':0})\n def test_blank(self): self.assertEqual(summarize(['','  '])['count'],0)\n def test_every_duration(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,0,error']),{'count':3,'errors':2,'total_ms':9,'max_ms':7})\n def test_filter_error(self): self.assertEqual(summarize(['a,7,error','a,2,ok','b,9,error'],'a'),{'count':2,'errors':1,'total_ms':9,'max_ms':7})\n def test_invalid_unselected(self):\n  with self.assertRaises(ValueError): summarize(['db,-1,error'],'api')\n",
+      "prompt": "修复这个Python工程并真实验证，不得修改测试。parse_event接收恰好3个逗号分隔字段，逐项strip，服务名非空，时长为非负整数字符串，状态仅ok或error；格式错误ValueError。summarize忽略空白行，先验证所有其他行再按service精确筛选（None表示全部）。count、errors、total_ms、max_ms均针对筛选后的所有状态，空集四项均0。保留接口与测试。",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    },
+    {
+      "id": "plain_2",
+      "group": "plain",
+      "family": "plain",
+      "repeat": 2,
+      "prompt": "不需要工具。只输出JSON字段value，值为(34+3)*4//2。",
+      "expected": {
+        "value": 74
+      },
+      "order": [
+        "runtime",
+        "direct_verified"
+      ]
+    },
+    {
+      "id": "plain_0",
+      "group": "plain",
+      "family": "plain",
+      "repeat": 0,
+      "prompt": "不需要工具。只输出JSON字段value，值为(52+3)*2//2。",
+      "expected": {
+        "value": 55
+      },
+      "order": [
+        "direct_verified",
+        "runtime"
+      ]
+    },
+    {
+      "id": "pricing_0",
+      "group": "engineering",
+      "family": "pricing",
+      "project": "pricing",
+      "repeat": 0,
+      "prompt": "修复这个Python项目，真实验证，保持接口。只返回JSON {\"source\":\"完整源码\"}。遵守受控Python子集，不添加导入、额外函数、类型注解、循环或三元表达式。\n{\"project_id\": \"pricing\", \"project\": \"integer-pricing\", \"file\": \"pricing.py\", \"requirements\": \"Inputs are integers; money is non-negative cents. line_total_cents(unit_cents,quantity,discount_pct): unit_cents and quantity >=0, discount_pct in 0..100; apply percentage discount to the whole line and floor once to integer cents. shipping_cents(subtotal_cents): reject negatives, free shipping for subtotal >=5000, otherwise 599. refund_cents(paid_cents,returned_qty,total_qty): paid_cents>=0, total_qty>0, 0<=returned_qty<=total_qty; prorate the whole paid amount and floor once. Invalid values must raise ValueError. Keep exactly these three signatures. No imports, attributes, subscripts, loops, decorators or arbitrary calls; only integer arithmetic, comparisons, if/return, and ValueError/min/max are supported.\", \"source\": \"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    return unit_cents * quantity - discount_pct\\n\\ndef shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents > 5000:\\n        return 0\\n    return 599\\n\\ndef refund_cents(paid_cents, returned_qty, total_qty):\\n    if paid_cents < 0 or total_qty <= 0 or returned_qty < 0 or returned_qty > total_qty:\\n        raise ValueError(\\\"invalid\\\")\\n    return paid_cents // total_qty * returned_qty\\n\", \"public_examples\": [[\"line_total_cents\", [199, 3, 10], 537], [\"shipping_cents\", [5000], 0], [\"refund_cents\", [100, 2, 3], 66]], \"patch_schema\": {\"source\": \"complete pricing.py source; JSON only\"}}",
+      "order": [
+        "direct_verified",
+        "lean_loop",
+        "runtime"
+      ]
+    }
+  ]
+}
