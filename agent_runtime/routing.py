@@ -40,6 +40,10 @@ def auto_tasks(prompt, *, response_tokens=4096, conversation=None, deep_thinking
     if workspace is not None and re.search(r'修复|修好|\bfix\b',prompt,re.I) and not re.search(r'不要修改|只分析|仅评审|建议',prompt):
         from pathlib import Path
         root=Path(workspace)
+        items=(attachments or {}).get('attachments',[])
+        python_files=[{'name':a['name'],'path':a['path']} for a in items if isinstance(a,dict) and isinstance(a.get('name'),str) and a['name'].endswith('.py') and isinstance(a.get('path'),str)]
+        if 2<=len(python_files)<=4 and any(a['name'].startswith('test') or a['name'].endswith('_test.py') for a in python_files):
+            return repair_tasks(prompt,None,response_tokens,deep_thinking,python_files)
         if root.is_dir() and (any(root.glob('test*.py')) or (root/'tests').is_dir()):
             return repair_tasks(prompt,None,response_tokens,deep_thinking)
     if re.search(r'不需要工具|无需系统操作|直接只回答|直接简短回答',prompt) and not re.search(r'修复|修改|执行|运行|部署|写入',prompt):

@@ -16,7 +16,7 @@ def protected(name):
 def inspect(task):
     root=workspace(task);workspace_usage(root);files=[];total=0
     for p in sorted(root.rglob('*.py')):
-        if any(part.startswith('.') or part in ('__pycache__','verified') for part in p.relative_to(root).parts):continue
+        if any(part.startswith('.') or part in ('__pycache__','verified','uploads') for part in p.relative_to(root).parts):continue
         name=p.relative_to(root).as_posix();scoped_path(root,name)
         value=operate({**task,'_download_full':True},'file.read',{'path':name})
         total+=len(value['content'].encode())
@@ -33,7 +33,7 @@ def apply_patch(task,args):
     for patch in patches:
         if not isinstance(patch,dict) or set(patch)!={'path','sha256','content'}:raise ValueError('补丁需包含path、sha256、content')
         name=patch['path'];scoped_path(workspace(task),name)
-        if name in seen or protected(name) or not name.endswith('.py'):raise ValueError('只可修改已有Python源码，禁止测试或重复路径')
+        if name in seen or protected(name) or not name.endswith('.py') or any(p in ('uploads','verified') for p in Path(name).parts):raise ValueError('只可修改已有Python源码，禁止测试或重复路径')
         seen.add(name)
         if not isinstance(patch['content'],str) or len(patch['content'].encode())>40000:raise ValueError('单个补丁超过40KB')
         compile(patch['content'],name,'exec')
@@ -76,6 +76,22 @@ def test(task):
 
 
 def execute(task,name,args):
+    if name=='workspace.import':
+        files=args.get('files')
+        if set(args)!={'files'} or not isinstance(files,list) or not 2<=len(files)<=4:raise ValueError('需2—4个Python附件')
+        root=workspace(task);prepared=[];seen=set()
+        for entry in files:
+            if not isinstance(entry,dict) or set(entry)!={'path','name'}:raise ValueError('附件映射无效')
+            target=entry['name'];source=entry['path'];scoped_path(root,target)
+            if '/' in target or not target.endswith('.py') or target in seen or not isinstance(source,str) or not re.fullmatch(r'uploads/[a-f0-9]{32}\.py',source):raise ValueError('只能导入本会话Python附件，不允许重复名称')
+            seen.add(target);original=operate({**task,'_download_full':True},'file.read',{'path':source})
+            if (root/target).exists():
+                previous=operate({**task,'_download_full':True},'file.read',{'path':target})
+                if previous['sha256']!=original['sha256']:raise ValueError('同名工程文件已存在且不同，未导入任何附件')
+            prepared.append((target,original))
+        if not any(protected(name) for name,_ in prepared):raise ValueError('附件中必须包含测试文件')
+        receipts=[operate(task,'file.write',{'path':name,'content':original['content']}) for name,original in prepared]
+        return {'imported':receipts,'executed':True,'origin':'validated_uploads'}
     if name=='workspace.inspect' and not args:return inspect(task)
     if name=='workspace.test' and not args:return test(task)
     if name=='workspace.apply_patch':return apply_patch(task,args)

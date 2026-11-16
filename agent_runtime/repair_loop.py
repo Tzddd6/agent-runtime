@@ -26,9 +26,9 @@ def detect_controlled(prompt):
     return canonical_project(hit[1].lower()) if hit else None
 
 
-def tasks(prompt,project=None,response_tokens=4096,thinking=False):
+def tasks(prompt,project=None,response_tokens=4096,thinking=False,attachments=None):
     return [{'id':'repair_prepare','agent':'repair-control','action':'repair_prepare','timeout':40,'resources':RES,
-             'repair_project':project,'contexts':[{'user_request':prompt}],'response_tokens':response_tokens,'thinking':thinking}]
+             'repair_project':project,'contexts':[{'user_request':prompt}],'repair_attachments':attachments,'response_tokens':response_tokens,'thinking':thinking}]
 
 
 def candidate(parent,context,round_number):
@@ -54,10 +54,13 @@ def execute(task):
             baseline=tool('project.test',{'project':project});info=manifest(project)
             if json.dumps(info,ensure_ascii=False) not in context['user_request']:context['project']=info
         else:
+            if task.get('repair_attachments'):tool('workspace.import',{'files':task['repair_attachments']})
             context['workspace']=tool('workspace.inspect',{})
             if not context['workspace']['source_count'] or not context['workspace']['test_count']:raise ValueError('工程修复需要已有Python源码与测试')
             baseline=tool('workspace.test',{})
         context['baseline']={k:v for k,v in baseline.items() if k not in ('source','heldout')}
+        if project and isinstance(context['baseline'].get('public'),dict):
+            context['baseline']['public']={k:v for k,v in context['baseline']['public'].items() if k!='failures_detail'}
         context['original_test_hashes']=baseline.get('test_hashes',{})
         return {'phase':'baseline','success':baseline.get('success'),'baseline':context['baseline'],'model_call_limit':2},candidate(task,context,1)
     raw=task['_inputs'][task['candidate_id']];context=dict(task['_contexts'][0]);project=task.get('repair_project');round_number=task['round']
@@ -66,7 +69,10 @@ def execute(task):
         value=json.loads(raw)
         if project:
             source=validate_patch(value,project)
-            result=tool('project.patch_check',{'project':project,'source':source})
+            fingerprint=hashlib.sha256(source.encode()).hexdigest()
+            if context.get('previous_failed_source_sha256')==fingerprint:
+                result={**context['previous_failed_verification'],'reused_from_previous_failed_check':True}
+            else:result=tool('project.patch_check',{'project':project,'source':source})
         else:
             applied=tool('workspace.apply_patch',value)
             result=tool('workspace.test',{})
@@ -88,6 +94,9 @@ def execute(task):
     if round_number<2:
         if not project:context['workspace']=tool('workspace.inspect',{})
         context['previous_candidate']=raw[:30000]
+        if project and source and result.get('success') is False:
+            context['previous_failed_source_sha256']=hashlib.sha256(source.encode()).hexdigest()
+            context['previous_failed_verification']=result
         context['validation_failure']=error or {k:v for k,v in result.items() if k in ('output','public','success','exit_code')}
         return {'phase':'correction','accepted':False,'error':error,'verification':result},candidate(task,context,2)
     return {'phase':'unresolved','accepted':False,'termination':'tool_failures','route':'direct',

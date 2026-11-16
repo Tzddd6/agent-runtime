@@ -58,6 +58,48 @@ class EngineeringLoopTests(unittest.TestCase):
                 with self.assertRaises(ValueError):execute_plugin({**task,'arguments':{'patches':[one,other]}})
                 self.assertEqual((root/'a.py').read_text(),'x=1\n')
 
+    @unittest.skipUnless(os.name=='posix','scoped uploads require Linux')
+    def test_imported_python_attachments_preserve_names_and_refuse_overwrite(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp);(root/'uploads').mkdir()
+            (root/'uploads'/('a'*32+'.py')).write_text('x=1\n');(root/'uploads'/('b'*32+'.py')).write_text('x=2\n')
+            files=[{'path':'uploads/'+'a'*32+'.py','name':'calc.py'},{'path':'uploads/'+'b'*32+'.py','name':'test_calc.py'}]
+            task={'_workspace':tmp,'plugin':'workspace.import','arguments':{'files':files}}
+            execute_plugin(task);self.assertEqual((root/'test_calc.py').read_text(),'x=2\n')
+            snapshot=execute_plugin({'_workspace':tmp,'plugin':'workspace.inspect','arguments':{}})
+            self.assertEqual(len(snapshot['files']),2)
+            (root/'calc.py').write_text('user_change=1\n')
+            with self.assertRaises(ValueError):execute_plugin(task)
+            self.assertEqual((root/'calc.py').read_text(),'user_change=1\n')
+
+    @unittest.skipUnless(os.name=='posix','fixed-project verification runs real processes')
+    def test_public_diagnostics_are_specific_and_hidden_cases_not_exposed(self):
+        from agent_runtime.engineering import run_check
+        broken=FIXED.replace('unit_cents * quantity * (100 - discount_pct) // 100','unit_cents * quantity - (unit_cents * quantity * discount_pct) // 100')
+        with tempfile.TemporaryDirectory() as tmp:
+            result=run_check(broken,Path(tmp)/'check','pricing')
+            self.assertFalse(result['success']);self.assertTrue(result['public']['failures_detail'])
+            self.assertNotIn('failures_detail',result['heldout'])
+            self.assertIn('expected',result['public']['failures_detail'][0])
+
+    @unittest.skipUnless(os.name=='posix','fixed-project verification runs real processes')
+    def test_identical_failed_correction_reuses_failed_verification(self):
+        from agent_runtime.runtime import run
+        from agent_runtime.model_gateway import ModelGateway
+        broken=FIXED.replace('unit_cents * quantity * (100 - discount_pct) // 100','unit_cents * quantity - (unit_cents * quantity * discount_pct) // 100')
+        class Client:
+            model='offline';timeout=2;calls=0
+            def complete(self,messages,*args):
+                self.calls+=1
+                if self.calls==2 and 'failures_detail' not in json.dumps(messages):raise AssertionError('missing public diagnostics')
+                return {'content':json.dumps({'source':broken}),'usage':{}}
+        client=Client()
+        with tempfile.TemporaryDirectory() as tmp,patch('agent_runtime.runtime.ModelGateway.from_env',side_effect=lambda p:ModelGateway(client,p)):
+            states,events=run(auto_tasks('修复pricing'),quiet=True,output_dir=tmp,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            final=next(e['result']['result'] for e in events if e['task_id']=='repair_check_2' and e['state']=='succeeded')
+            self.assertFalse(final['accepted']);self.assertEqual(client.calls,2)
+            self.assertTrue(final['verification']['reused_from_previous_failed_check'])
+
     @unittest.skipUnless(os.name=='posix','verified artifact uses Linux scoped files')
     def test_controlled_loop_uses_one_call_and_delivers_exact_tested_artifact(self):
         from agent_runtime.runtime import run

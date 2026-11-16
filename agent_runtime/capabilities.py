@@ -44,6 +44,7 @@ PLUGINS={'text.stats':'统计文本字符、行与词数',
          'context.search':'检索当前Agent已获授权的上下文语义片段、来源与冲突主张',
          'context.read':'按不可变引用分页读取已获授权的完整原始上下文',
          'workspace.inspect':'读取当前Python项目的源码、测试清单与哈希',
+         'workspace.import':'把本会话Python附件按原文件名导入工程，拒绝覆盖不同文件',
          'workspace.apply_patch':'校验整批哈希后修改已有源码，禁止修改测试',
          'workspace.test':'隔离运行unittest，拒绝0测试或全部跳过的假成功',
          'library.search':'检索版本化的Python、SQL、Git、HTTP和Linux资料',
@@ -63,7 +64,7 @@ ARGUMENTS={
  'artifact.write':{'path':'report.md','content':'产物正文'},'runtime.observe':{},
  'runtime.configure':{'workers':2,'policy':'fifo/resource_fit/aging_fit/drf'},
  'context.search':{'query':'并发预算与上游失败','limit':6},'context.read':{'ref':'64位source_ref','offset':0,'limit':4000},
- 'workspace.inspect':{},'workspace.test':{},'workspace.apply_patch':{'patches':[{'path':'calc.py','sha256':'原SHA','content':'完整新源码'}]},
+ 'workspace.inspect':{},'workspace.test':{},'workspace.import':{'files':[{'path':'uploads/附件id.py','name':'calc.py'},{'path':'uploads/测试附件id.py','name':'test_calc.py'}]},'workspace.apply_patch':{'patches':[{'path':'calc.py','sha256':'原SHA','content':'完整新源码'}]},
  'library.search':{'query':'Python测试','limit':4},'library.read':{'id':'python-testing'},'tools.discover':{'query':'file.read'}}
 
 
@@ -71,7 +72,7 @@ def catalog():
     return {'skills':[{'id':key,'description':value} for key,value in SKILLS.items()],
             'plugins':[{'id':key,'description':value,'arguments_example':ARGUMENTS[key],
                 'permissions':['sandboxed_command' if key=='command.run' else 'public_network' if key=='web.fetch'
-                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
+                    else 'workspace_write' if key in ('file.write','file.copy','file.replace','artifact.write','workspace.apply_patch','workspace.import') else 'sandboxed_command' if key=='workspace.test' else 'runtime_control' if key=='runtime.configure' else 'bounded_read_or_compute']}
                 for key,value in PLUGINS.items()],
             'host_arbitrary_code_execution':False,'external_plugins_installed':False}
 

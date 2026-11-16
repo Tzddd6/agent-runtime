@@ -345,6 +345,13 @@ for group,rows in cases.items():
     result=unittest.TextTestRunner(stream=stream,verbosity=1).run(suite)
     report[group]={'total':result.testsRun,'passed':result.testsRun-len(result.failures)-len(result.errors),
                    'failed':len(result.failures),'errors':len(result.errors),'stdout':stream.getvalue()}
+    if group=='public':
+        details=[]
+        for test,trace in (result.failures+result.errors)[:4]:
+            index=int(test.shortDescription().split(':')[-1])
+            name,args,expected=rows[index]
+            details.append({'function':name,'args':args,'expected':expected,'assertion':trace.strip().splitlines()[-1][:300]})
+        report[group]['failures_detail']=details
 print(json.dumps(report))
 '''
 

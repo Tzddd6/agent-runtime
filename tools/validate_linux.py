@@ -40,6 +40,9 @@ strict_names=[
  'test_context_control.ContextControlTests.test_forged_delegation_fails_without_stopping_independent_agent',
  'test_context_control.ContextControlTests.test_real_model_worker_uses_bounded_view_and_preserves_evidence',
  'test_context_control.ContextControlTests.test_empty_claim_contract_is_isolated_before_publication']
+strict_names += ['test_engineering_loop.EngineeringLoopTests.test_workspace_loop_corrects_once_without_modifying_tests',
+ 'test_engineering_loop.EngineeringLoopTests.test_controlled_loop_uses_one_call_and_delivers_exact_tested_artifact',
+ 'test_engineering_loop.EngineeringLoopTests.test_identical_failed_correction_reuses_failed_verification']
 ret=subprocess.run([sys.executable,'-m','unittest','-v',*strict_names],env=env)
 if ret.returncode:raise SystemExit(ret.returncode)
 from agent_runtime.runtime import run
