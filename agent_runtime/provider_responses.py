@@ -80,7 +80,7 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     from .transport_trace import Trace
     trace=Trace();trace.emit('request_start');events_seen=0;callbacks=0;wire_seen=False;text_seen=False
     callback_opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()) if callback else None
-    started=time.monotonic();last=0.;pending=[];enabled=True;response_value=None
+    started=time.monotonic();last=0.;pending=[];enabled=True;response_value=None;size=0;text_bytes=0
     def emit(force=False):
         nonlocal last,enabled,callbacks
         if not callback or not pending or not enabled or not force and time.monotonic()-last<.12:return
@@ -108,7 +108,9 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
                     if not line.startswith(b'data:'):continue
                     payload=line[5:].strip()
                     if payload==b'[DONE]':break
-                    event=json.loads(payload);kind=event.get('type');events_seen+=1
+                    event=json.loads(payload)
+                    if not isinstance(event,dict):raise ValueError('Responses event must be an object')
+                    kind=event.get('type');events_seen+=1
                     if kind=='response.output_text.delta':
                         delta=event.get('delta')
                         if not isinstance(delta,str):raise ModelError('Invalid Responses delta')
@@ -118,7 +120,8 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
                         if enabled:pending.append(delta);emit()
                     elif kind in ('response.completed','response.incomplete'):response_value=event.get('response');trace.emit('terminal',wire_bytes=size,text_bytes=text_bytes,events=events_seen,callbacks=callbacks);break
                     elif kind in ('response.failed','error') or event.get('error'):
-                        raw_error=event.get('error') or (event.get('response') or {}).get('error') or {}
+                        failed_response=event.get('response') if isinstance(event.get('response'),dict) else {}
+                        raw_error=event.get('error') or failed_response.get('error') or {}
                         error_name=raw_error.get('code',raw_error.get('type')) if isinstance(raw_error,dict) else None
                         error_kind={'rate_limit_exceeded':1,'server_error':2,'timeout':3,'invalid_request_error':4,'insufficient_quota':5}.get(error_name,0) if isinstance(error_name,str) else 0
                         trace.emit('provider_error',events=events_seen,wire_bytes=size,error_kind=error_kind)
@@ -137,7 +140,7 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     except (TimeoutError,urllib.error.URLError) as exc:
         trace.emit('transport_error')
         raise ModelError('Relay transport timeout or connection failure; billing unknown',code='MODEL_TIMEOUT' if isinstance(exc,TimeoutError) or isinstance(getattr(exc,'reason',None),TimeoutError) else 'MODEL_UPSTREAM_FAILED') from None
-    except (ValueError,KeyError,TypeError):
+    except (ValueError,KeyError,TypeError,AttributeError):
         trace.emit('parser_error')
         raise ModelError('Relay Responses schema failed; billing unknown; no retry',code='MODEL_UPSTREAM_FAILED') from None
     except OSError:

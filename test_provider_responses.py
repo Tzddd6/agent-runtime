@@ -65,6 +65,13 @@ class ResponseTests(unittest.TestCase):
     self.assertTrue(all(e['source']=='provider_content_delta' and 'delta' not in e for e in events));self.assertNotIn('PRIVATE-REASONING-MARKER',json.dumps(events))
     self.assertEqual(next(e['result']['result'] for e in records if e['state']=='succeeded'),text)
   finally:server.shutdown();server.server_close();thread.join()
+ def test_stream_error_is_classified_without_provider_error_text(self):
+  events=[{'type':'error','error':{'code':'server_error','message':'private-provider-sentinel'}}];traces=[]
+  class Trace:
+   def emit(self,stage,**values):traces.append({'stage':stage,**values})
+  with patch('agent_runtime.transport_trace.Trace',return_value=Trace()),patch('agent_runtime.model_network.provider_opener',return_value=self.stream(events)):
+   with self.assertRaises(ModelError) as caught:complete(AizexClient(KEY),[{'role':'user','content':'fixture'}],128,{'url':'http://127.0.0.1:1/progress','token':'synthetic'})
+  self.assertEqual(caught.exception.code,'MODEL_UPSTREAM_FAILED');self.assertTrue(any(t['stage']=='provider_error' and t['error_kind']==2 for t in traces));self.assertNotIn('private-provider-sentinel',json.dumps(traces))
  def test_incomplete_output_stays_incomplete(self):
   v=response();v['status']='incomplete';self.assertEqual(decode(v,'model')['finish_reason'],'length')
 if __name__=='__main__':unittest.main()
