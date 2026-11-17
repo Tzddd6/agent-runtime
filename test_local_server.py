@@ -1,4 +1,5 @@
 import threading
+import socket
 import unittest
 import urllib.request
 from http.server import BaseHTTPRequestHandler
@@ -6,6 +7,18 @@ from agent_runtime.local_server import LocalHTTPServer
 
 
 class LocalServerTests(unittest.TestCase):
+    def test_partial_headers_cannot_hold_teardown_forever(self):
+        entered=threading.Event()
+        class Handler(BaseHTTPRequestHandler):
+            def setup(self):super().setup();entered.set()
+            def log_message(self,*args):pass
+        server=LocalHTTPServer(('127.0.0.1',0),Handler);server.request_timeout=.1
+        thread=threading.Thread(target=server.serve_forever);thread.start()
+        client=socket.create_connection(server.server_address,timeout=2);client.sendall(b'GET / HTTP/1.1\r\n')
+        self.assertTrue(entered.wait(2));server.shutdown()
+        closer=threading.Thread(target=server.server_close);closer.start();closer.join(2)
+        client.close();thread.join(2);self.assertFalse(closer.is_alive())
+
     def test_shutdown_wakes_an_idle_server_without_polling(self):
         server=LocalHTTPServer(('127.0.0.1',0),BaseHTTPRequestHandler)
         thread=threading.Thread(target=server.serve_forever,kwargs={'poll_interval':3600})

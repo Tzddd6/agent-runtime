@@ -10,6 +10,7 @@ from http.server import ThreadingHTTPServer
 
 
 class LocalHTTPServer(ThreadingHTTPServer):
+    request_timeout = 5
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._wake_read, self._wake_write = socket.socketpair()
@@ -17,6 +18,11 @@ class LocalHTTPServer(ThreadingHTTPServer):
         self._stopped = threading.Event()
         self._serving_thread = None
         self._wake_closed = False
+
+    def get_request(self):
+        request,address=super().get_request()
+        request.settimeout(self.request_timeout) # Bound even incomplete HTTP headers.
+        return request,address
 
     def serve_forever(self, poll_interval=None):
         # poll_interval is accepted for BaseServer compatibility, not used.
