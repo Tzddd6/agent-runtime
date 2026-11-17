@@ -299,6 +299,13 @@ function renderDetail(job){
   const changed=viewJob!==job.id;
   if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':job.preset==='agents'?'agents':'resources';phaseSignature=''}
   renderDetailBase(job);renderOverview(job);renderInspector();renderAgents(job);showView(currentView);
+  const recovery=job.recovery,checkpoint=$('checkpointState'),resume=$('resumeSafe');
+  if(checkpoint)checkpoint.textContent=!recovery?.available?'该历史记录没有可读取的持久检查点。':
+    '已确认完成 '+recovery.completed+' 项，未完成 '+recovery.unfinished+' 项。'+
+    (recovery.blocked_tasks?.length?'结果不确定的操作：'+recovery.blocked_tasks.join('、')+'。请核对实际结果，系统不会自动重放。':
+    recovery.can_resume_demo?'可恢复安全演示，已确认完成的步骤不会重做。':'检查点已保存；模型调用与有副作用操作不会自动重放。');
+  if(resume){resume.hidden=!recovery?.can_resume_demo;resume.disabled=offline||recoveryRequired;
+    resume.onclick=async()=>{resume.disabled=true;try{await api('jobs/'+job.id+'/resume-safe',{});await refresh()}catch(e){$('notice').textContent=e.message}}}
 }
 function modelBudgetText(resources){
   if(!resources)return '该历史记录没有模型额度快照';

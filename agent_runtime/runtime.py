@@ -133,9 +133,34 @@ def validate(tasks):
             del pending[key]
 
 
-def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
+def run(tasks,max_workers=2,timeout=10,*,checkpoint_dir=None,resume=False,recovery_owner='local',**options):
+    if checkpoint_dir is None:
+        if resume:raise ValueError('Resume requires an explicit checkpoint directory')
+        return _run(tasks,max_workers,timeout,**options)
+    from .checkpoint import WorkflowCheckpoint
+    import inspect
+    validate(tasks)
+    options=dict(options)
+    if options.get('output_dir') is None:options['output_dir']=Path(checkpoint_dir).absolute().parent/'runs'
+    bound=inspect.signature(_run).bind(tasks,max_workers,timeout,**options);bound.apply_defaults()
+    fields=('tasks','max_workers','timeout','budget','policy','max_tasks','agents','model_budget',
+            'context_mode','worker_backend','context_compression_level','model_task_timeout')
+    specification={k:bound.arguments[k] for k in fields}
+    specification['output_dir']=str(Path(options['output_dir']).resolve())
+    specification['workspace']=str(Path(options['workspace']).resolve()) if options.get('workspace') else None
+    client=options.get('model_client')
+    def uses_model(batch):
+        return any(t.get('action')=='llm' or t.get('plugin')=='computer.run' or uses_model(t.get('spawn',[])) for t in batch)
+    if not uses_model(tasks):client=None
+    specification['model']={k:getattr(client,k,None) for k in ('model','provider','profile_id','profile_revision')}
+    checkpoint=WorkflowCheckpoint(checkpoint_dir,recovery_owner,specification,resume=resume)
+    try:return _run(tasks,max_workers,timeout,_checkpoint=checkpoint,**options)
+    finally:checkpoint.close()
+
+
+def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None,model_task_timeout=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None,model_task_timeout=None,_checkpoint=None):
     validate(tasks)
     if model_task_timeout is not None and (type(model_task_timeout) not in (int,float) or not math.isfinite(model_task_timeout) or not 1<=model_task_timeout<=180):raise ValueError('Invalid trusted model task deadline')
     def bound_model_task(task):
@@ -159,7 +184,23 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         raise ValueError('control 必须是尚未结束的 RuntimeControl')
     scheduler = AdmissionScheduler(policy,budget,DEFAULTS)
     root = Path(output_dir or tempfile.mkdtemp(prefix='agentrt-')).resolve() / uuid.uuid4().hex
-    root.mkdir(parents=True)
+    restored=_checkpoint.data if _checkpoint and 'root' in _checkpoint.data else None
+    if restored:
+        root=Path(restored['root'])
+        if root.is_symlink() or root.parent!=Path(output_dir).resolve():raise ValueError('Recovery output directory mismatch')
+        tasks=restored['tasks'];validate(tasks)
+    root.mkdir(parents=True,exist_ok=bool(restored),mode=0o700)
+    if restored:
+        # A process may die after journal.flush() but before checkpoint commit.
+        # Keep the old journal as evidence, then expose only committed events.
+        import os
+        previous=root/'events.jsonl'
+        if previous.is_symlink():raise ValueError('Recovery journal symlink refused')
+        if previous.exists():previous.rename(root/('events-interrupted-'+uuid.uuid4().hex+'.jsonl'))
+        fd=os.open(previous,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
+        with os.fdopen(fd,'w',encoding='utf-8') as stream:
+            for row in restored['events']:stream.write(json.dumps(row,ensure_ascii=False)+'\n')
+            stream.flush();os.fsync(stream.fileno())
     # A single fixed leaf cannot amortize a preloader's extra resident memory.
     # Dynamic control stages and multi-task graphs can reuse preloaded imports.
     resolved_backend=worker_backend
@@ -173,25 +214,33 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     project_workspace=Path(workspace).resolve() if workspace is not None else root/'workspace'
     project_workspace.mkdir(parents=True,exist_ok=True,mode=0o700)
     registry=AgentRegistry(budget,agents,cgroup_root=Path(cgroup_root) if cgroup_root else None,
-                           workflow_id=root.name,model_budget=model_budget)
-    agent_journal=(root/'agents.jsonl').open('w',encoding='utf-8');registry.journal=agent_journal
+                           workflow_id=root.name+('-r'+uuid.uuid4().hex[:8] if restored else ''),model_budget=model_budget)
+    agent_journal=(root/'agents.jsonl').open('a' if restored else 'w',encoding='utf-8');registry.journal=agent_journal
     executor.agent_roots=registry.groups
     store = ContextStore(root / 'contexts',compression_level=context_compression_level)
     tasks = [dict(t) for t in tasks]
     task_by_id = {t['id']: t for t in tasks}
-    states = {t['id']: 'waiting' for t in tasks}
-    attempts = {t['id']: 0 for t in tasks}
+    states = dict(restored['states']) if restored else {t['id']: 'waiting' for t in tasks}
+    attempts = dict(restored['attempts']) if restored else {t['id']: 0 for t in tasks}
     used = {k: 0 for k in budget}
-    running, events = {}, []
+    running, events = {}, list(restored['events']) if restored else []
     gateway = broker = None
-    outputs = {} # task ID -> immutable ContextStore reference
+    outputs = dict(restored['outputs']) if restored else {} # task ID -> immutable ContextStore reference
     dataflow = {'context_ref_deliveries':0,'input_ref_deliveries':0,'semantic_ref_deliveries':0}
     sampler, last_telemetry, terminal_usage = CgroupSampler(), [0], {}
-    journal = (root / 'events.jsonl').open('w', encoding='utf-8')
+    journal = (root / 'events.jsonl').open('a' if restored else 'w', encoding='utf-8')
     channel = _ObserverChannel(observer) if observer is not None else None
     sample_sequence = [0]
     completion=CompletionWaiter()
     scheduling_stats={'iterations':0,'decisions':0}
+
+    def checkpoint_state(intent=None):
+        if _checkpoint:
+            saved=dict(states)
+            if intent:saved[intent]='running'
+            _checkpoint.record(root=root,tasks=tasks,states=saved,attempts=attempts,events=events,
+                               outputs=outputs,store=store,cgroup_root=cgroup_root,
+                               agent_modes={k:a.mode for k,a in registry.agents.items()})
 
     def observe(force=False):
         registry.synchronize(states,finished=control.closed)
@@ -266,6 +315,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         # Preserve every journal event, but sample cgroups once per dispatch or
         # completion batch instead of rereading every Agent for every task.
         registry.synchronize(states)
+        checkpoint_state()
 
     def cleanup_attempt(key, handle, limits):
         if gateway and handle.get('gateway_token'):gateway.revoke(handle['gateway_token'])
@@ -286,9 +336,16 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
 
     execution_failed=False
     try:
+        if restored:
+            store.grants={k:set(v) for k,v in restored['grants'].items()};store.sources=restored.get('sources',{})
+            for ref,readers in store.grants.items():
+                if readers:store.get(ref,next(iter(readers))) # Verify bytes before restoring authority.
         try:
             for identity in registry.specs:registry.register(identity)
             for task in tasks:registry.attach(task)
+            if restored and restored.get('model_ledger'):registry.model_budgets.restore(restored['model_ledger'])
+            registry.model_budgets.checkpoint=_checkpoint
+            checkpoint_state()
         except OSError as exc:raise RuntimeError('EXECUTION_BACKEND_FAILED: Agent cgroup registration failed') from exc
         control.publish(registry.snapshots())
         observe(force=True)
@@ -321,7 +378,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         if states[key]=='waiting':event(key,'cancelled',reason='所属 Agent 已终止')
                     a.mode='terminated'
                 else:a.mode='paused' if operation=='pause' else 'open'
-                registry.synchronize(states);control.acknowledge(command);observe(force=True)
+                registry.synchronize(states);control.acknowledge(command);checkpoint_state();observe(force=True)
             if cancel_event is not None and cancel_event.is_set():
                 for key, (handle, task, limits) in list(running.items()):
                     cleanup_attempt(key,handle,limits)
@@ -413,6 +470,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         event(key, 'failed', error=str(exc))
                         continue
                 directory = root / f'{key}-{attempts[key]}'
+                checkpoint_state(intent=key) # Record uncertainty BEFORE crossing the execution boundary.
                 try:
                     handle = executor.launch(payload, directory, limits)
                 except (ValueError,TypeError) as exc:
@@ -573,6 +631,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             raise RuntimeError('CLEANUP_FAILED: '+'; '.join(cleanup_errors))
         if teardown_errors:
             raise RuntimeError('TEARDOWN_FAILED: '+'; '.join(teardown_errors))
+        if _checkpoint:_checkpoint.clean()
     (root / 'summary.json').write_text(json.dumps({'states': states, 'attempts': attempts,
                                                 'agents':registry.snapshots(),'agent_controls':control.history(),
                                                 'dataflow':dataflow,'policy':policy,

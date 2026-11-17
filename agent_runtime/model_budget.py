@@ -26,6 +26,7 @@ class ModelBudgetLedger:
         self.budget=validate_budget({} if budget is None else budget,DEFAULT_WORKFLOW_MODEL_BUDGET)
         self.used={'calls':0,'output_tokens':0}
         self.agents={}
+        self.checkpoint=None
 
     def register(self,agent,budget=None):
         limits=validate_budget({} if budget is None else budget,DEFAULT_AGENT_MODEL_BUDGET)
@@ -48,8 +49,28 @@ class ModelBudgetLedger:
                     raise ModelBudgetExceeded('模型累计调用或输出额度不足；请求未提交')
             for k in request:
                 entry['used'][k]+=request[k];self.used[k]+=request[k]
+            if self.checkpoint is not None:
+                self.checkpoint.model_admission(self.budget,self.used,self.agents)
             # Never refund after provider submission: failed/cancelled requests
             # may still be billed remotely. This is not actual token usage.
+
+    def restore(self,value):
+        """Do not reset admitted call/output reservations after a restart."""
+        with self.lock:
+            if value['budget']!=self.budget or set(value['agents'])!=set(self.agents):
+                raise ValueError('Recovery model budget identities changed')
+            totals={'calls':0,'output_tokens':0}
+            for identity,entry in value['agents'].items():
+                if entry['budget']!=self.agents[identity]['budget']:raise ValueError('Recovery Agent model budget changed')
+                for name in totals:
+                    amount=entry['used'][name]
+                    if type(amount) is not int or not 0<=amount<=entry['budget'][name]:raise ValueError('Invalid recovered model usage')
+                    totals[name]+=amount
+                self.agents[identity]['used']=dict(entry['used'])
+                self.agents[identity]['rejected']=entry.get('rejected',0)
+            if totals!=value['used'] or any(totals[k]>self.budget[k] for k in totals):
+                raise ValueError('Invalid recovered workflow model usage')
+            self.used=dict(totals)
 
     def snapshot(self,agent=None):
         with self.lock:

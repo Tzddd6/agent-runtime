@@ -363,7 +363,8 @@ class ModelGateway:
                 except (BrokenPipeError, ConnectionResetError):
                     pass
 
-        self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        from .local_server import LocalHTTPServer
+        self.server = LocalHTTPServer(('127.0.0.1', 0), Handler)
         # 关闭时等待本地调用线程收敛，避免取消后立刻叠加新工作流的调用槽。
         self.server.daemon_threads = False
         self.thread = threading.Thread(target=self.server.serve_forever,kwargs={'poll_interval':.02},daemon=True)

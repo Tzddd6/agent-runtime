@@ -101,6 +101,7 @@
       <section class="panel" data-pane="tasks"><div class="panel-title"><h2>任务依赖与调度状态</h2><span class="muted">依赖完成后才可分配资源</span></div><div id="dependencyGraph" class="dependency-graph"><div class="empty compact">暂无任务图</div></div></section>
       <section class="panel" id="timelineSection" data-pane="resources tasks"><div class="panel-title"><div><h2>Attempt 执行时间线</h2><p class="hint title-hint">每条代表一次真实执行；重试会生成新的 Attempt。</p></div><span id="timelineDuration" class="muted">—</span></div><div id="timeline" class="timeline"><div class="empty compact">任务启动后显示资源占用区间</div></div></section>
       <section class="panel" id="taskInspector" data-pane="tasks" hidden><div class="panel-title"><h2 id="inspectorTitle">任务详情</h2><button id="closeInspector" class="secondary">关闭</button></div><p id="inspectorMeta" class="hint"></p><pre id="inspectorBody" class="answer"></pre></section><section class="panel" id="answer" data-pane="logs" hidden><div class="panel-title"><h2>执行结果</h2></div><pre id="answerText" class="answer"></pre></section>
+      <section class="panel" data-pane="logs"><div class="panel-title"><h2>持久检查点与恢复</h2><button id="resumeSafe" class="secondary" hidden>恢复安全演示</button></div><p id="checkpointState" class="hint">选择运行记录查看检查点。</p></section>
       <details class="panel event-panel" data-pane="logs" open><summary><span>原始执行事件</span><span id="eventCount" class="muted">0 条</span></summary><pre id="events" class="log">等待工作流启动…</pre><p class="hint">停止模型任务不保证远端模型计算或计费同时停止。</p></details>
     </div>
   </div>

@@ -58,8 +58,9 @@ class Broker:
                 except OSError:
                     pass
 
-        self.server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
-        # Default HTTPServer polling adds up to 0.5s to every workflow teardown.
+        from .local_server import LocalHTTPServer
+        self.server = LocalHTTPServer(('127.0.0.1', 0), Handler)
+        # Explicit wakeup avoids a polling interval in every workflow teardown.
         self.thread = threading.Thread(target=self.server.serve_forever,
                                        kwargs={'poll_interval':.02},daemon=True)
         self.thread.start()

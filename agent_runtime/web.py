@@ -249,7 +249,8 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model,model_task_timeout=(workflow_model.timeout+20 if provider_info.get('provider')=='aizex' else None))
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model,model_task_timeout=(workflow_model.timeout+20 if provider_info.get('provider')=='aizex' else None),
+                                checkpoint_dir=job['directory']/'recovery' if os.name=='posix' else None,recovery_owner=self.user_identity)
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
@@ -482,7 +483,62 @@ class Controller:
                                    else result.get('model_resource_summary',(monitor or {}).get('model_resources')))
         result['agent_controls']=((monitor or {}).get('agent_controls',[]) if result['status'] in ('running','cancelling')
                                  else result.get('agent_control_summary',(monitor or {}).get('agent_controls',[])))
+        if (directory/'recovery'/'state.json').exists():
+            from .checkpoint import recovery_view
+            try:
+                result['recovery']=recovery_view(directory/'recovery',self.user_identity)
+                result['recovery']['can_resume_demo']=(result['status']=='interrupted' and result['preset'] in ('dynamic','resources','document')
+                    and not result['recovery']['blocked_tasks'] and not result['recovery']['mailbox_reconciliation_required']
+                    and not result['recovery']['paused_agents'])
+            except (ValueError,OSError,KeyError,TypeError):result['recovery']={'available':False,'can_resume_demo':False}
         return result
+
+    def resume_safe_demo(self,key):
+        """Explicit recovery of non-model demos; never silently restart chat calls."""
+        from .checkpoint import read_checkpoint
+        def begin():
+            identity(key)
+            with self.lock:
+                if key not in self.jobs:raise ValueError('工作流不存在')
+            detail=self.detail(key)
+            if not detail.get('recovery',{}).get('can_resume_demo'):raise ValueError('该记录需要管理员核对，不会自动重放模型或有副作用的操作')
+            with self.lock:
+                if self.recovery_required or any(j['status'] in ('running','cancelling') for j in self.jobs.values()):raise ValueError('已有任务运行或资源待回收')
+                job=self.jobs[key];data=read_checkpoint(job['directory']/'recovery',self.user_identity)
+                settings=dict(data['specification']);tasks=settings.pop('tasks');model=settings.pop('model')
+                if any(v is not None for v in model.values()):raise ValueError('模型工作流需显式核对模型及费用，不从演示入口恢复')
+                workers=settings.pop('max_workers');timeout=settings.pop('timeout')
+                current_budget=self.resource_budget(self.machine.sample()['service'])
+                if settings.get('budget') and any(v>current_budget[k] for k,v in settings['budget'].items()):
+                    raise ValueError('旧任务预算超过当前服务上限，不会扩大资源许可')
+                job['status']='running';job['cancel']=threading.Event();job['_control']=RuntimeControl()
+                job.pop('error',None);job.pop('finished',None);self.store.save(job)
+            def observe(sample):
+                with self.lock:job['monitor']=sample
+            def execute():
+                try:
+                    states,_=run(tasks,workers,timeout,**settings,cgroup_root=self.cgroup_root,quiet=True,
+                        cancel_event=job['cancel'],observer=observe,control=job['_control'],
+                        checkpoint_dir=job['directory']/'recovery',resume=True,recovery_owner=self.user_identity)
+                    with self.lock:
+                        job['final_states']=states
+                        job['status']='succeeded' if all(v=='succeeded' for v in states.values()) else 'cancelled' if 'cancelled' in states.values() else 'failed'
+                except Exception as exc:
+                    with self.lock:
+                        cleanup_fault=str(exc).startswith(('CLEANUP_FAILED','TEARDOWN_FAILED','EXECUTION_BACKEND_FAILED'))
+                        if cleanup_fault:self.recovery_required=True
+                        job['status']='recovery_required' if cleanup_fault else 'interrupted'
+                        job['error']=RECOVERY_MESSAGE if cleanup_fault else '恢复未执行完成，检查点保留；请核对权限、配置、上下文和旧执行资源'
+                finally:
+                    with self.lock:
+                        job['finished']=time.time();job['_control'].close()
+                        try:self.store.save(job)
+                        except (OSError,ValueError):self.storage_warning=True
+            threading.Thread(target=execute,daemon=True).start()
+            return key
+        if self.global_gate is not None:
+            with self.global_gate.lock:self.global_gate.check_idle();return begin()
+        return begin()
 
     def control_agent(self,key,identity,operation):
         with self.lock:
@@ -643,6 +699,8 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token='', *, ten
                 elif len(self.path.split('/'))==7 and self.path.startswith('/api/jobs/') and self.path.split('/')[4]=='agents':
                     parts=self.path.split('/')
                     self.respond(202,controller.control_agent(parts[3],parts[5],parts[6]))
+                elif len(self.path.split('/'))==5 and self.path.endswith('/resume-safe') and self.path.startswith('/api/jobs/'):
+                    self.respond(202,{'id':controller.resume_safe_demo(self.path.split('/')[3])})
                 elif self.path.endswith('/cancel') and self.path.startswith('/api/jobs/'):
                     key=self.path.split('/')[-2]
                     controller.cancel_job(key)
