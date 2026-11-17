@@ -1,0 +1,24 @@
+{
+  "runtime_succeeded": true,
+  "gateway_received_deltas": 2,
+  "gateway_first_delta_seconds": 14.413422593999712,
+  "final_exact_short_text": true,
+  "usage": {
+    "prompt_tokens": 22,
+    "completion_tokens": 6,
+    "total_tokens": 28,
+    "prompt_tokens_details": {
+      "cache_write_tokens": 0,
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 0
+    }
+  },
+  "original_observer_wrong_field": true,
+  "observer_expected_field": "text (cumulative)",
+  "observer_used_field": "delta",
+  "stream_final_hash_validation_in_provider_adapter": true,
+  "no_additional_provider_call": true,
+  "passed": true
+}

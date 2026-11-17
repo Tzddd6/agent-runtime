@@ -88,6 +88,22 @@ class Fixture:
   else:content={'cpu_cores':.2,'memory_bytes':209715200,'swap_bytes':0,'reservation_equals_usage':False}
   return {'content':json.dumps(content),'finish_reason':'stop','model':'fixture','usage':{'prompt_tokens':10,'completion_tokens':10},'latency_seconds':0.}
 
+def execute_case(case,arm,client,invoke,repeat):
+ start=time.monotonic();cpu=time.process_time();attempt_start=len(client.ledger.rows);record_start=len(client.records);error_type=None
+ try:
+  text=invoke(arm,case['messages'])
+  if case['id']=='tool_chain':
+   if digest(json.loads(text))!=digest(case['tool_request']):raise ValueError('Tool protocol rejected; do not request stage two')
+   follow=case['messages']+[{'role':'assistant','content':json.dumps(case['tool_request'],sort_keys=True)},{'role':'user','content':'The observed inventory tool result is '+json.dumps(case['tool_result'],sort_keys=True)+'. Return JSON with sku and available=stock-reserved.'}]
+   text=invoke(arm,follow)
+  passed=grade(case,text)
+ except Exception as exc:
+  # Resource recovery failure is not an ordinary model-task failure.
+  if isinstance(exc,RuntimeError) and str(exc).startswith(('CLEANUP_FAILED:','TEARDOWN_FAILED:')):raise
+  passed=False;error_type=type(exc).__name__
+ attempts=client.ledger.rows[attempt_start:];records=client.records[record_start:]
+ return {'repeat':repeat,'case':case['id'],'arm':arm,'seconds':time.monotonic()-start,'coordinator_cpu_seconds':time.process_time()-cpu,'passed':passed,'request_hashes':[r['request_sha256'] for r in attempts],'calls':len(attempts),'usage':{k:sum(r['usage'][k] for r in records) for k in ('prompt_tokens','completion_tokens')},'usage_unknown_calls':sum('usage' not in r for r in attempts),'broker_seconds':sum(r.get('transport_timings',{}).get('broker_seconds',0) for r in records),'provider_seconds':sum(r.get('provider_seconds') or 0 for r in records),'case_error_type':error_type}
+
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--aizex',action='store_true',help='Explicitly use Aizex gpt-6-luna and the user-supplied published nominal token prices');p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
  if a.repeats!=2:p.error('This small preflight has exactly two repetitions (16 calls total)')
@@ -111,18 +127,14 @@ def main():
    for repeat in range(2):
     for case in cases():
      for arm in (('direct','runtime') if repeat==0 else ('runtime','direct')):
-      start=time.monotonic();cpu=time.process_time();begin=len(client.records);text=call(arm,case['messages'])
-      if case['id']=='tool_chain':
-       if digest(json.loads(text))!=digest(case['tool_request']):raise ValueError('Tool protocol failed; no second call')
-       follow=case['messages']+[{'role':'assistant','content':json.dumps(case['tool_request'],sort_keys=True)},{'role':'user','content':'The observed inventory tool result is '+json.dumps(case['tool_result'],sort_keys=True)+'. Return JSON with sku and available=stock-reserved.'}]
-       text=call(arm,follow)
-      records=client.records[begin:];row={'repeat':repeat,'case':case['id'],'arm':arm,'seconds':time.monotonic()-start,'coordinator_cpu_seconds':time.process_time()-cpu,'passed':grade(case,text),'request_hashes':[r['request_sha256'] for r in records],'calls':len(records),'usage':{k:sum(r['usage'][k] for r in records) for k in ('prompt_tokens','completion_tokens')},'broker_seconds':sum(r.get('transport_timings',{}).get('broker_seconds',0) for r in records),'provider_seconds':sum(r.get('provider_seconds') or 0 for r in records)}
+      row=execute_case(case,arm,client,call,repeat)
       rows.append(row);(a.output/'rows.json').write_text(json.dumps(rows,indent=2));print(json.dumps(row),flush=True)
   finally:session_stats=dict(session.stats)
  pairs=[(next(r for r in rows if r['repeat']==repeat and r['case']==case['id'] and r['arm']=='direct'),next(r for r in rows if r['repeat']==repeat and r['case']==case['id'] and r['arm']=='runtime')) for repeat in range(2) for case in cases()]
- if not all(d['request_hashes']==r['request_hashes'] for d,r in pairs):raise ValueError('Unmatched provider requests; comparison invalid')
- summary={'live':a.live,'supplier_requests':len(ledger.rows) if a.live else 0,'fixture_calls':len(ledger.rows) if not a.live else 0,'model':c.model,'provider':'aizex' if a.aizex else 'openai','paired_requests_identical':True,'repeats':2,'tasks_per_arm':6,'reserved_usd':ledger.reserved,'session':session_stats,'arms':{},'limits':['Six small tasks per arm, not an official capability score or significance result','Direct shares the same RAM broker, TLS path and parameters; no raw HTTP speed claim','Same explicit two-turn tool protocol and canonicalized messages in both arms','No prompts, model text or supplier credentials in public summary']}
+ matched=all(d['request_hashes']==r['request_hashes'] for d,r in pairs)
+ prefix_matched=all(d['request_hashes'][:min(len(d['request_hashes']),len(r['request_hashes']))]==r['request_hashes'][:min(len(d['request_hashes']),len(r['request_hashes']))] for d,r in pairs)
+ summary={'live':a.live,'supplier_requests':len(ledger.rows) if a.live else 0,'fixture_calls':len(ledger.rows) if not a.live else 0,'model':c.model,'provider':'aizex' if a.aizex else 'openai','paired_requests_identical':matched,'paired_attempted_prefixes_identical':prefix_matched,'repeats':2,'tasks_per_arm':6,'reserved_usd':ledger.reserved,'session':session_stats,'arms':{},'limits':['Six small tasks per arm, not an official capability score or significance result','Direct shares the same RAM broker, TLS path and parameters; no raw HTTP speed claim','Same explicit two-turn tool protocol and canonicalized messages in both arms','No prompts, model text or supplier credentials in public summary']}
  for arm in ('direct','runtime'):
-  selected=[r for r in rows if r['arm']==arm];summary['arms'][arm]={'passed':sum(r['passed'] for r in selected),'seconds_sum':sum(r['seconds'] for r in selected),'seconds_median':statistics.median(r['seconds'] for r in selected),'calls':sum(r['calls'] for r in selected),'usage':{k:sum(r['usage'][k] for r in selected) for k in ('prompt_tokens','completion_tokens')}}
+  selected=[r for r in rows if r['arm']==arm];summary['arms'][arm]={'passed':sum(r['passed'] for r in selected),'seconds_sum':sum(r['seconds'] for r in selected),'seconds_median':statistics.median(r['seconds'] for r in selected),'calls':sum(r['calls'] for r in selected),'usage_unknown_calls':sum(r['usage_unknown_calls'] for r in selected),'usage':{k:sum(r['usage'][k] for r in selected) for k in ('prompt_tokens','completion_tokens')}}
  (a.output/'summary.json').write_text(json.dumps(summary,indent=2));print(json.dumps(summary),flush=True)
 if __name__=='__main__':main()

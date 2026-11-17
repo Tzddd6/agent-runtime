@@ -19,6 +19,22 @@ class ProviderBenchmarkTests(unittest.TestCase):
    self.assertEqual(f.calls,1);self.assertEqual(ledger.rows[0]['state'],'failed_billing_unknown')
    self.assertGreater(ledger.reserved,0);self.assertNotIn('private-response-sentinel',path.read_text())
    with self.assertRaises(ValueError):b.Ledger(path)
+ def test_case_failure_is_recorded_and_next_case_runs_without_replay(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   ledger=b.Ledger(Path(tmp)/'ledger.json');fixture=b.Fixture();client=b.Measured(fixture,ledger);attempts=[]
+   def invoke(arm,messages):
+    attempts.append(messages)
+    if len(attempts)==1:
+     row=ledger.admit(messages,256);row['state']='failed_billing_unknown';ledger.flush();raise RuntimeError('synthetic transport failure')
+    return client.complete(messages,256)['content']
+   failed=b.execute_case(b.cases()[0],'runtime',client,invoke,0)
+   recovered=b.execute_case(b.cases()[1],'runtime',client,invoke,0)
+   self.assertFalse(failed['passed']);self.assertEqual(failed['usage_unknown_calls'],1);self.assertTrue(recovered['passed']);self.assertEqual(len(attempts),2)
+ def test_cleanup_failure_aborts_instead_of_starting_more_workers(self):
+  with tempfile.TemporaryDirectory() as tmp:
+   client=b.Measured(b.Fixture(),b.Ledger(Path(tmp)/'ledger.json'))
+   def invoke(*args):raise RuntimeError('CLEANUP_FAILED: synthetic')
+   with self.assertRaises(RuntimeError):b.execute_case(b.cases()[0],'runtime',client,invoke,0)
  def test_cost_guard_blocks_before_provider(self):
   with tempfile.TemporaryDirectory() as tmp:
    ledger=b.Ledger(Path(tmp)/'ledger.json',limit=.00000001)

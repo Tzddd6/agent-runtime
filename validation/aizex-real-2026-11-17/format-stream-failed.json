@@ -1,0 +1,9 @@
+{
+  "supplier_requests": 1,
+  "state": "failed",
+  "seconds": 45.12640079199991,
+  "delta_events": 0,
+  "first_delta_seconds": null,
+  "passed": false,
+  "billing_unknown": true
+}

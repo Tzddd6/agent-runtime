@@ -41,6 +41,30 @@ class ResponseTests(unittest.TestCase):
   self.assertEqual(''.join(updates),'{"ok":true}');self.assertEqual(r['content'],'{"ok":true}')
   with patch('agent_runtime.model_network.provider_opener',return_value=self.stream(events[:-1])),patch('urllib.request.build_opener',return_value=Callback()):
    with self.assertRaises(ModelError):complete(AizexClient(KEY),[{'role':'user','content':'fixture'}],128,{'url':'http://127.0.0.1:1/progress','token':'synthetic-capability'})
+ def test_runtime_streams_cumulative_markdown_without_reasoning(self):
+  import os,tempfile,threading,time
+  from pathlib import Path
+  from http.server import BaseHTTPRequestHandler,ThreadingHTTPServer
+  from agent_runtime.runtime import run
+  first='## 标题\n';last='**粗体**\n\n```python\nprint(1)\n```\n\n|A|B|\n|---|---|\n|1|2|\n\n$$x^2$$';text=first+last
+  class Handler(BaseHTTPRequestHandler):
+   def log_message(self,*args):pass
+   def do_POST(self):
+    request=json.loads(self.rfile.read(int(self.headers['Content-Length'])));assert request['stream'] is True
+    self.send_response(200);self.send_header('Content-Type','text/event-stream');self.end_headers()
+    def send(event):self.wfile.write(b'data: '+json.dumps(event).encode()+b'\n\n');self.wfile.flush()
+    send({'type':'response.reasoning_text.delta','delta':'PRIVATE-REASONING-MARKER'})
+    send({'type':'response.output_text.delta','delta':first});time.sleep(.2)
+    send({'type':'response.output_text.delta','delta':last});send({'type':'response.completed','response':response(text)})
+  server=ThreadingHTTPServer(('127.0.0.1',0),Handler);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
+  try:
+   with tempfile.TemporaryDirectory() as tmp:
+    events=[];client=AizexClient(KEY,base='http://127.0.0.1:'+str(server.server_port),local_test=True)
+    states,records=run([{'id':'assistant','action':'llm','messages':[{'role':'user','content':'synthetic format fixture'}],'max_tokens':256,'timeout':10}],quiet=True,output_dir=Path(tmp)/'runs',model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),output_observer=events.append,model_budget={'calls':1,'output_tokens':256})
+    self.assertEqual(states['assistant'],'succeeded');self.assertGreaterEqual(len(events),2);self.assertEqual(events[-1]['text'],text)
+    self.assertTrue(all(e['source']=='provider_content_delta' and 'delta' not in e for e in events));self.assertNotIn('PRIVATE-REASONING-MARKER',json.dumps(events))
+    self.assertEqual(next(e['result']['result'] for e in records if e['state']=='succeeded'),text)
+  finally:server.shutdown();server.server_close();thread.join()
  def test_incomplete_output_stays_incomplete(self):
   v=response();v['status']='incomplete';self.assertEqual(decode(v,'model')['finish_reason'],'length')
 if __name__=='__main__':unittest.main()

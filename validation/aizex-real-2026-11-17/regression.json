@@ -1,0 +1,8 @@
+{
+  "tests_run": 382,
+  "passed": 380,
+  "skipped": 2,
+  "supplier_calls_in_regression": 0,
+  "measured_runtime_source": "4c455354f776cc4babe837710cb7ee2198d485d0",
+  "note": "Final additions affect benchmark driver and regression coverage; live core remained frozen."
+}

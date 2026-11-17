@@ -1,0 +1,322 @@
+{
+  "source_measured": "4c455354f776cc4babe837710cb7ee2198d485d0",
+  "provider": "aizex",
+  "model_identifier": "gpt-6-luna",
+  "model_identity_independently_verified": false,
+  "tasks_each": 6,
+  "paid_attempts": 16,
+  "paired_provider_requests_identical": true,
+  "original_failed_case_replayed": false,
+  "arms": {
+    "direct": {
+      "passed": 6,
+      "tasks": 6,
+      "model_attempts": 8,
+      "task_seconds_sum_or_lower_bound": 118.33060585299609,
+      "task_seconds_is_lower_bound": false,
+      "usage_known": {
+        "prompt_tokens": 736,
+        "completion_tokens": 275
+      },
+      "usage_unknown_calls": 0,
+      "known_provider_seconds": 117.22129800999937,
+      "local_over_broker_seconds_per_known_call": 0.07929603611364655,
+      "coordinator_cpu_seconds_known": 1.102103895,
+      "coordinator_cpu_unknown_tasks": 0
+    },
+    "runtime": {
+      "passed": 5,
+      "tasks": 6,
+      "model_attempts": 8,
+      "task_seconds_sum_or_lower_bound": 157.19935300600082,
+      "task_seconds_is_lower_bound": true,
+      "usage_known": {
+        "prompt_tokens": 657,
+        "completion_tokens": 300
+      },
+      "usage_unknown_calls": 1,
+      "known_provider_seconds": 110.82519611900352,
+      "local_over_broker_seconds_per_known_call": 0.13409573358642643,
+      "coordinator_cpu_seconds_known": 2.4632549660000005,
+      "coordinator_cpu_unknown_tasks": 1
+    }
+  },
+  "rows": [
+    {
+      "repeat": 0,
+      "case": "structured",
+      "arm": "direct",
+      "seconds": 24.959292355999423,
+      "coordinator_cpu_seconds": 0.48864803700000004,
+      "passed": true,
+      "request_hashes": [
+        "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 63
+      },
+      "broker_seconds": 24.810704708099365,
+      "provider_seconds": 24.751438643001165,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 0,
+      "case": "structured",
+      "arm": "runtime",
+      "seconds": 5.36268890700012,
+      "coordinator_cpu_seconds": 0.17325920700000008,
+      "passed": true,
+      "request_hashes": [
+        "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 59
+      },
+      "broker_seconds": 5.1501219272613525,
+      "provider_seconds": 5.091171975000179,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 0,
+      "case": "repair",
+      "arm": "direct",
+      "seconds": 6.678875280000284,
+      "coordinator_cpu_seconds": 0.15100175699999996,
+      "passed": true,
+      "request_hashes": [
+        "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 51
+      },
+      "broker_seconds": 6.655927419662476,
+      "provider_seconds": 6.594247360999361,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 0,
+      "case": "repair",
+      "arm": "runtime",
+      "seconds": 26.347168406999117,
+      "coordinator_cpu_seconds": 0.7384985420000001,
+      "passed": true,
+      "request_hashes": [
+        "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 67
+      },
+      "broker_seconds": 26.22700309753418,
+      "provider_seconds": 26.167580927000017,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 0,
+      "case": "tool_chain",
+      "arm": "direct",
+      "seconds": 16.984246660998906,
+      "coordinator_cpu_seconds": 0.353129542,
+      "passed": true,
+      "request_hashes": [
+        "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+        "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+      ],
+      "calls": 2,
+      "usage": {
+        "prompt_tokens": 175,
+        "completion_tokens": 33
+      },
+      "broker_seconds": 16.83689856529236,
+      "provider_seconds": 16.71902404299908,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 0,
+      "case": "tool_chain",
+      "arm": "runtime",
+      "seconds": 40.27873528100099,
+      "coordinator_cpu_seconds": 1.136113447,
+      "passed": true,
+      "request_hashes": [
+        "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+        "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+      ],
+      "calls": 2,
+      "usage": {
+        "prompt_tokens": 175,
+        "completion_tokens": 59
+      },
+      "broker_seconds": 40.00367617607117,
+      "provider_seconds": 39.88745289000144,
+      "usage_unknown_calls": 0
+    },
+    {
+      "repeat": 1,
+      "case": "structured",
+      "arm": "runtime",
+      "seconds": 45.02555208400008,
+      "seconds_is_lower_bound": true,
+      "timing_scope": "provider-broker call only; original outer timer unavailable after driver aborted",
+      "passed": false,
+      "request_hashes": [
+        "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0
+      },
+      "usage_unknown_calls": 1,
+      "coordinator_cpu_seconds": null,
+      "broker_seconds": null,
+      "provider_seconds": null,
+      "case_error_type": "ModelError",
+      "cohort": "original_recorded_failure_not_replayed"
+    },
+    {
+      "repeat": 1,
+      "case": "structured",
+      "arm": "direct",
+      "seconds": 27.698975121998956,
+      "coordinator_cpu_seconds": 0.042608799,
+      "passed": true,
+      "request_hashes": [
+        "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 63
+      },
+      "usage_unknown_calls": 0,
+      "broker_seconds": 27.577746152877808,
+      "provider_seconds": 27.51847373199962,
+      "case_error_type": null,
+      "cohort": "explicit_continuation_after_recorded_failure"
+    },
+    {
+      "repeat": 1,
+      "case": "repair",
+      "arm": "runtime",
+      "seconds": 3.8167393740004627,
+      "coordinator_cpu_seconds": 0.04667441699999998,
+      "passed": true,
+      "request_hashes": [
+        "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 40
+      },
+      "usage_unknown_calls": 0,
+      "broker_seconds": 3.6977672576904297,
+      "provider_seconds": 3.6403727300003084,
+      "case_error_type": null,
+      "cohort": "explicit_continuation_after_recorded_failure"
+    },
+    {
+      "repeat": 1,
+      "case": "repair",
+      "arm": "direct",
+      "seconds": 8.947740689998682,
+      "coordinator_cpu_seconds": 0.014596931000000007,
+      "passed": true,
+      "request_hashes": [
+        "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+      ],
+      "calls": 1,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 17
+      },
+      "usage_unknown_calls": 0,
+      "broker_seconds": 8.88394284248352,
+      "provider_seconds": 8.825565032000668,
+      "case_error_type": null,
+      "cohort": "explicit_continuation_after_recorded_failure"
+    },
+    {
+      "repeat": 1,
+      "case": "tool_chain",
+      "arm": "runtime",
+      "seconds": 36.36846895300005,
+      "coordinator_cpu_seconds": 0.3687093530000001,
+      "passed": true,
+      "request_hashes": [
+        "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+        "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+      ],
+      "calls": 2,
+      "usage": {
+        "prompt_tokens": 175,
+        "completion_tokens": 75
+      },
+      "usage_unknown_calls": 0,
+      "broker_seconds": 36.15656232833862,
+      "provider_seconds": 36.038617597001576,
+      "case_error_type": null,
+      "cohort": "explicit_continuation_after_recorded_failure"
+    },
+    {
+      "repeat": 1,
+      "case": "tool_chain",
+      "arm": "direct",
+      "seconds": 33.061475743999836,
+      "coordinator_cpu_seconds": 0.05211882899999998,
+      "passed": true,
+      "request_hashes": [
+        "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+        "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+      ],
+      "calls": 2,
+      "usage": {
+        "prompt_tokens": 175,
+        "completion_tokens": 48
+      },
+      "usage_unknown_calls": 0,
+      "broker_seconds": 32.93101787567139,
+      "provider_seconds": 32.81254919899948,
+      "case_error_type": null,
+      "cohort": "explicit_continuation_after_recorded_failure"
+    }
+  ],
+  "limits": [
+    "Interrupted driver was resumed only at unattempted cases; failed case included, never replayed",
+    "Runtime failed-task duration is broker-call lower bound; original outer timer/CPU were not captured",
+    "Failed call usage and actual billing remain unknown; known usage is not a full token total",
+    "Single small synthetic suite repeated twice, not an official capability score or statistical significance result",
+    "Direct shares the same broker, provider adapter and network; SDK run path, not full web automatic routing",
+    "Runtime and direct get the same explicit tool returns, canonicalized messages and output limits",
+    "Relay model identifier and usage are supplier-reported; cannot verify underlying model identity",
+    "No evidence that Runtime is faster or uses fewer total tokens in this run"
+  ],
+  "cost": {
+    "currency": "nominal USD at user-supplied relay token prices",
+    "known_usage_estimate": 0.00042679999999999997,
+    "conservative_reserved": 0.0036984,
+    "unknown_billing_calls": 1,
+    "actual_provider_bill_checked": false,
+    "discounts_ignored": true
+  },
+  "transport": {
+    "original": {
+      "completed_calls": 8,
+      "total_status_reads": 239,
+      "median_detection_seconds": 0.0004438161849975586
+    },
+    "continuation": {
+      "completed_calls": 7,
+      "total_status_reads": 220,
+      "median_detection_seconds": 0.00044035911560058594
+    }
+  }
+}

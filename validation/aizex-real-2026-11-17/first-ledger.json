@@ -1,0 +1,239 @@
+{
+  "price_source": "User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored",
+  "currency": "USD",
+  "limit": 0.05,
+  "reserved": 0.0020657,
+  "calls": [
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.9399999999999995e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 63,
+        "total_tokens": 142,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 30
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 24.822443731998646,
+      "provider_seconds": 24.751438643001165,
+      "transport_timings": {
+        "client_seconds": 24.822425475000273,
+        "broker_seconds": 24.810704708099365,
+        "completion_detection_seconds": 0.0003924369812011719,
+        "status_reads": 49
+      }
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.74e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 59,
+        "total_tokens": 138,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 26
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 5.162265205999574,
+      "provider_seconds": 5.091171975000179,
+      "transport_timings": {
+        "client_seconds": 5.162249253000482,
+        "broker_seconds": 5.1501219272613525,
+        "completion_detection_seconds": 0.0005176067352294922,
+        "status_reads": 11
+      }
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.6899999999999996e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 51,
+        "total_tokens": 165,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 31
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 6.673309493999113,
+      "provider_seconds": 6.594247360999361,
+      "transport_timings": {
+        "client_seconds": 6.673298973000783,
+        "broker_seconds": 6.655927419662476,
+        "completion_detection_seconds": 0.0058231353759765625,
+        "status_reads": 14
+      }
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.49e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 67,
+        "total_tokens": 181,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 48
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 26.238855218000026,
+      "provider_seconds": 26.167580927000017,
+      "transport_timings": {
+        "client_seconds": 26.23884376299975,
+        "broker_seconds": 26.22700309753418,
+        "completion_detection_seconds": 0.00039386749267578125,
+        "status_reads": 52
+      }
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.45e-05,
+      "usage": {
+        "prompt_tokens": 55,
+        "completion_tokens": 18,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 12.417002881000371,
+      "provider_seconds": 12.34649972599982,
+      "transport_timings": {
+        "client_seconds": 12.416991398000391,
+        "broker_seconds": 12.405289888381958,
+        "completion_detection_seconds": 0.00040078163146972656,
+        "status_reads": 25
+      }
+    },
+    {
+      "reserved_usd": 0.0002631,
+      "request_sha256": "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.95e-05,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 15,
+        "total_tokens": 135,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 4.4431870139997045,
+      "provider_seconds": 4.372524316999261,
+      "transport_timings": {
+        "client_seconds": 4.443174607000401,
+        "broker_seconds": 4.4316086769104,
+        "completion_detection_seconds": 0.0004868507385253906,
+        "status_reads": 9
+      }
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.45e-05,
+      "usage": {
+        "prompt_tokens": 55,
+        "completion_tokens": 18,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 9.533535288999701,
+      "provider_seconds": 9.464665415000127,
+      "transport_timings": {
+        "client_seconds": 9.53352351400099,
+        "broker_seconds": 9.521780490875244,
+        "completion_detection_seconds": 0.00039124488830566406,
+        "status_reads": 19
+      }
+    },
+    {
+      "reserved_usd": 0.0002631,
+      "request_sha256": "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.25e-05,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 41,
+        "total_tokens": 161,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 24
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 30.504430138000316,
+      "provider_seconds": 30.422787475001314,
+      "transport_timings": {
+        "client_seconds": 30.504418568998517,
+        "broker_seconds": 30.481895685195923,
+        "completion_detection_seconds": 0.010950088500976562,
+        "status_reads": 60
+      }
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "failed_billing_unknown",
+      "seconds": 45.02555208400008
+    }
+  ]
+}

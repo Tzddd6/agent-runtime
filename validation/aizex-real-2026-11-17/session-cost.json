@@ -1,0 +1,11 @@
+{
+  "all_relay_supplier_attempts": 25,
+  "currency": "nominal USD at user-provided relay token prices",
+  "known_usage_estimate": 0.0005496999999999999,
+  "conservative_reserved_estimate": 0.0068957,
+  "unknown_usage_or_billing_calls": 3,
+  "session_ceiling_nominal_usd": 0.05,
+  "actual_account_bill_checked": false,
+  "discounts_ignored": true,
+  "stream_probes_each_reserved_at": 0.001
+}
