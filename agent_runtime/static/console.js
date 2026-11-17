@@ -72,6 +72,8 @@ function selectRun(id){
   renderAllocations({stale:true});renderCharts(null,[]);renderContext(null);renderTasks([],[],true);renderDependencies([]);
   renderTimeline({events:[],created:Date.now()/1000,status:'waiting'});
   $('events').textContent='正在读取记录…';showView(currentView);
+  if($('resumeSafe'))$('resumeSafe').hidden=true;
+  if($('checkpointState'))$('checkpointState').textContent='正在读取该运行的检查点…';
   if($('agentCards'))$('agentCards').replaceChildren(empty('正在读取 Agent 控制块…',true));
   if($('agentCommands'))$('agentCommands').textContent='正在读取控制记录…';
 }
@@ -304,8 +306,8 @@ function renderDetail(job){
     '已确认完成 '+recovery.completed+' 项，未完成 '+recovery.unfinished+' 项。'+
     (recovery.blocked_tasks?.length?'结果不确定的操作：'+recovery.blocked_tasks.join('、')+'。请核对实际结果，系统不会自动重放。':
     recovery.can_resume_demo?'可恢复安全演示，已确认完成的步骤不会重做。':'检查点已保存；模型调用与有副作用操作不会自动重放。');
-  if(resume){resume.hidden=!recovery?.can_resume_demo;resume.disabled=offline||recoveryRequired;
-    resume.onclick=async()=>{resume.disabled=true;try{await api('jobs/'+job.id+'/resume-safe',{});await refresh()}catch(e){$('notice').textContent=e.message}}}
+  if(resume){resume.hidden=!recovery?.can_resume_demo;resume.disabled=offline||recoveryRequired||apiProfileRunning;
+    resume.onclick=async()=>{if(offline||recoveryRequired||apiProfileRunning)return;resume.disabled=true;try{await api('jobs/'+job.id+'/resume-safe',{});await refresh()}catch(e){$('notice').textContent=e.message}}}
 }
 function modelBudgetText(resources){
   if(!resources)return '该历史记录没有模型额度快照';

@@ -107,12 +107,13 @@ class WorkflowCheckpoint:
             finally:os.close(fd)
         finally:temporary.unlink(missing_ok=True)
 
-    def record(self,*,root,tasks,states,attempts,events,outputs,store,cgroup_root,agent_modes):
+    def record(self,*,root,tasks,states,attempts,events,outputs,store,cgroup_root,agent_modes,model_ledger):
         with self.lock:
             self.data.update(copy.deepcopy(dict(root=str(root),tasks=tasks,states=dict(states),attempts=dict(attempts),
                              events=events,outputs=dict(outputs),clean_shutdown=False,
                              cgroup_root=str(cgroup_root) if cgroup_root else None,
-                             grants={k:sorted(v) for k,v in store.grants.items()},sources=store.sources,agent_modes=agent_modes)))
+                             grants={k:sorted(v) for k,v in store.grants.items()},sources=store.sources,agent_modes=agent_modes,
+                             model_ledger=model_ledger)))
             self.write()
 
     def model_admission(self,budget,used,agents):

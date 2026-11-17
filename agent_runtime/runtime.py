@@ -238,9 +238,14 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         if _checkpoint:
             saved=dict(states)
             if intent:saved[intent]='running'
-            _checkpoint.record(root=root,tasks=tasks,states=saved,attempts=attempts,events=events,
-                               outputs=outputs,store=store,cgroup_root=cgroup_root,
-                               agent_modes={k:a.mode for k,a in registry.agents.items()})
+            ledger=registry.model_budgets
+            # Same lock order as admit(): ledger then checkpoint. Include newly
+            # registered dynamic Agents even before their first model request.
+            with ledger.lock:
+                _checkpoint.record(root=root,tasks=tasks,states=saved,attempts=attempts,events=events,
+                                   outputs=outputs,store=store,cgroup_root=cgroup_root,
+                                   agent_modes={k:a.mode for k,a in registry.agents.items()},
+                                   model_ledger={'budget':ledger.budget,'used':ledger.used,'agents':ledger.agents})
 
     def observe(force=False):
         registry.synchronize(states,finished=control.closed)
@@ -344,6 +349,15 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             for identity in registry.specs:registry.register(identity)
             for task in tasks:registry.attach(task)
             if restored and restored.get('model_ledger'):registry.model_budgets.restore(restored['model_ledger'])
+            if restored:
+                # Restore observed successful response counters as well as the
+                # conservative admission ledger. They measure different things.
+                for row in events:
+                    call=row.get('result',{}).get('model_call') if row.get('state')=='succeeded' else None
+                    if call:
+                        acb=registry.agents[row['agent']];acb.model_calls+=call.get('provider_calls',1)
+                        for field,value in call.get('usage',{}).items():
+                            if type(value) is int and value>=0:acb.token_usage[field]=acb.token_usage.get(field,0)+value
             registry.model_budgets.checkpoint=_checkpoint
             checkpoint_state()
         except OSError as exc:raise RuntimeError('EXECUTION_BACKEND_FAILED: Agent cgroup registration failed') from exc

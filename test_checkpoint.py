@@ -68,6 +68,10 @@ class CheckpointTests(unittest.TestCase):
             self.assertEqual(states['first'],'succeeded');self.assertEqual(states['second'],'failed');self.assertEqual(client.calls,1)
             snapshot=read_checkpoint(options['checkpoint_dir'],'alice')
             self.assertEqual(snapshot['model_ledger']['used'],{'calls':1,'output_tokens':16})
+            summary=json.loads((Path(snapshot['root'])/'summary.json').read_text())
+            acb=next(a for a in summary['agents'] if a['id']=='a')
+            self.assertEqual(acb['model_calls'],1)
+            self.assertEqual(acb['token_usage'],{'prompt_tokens':1,'completion_tokens':1})
 
     def test_identity_config_and_concurrent_lease_are_checked(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -129,3 +133,18 @@ class CheckpointTests(unittest.TestCase):
             self.assertNotIn('uncommitted-tail',(root/'events.jsonl').read_text())
             self.assertTrue(any('uncommitted-tail' in p.read_text() for p in root.glob('events-interrupted-*.jsonl')))
             self.assertEqual([e['sequence'] for e in events],list(range(1,len(events)+1)))
+
+    def test_new_dynamic_agent_after_model_call_keeps_the_complete_ledger(self):
+        class Client:
+            model='fixed';timeout=3;calls=0
+            def complete(self,*args):
+                self.calls+=1;return {'content':'fixed','finish_reason':'stop','usage':{}}
+        with tempfile.TemporaryDirectory() as tmp:
+            client=Client();options=self.options(tmp,model_client=client)
+            tasks=[{'id':'parent','action':'llm','messages':[{'role':'user','content':'fixed'}],
+                    'spawn':[{'id':'child','agent':'new-agent','action':'sleep','seconds':.01,'depends_on':['parent']}]}]
+            self.interrupt(tasks,options,'child')
+            data=read_checkpoint(options['checkpoint_dir'],'alice')
+            self.assertEqual(set(data['model_ledger']['agents']),{'parent','new-agent'})
+            states,_=run(tasks,max_workers=1,resume=True,**options)
+            self.assertTrue(all(v=='succeeded' for v in states.values()));self.assertEqual(client.calls,1)
