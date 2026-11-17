@@ -20,19 +20,8 @@ def ipc(task, **value):
         return json.load(response)
 
 def perform_plugin(task):
-    from .capabilities import execute_plugin
-    try:
-        output=execute_plugin(task)
-        if task.get('expect_failure') and task.get('plugin')=='command.run':
-            output['expected_failure_observed']=bool(output.get('executed') and output.get('exit_code') not in (None,0))
-        return output
-    except (ValueError,SyntaxError,OSError,RuntimeError,ArithmeticError) as exc:
-        detail=str(exc)[:500] if type(exc) is ValueError else '工具未完成，按类型检查参数、权限或运行结果'
-        detail=re.sub(r'(?i)sk-[a-z0-9_-]{12,}|bearer\s+\S+|(?:api[_-]?key|password|secret|token)\s*[=:]\s*[^\s,;]+','[redacted]',detail)
-        return {'plugin':task.get('plugin'),'ok':False,'executed':False,'error_type':type(exc).__name__,
-                'error_code':'TOOL_INVALID_ARGUMENTS' if isinstance(exc,(ValueError,SyntaxError,ArithmeticError)) else 'TOOL_EXECUTION_REJECTED',
-                'error':('参数必须使用合法的有限算术表达式，不能使用英文描述、变量或占位句。' if isinstance(exc,SyntaxError) and task.get('plugin')=='math.calculate' else
-                         detail)}
+    from .kernel.managers import execute_plugin
+    return execute_plugin(task)
 
 
 def main():
@@ -67,14 +56,19 @@ def main():
     if task.get('_attempt', 1) <= task.get('fail_attempts', 0):
         print('模拟可恢复失败', file=sys.stderr)
         return 1
-    if action == 'sleep':
+    from .kernel.managers import managed,execute
+    if managed(task):
+        from .model_exchange import CompletionFailure
+        try:
+            managed_result=execute(task,rpc=ipc,context_view=context_view,images=view_images)
+            output=managed_result.value;model_result=managed_result.model_call
+        except CompletionFailure as exc:
+            from .failures import failure
+            if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure(exc.code)}))
+            print(failure(exc.code)['message'],file=sys.stderr)
+            return 1
+    elif action == 'sleep':
         time.sleep(float(task.get('seconds', 0)))
-    elif action in ('memory_write','memory_read','memory_delete'):
-        arguments={'op':action}
-        fields={'memory_write':('content','policy'),'memory_read':('budget',),'memory_delete':('memory_id',)}[action]
-        for name in fields:
-            if name in task:arguments['id' if name=='memory_id' else name]=task[name]
-        output=ipc(task,**arguments)
     elif action=='clock':
         from .clock_tool import now
         output=now(task.get('timezone','Asia/Shanghai'))['display']
@@ -97,27 +91,6 @@ def main():
     elif action == 'fail':
         print('模拟 Worker 失败', file=sys.stderr)
         return 1
-    elif action == 'llm':
-        messages = list(task.get('messages', []))
-        images=list(view_images);contexts=[]
-        for context in task.get('_contexts',[]):
-            if isinstance(context,dict) and '_images' in context:
-                images.extend(context['_images']);contexts.append({k:v for k,v in context.items() if k!='_images'})
-            else:contexts.append(context)
-        if images:messages.append({'role':'system','content':'agentrt-internal-images-v1:'+json.dumps(images)})
-        if task.get('_contexts') or task.get('_inputs'):
-            body={'context':contexts,'upstream_results':task.get('_inputs',{})}
-            if context_view and context_view['body'].get('context_control'):body['context_control']=context_view['body']['context_control']
-            messages.append({'role':'user', 'content':json.dumps(body,ensure_ascii=False)})
-        from .model_exchange import complete,CompletionFailure
-        try:
-            model_result=complete(task,messages)
-        except CompletionFailure as exc:
-            from .failures import failure
-            code=exc.code
-            if len(sys.argv)>1:Path(sys.argv[1]).write_text(json.dumps({'task_id':task['id'],'failure':failure(code)}))
-            print(failure(code)['message'],file=sys.stderr)
-            return 1
     elif action == 'command':
         argv = task.get('argv')
         if not isinstance(argv, list) or not argv or not all(isinstance(s, str) for s in argv):
@@ -140,8 +113,6 @@ def main():
             if time.monotonic() >= deadline:
                 raise TimeoutError('等待 Agent 消息超时')
             time.sleep(.05)
-    elif action == 'plugin':
-        output=perform_plugin(task)
     elif action == 'route_gate':
         from .routing import route_plan,repair_plan
         try:output, children = route_plan(task)

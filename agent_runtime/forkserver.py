@@ -119,6 +119,7 @@ def serve(fd,root,parent):
     parent_death(parent)
     # Import only stateless modules, before any Agent data or credentials exist.
     from . import worker,capabilities,repair_loop,routing,workspace_tools,tooling
+    from .kernel import managers
     root=Path(root).resolve();channel=socket.socket(fileno=fd);children={}
     wake_r,wake_w=os.pipe2(os.O_NONBLOCK|os.O_CLOEXEC)
     signal.signal(signal.SIGCHLD,lambda *_:None);signal.set_wakeup_fd(wake_w)

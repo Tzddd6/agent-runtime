@@ -17,6 +17,7 @@ from .scheduling import AdmissionScheduler
 from .agents import AgentRegistry,RuntimeControl,agent_id
 from .completion import CompletionWaiter
 from .contracts import NAMES as CONTRACTS,validate_result
+from .kernel import KernelCoordinator,service_for
 
 
 TERMINAL_BAD = {'failed', 'timeout', 'skipped', 'unschedulable', 'cancelled'}
@@ -136,7 +137,7 @@ def validate(tasks):
 def run(tasks,max_workers=2,timeout=10,*,checkpoint_dir=None,resume=False,recovery_owner='local',**options):
     if checkpoint_dir is None:
         if resume:raise ValueError('Resume requires an explicit checkpoint directory')
-        return _run(tasks,max_workers,timeout,**options)
+        return _run(tasks,max_workers,timeout,_kernel_owner=recovery_owner,**options)
     from .checkpoint import WorkflowCheckpoint
     import inspect
     validate(tasks)
@@ -146,6 +147,7 @@ def run(tasks,max_workers=2,timeout=10,*,checkpoint_dir=None,resume=False,recove
     fields=('tasks','max_workers','timeout','budget','policy','max_tasks','agents','model_budget',
             'context_mode','worker_backend','context_compression_level','model_task_timeout')
     specification={k:bound.arguments[k] for k in fields}
+    if bound.arguments['kernel_queue_policy']!='fifo':specification['kernel_queue_policy']=bound.arguments['kernel_queue_policy']
     specification['output_dir']=str(Path(options['output_dir']).resolve())
     specification['workspace']=str(Path(options['workspace']).resolve()) if options.get('workspace') else None
     client=options.get('model_client')
@@ -154,13 +156,13 @@ def run(tasks,max_workers=2,timeout=10,*,checkpoint_dir=None,resume=False,recove
     if not uses_model(tasks):client=None
     specification['model']={k:getattr(client,k,None) for k in ('model','provider','profile_id','profile_revision')}
     checkpoint=WorkflowCheckpoint(checkpoint_dir,recovery_owner,specification,resume=resume)
-    try:return _run(tasks,max_workers,timeout,_checkpoint=checkpoint,**options)
+    try:return _run(tasks,max_workers,timeout,_checkpoint=checkpoint,_kernel_owner=recovery_owner,**options)
     finally:checkpoint.close()
 
 
 def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None,model_task_timeout=None,_checkpoint=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None,model_task_timeout=None,kernel_queue_policy='fifo',_checkpoint=None,_kernel_owner='local'):
     validate(tasks)
     if model_task_timeout is not None and (type(model_task_timeout) not in (int,float) or not math.isfinite(model_task_timeout) or not 1<=model_task_timeout<=180):raise ValueError('Invalid trusted model task deadline')
     def bound_model_task(task):
@@ -169,6 +171,8 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     tasks=[bound_model_task(t) for t in tasks]
     if model_client is not None and not callable(getattr(model_client,'complete',None)):raise ValueError('Invalid model client')
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
+    if kernel_queue_policy not in ('fifo','round_robin'):raise ValueError('无效的内核队列策略')
+    if not isinstance(_kernel_owner,str) or not 1<=len(_kernel_owner)<=128:raise ValueError('Invalid trusted kernel owner')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
             or policy not in AdmissionScheduler.POLICIES
@@ -219,6 +223,8 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     executor.agent_roots=registry.groups
     store = ContextStore(root / 'contexts',compression_level=context_compression_level,durable=_checkpoint is not None)
     tasks = [dict(t) for t in tasks]
+    kernel=KernelCoordinator(root.name,owner=_kernel_owner,queue_policy=kernel_queue_policy)
+    if restored:kernel.restore(restored['events'],tasks)
     task_by_id = {t['id']: t for t in tasks}
     states = dict(restored['states']) if restored else {t['id']: 'waiting' for t in tasks}
     attempts = dict(restored['attempts']) if restored else {t['id']: 0 for t in tasks}
@@ -283,7 +289,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 else:
                     reason = '等待调度' if policy!='fifo' else '等待 FIFO 队列调度'
             metrics = sampler.sample(handle['group']) if handle else dict(terminal_usage.get(key,{}))
-            rows.append({'id':key,'agent':agent,'kind':execution_kind(t),'state':states[key],'attempt':attempts[key],
+            rows.append({'id':key,'agent':agent,'kind':execution_kind(t),'service':service_for(t),'state':states[key],'attempt':attempts[key],
                          'depends_on':list(t.get('depends_on',[])),'resources':limits,'wait_reason':reason,
                          'pid':handle['proc'].pid if handle else None,'metrics':metrics})
         sample_sequence[0] += 1
@@ -298,6 +304,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                   'ipc':broker.stats() if broker else {'requests':0,'request_bytes':0,'response_bytes':0,'errors':0,'operations':{}},
                   'context_control':broker.contexts.stats() if broker else {'policy':context_mode,'views':0},
                   'model_resources':registry.model_budgets.snapshot(),
+                  'kernel':kernel.snapshot(tasks,states),
                   'scheduling':{'reason':scheduler.last_decision.reason,
                     'dominant_shares':{a.id:max(a.reserved[k]/budget[k] for k in budget)
                                        for a in registry.agents.values()},
@@ -308,10 +315,12 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
 
     def event(key, state, **extra):
         states[key] = state
+        syscall=kernel.event(task_by_id[key],state,attempts[key],pid=extra.get('pid'))
         item = {'workflow_id': root.name, 'task_id': key, 'state': state,
                 'agent': task_by_id[key].get('agent', key),
                 'kind':execution_kind(task_by_id[key]),'action':task_by_id[key].get('action','echo'),
                 'time': time.time(), 'attempt': attempts[key], 'sequence':len(events)+1, **extra}
+        if syscall:item['syscall']=syscall
         events.append(item)
         journal.write(json.dumps(item, ensure_ascii=False) + '\n')
         journal.flush()
@@ -409,7 +418,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 scheduling_stats['decisions']+=1
                 ready = [t for t in tasks if states[t['id']]=='waiting'
                          and all(states[d]=='succeeded' for d in t.get('depends_on',[]))]
-                return scheduler.choose(ready,used,
+                return kernel.choose(scheduler,ready,used,
                     agent_allocations={a.id:dict(a.reserved) for a in registry.agents.values()},
                     busy_agents={a.id for a in registry.agents.values() if registry.blocked(a.id)},
                     blocked_tasks={t['id'] for t in ready if not registry.fits(t.get('agent',t['id']),{**DEFAULTS,**t.get('resources',{})})},
@@ -445,6 +454,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 if busy or len(running) >= max_workers or any(used[k] + limits[k] > budget[k] for k in budget):
                     raise RuntimeError('Scheduler returned an inadmissible task')
                 attempts[key] += 1
+                kernel.dispatch(task,attempts[key])
                 payload = {**task, '_attempt': attempts[key], 'timeout':task.get('timeout',timeout)}
                 try:
                     refs = [store.put(data, [agent]) for data in task.get('contexts', [])]
@@ -651,6 +661,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                                                 'dataflow':dataflow,'policy':policy,
                                                 'scheduling_stats':{**scheduling_stats,**completion.stats},
                                                 'execution_stats':executor.stats,
+                                                'kernel':kernel.snapshot(tasks,states),
                                                 'ipc_stats':broker.stats() if broker else {'requests':0,'request_bytes':0,'response_bytes':0,'errors':0,'operations':{}},
                                                 'telemetry_stats':registry.telemetry_stats,
                                                 'model_resources':registry.model_budgets.snapshot(),

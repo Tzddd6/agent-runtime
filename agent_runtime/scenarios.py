@@ -61,3 +61,18 @@ def agent_tasks():
         'budget':{'cpu_milli':500,'memory_bytes':192*1024**2,'pids':32}}
         for owner,role,slots in [('alpha','并行计算 Agent',2),('beta','独立计算 Agent',1)]]
     return tasks,specs
+
+
+def kernel_tasks():
+    """Five real service queues without calling a model or writing memories."""
+    from .sdk import Request,StorageQuery,ToolQuery,MemoryQuery
+    requests=[
+        Request('write','storage-agent',StorageQuery('write',{'path':'kernel-demo.txt','content':'Kernel service demo: storage, memory, context and tools.'})),
+        Request('calculate','tool-agent',ToolQuery('math.calculate',{'expression':'(12+3)*2'})),
+        Request('memory','memory-agent',MemoryQuery('read',{'budget':1024})),
+        Request('context','context-agent',ToolQuery('context.search',{'query':'kernel','limit':3}),contexts=({'text':'kernel service demo with explicitly authorized context'},)),
+        Request('read','storage-agent',StorageQuery('read',{'path':'kernel-demo.txt'}),depends_on=('write',))]
+    tasks=[request.task() for request in requests]
+    tasks.append({'id':'collect','agent':'coordinator','action':'review_document',
+                  'depends_on':[task['id'] for task in tasks],'inputs':[task['id'] for task in tasks]})
+    return tasks

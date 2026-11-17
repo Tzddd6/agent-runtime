@@ -141,6 +141,9 @@ class Controller:
             raise ValueError('并发数需为 1—4，调度策略不合法')
         if preset == 'dynamic':
             tasks = json.loads(DEMO.read_text(encoding='utf-8'))
+        elif preset == 'kernel':
+            from .scenarios import kernel_tasks
+            tasks=kernel_tasks()
         elif preset == 'resources':
             from .scenarios import resource_tasks
             tasks = resource_tasks()
@@ -256,7 +259,8 @@ class Controller:
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
                                 agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model,model_task_timeout=(workflow_model.timeout+20 if provider_info.get('provider')=='aizex' else None),
-                                checkpoint_dir=job['directory']/'recovery' if os.name=='posix' else None,recovery_owner=self.user_identity)
+                                checkpoint_dir=job['directory']/'recovery' if os.name=='posix' else None,recovery_owner=self.user_identity,
+                                kernel_queue_policy='round_robin')
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
@@ -276,6 +280,7 @@ class Controller:
                         job['agent_control_summary']=summary.get('agent_controls',[])
                         job['model_resource_summary']=summary.get('model_resources')
                         job['context_control_summary']=summary.get('context_control')
+                        job['kernel_summary']=summary.get('kernel')
                     semantic=True
                     if preset=='auto':
                         semantic=not any(e.get('result',{}).get('result',{}).get('termination') in ('max_rounds','tool_failures')
@@ -487,6 +492,8 @@ class Controller:
         result['agent_events']=(monitor or {}).get('agent_events',[])
         result['model_resources']=((monitor or {}).get('model_resources') if result['status'] in ('running','cancelling')
                                    else result.get('model_resource_summary',(monitor or {}).get('model_resources')))
+        result['kernel']=((monitor or {}).get('kernel') if result['status'] in ('running','cancelling')
+                          else result.get('kernel_summary',(monitor or {}).get('kernel')))
         result['agent_controls']=((monitor or {}).get('agent_controls',[]) if result['status'] in ('running','cancelling')
                                  else result.get('agent_control_summary',(monitor or {}).get('agent_controls',[])))
         if (directory/'recovery'/'state.json').exists():

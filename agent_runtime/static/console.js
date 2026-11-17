@@ -8,6 +8,7 @@ Object.assign(names,{registered:'已注册',ready:'就绪',idle:'空闲',pausing
 const scenes={resources:'资源分配',dynamic:'动态协作',ipc:'Agent 通信',document:'文档处理',llm:'DeepSeek 对话',team:'四 Agent 协作',review:'写作与评审',engineering:'Python 项目修复'};
 scenes.agents='Agent 生命周期';
 scenes.auto='自动协作';
+scenes.kernel='内核服务验收';
 const palette=['#109a8c','#5d8dcc','#c79d52','#957bb7','#5fa0a6','#c17c8b','#709563'];
 const finite=value=>typeof value==='number'&&Number.isFinite(value);
 const number=(value,digits=1)=>finite(value)?value.toFixed(digits):'—';
@@ -63,7 +64,7 @@ function renderMachine(machine={}){
 
 function jobTitle(job){const labels={pricing:'金额计算',intervals:'时间区间',text_normalization:'文本规范化'};return job.preset==='engineering'?'项目修复 · '+(labels[job.project]||job.project||'受控项目'):scenes[job.preset]||job.preset}
 function selectRun(id){
-  selected=id;currentDetail=null;inspectedTask=null;
+  selected=id;currentDetail=null;inspectedTask=null;renderKernel(null);
   $('selectedTitle').textContent='正在读取运行…';$('selectedStatus').textContent='读取中';$('selectedStatus').className='badge waiting';
   $('exportRun').disabled=true;$('engineeringPanel').hidden=true;$('answer').hidden=true;$('cancel').hidden=true;
   $('runFacts').replaceChildren(node('span','正在同步该运行的实际状态…'));
@@ -300,7 +301,7 @@ function renderTasks(rows,events,stale=false){
 function renderDetail(job){
   const changed=viewJob!==job.id;
   if(changed){viewJob=job.id;inspectedTask=null;currentView=job.preset==='engineering'?'workflow':job.preset==='agents'?'agents':'resources';phaseSignature=''}
-  renderDetailBase(job);renderOverview(job);renderInspector();renderAgents(job);showView(currentView);
+  renderDetailBase(job);renderKernel(job);renderOverview(job);renderInspector();renderAgents(job);showView(currentView);
   const recovery=job.recovery,checkpoint=$('checkpointState'),resume=$('resumeSafe');
   if(checkpoint)checkpoint.textContent=!recovery?.available?'该历史记录没有可读取的持久检查点。':
     '已确认完成 '+recovery.completed+' 项，未完成 '+recovery.unfinished+' 项。'+
@@ -428,3 +429,19 @@ function initialize(){
   updateScene();showView('workflow');$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);
 }
 if(typeof document!=='undefined'&&document.getElementById('form'))initialize();
+
+function renderKernel(job){
+  const panel=$('kernelPanel');if(!panel)return;
+  const data=job?.kernel||job?.monitor?.kernel;
+  const queues=$('kernelQueues'),calls=$('kernelCalls');queues.replaceChildren();calls.replaceChildren();
+  if(!data){$('kernelState').textContent='尚无内核调用记录。历史旧版本记录可能未采集此项。';return}
+  const live=!offline&&!job?.monitor?.stale&&['running','cancelling'].includes(job?.status);
+  $('kernelState').textContent=(live?'运行快照':'最后记录')+' · '+(data.queue_policy==='round_robin'?'分类轮询准入':'全局顺序准入')+' · '+data.total_calls+' 次实际 Attempt';
+  const labels={llm:'模型',tool:'工具',memory:'记忆',storage:'存储',context:'上下文',process:'进程',runtime:'协调'};
+  for(const [key,row] of Object.entries(data.queues||{})){
+    const item=node('div',null,'cache-stat');item.append(node('b',labels[key]||key),node('span','就绪 '+row.ready+' · 等待 '+row.waiting+' · 执行 '+row.running),node('small','结束 '+row.finished+' · 失败尝试 '+row.failed));queues.append(item);
+  }
+  const table=node('table'),head=node('tr');for(const label of ['任务 / Attempt','服务与动作','状态','PID','等待','执行'])head.append(node('th',label));table.append(head);
+  for(const call of data.calls||[]){const row=node('tr');for(const item of [call.task_id+' #'+call.attempt,(labels[call.service]||call.service)+' / '+call.operation,names[call.state]||call.state,call.pid??'—',number(call.wait_seconds,3)+' s',number(call.execution_seconds,3)+' s'])row.append(node('td',item));row.title=call.id;table.append(row)}
+  calls.append(table);if(data.calls_truncated)calls.append(node('p','页面只展示最近的调用，完整结果保留在运行目录。','hint'));
+}
