@@ -80,11 +80,15 @@ class EvaluationBudget:
 
 class TauBridge:
     def __init__(self, client, output, *, arm='runtime', cgroup_root=None,
-                 cny_limit=10.,max_calls=32,ledger=None):
+                 cny_limit=10.,max_calls=32,ledger=None,reuse_workers=False):
         if arm not in ('runtime','direct'):raise ValueError('Invalid arm')
         self.client=client;self.output=Path(output);self.output.mkdir(parents=True,exist_ok=True)
         self.arm=arm;self.cgroup_root=cgroup_root;self.budget=EvaluationBudget(cny_limit,max_calls,ledger)
         self.records=[];self.lock=threading.Lock()
+        self.worker_session=None
+        if reuse_workers and arm=='runtime':
+            from .worker_session import WorkerSession
+            self.worker_session=WorkerSession(self.output)
         self.budget_exhausted=False
 
     def generate(self,model,messages,tools=None,tool_choice=None,call_name=None,**kwargs):
@@ -107,7 +111,7 @@ class TauBridge:
                 states,events=run([{'id':'tau_turn','agent':'tau-agent','action':'llm','messages':wire,
                     'max_tokens':tokens,'timeout':65,'resources':{'cpu_milli':500,'memory_bytes':128*1024**2,'pids':16}}],
                     max_workers=1,quiet=True,output_dir=self.output/key,cgroup_root=self.cgroup_root,
-                    budget={'cpu_milli':2000,'memory_bytes':1024**3,'pids':128})
+                    budget={'cpu_milli':2000,'memory_bytes':1024**3,'pids':128},worker_session=self.worker_session)
                 if states['tau_turn']!='succeeded':raise RuntimeError('Runtime inference turn failed; no replay')
                 event=next(e for e in events if e['task_id']=='tau_turn' and e['state']=='succeeded')
                 result=event['result']['model_call'];record['runtime_usage']=event.get('usage',{})
@@ -127,6 +131,9 @@ class TauBridge:
             with self.lock:
                 self.records.append(record)
                 with (self.output/'calls.jsonl').open('a') as stream:stream.write(json.dumps(record)+'\n')
+
+    def close(self):
+        if self.worker_session is not None:self.worker_session.close()
 
     def install(self):
         # Keep official Agent/User prompts and message/state conversion. Replace

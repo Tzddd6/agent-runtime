@@ -135,7 +135,7 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None):
     validate(tasks)
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
@@ -158,9 +158,10 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
     # Dynamic control stages and multi-task graphs can reuse preloaded imports.
     resolved_backend=worker_backend
     fixed_actions={'echo','sleep','load','llm','command','plugin','analyze_text','index_text','clock','capabilities','send','receive'}
-    if worker_backend=='auto' and len(tasks)==1 and not tasks[0].get('spawn') and tasks[0].get('action','echo') in fixed_actions:
+    if worker_session is not None and worker_backend=='auto':resolved_backend='forkserver'
+    elif worker_backend=='auto' and len(tasks)==1 and not tasks[0].get('spawn') and tasks[0].get('action','echo') in fixed_actions:
         resolved_backend='spawn'
-    executor = Executor(cgroup_root,backend=resolved_backend,workflow_root=root)
+    executor = Executor(cgroup_root,backend=resolved_backend,workflow_root=root,worker_session=worker_session)
     control=control or RuntimeControl()
     control.worker_ceiling=max_workers;control.settings={'workers':max_workers,'policy':policy}
     project_workspace=Path(workspace).resolve() if workspace is not None else root/'workspace'
@@ -386,7 +387,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                     event(key,'failed',error=f'任务输入准备失败: {exc}')
                     continue
                 payload['_project_workspace']=str(project_workspace)
-                if refs or input_refs or task.get('action') in ('llm','send', 'receive','memory_write','memory_read','memory_delete') or task.get('plugin','').startswith(('runtime.','context.','memory.')):
+                if refs or input_refs or task.get('action') in ('send', 'receive','memory_write','memory_read','memory_delete') or task.get('plugin','').startswith(('runtime.','context.','memory.')):
                     if broker is None:
                         broker = Broker(store, [a.id for a in registry.agents.values() if a.mode!='terminated'],control=control,context_mode=context_mode,memory_repository=memory_repository)
                     payload['_ipc_url'] = broker.url

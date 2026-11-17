@@ -10,10 +10,15 @@ from pathlib import Path
 
 
 class Executor:
-    def __init__(self, cgroup_root=None, *, backend='spawn',workflow_root=None):
+    def __init__(self, cgroup_root=None, *, backend='spawn',workflow_root=None,worker_session=None):
         if backend not in ('spawn','forkserver','auto'):raise ValueError('无效的进程后端')
         self.backend=('forkserver' if sys.platform=='linux' else 'spawn') if backend=='auto' else backend
         self.workflow_root=workflow_root;self.preloader=None
+        self.worker_session=worker_session;self._session_leased=False
+        if worker_session is not None:
+            from .worker_session import WorkerSession
+            if not isinstance(worker_session,WorkerSession) or self.backend!='forkserver':
+                raise ValueError('WorkerSession requires an explicit forkserver backend')
         self.stats={'backend':self.backend,'launches':0,'preloader_startup_seconds':0,'launch_seconds':0}
         self.root = Path(cgroup_root).resolve() if cgroup_root else None
         self.agent_roots={}
@@ -56,10 +61,16 @@ class Executor:
             environment={'PATH':os.defpath,'LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
             if self.backend=='forkserver':
                 from .forkserver import ForkServer
-                if self.preloader is None:
+                if self.worker_session is not None:
+                    if not self._session_leased:
+                        self.worker_session.acquire(self.workflow_root);self._session_leased=True
+                    before=self.worker_session.stats['startup_seconds']
+                    proc=self.worker_session.launch(directory,payload_path)
+                    self.stats['preloader_startup_seconds']+=self.worker_session.stats['startup_seconds']-before
+                elif self.preloader is None:
                     self.preloader=ForkServer(self.workflow_root or directory.parent)
                     self.stats['preloader_startup_seconds']=self.preloader.startup_seconds
-                proc=self.preloader.launch(directory,payload_path)
+                if self.worker_session is None:proc=self.preloader.launch(directory,payload_path)
             else:
                 proc = subprocess.Popen([sys.executable, '-X', 'utf8', '-m', 'agent_runtime.worker',
                                          str(directory / 'result.json'),str(payload_path)],
@@ -102,6 +113,8 @@ class Executor:
             raise
 
     def close(self):
+        if self._session_leased:
+            self.worker_session.release();self._session_leased=False
         if self.preloader is not None:self.preloader.close();self.preloader=None
 
     @staticmethod

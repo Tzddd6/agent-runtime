@@ -47,7 +47,7 @@ def main():
         task = json.loads(sys.stdin.read())
     action = task.get('action', 'echo');context_view=None;view_images=[]
     # Model tasks receive one bounded authenticated view rather than N full RPCs.
-    if action=='llm' and '_context_refs' in task:
+    if action=='llm' and (task.get('_context_refs') or task.get('_input_refs')):
         context_view=ipc(task,op='context_view',context_refs=task.get('_context_refs',[]),input_refs=task.get('_input_refs',{}),
                          query=task.get('_context_query') or '\n'.join(m.get('content','') for m in task.get('messages',[]) if isinstance(m,dict))[:2000])
         task['_contexts']=context_view['body']['context'];task['_inputs']=context_view['body']['upstream_results'];view_images=context_view['images']
