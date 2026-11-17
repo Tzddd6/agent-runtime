@@ -1,0 +1,83 @@
+{
+  "runtime_source": "93b027e",
+  "key_owner_loaded_policy": "279328e",
+  "model_identifier": "gpt-6-luna",
+  "provider": "aizex",
+  "model_identity_independently_verified": false,
+  "trials_each": 6,
+  "provider_attempts": 15,
+  "attempted_prefixes_identical": true,
+  "full_requests_identical": false,
+  "no_failed_attempt_replayed": true,
+  "arms": {
+    "direct": {
+      "passed": 6,
+      "tasks": 6,
+      "attempts": 8,
+      "observed_seconds": 146.958200907,
+      "usage_known": {
+        "prompt_tokens": 736,
+        "completion_tokens": 379
+      },
+      "usage_unknown_calls": 0,
+      "coordinator_cpu_seconds": 0.16450028299999994,
+      "local_over_broker_seconds_per_fully_known_call": 0.06836503437261854
+    },
+    "runtime": {
+      "passed": 5,
+      "tasks": 6,
+      "attempts": 7,
+      "observed_seconds": 124.21360000599998,
+      "usage_known": {
+        "prompt_tokens": 561,
+        "completion_tokens": 296
+      },
+      "usage_unknown_calls": 1,
+      "coordinator_cpu_seconds": 0.5655907870000001,
+      "local_over_broker_seconds_per_fully_known_call": 0.13442486526704064
+    }
+  },
+  "failure_phases": [
+    {
+      "state": "failed_billing_unknown",
+      "seconds": 2.759973815998819,
+      "phases": [
+        {
+          "call": "3f10ba8b660e4bd99193bdb38dbf245e",
+          "stage": "request_start",
+          "seconds": 0.00011813899982371368
+        },
+        {
+          "call": "3f10ba8b660e4bd99193bdb38dbf245e",
+          "stage": "http_error",
+          "seconds": 2.6841774599997734,
+          "status": 400
+        }
+      ]
+    }
+  ],
+  "old_failure_records_preserved": true,
+  "limits": [
+    "Runtime tool chain failed on HTTP400; follow-up model request was skipped, so total elapsed/tokens are not equal completed work",
+    "Remote HTTP400 business cause was not retained; do not infer invalid prompt/model/etc",
+    "Same90second provider budget and same messages at each attempted shared step; two alternated repetitions only",
+    "Known usage excludes failed request; cannot claim token saving",
+    "Runtime measured via SDK not full web auto routing",
+    "No official ranking or capability score from this micro suite"
+  ],
+  "cost": {
+    "known_nominal_usd": 0.00046719999999999997,
+    "reserved_nominal_usd": 0.0034352999999999996,
+    "actual_bill_checked": false,
+    "unknown_billing_calls": 1
+  },
+  "all_new_session_cost": {
+    "attempts": 20,
+    "known_nominal_usd_estimate": 0.0006055,
+    "reserved_nominal_usd": 0.0044433,
+    "limit_nominal_usd": 0.01,
+    "unknown_billing_calls": 2,
+    "actual_account_bill_checked": false,
+    "discounts_ignored": true
+  }
+}

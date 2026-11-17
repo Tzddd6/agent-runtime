@@ -1,0 +1,49 @@
+{
+  "live": true,
+  "supplier_requests": 15,
+  "fixture_calls": 0,
+  "model": "gpt-6-luna",
+  "provider": "aizex",
+  "paired_requests_identical": false,
+  "paired_attempted_prefixes_identical": true,
+  "repeats": 2,
+  "tasks_per_arm": 6,
+  "reserved_usd": 0.0034352999999999996,
+  "session": {
+    "preloader_starts": 1,
+    "recovered_preloaders": 0,
+    "leases": 7,
+    "launches": 7,
+    "startup_seconds": 0.0753267460004281
+  },
+  "arms": {
+    "direct": {
+      "passed": 6,
+      "seconds_sum": 146.958200907,
+      "seconds_median": 18.53279694200046,
+      "calls": 8,
+      "usage_unknown_calls": 0,
+      "usage": {
+        "prompt_tokens": 736,
+        "completion_tokens": 379
+      }
+    },
+    "runtime": {
+      "passed": 5,
+      "seconds_sum": 124.21360000599998,
+      "seconds_median": 15.315260149000096,
+      "calls": 7,
+      "usage_unknown_calls": 1,
+      "usage": {
+        "prompt_tokens": 561,
+        "completion_tokens": 296
+      }
+    }
+  },
+  "limits": [
+    "Six small tasks per arm, not an official capability score or significance result",
+    "Direct shares the same RAM broker, TLS path and parameters; no raw HTTP speed claim",
+    "Same explicit two-turn tool protocol and canonicalized messages in both arms",
+    "No prompts, model text or supplier credentials in public summary"
+  ]
+}

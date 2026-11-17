@@ -1,0 +1,257 @@
+[
+  {
+    "repeat": 0,
+    "case": "structured",
+    "arm": "direct",
+    "seconds": 11.488260186000844,
+    "coordinator_cpu_seconds": 0.012868900999999988,
+    "passed": true,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 56
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 11.364057540893555,
+    "provider_seconds": 11.304145366999364,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 0,
+    "case": "structured",
+    "arm": "runtime",
+    "seconds": 16.91960288500013,
+    "coordinator_cpu_seconds": 0.08222460299999998,
+    "passed": true,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 65
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 16.653754472732544,
+    "provider_seconds": 16.593268033999266,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 0,
+    "case": "repair",
+    "arm": "direct",
+    "seconds": 18.437508769000488,
+    "coordinator_cpu_seconds": 0.020542221,
+    "passed": true,
+    "request_hashes": [
+      "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 114,
+      "completion_tokens": 61
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 18.370383501052856,
+    "provider_seconds": 18.30959466100103,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 0,
+    "case": "repair",
+    "arm": "runtime",
+    "seconds": 13.710917413000061,
+    "coordinator_cpu_seconds": 0.06568998200000001,
+    "passed": true,
+    "request_hashes": [
+      "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 114,
+      "completion_tokens": 60
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 13.583589553833008,
+    "provider_seconds": 13.52213957100139,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 0,
+    "case": "tool_chain",
+    "arm": "direct",
+    "seconds": 18.62808511500043,
+    "coordinator_cpu_seconds": 0.023044697999999975,
+    "passed": true,
+    "request_hashes": [
+      "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+    ],
+    "calls": 2,
+    "usage": {
+      "prompt_tokens": 175,
+      "completion_tokens": 62
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 18.49235486984253,
+    "provider_seconds": 18.36917190799977,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 0,
+    "case": "tool_chain",
+    "arm": "runtime",
+    "seconds": 2.8782031200007623,
+    "coordinator_cpu_seconds": 0.028233341999999995,
+    "passed": false,
+    "request_hashes": [
+      "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "usage_unknown_calls": 1,
+    "broker_seconds": 0,
+    "provider_seconds": 0,
+    "case_error_type": "ModelError",
+    "failure_code": "MODEL_UPSTREAM_FAILED"
+  },
+  {
+    "repeat": 1,
+    "case": "structured",
+    "arm": "runtime",
+    "seconds": 29.56695707200015,
+    "coordinator_cpu_seconds": 0.12251052800000001,
+    "passed": true,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 50
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 29.469230890274048,
+    "provider_seconds": 29.40700591699897,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 1,
+    "case": "structured",
+    "arm": "direct",
+    "seconds": 10.464095063000059,
+    "coordinator_cpu_seconds": 0.012893572999999992,
+    "passed": true,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 69
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 10.448806524276733,
+    "provider_seconds": 10.389107204000538,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 1,
+    "case": "repair",
+    "arm": "runtime",
+    "seconds": 10.947792691000359,
+    "coordinator_cpu_seconds": 0.05658309,
+    "passed": true,
+    "request_hashes": [
+      "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 114,
+      "completion_tokens": 65
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 10.889545202255249,
+    "provider_seconds": 10.82778014500036,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 1,
+    "case": "repair",
+    "arm": "direct",
+    "seconds": 33.17041730999881,
+    "coordinator_cpu_seconds": 0.035151825000000025,
+    "passed": true,
+    "request_hashes": [
+      "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 114,
+      "completion_tokens": 69
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 33.10240387916565,
+    "provider_seconds": 33.04153845700057,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 1,
+    "case": "tool_chain",
+    "arm": "runtime",
+    "seconds": 50.190126824998515,
+    "coordinator_cpu_seconds": 0.21034924200000005,
+    "passed": true,
+    "request_hashes": [
+      "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+    ],
+    "calls": 2,
+    "usage": {
+      "prompt_tokens": 175,
+      "completion_tokens": 56
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 49.932727575302124,
+    "provider_seconds": 49.810511374998896,
+    "case_error_type": null,
+    "failure_code": null
+  },
+  {
+    "repeat": 1,
+    "case": "tool_chain",
+    "arm": "direct",
+    "seconds": 54.76983446399936,
+    "coordinator_cpu_seconds": 0.05999906499999996,
+    "passed": true,
+    "request_hashes": [
+      "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0"
+    ],
+    "calls": 2,
+    "usage": {
+      "prompt_tokens": 175,
+      "completion_tokens": 62
+    },
+    "usage_unknown_calls": 0,
+    "broker_seconds": 54.63327431678772,
+    "provider_seconds": 54.51245387500239,
+    "case_error_type": null,
+    "failure_code": null
+  }
+]

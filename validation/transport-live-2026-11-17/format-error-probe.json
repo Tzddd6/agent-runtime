@@ -1,0 +1,76 @@
+{
+  "calls_attempted": 1,
+  "reserved_nominal_usd": 0.00020160000000000002,
+  "rows": [
+    {
+      "repeat": 0,
+      "seconds": 4.970337983000718,
+      "state": "succeeded",
+      "observed_cumulative_events": 4,
+      "first_event_seconds": 3.635332471001675,
+      "usage": {
+        "prompt_tokens": 57,
+        "completion_tokens": 55,
+        "total_tokens": 112,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 12
+        }
+      },
+      "stream_equals_final": true,
+      "format_checks": {
+        "bold": true,
+        "table": true,
+        "formula": true,
+        "code": true
+      },
+      "passed": true,
+      "transport_phases": [
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "request_start",
+          "seconds": 0.000123751999126398
+        },
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "headers",
+          "seconds": 3.461448734999067,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "first_wire",
+          "seconds": 3.4616543859992817
+        },
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "first_text",
+          "seconds": 3.481986037999377
+        },
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "terminal",
+          "seconds": 4.7956533529995795,
+          "wire_bytes": 25996,
+          "text_bytes": 94,
+          "events": 50,
+          "callbacks": 3
+        },
+        {
+          "call": "0dff8728f19447cf9656ea6bcda0947e",
+          "stage": "decoded",
+          "seconds": 4.797676479000074,
+          "events": 50,
+          "callbacks": 4
+        }
+      ]
+    }
+  ],
+  "source": "93b027e",
+  "key_read": false,
+  "automatic_replay": false
+}

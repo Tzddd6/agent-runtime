@@ -1,0 +1,32 @@
+{
+  "price_source": "Same user-supplied relay nominal prices; no discounts",
+  "currency": "USD",
+  "limit": 0.001,
+  "reserved": 0.00040320000000000004,
+  "calls": [
+    {
+      "reserved_usd": 0.00020160000000000002,
+      "request_sha256": "9e66388171116f0766f81517965a706a42738309f9a63ed4f33ba23e10c4670b",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 57,
+        "completion_tokens": 60,
+        "total_tokens": 117,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      }
+    },
+    {
+      "reserved_usd": 0.00020160000000000002,
+      "request_sha256": "9e66388171116f0766f81517965a706a42738309f9a63ed4f33ba23e10c4670b",
+      "max_completion_tokens": 256,
+      "state": "failed_billing_unknown"
+    }
+  ]
+}

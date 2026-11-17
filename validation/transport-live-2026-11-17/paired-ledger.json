@@ -1,0 +1,714 @@
+{
+  "price_source": "User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored",
+  "currency": "USD",
+  "limit": 0.007,
+  "reserved": 0.0034352999999999996,
+  "calls": [
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.59e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 56,
+        "total_tokens": 135,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 23
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 11.36740833300064,
+      "provider_seconds": 11.304145366999364,
+      "transport_timings": {
+        "client_seconds": 11.367388378001124,
+        "broker_seconds": 11.364057540893555,
+        "completion_detection_seconds": 0.0004782676696777344,
+        "status_reads": 23
+      },
+      "transport_phases": [
+        {
+          "call": "5097d29e0d50424db6dae234eba899c0",
+          "stage": "request_start",
+          "seconds": 0.00012066700037394185
+        },
+        {
+          "call": "5097d29e0d50424db6dae234eba899c0",
+          "stage": "headers",
+          "seconds": 11.302993766999862,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "5097d29e0d50424db6dae234eba899c0",
+          "stage": "decoded",
+          "seconds": 11.30424735700035,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.04e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 65,
+        "total_tokens": 144,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 32
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 16.665160915999877,
+      "provider_seconds": 16.593268033999266,
+      "transport_timings": {
+        "client_seconds": 16.665116896001564,
+        "broker_seconds": 16.653754472732544,
+        "completion_detection_seconds": 0.00041484832763671875,
+        "status_reads": 34
+      },
+      "transport_phases": [
+        {
+          "call": "4a5cd3394a3d472b91fc6dc77f32a18d",
+          "stage": "request_start",
+          "seconds": 0.00011748399992939085
+        },
+        {
+          "call": "4a5cd3394a3d472b91fc6dc77f32a18d",
+          "stage": "headers",
+          "seconds": 16.59218388499903,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "4a5cd3394a3d472b91fc6dc77f32a18d",
+          "stage": "decoded",
+          "seconds": 16.593374797999786,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.1899999999999995e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 61,
+        "total_tokens": 175,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 40
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 18.373980663998736,
+      "provider_seconds": 18.30959466100103,
+      "transport_timings": {
+        "client_seconds": 18.373968579000575,
+        "broker_seconds": 18.370383501052856,
+        "completion_detection_seconds": 0.00043511390686035156,
+        "status_reads": 37
+      },
+      "transport_phases": [
+        {
+          "call": "5f72a99145d04b60809175c5c7ff7189",
+          "stage": "request_start",
+          "seconds": 0.00011808999988716096
+        },
+        {
+          "call": "5f72a99145d04b60809175c5c7ff7189",
+          "stage": "headers",
+          "seconds": 18.308524394000415,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "5f72a99145d04b60809175c5c7ff7189",
+          "stage": "decoded",
+          "seconds": 18.309705828000006,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.14e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 60,
+        "total_tokens": 174,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 40
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 13.595854262999637,
+      "provider_seconds": 13.52213957100139,
+      "transport_timings": {
+        "client_seconds": 13.595841618000122,
+        "broker_seconds": 13.583589553833008,
+        "completion_detection_seconds": 0.0004582405090332031,
+        "status_reads": 28
+      },
+      "transport_phases": [
+        {
+          "call": "67d6d04b22bb4ad6b8eb6c9ccca4df3c",
+          "stage": "request_start",
+          "seconds": 0.00011637900024652481
+        },
+        {
+          "call": "67d6d04b22bb4ad6b8eb6c9ccca4df3c",
+          "stage": "headers",
+          "seconds": 13.520981234998544,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "67d6d04b22bb4ad6b8eb6c9ccca4df3c",
+          "stage": "decoded",
+          "seconds": 13.522240065000005,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.45e-05,
+      "usage": {
+        "prompt_tokens": 55,
+        "completion_tokens": 18,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 8.10827391499879,
+      "provider_seconds": 8.04334323799958,
+      "transport_timings": {
+        "client_seconds": 8.108261520001179,
+        "broker_seconds": 8.105080842971802,
+        "completion_detection_seconds": 0.00039458274841308594,
+        "status_reads": 17
+      },
+      "transport_phases": [
+        {
+          "call": "42f71924f0044f9d91d4657780b98bc3",
+          "stage": "request_start",
+          "seconds": 0.00012166600026830565
+        },
+        {
+          "call": "42f71924f0044f9d91d4657780b98bc3",
+          "stage": "headers",
+          "seconds": 8.04194395200102,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "42f71924f0044f9d91d4657780b98bc3",
+          "stage": "decoded",
+          "seconds": 8.04350134699962,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002631,
+      "request_sha256": "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.4e-05,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 44,
+        "total_tokens": 164,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 10.39057917199898,
+      "provider_seconds": 10.325828670000192,
+      "transport_timings": {
+        "client_seconds": 10.390566641000987,
+        "broker_seconds": 10.387274026870728,
+        "completion_detection_seconds": 0.0004401206970214844,
+        "status_reads": 21
+      },
+      "transport_phases": [
+        {
+          "call": "3858fab2b7ec461085fbf9243b131d41",
+          "stage": "request_start",
+          "seconds": 0.00011777200052165426
+        },
+        {
+          "call": "3858fab2b7ec461085fbf9243b131d41",
+          "stage": "headers",
+          "seconds": 10.324879419000354,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "3858fab2b7ec461085fbf9243b131d41",
+          "stage": "decoded",
+          "seconds": 10.325954170000841,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "failed_billing_unknown",
+      "seconds": 2.759973815998819,
+      "transport_phases": [
+        {
+          "call": "3f10ba8b660e4bd99193bdb38dbf245e",
+          "stage": "request_start",
+          "seconds": 0.00011813899982371368
+        },
+        {
+          "call": "3f10ba8b660e4bd99193bdb38dbf245e",
+          "stage": "http_error",
+          "seconds": 2.6841774599997734,
+          "status": 400
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.29e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 50,
+        "total_tokens": 129,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 29.481266053999207,
+      "provider_seconds": 29.40700591699897,
+      "transport_timings": {
+        "client_seconds": 29.48125187900041,
+        "broker_seconds": 29.469230890274048,
+        "completion_detection_seconds": 0.0004489421844482422,
+        "status_reads": 59
+      },
+      "transport_phases": [
+        {
+          "call": "13a89fe453a24c67a2c0de840e2f5987",
+          "stage": "request_start",
+          "seconds": 0.0001153980010712985
+        },
+        {
+          "call": "13a89fe453a24c67a2c0de840e2f5987",
+          "stage": "headers",
+          "seconds": 29.405903926000974,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "13a89fe453a24c67a2c0de840e2f5987",
+          "stage": "decoded",
+          "seconds": 29.40710806900097,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.24e-05,
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 69,
+        "total_tokens": 148,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 36
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 10.451931337000133,
+      "provider_seconds": 10.389107204000538,
+      "transport_timings": {
+        "client_seconds": 10.451918565999222,
+        "broker_seconds": 10.448806524276733,
+        "completion_detection_seconds": 0.00039887428283691406,
+        "status_reads": 21
+      },
+      "transport_phases": [
+        {
+          "call": "b1591a8fd24d4509bbc3c56bfee79115",
+          "stage": "request_start",
+          "seconds": 0.00011785800052166451
+        },
+        {
+          "call": "b1591a8fd24d4509bbc3c56bfee79115",
+          "stage": "headers",
+          "seconds": 10.38791340500029,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "b1591a8fd24d4509bbc3c56bfee79115",
+          "stage": "decoded",
+          "seconds": 10.389211211000656,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.3899999999999996e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 65,
+        "total_tokens": 179,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 45
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 10.901506795000387,
+      "provider_seconds": 10.82778014500036,
+      "transport_timings": {
+        "client_seconds": 10.90149489400028,
+        "broker_seconds": 10.889545202255249,
+        "completion_detection_seconds": 0.0004622936248779297,
+        "status_reads": 22
+      },
+      "transport_phases": [
+        {
+          "call": "e02cfbf352194d1786ec00133e2b8681",
+          "stage": "request_start",
+          "seconds": 0.000119099999210448
+        },
+        {
+          "call": "e02cfbf352194d1786ec00133e2b8681",
+          "stage": "headers",
+          "seconds": 10.774917081998865,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "e02cfbf352194d1786ec00133e2b8681",
+          "stage": "decoded",
+          "seconds": 10.776125090998903,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 4.59e-05,
+      "usage": {
+        "prompt_tokens": 114,
+        "completion_tokens": 69,
+        "total_tokens": 183,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 49
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 33.10551366200161,
+      "provider_seconds": 33.04153845700057,
+      "transport_timings": {
+        "client_seconds": 33.105501860000004,
+        "broker_seconds": 33.10240387916565,
+        "completion_detection_seconds": 0.0004565715789794922,
+        "status_reads": 66
+      },
+      "transport_phases": [
+        {
+          "call": "a73694ebfa614bcb853b392f0cd21aee",
+          "stage": "request_start",
+          "seconds": 0.00011914800052181818
+        },
+        {
+          "call": "a73694ebfa614bcb853b392f0cd21aee",
+          "stage": "headers",
+          "seconds": 33.04042020000088,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "a73694ebfa614bcb853b392f0cd21aee",
+          "stage": "decoded",
+          "seconds": 33.04164489300092,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.45e-05,
+      "usage": {
+        "prompt_tokens": 55,
+        "completion_tokens": 18,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 25.302470250000624,
+      "provider_seconds": 25.23058218999904,
+      "transport_timings": {
+        "client_seconds": 25.30245893999927,
+        "broker_seconds": 25.290401935577393,
+        "completion_detection_seconds": 0.000392913818359375,
+        "status_reads": 51
+      },
+      "transport_phases": [
+        {
+          "call": "682ec28ed43f42b68daa00a32496146a",
+          "stage": "request_start",
+          "seconds": 0.00011794200145232026
+        },
+        {
+          "call": "682ec28ed43f42b68daa00a32496146a",
+          "stage": "headers",
+          "seconds": 25.22943272700104,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "682ec28ed43f42b68daa00a32496146a",
+          "stage": "decoded",
+          "seconds": 25.230688765001105,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002631,
+      "request_sha256": "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.1e-05,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 38,
+        "total_tokens": 158,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 21
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 24.653725134001434,
+      "provider_seconds": 24.579929184999855,
+      "transport_timings": {
+        "client_seconds": 24.653713296000205,
+        "broker_seconds": 24.64232563972473,
+        "completion_detection_seconds": 0.00038552284240722656,
+        "status_reads": 50
+      },
+      "transport_phases": [
+        {
+          "call": "3a53e486cdbf44a7a9d2b78b737164e6",
+          "stage": "request_start",
+          "seconds": 0.0001177989997813711
+        },
+        {
+          "call": "3a53e486cdbf44a7a9d2b78b737164e6",
+          "stage": "headers",
+          "seconds": 24.578399756999715,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "3a53e486cdbf44a7a9d2b78b737164e6",
+          "stage": "decoded",
+          "seconds": 24.58002548999866,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.00020910000000000001,
+      "request_sha256": "a4fd3f904012476f3bd585ec774af8ed0fd020bf4626972cb6bf51ababb7e02e",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 1.45e-05,
+      "usage": {
+        "prompt_tokens": 55,
+        "completion_tokens": 18,
+        "total_tokens": 73,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 25.009877229000267,
+      "provider_seconds": 24.94602548000148,
+      "transport_timings": {
+        "client_seconds": 25.00986585999999,
+        "broker_seconds": 25.00682258605957,
+        "completion_detection_seconds": 0.00039505958557128906,
+        "status_reads": 50
+      },
+      "transport_phases": [
+        {
+          "call": "39160423d85a4668b29c7259d77446f3",
+          "stage": "request_start",
+          "seconds": 0.00011678900045808405
+        },
+        {
+          "call": "39160423d85a4668b29c7259d77446f3",
+          "stage": "headers",
+          "seconds": 24.944968597999832,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "39160423d85a4668b29c7259d77446f3",
+          "stage": "decoded",
+          "seconds": 24.946127130000605,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    },
+    {
+      "reserved_usd": 0.0002631,
+      "request_sha256": "9c849a7697e58216314911eadf1e5af0f2171ffe1c435170d10bd30496eda0c0",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "reported_nominal_usd": 3.4e-05,
+      "usage": {
+        "prompt_tokens": 120,
+        "completion_tokens": 44,
+        "total_tokens": 164,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 29.629510148000918,
+      "provider_seconds": 29.566428395000912,
+      "transport_timings": {
+        "client_seconds": 29.62949879000007,
+        "broker_seconds": 29.62645173072815,
+        "completion_detection_seconds": 0.00041222572326660156,
+        "status_reads": 60
+      },
+      "transport_phases": [
+        {
+          "call": "2f54f18a459e44f089adfcca45cccbdc",
+          "stage": "request_start",
+          "seconds": 0.00011967499995080288
+        },
+        {
+          "call": "2f54f18a459e44f089adfcca45cccbdc",
+          "stage": "headers",
+          "seconds": 29.565270144999886,
+          "status": 200,
+          "sse": false
+        },
+        {
+          "call": "2f54f18a459e44f089adfcca45cccbdc",
+          "stage": "decoded",
+          "seconds": 29.566533392000565,
+          "events": 0,
+          "callbacks": 0
+        }
+      ]
+    }
+  ]
+}

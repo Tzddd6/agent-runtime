@@ -1,0 +1,104 @@
+{
+  "calls_attempted": 2,
+  "reserved_nominal_usd": 0.00040320000000000004,
+  "rows": [
+    {
+      "repeat": 0,
+      "seconds": 10.88347699500082,
+      "state": "succeeded",
+      "observed_cumulative_events": 6,
+      "first_event_seconds": 8.735421097000653,
+      "usage": {
+        "prompt_tokens": 57,
+        "completion_tokens": 60,
+        "total_tokens": 117,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      },
+      "stream_equals_final": true,
+      "format_checks": {
+        "bold": true,
+        "table": true,
+        "formula": true,
+        "code": true
+      },
+      "passed": true,
+      "transport_phases": [
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "request_start",
+          "seconds": 0.00012322600014158525
+        },
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "headers",
+          "seconds": 8.492090169000221,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "first_wire",
+          "seconds": 8.49221722600123
+        },
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "first_text",
+          "seconds": 8.577745840000716
+        },
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "terminal",
+          "seconds": 10.643203949000963,
+          "wire_bytes": 25561,
+          "text_bytes": 94,
+          "events": 50,
+          "callbacks": 5
+        },
+        {
+          "call": "81c626d8e5fb440ea84272dc8bb8eda2",
+          "stage": "decoded",
+          "seconds": 10.645402612000908,
+          "events": 50,
+          "callbacks": 6
+        }
+      ]
+    },
+    {
+      "repeat": 1,
+      "seconds": 29.73383041099987,
+      "state": "failed",
+      "observed_cumulative_events": 0,
+      "first_event_seconds": null,
+      "passed": false,
+      "billing_unknown": true,
+      "transport_phases": [
+        {
+          "call": "dcfc44d0fd134577b91ac593f0c5a14e",
+          "stage": "request_start",
+          "seconds": 0.00017531000048620626
+        },
+        {
+          "call": "dcfc44d0fd134577b91ac593f0c5a14e",
+          "stage": "headers",
+          "seconds": 29.632397014000162,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "dcfc44d0fd134577b91ac593f0c5a14e",
+          "stage": "first_wire",
+          "seconds": 29.632683228999667
+        }
+      ]
+    }
+  ],
+  "source": "279328e",
+  "key_read": false,
+  "automatic_replay": false
+}
