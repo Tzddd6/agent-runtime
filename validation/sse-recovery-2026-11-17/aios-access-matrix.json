@@ -1,0 +1,22 @@
+{
+  "mode": "unchanged_upstream_assertions_with_runtime_adapter",
+  "upstream_commit": "292d98f78c835499df18cdb6de6325bba1895862",
+  "test_sha256": "2a01240304a7b5460b2fc7508c310a20446afde9e707547c2a87893cd0a20658",
+  "mutation": "none",
+  "tests": 34,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": 0.06463589996565133,
+  "supplier_calls": 0,
+  "native_aios": false,
+  "production_integrated": false,
+  "include_local": true,
+  "implementation_sha256": {
+    "agent_runtime/context.py": "35cb77785e2acce9530fec8e70ecfb563b546e629cca180cdb6dea36f657ab61",
+    "agent_runtime/memory_access.py": "5734d0c7188af081fea7a3cb15f91185be9566745991c146a6398a654853c0d6",
+    "tools/aios_access_adapter.py": "e98d88b59995feca1f9c816b887fd5c7210e33871c1bd790d2ffd3f04b3516eb",
+    "test_memory_access.py": "7e3f046a06d11ea74f3100b5f57493c7a803705f7a259402f2fe242d3edb2615"
+  },
+  "failed_tests": []
+}

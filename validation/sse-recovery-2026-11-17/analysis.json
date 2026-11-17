@@ -1,0 +1,45 @@
+{
+  "source": "6dd8c4d",
+  "model": "gpt-6-luna",
+  "paired_requests_identical": true,
+  "arms": {
+    "direct": {
+      "passed": 6,
+      "seconds_sum": 150.41738610299944,
+      "seconds_median": 23.133262270999694,
+      "calls": 8,
+      "usage_unknown_calls": 0,
+      "usage": {
+        "prompt_tokens": 736,
+        "completion_tokens": 330
+      },
+      "coordinator_cpu_seconds": 0.16986808400000006,
+      "provider_seconds": 149.3759876949989,
+      "broker_seconds": 149.86846160888672,
+      "local_over_broker_seconds_per_call": 0.06861556176409067
+    },
+    "runtime": {
+      "passed": 6,
+      "seconds_sum": 110.40753266000138,
+      "seconds_median": 18.945475400500072,
+      "calls": 8,
+      "usage_unknown_calls": 0,
+      "usage": {
+        "prompt_tokens": 736,
+        "completion_tokens": 339
+      },
+      "coordinator_cpu_seconds": 0.5296539159999999,
+      "provider_seconds": 108.93163164699763,
+      "broker_seconds": 109.42412447929382,
+      "local_over_broker_seconds_per_call": 0.12292602258844454
+    }
+  },
+  "observed_elapsed_change_percent": -26.599221326450262,
+  "observed_total_tokens_change_percent": 0.8442776735459567,
+  "limits": [
+    "Only two alternated repetitions; large upstream latency variability",
+    "No statistical causal claim that framework caused lower observed elapsed time",
+    "No new official ranking; scores apply only to six small tasks per arm",
+    "Provider model identifier not independently verified"
+  ]
+}

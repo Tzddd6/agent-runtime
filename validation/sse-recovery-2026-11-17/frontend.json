@@ -1,0 +1,12 @@
+{
+  "markdown_dom": {
+    "passed": 10,
+    "tests": 10
+  },
+  "disconnect_controls": {
+    "passed": 1,
+    "tests": 1
+  },
+  "environment": "Windows bundled Node24.22.1",
+  "supplier_requests": 0
+}

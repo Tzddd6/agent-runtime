@@ -1,0 +1,10 @@
+{
+  "attempts": 20,
+  "nominal_reserved_usd": 0.005488699999999999,
+  "nominal_limit_usd": 0.01,
+  "known_nominal_usd": 0.0008091999999999999,
+  "unknown_usage_calls": 0,
+  "actual_account_bill_verified": false,
+  "paid_tests_stopped": true,
+  "price_basis": "User supplied nominal token prices; actual relay per-request billing unverified"
+}

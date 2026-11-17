@@ -1,0 +1,261 @@
+{
+  "rows": [
+    {
+      "case": "mixed",
+      "state": "succeeded",
+      "seconds": 5.070655694000379,
+      "progress_events": 4,
+      "first_event_seconds": 4.172613406999517,
+      "passed": true,
+      "usage": {
+        "prompt_tokens": 70,
+        "completion_tokens": 41,
+        "total_tokens": 111,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      },
+      "stream_equals_final": true,
+      "exact_text": true,
+      "final_sha256": "55cb6d3a450d126abe13019d1e497ddcc6c73d466b240704553a2ce37cf6188e",
+      "transport_phases": [
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "request_start",
+          "seconds": 0.00012636700012080837
+        },
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "headers",
+          "seconds": 4.007698007000727,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "first_wire",
+          "seconds": 4.010262432000673
+        },
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "first_text",
+          "seconds": 4.011246558000494
+        },
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "terminal",
+          "seconds": 4.827235857001142,
+          "wire_bytes": 18988,
+          "text_bytes": 94,
+          "events": 48,
+          "callbacks": 3
+        },
+        {
+          "call": "15d3798a1dd74508913f47b950500d38",
+          "stage": "decoded",
+          "seconds": 4.829212648000976,
+          "events": 48,
+          "callbacks": 4
+        }
+      ]
+    },
+    {
+      "case": "formula",
+      "state": "succeeded",
+      "seconds": 4.44107427400013,
+      "progress_events": 8,
+      "first_event_seconds": 2.731157758000336,
+      "passed": true,
+      "usage": {
+        "prompt_tokens": 105,
+        "completion_tokens": 91,
+        "total_tokens": 196,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 13
+        }
+      },
+      "stream_equals_final": true,
+      "exact_text": true,
+      "final_sha256": "5111862557140d9502cab0b94c044cc62e9cac1d574bd4c50d11118905d9307d",
+      "transport_phases": [
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "request_start",
+          "seconds": 0.00011683500088111032
+        },
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "headers",
+          "seconds": 2.6041937090012652,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "first_wire",
+          "seconds": 2.6045546639998065
+        },
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "first_text",
+          "seconds": 2.6555719309999404
+        },
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "terminal",
+          "seconds": 4.344193646000349,
+          "wire_bytes": 34118,
+          "text_bytes": 133,
+          "events": 85,
+          "callbacks": 7
+        },
+        {
+          "call": "a95130f1cd584303a5919e85307ddd9e",
+          "stage": "decoded",
+          "seconds": 4.345992042000944,
+          "events": 85,
+          "callbacks": 8
+        }
+      ]
+    },
+    {
+      "case": "code",
+      "state": "succeeded",
+      "seconds": 17.346935633999237,
+      "progress_events": 7,
+      "first_event_seconds": 15.789728179999656,
+      "passed": true,
+      "usage": {
+        "prompt_tokens": 81,
+        "completion_tokens": 71,
+        "total_tokens": 152,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      },
+      "stream_equals_final": true,
+      "exact_text": true,
+      "final_sha256": "003129ec2be3430ab7fc70f68beb8e8d7fc8725a4bf2d3150a6a4ac8a6e288d8",
+      "transport_phases": [
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "request_start",
+          "seconds": 0.0001172379998024553
+        },
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "headers",
+          "seconds": 15.509503831000984,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "first_wire",
+          "seconds": 15.509835488001045
+        },
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "first_text",
+          "seconds": 15.708812971000953
+        },
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "terminal",
+          "seconds": 17.244789626000056,
+          "wire_bytes": 28716,
+          "text_bytes": 141,
+          "events": 61,
+          "callbacks": 6
+        },
+        {
+          "call": "f5c2505615ce4d37bf9b631dcd6cb874",
+          "stage": "decoded",
+          "seconds": 17.246694060000664,
+          "events": 61,
+          "callbacks": 7
+        }
+      ]
+    },
+    {
+      "case": "long_table",
+      "state": "succeeded",
+      "seconds": 17.142331897000986,
+      "progress_events": 36,
+      "first_event_seconds": 8.824491707000561,
+      "passed": true,
+      "usage": {
+        "prompt_tokens": 344,
+        "completion_tokens": 332,
+        "total_tokens": 676,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 15
+        }
+      },
+      "stream_equals_final": true,
+      "exact_text": true,
+      "final_sha256": "49ef5db58b56349a6c48d1da1ad4957de94c42304ab79afab01d6e3dabf45a54",
+      "transport_phases": [
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "request_start",
+          "seconds": 0.00011937800081796013
+        },
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "headers",
+          "seconds": 8.549763205999625,
+          "status": 200,
+          "sse": true
+        },
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "first_wire",
+          "seconds": 8.550113733999751
+        },
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "first_text",
+          "seconds": 8.751666620000833
+        },
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "terminal",
+          "seconds": 17.048063620999528,
+          "wire_bytes": 98787,
+          "text_bytes": 570,
+          "events": 323,
+          "callbacks": 35
+        },
+        {
+          "call": "bdd72b58883943f18aadf7d3704159f8",
+          "stage": "decoded",
+          "seconds": 17.049913476001166,
+          "events": 323,
+          "callbacks": 36
+        }
+      ]
+    }
+  ],
+  "attempts": 4,
+  "passed": 4,
+  "reserved_nominal_usd": 0.0017902999999999999,
+  "automatic_retry": false,
+  "model": "gpt-6-luna"
+}

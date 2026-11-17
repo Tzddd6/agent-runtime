@@ -1,0 +1,15 @@
+{
+  "run": 398,
+  "passed": 397,
+  "failures": 0,
+  "errors": 0,
+  "skipped": [
+    [
+      "test_browser_disconnect_invalidates_live_readings_and_controls (test_control_faults.ControlFaultTests.test_browser_disconnect_invalidates_live_readings_and_controls)",
+      "Node.js is needed to execute browser logic offline"
+    ]
+  ],
+  "seconds": 76.71692847300073,
+  "real_browser_enabled": true,
+  "paid_calls": 0
+}

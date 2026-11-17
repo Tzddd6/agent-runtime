@@ -1,0 +1,80 @@
+{
+  "price_source": "User supplied relay nominal rates; actual billing unverified",
+  "currency": "USD",
+  "limit": 0.003,
+  "reserved": 0.0017902999999999999,
+  "calls": [
+    {
+      "reserved_usd": 0.0002082,
+      "request_sha256": "c509b7fabf87c09ee181923918830f3d999c8a24bfff81c3ee3bd5d39360d235",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 70,
+        "completion_tokens": 41,
+        "total_tokens": 111,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        }
+      }
+    },
+    {
+      "reserved_usd": 0.0003409,
+      "request_sha256": "6127d805a49af493acde4b3789021dd357bb57f37468d3d00ac232a58d043fb6",
+      "max_completion_tokens": 512,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 105,
+        "completion_tokens": 91,
+        "total_tokens": 196,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 13
+        }
+      }
+    },
+    {
+      "reserved_usd": 0.00034189999999999996,
+      "request_sha256": "178ca32edb4a06d0737987a921b155334d92d021ddbee6839cc4567389a5b65a",
+      "max_completion_tokens": 512,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 81,
+        "completion_tokens": 71,
+        "total_tokens": 152,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 17
+        }
+      }
+    },
+    {
+      "reserved_usd": 0.0008992999999999999,
+      "request_sha256": "2c52e52873561aeef2ce59cdc432956c992ea660cc54e8292f6d144131e274c9",
+      "max_completion_tokens": 1536,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 344,
+        "completion_tokens": 332,
+        "total_tokens": 676,
+        "prompt_tokens_details": {
+          "cache_write_tokens": 0,
+          "cached_tokens": 0
+        },
+        "completion_tokens_details": {
+          "reasoning_tokens": 15
+        }
+      }
+    }
+  ]
+}
