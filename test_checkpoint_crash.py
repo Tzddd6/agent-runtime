@@ -18,7 +18,9 @@ class CheckpointCrashTests(unittest.TestCase):
                 root=Path(folder);workspace=root/'work';workspace.mkdir()
                 tasks=[{'id':'write','action':'command','argv':['/bin/sh','-c',f'echo retained >> {workspace}/count']},
                        {'id':'pause','action':'sleep','seconds':3,'timeout':8,'depends_on':['write']}]
-                options=dict(output_dir=str(root/'runs'),workspace=str(workspace),checkpoint_dir=str(root/'checkpoint'),recovery_owner='alice',quiet=True)
+                # Explicit spawn leaves a real orphan on coordinator SIGKILL.
+                # Forkserver parent-death cleanup can legitimately beat the check.
+                options=dict(output_dir=str(root/'runs'),workspace=str(workspace),checkpoint_dir=str(root/'checkpoint'),recovery_owner='alice',quiet=True,worker_backend='spawn')
                 source='from agent_runtime.runtime import run;run('+repr(tasks)+',max_workers=1,cgroup_root='+repr(str(old))+',**'+repr(options)+')'
                 child=subprocess.Popen([sys.executable,'-c',source],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,
                     env={'PATH':os.defpath,'LANG':'C.UTF-8','PYTHONPATH':str(Path(__file__).resolve().parent)})
