@@ -1,0 +1,154 @@
+{
+  "rows": [
+    {
+      "seconds": 0.5005493820026459,
+      "coordinator_cpu": 0.044601960999999996,
+      "child_cpu": 0.302188,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "baseline",
+      "repetition": 0
+    },
+    {
+      "seconds": 0.4878873150009895,
+      "coordinator_cpu": 0.04942474699999999,
+      "child_cpu": 0.30641399999999996,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "candidate",
+      "repetition": 0
+    },
+    {
+      "seconds": 0.7718816039996454,
+      "coordinator_cpu": 0.07605072800000001,
+      "child_cpu": 0.307928,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": true,
+      "arm": "durable",
+      "repetition": 0
+    },
+    {
+      "seconds": 0.7117313390008349,
+      "coordinator_cpu": 0.07391795,
+      "child_cpu": 0.303042,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": true,
+      "arm": "durable",
+      "repetition": 1
+    },
+    {
+      "seconds": 0.511534028002643,
+      "coordinator_cpu": 0.04847570300000001,
+      "child_cpu": 0.306912,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "candidate",
+      "repetition": 1
+    },
+    {
+      "seconds": 0.4681269240027177,
+      "coordinator_cpu": 0.04334652,
+      "child_cpu": 0.301008,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "baseline",
+      "repetition": 1
+    },
+    {
+      "seconds": 0.4871922620004625,
+      "coordinator_cpu": 0.047700597,
+      "child_cpu": 0.309556,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "candidate",
+      "repetition": 2
+    },
+    {
+      "seconds": 0.4734153649988002,
+      "coordinator_cpu": 0.043938419000000006,
+      "child_cpu": 0.303216,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": false,
+      "arm": "baseline",
+      "repetition": 2
+    },
+    {
+      "seconds": 0.6816761720001523,
+      "coordinator_cpu": 0.073451331,
+      "child_cpu": 0.30273,
+      "requests_sha256": "ac7ff2fab238b2a54e1f6225a9ce7a0fcb5ad56965bb4fffbc047cae8ce7e3ef",
+      "results_sha256": "422e99d04427cbc334360555200ebb926c4fcce50ead6309efda614b99c55f09",
+      "tasks": 12,
+      "fixed_model_callbacks": 12,
+      "supplier_requests": 0,
+      "durable": true,
+      "arm": "durable",
+      "repetition": 2
+    }
+  ],
+  "repetitions": 3,
+  "all_identical": true,
+  "supplier_requests": 0,
+  "arms": {
+    "baseline": {
+      "seconds_mean": 0.4806972236680546,
+      "seconds": [
+        0.5005493820026459,
+        0.4681269240027177,
+        0.4734153649988002
+      ],
+      "coordinator_cpu_mean": 0.0439623
+    },
+    "candidate": {
+      "seconds_mean": 0.4955378683346983,
+      "seconds": [
+        0.4878873150009895,
+        0.511534028002643,
+        0.4871922620004625
+      ],
+      "coordinator_cpu_mean": 0.04853368233333333
+    },
+    "durable": {
+      "seconds_mean": 0.7217630383335442,
+      "seconds": [
+        0.7718816039996454,
+        0.7117313390008349,
+        0.6816761720001523
+      ],
+      "coordinator_cpu_mean": 0.07447333633333333
+    }
+  },
+  "scope": "12 fixed callbacks in one workflow; includes optional checkpoint fsync costs; not a live model/token benchmark"
+}

@@ -1,0 +1,7 @@
+{
+  "tests": 1,
+  "passed": 1,
+  "platform": "Windows with bundled Node.js",
+  "scope": "offline disconnect and control guards",
+  "supplier_requests": 0
+}

@@ -1,0 +1,15 @@
+{
+  "retained_failures": [
+    {
+      "kind": "profiling metadata failure",
+      "detail": "The initial8-case profile preserved all fixed outcomes but exited when Git rejected the new worktree ownership. Only this isolated worktree ownership was corrected; no global safe.directory bypass."
+    },
+    {
+      "kind": "fault fixture race",
+      "detail": "A test assumed old Worker must survive coordinator SIGKILL. Forkserver parent-death cleanup sometimes completed first. The corrected fixture explicitly selects spawn to keep a real orphan; the failed suite summary remains."
+    }
+  ],
+  "paid_requests": 0,
+  "private_checkpoints_published": false,
+  "old_four_trial_score_unchanged": true
+}
