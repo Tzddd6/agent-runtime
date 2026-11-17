@@ -1,0 +1,9 @@
+{
+  "real_browser": "chromium",
+  "real_http": true,
+  "real_cgroup_v2": true,
+  "demo": "succeeded",
+  "calls": 6,
+  "page_errors": [],
+  "supplier_calls": 0
+}

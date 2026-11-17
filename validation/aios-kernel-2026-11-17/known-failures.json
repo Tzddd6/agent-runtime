@@ -1,0 +1,9 @@
+{
+  "retained_setup_failures": [
+    "Initial local Windows subset interrupted, not counted as pass",
+    "Browser fixture first used benchmark Python without Playwright",
+    "Browser fixture default binary paths missing; fixed by using existing project browser resolver"
+  ],
+  "framework_test_failures": 0,
+  "paid_requests": 0
+}

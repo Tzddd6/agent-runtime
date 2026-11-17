@@ -1,0 +1,21 @@
+{
+  "run": 437,
+  "passed": 435,
+  "failures": 0,
+  "errors": 0,
+  "skipped": [
+    [
+      "test_browser_disconnect_invalidates_live_readings_and_controls (test_control_faults.ControlFaultTests.test_browser_disconnect_invalidates_live_readings_and_controls)",
+      "Node.js is needed to execute browser logic offline"
+    ],
+    [
+      "test_kernel_panel_resets_and_uses_text_only (test_kernel_frontend.KernelFrontendTests.test_kernel_panel_resets_and_uses_text_only)",
+      "Node.js needed for offline kernel UI validation"
+    ]
+  ],
+  "seconds": 77.73513934799848,
+  "paid_calls": 0,
+  "real_browser_enabled": true,
+  "cgroup_v2": true,
+  "residual_groups": []
+}

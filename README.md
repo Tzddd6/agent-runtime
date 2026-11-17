@@ -98,9 +98,9 @@ python3 -m agent_runtime.web --host 127.0.0.1 --port 18881
 - worker.py：echo/sleep/fail/command 动作。command 接收 argv 字符串数组，不启用 shell，仅允许受信任配置，不能直接执行模型生成命令。
 - __main__.py：CLI，保留原有 run/validate 导入兼容。
 
-每次执行创建 runs/<workflow_id>/，包含 events.jsonl、summary.json、contexts/<hash> 和 <task_id>-<attempt>/ 下的 result.json、worker.log。日志即时刷新，但没有崩溃续跑能力。
+每次执行创建 runs/<workflow_id>/，包含 events.jsonl、summary.json、contexts/<hash> 和 <task_id>-<attempt>/ 下的 result.json、worker.log。日志即时刷新；配置私有检查点后可恢复安全任务，不确定的模型调用或写操作需核对后处理。
 
-任务字段参照 examples/dynamic.json。资源向量为 cpu_milli、memory_bytes、pids；默认单任务 1000 millicpu、256 MiB、32 pids；默认总预算为 workers×1000 millicpu、1 GiB、128 pids，可通过 Python run(..., budget=...) 调整。超出总预算立即 unschedulable，前置失败则跳过后继。同一 Agent 的任务串行执行。
+任务字段参照 examples/dynamic.json。资源向量为 cpu_milli、memory_bytes、pids；默认单任务 1000 millicpu、256 MiB、32 pids；默认总预算为 workers×1000 millicpu、1 GiB、128 pids，可通过 Python run(..., budget=...) 调整。超出总预算立即 unschedulable，前置失败则跳过后继。同一 Agent 默认并发为 1，可通过控制块显式配置并发及聚合预算。
 
 --policy fifo 保留队首阻塞基线；--policy resource_fit 选择预算能容纳的任务；--policy aging_fit 在就绪任务等待超过 2 秒时停止旁路填充，让在运行任务自然释放资源后优先启动老任务。它是非抢占准入策略，不会抢占供应商的模型推理。
 
@@ -123,7 +123,7 @@ AGENTRT_TEST_CGROUP=/sys/fs/cgroup/实际委派路径/attempts python3 -m unitte
 
 2026-11-10 实机验收：Windows 常规测试 11 项通过；openEuler 3.11.6 常规测试 11 项通过，随后单独启用的 cgroup OOM 测试通过。临时 systemd 服务配置 User=dev、Delegate=yes，Runtime 运行 UID=1000；CPU 200 millicpu 的一次 2 秒负载实测约 0.209 核，记录到 21 次节流，并检查任务组清理完成。原始摘要见 validation/2026-11-10-openeuler.json。该短时烟雾测试不等同于完整性能基准或所有故障边界验收。
 
-- 已实现模型网关、无损 gzip 上下文压缩、内容哈希去重、在线 mailbox IPC、消息去重及取消 API。尚无 lease、心跳或崩溃恢复。动态任务在 Worker 成功返回后批量加入，不是完整在线 spawn_batch RPC。
+- 已实现模型网关、无损 gzip 上下文压缩、内容哈希去重、在线 mailbox IPC、消息去重及取消 API。已有检查点与工作流执行租约，尚无跨主机心跳与自动对账；未启用检查点时仅恢复观测。动态任务在 Worker 成功返回后批量加入，不是完整在线 spawn_batch RPC。
 - 上下文授权在 Runtime API 内检查，不是不同 OS 身份之间的安全沙箱。Worker 仍收到序列化内容，不是零拷贝或 KV Cache 共享。
 - 普通 POSIX 进程组不能覆盖主动脱离会话的后代；Windows 对存活父进程使用 taskkill 清树，父进程先退出后不能保证清理脱离后代。严格模式通过 cgroup 管理后代。
 - 目前没有日志/磁盘/结果体积的强制配额；UI 仅取日志尾部不代表磁盘已限额。
@@ -154,4 +154,4 @@ NUC 的浏览器入口是 https://mc.tzddd.cn/agentrt/ ，使用当前网站的 
 
 `python3 tools/benchmark.py --repeats 3` 比较 FIFO 和 resource_fit 在特定队首阻塞场景下的响应时间与总耗时，逐次原始数据写入 reports/benchmark.json。该实验使用 sleep Worker，不是通用性能结论。需要严格资源实验时在已委派服务内传入 --cgroup-root。
 
-当前统一映射是 Workflow → Agent → Task → Attempt → Worker PID → cgroup。事件带 workflow_id、agent、task_id、attempt、PID、资源请求和终态；同一 Agent 串行，不同 Agent 按依赖和总预算并发。尚未实现多主机、持久恢复、内核修改或容器级安全隔离。
+当前统一映射是 Workflow → Agent → Task → Attempt → Worker PID → cgroup。事件带 workflow_id、agent、task_id、attempt、PID、资源请求和终态；Agent 默认串行，不同 Agent 按依赖和总预算并发。持久恢复需显式配置检查点，仍未实现多主机调度、Linux 内核修改或完全容器级隔离。

@@ -1,0 +1,15 @@
+{
+  "repository": "https://github.com/agiresearch/AIOS",
+  "commit": "292d98f78c835499df18cdb6de6325bba1895862",
+  "reviewed_files": [
+    "aios/syscall/__init__.py",
+    "aios/syscall/syscall.py",
+    "aios/scheduler/base.py",
+    "aios/scheduler/fifo_scheduler.py",
+    "aios/scheduler/rr_scheduler.py",
+    "aios/tool/manager.py",
+    "aios/context/simple_context.py"
+  ],
+  "implementation": "independently written; architectural reference only; no upstream runtime dependency",
+  "upstream_license_file": "whitespace only at reference commit"
+}
