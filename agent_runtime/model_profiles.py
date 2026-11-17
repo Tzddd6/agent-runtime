@@ -5,7 +5,7 @@ OpenAI does not require restarting it or reading/transferring its existing key.
 """
 import re
 from .model_broker import ModelBroker,ACTIVE
-from .model_gateway import DeepSeekClient,OpenAIClient,ModelError
+from .model_gateway import DeepSeekClient,OpenAIClient,AizexClient,ModelError
 
 
 class MultiModelBroker(ModelBroker):
@@ -16,7 +16,7 @@ class MultiModelBroker(ModelBroker):
 
     @staticmethod
     def build_client(provider,key,model):
-        return (OpenAIClient if provider=='openai' else DeepSeekClient)(key,model=model)
+        return {'openai':OpenAIClient,'deepseek':DeepSeekClient,'aizex':AizexClient}[provider](key,model=model)
 
     def idle(self):
         if self.closed or any(c['status'] in ACTIVE for c in self.calls.values()):
@@ -61,7 +61,7 @@ class MultiModelBroker(ModelBroker):
         identity=value.get('id');label=value.get('label');provider=value.get('provider');model=value.get('model')
         if (not isinstance(identity,str) or not re.fullmatch(r'[a-z][a-z0-9_-]{0,31}',identity) or identity=='legacy'
             or not isinstance(label,str) or not 1<=len(label)<=60 or any(ord(c)<32 for c in label)
-            or provider not in ('deepseek','openai') or not isinstance(model,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}',model)
+            or provider not in ('deepseek','openai','aizex') or not isinstance(model,str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}',model)
             or 'sk-' in label.lower() or 'sk-' in model.lower()):raise ValueError('Invalid profile metadata')
         with self.lock:
             self.idle();old=self.profiles.get(identity)

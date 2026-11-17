@@ -1,0 +1,18 @@
+{
+  "regular_suite": {
+    "run": 369,
+    "passed": 367,
+    "skipped": 2
+  },
+  "after_native_parameter_fix": {
+    "focused_tests": 10,
+    "passed": 10
+  },
+  "supplier_requests": 0,
+  "protocol": "Chat Completions compatibility per user-provided provider documentation",
+  "origin": "https://ca.memofun.net/v1",
+  "official_credentials_reused": false,
+  "key_services_restarted": false,
+  "pricing_source": "User-provided screenshot 2026-11-17; actual per-token settlement",
+  "note": "No live result until a rotated dedicated relay key is configured in the new provider entry."
+}

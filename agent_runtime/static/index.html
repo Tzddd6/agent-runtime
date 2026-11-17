@@ -18,7 +18,7 @@
   <a class="nav" href="#workspace" data-view="tasks"><span>⌘</span>任务与拓扑</a>
   <a class="nav" href="#workspace" data-view="agents"><span>◎</span>Agent 管理</a>
   <a class="nav" href="#workspace" data-view="logs"><span>≡</span>结果与记录</a>
-  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.21.0 / Agent 执行工作台</small></div>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.22.0 / Agent 执行工作台</small></div>
 </aside>
 <main>
   <header><span class="breadcrumb">Agent Runtime <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
@@ -42,13 +42,13 @@
           <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
         </form>
         <details class="model-config" id="apiProfilesPanel"><summary><span>模型与 API</span><span id="modelState" class="muted">待配置密钥</span></summary>
-          <p class="hint">可添加多个 DeepSeek / OpenAI API，手动选择当前模型。保存配置不发送测试请求，也不会自动切换到其他供应商。密钥只保存在独立服务内存中，服务重启后需要重新填写。</p>
+          <p class="hint">可添加多个 DeepSeek / OpenAI / Aizex API，手动选择当前模型。保存配置不发送测试请求，也不会自动切换到其他供应商。密钥只保存在独立服务内存中，服务重启后需要重新填写。</p>
           <div id="apiProfiles" aria-live="polite"><p class="hint">展开后加载 API 配置。</p></div>
           <form id="apiProfileForm" autocomplete="off">
             <input id="editingProfileId" type="hidden">
             <h3>添加 API</h3><label for="profileLabel">名称</label><input id="profileLabel" maxlength="60" placeholder="例如：我的 GPT API" required>
-            <div class="two"><div><label for="profileProvider">供应商</label><select id="profileProvider"><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option></select></div><div><label for="profileModel">模型名称</label><input id="profileModel" maxlength="128" placeholder="例如 gpt-4.1-mini" required></div></div>
-            <label for="profileKey">API Key</label><input id="profileKey" type="password" autocomplete="new-password" spellcheck="false" placeholder="仅提交到当前 Runtime 的模型服务" required>
+            <div class="two"><div><label for="profileProvider">供应商</label><select id="profileProvider"><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option><option value="aizex">Aizex 中转（香港）</option></select></div><div><label for="profileModel">模型名称</label><input id="profileModel" maxlength="128" placeholder="例如 gpt-4.1-mini" required></div></div>
+            <p class="hint" id="profileOrigin">OpenAI 官方接口：https://api.openai.com/v1</p><label for="profileKey">API Key</label><input id="profileKey" type="password" autocomplete="new-password" spellcheck="false" placeholder="仅提交到当前 Runtime 的模型服务" required>
             <button id="saveProfile" class="secondary" type="submit">添加 API，不切换模型</button>
             <button id="cancelProfileEdit" class="secondary" type="button" hidden>取消编辑</button>
           </form>

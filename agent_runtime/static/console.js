@@ -341,10 +341,16 @@ function renderAgents(job){
   $('agentCommands').textContent=(job.agent_controls||[]).map(c=>new Date(c.time*1000).toLocaleTimeString()+'  '+c.agent_id+'  '+c.operation+'  '+({queued:'排队中',applied:'已执行',rejected:'已拒绝'}[c.status]||c.status)+(c.error?' · '+c.error:'')).join('\n')||'尚无控制指令';
 }
 let apiProfileBusy=false,apiProfileRunning=false;
+function profileOrigin(){
+ const provider=$('profileProvider').value;
+ const origins={openai:'OpenAI 官方：https://api.openai.com/v1',deepseek:'DeepSeek 官方：https://api.deepseek.com',aizex:'第三方 Aizex：https://ca.memofun.net/v1；仅填写该站专用密钥，不要填写官方 OpenAI 密钥。'};
+ $('profileOrigin').textContent=origins[provider]||'未知供应商';
+ $('profileModel').placeholder=provider==='aizex'?'例如 gpt-6-luna':provider==='openai'?'例如 gpt-4.1-mini':'例如 deepseek-flash';
+}
 function resetApiProfileForm(){
   $('apiProfileForm').reset();$('editingProfileId').value='';$('profileProvider').disabled=false;
   $('profileKey').required=true;$('profileKey').placeholder='仅提交到当前 Runtime 的模型服务';
-  $('saveProfile').textContent='添加 API，不切换模型';$('cancelProfileEdit').hidden=true;
+  $('saveProfile').textContent='添加 API，不切换模型';$('cancelProfileEdit').hidden=true;profileOrigin();
 }
 async function loadApiProfiles(){
   const box=$('apiProfiles');if(!box)return;
@@ -360,7 +366,7 @@ async function loadApiProfiles(){
       select.onclick=()=>apiProfileAction('select',{id:profile.id},'已切换当前模型；尚未发送模型请求');actions.append(select);
       if(!profile.legacy){
         const edit=node('button','编辑','secondary');edit.type='button';edit.dataset.apiProfileAction='1';edit.disabled=apiProfileBusy||apiProfileRunning||offline||recoveryRequired;
-        edit.onclick=()=>{$('editingProfileId').value=profile.id;$('profileLabel').value=profile.label;$('profileProvider').value=profile.provider;$('profileProvider').disabled=true;$('profileModel').value=profile.model;$('profileKey').value='';$('profileKey').required=false;$('profileKey').placeholder='留空保留现有密钥；输入新值可替换';$('saveProfile').textContent='更新配置，不切换模型';$('cancelProfileEdit').hidden=false;$('profileLabel').focus()};
+        edit.onclick=()=>{$('editingProfileId').value=profile.id;$('profileLabel').value=profile.label;$('profileProvider').value=profile.provider;$('profileProvider').disabled=true;$('profileModel').value=profile.model;$('profileKey').value='';$('profileKey').required=false;$('profileKey').placeholder='留空保留现有密钥；输入新值可替换';$('saveProfile').textContent='更新配置，不切换模型';$('cancelProfileEdit').hidden=false;profileOrigin();$('profileLabel').focus()};
         const remove=node('button','移除','secondary danger');remove.type='button';remove.dataset.apiProfileAction='1';remove.disabled=edit.disabled;let armed=false;
         remove.onclick=()=>{if(!armed){armed=true;remove.textContent='再次点击确认移除';setTimeout(()=>{armed=false;remove.textContent='移除'},5000);return}apiProfileAction('remove',{id:profile.id},'配置已移除；未吊销供应商密钥。移除当前模型后请重新选择。')};
         actions.append(edit,remove);
@@ -394,7 +400,7 @@ function initialize(){
     if(location.hash==='#apiProfilesPanel')$('apiProfilesPanel').open=true;
     $('apiProfileForm').addEventListener('submit',saveApiProfile);
     $('cancelProfileEdit').onclick=resetApiProfileForm;
-    $('profileProvider').onchange=()=>{$('profileModel').placeholder=$('profileProvider').value==='openai'?'例如 gpt-4.1-mini':'例如 deepseek-flash'};
+    $('profileProvider').onchange=profileOrigin;profileOrigin();
   }
   const linkedJob=new URLSearchParams(location.search).get('job');if(/^[a-f0-9]{32}$/.test(linkedJob||''))selected=linkedJob;
   for(const el of document.querySelectorAll('[data-view]'))el.onclick=e=>{e.preventDefault();showView(el.dataset.view)};

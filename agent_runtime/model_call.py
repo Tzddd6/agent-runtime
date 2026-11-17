@@ -4,7 +4,7 @@ import sys
 import os
 import stat
 from pathlib import Path
-from .model_gateway import DeepSeekClient,OpenAIClient,ModelError,MAX_BYTES
+from .model_gateway import DeepSeekClient,OpenAIClient,AizexClient,ModelError,MAX_BYTES
 
 
 HANDOFF_PATH=Path('/home/tzd/.config/agentrt/broker-handoff.json')
@@ -56,8 +56,8 @@ def main():
         if len(wire)>MAX_BYTES+4096:raise ModelError('模型代理输入超过限制')
         request=json.loads(wire)
         provider=request.get('provider','deepseek')
-        if provider not in ('deepseek','openai'):raise ModelError('Unsupported model provider')
-        factory=OpenAIClient if provider=='openai' else DeepSeekClient
+        if provider not in ('deepseek','openai','aizex'):raise ModelError('Unsupported model provider')
+        factory={'openai':OpenAIClient,'deepseek':DeepSeekClient,'aizex':AizexClient}[provider]
         client=factory(request['key'],model=request['model'],timeout=request['timeout'],
                               base=request['base'],local_test=request.get('local_test',False))
         if provider=='deepseek' and request.get('base')=='https://api.deepseek.com' and not request.get('local_test',False):

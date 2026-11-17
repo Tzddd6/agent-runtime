@@ -47,18 +47,18 @@ def grade(case,text):
  except (ValueError,TypeError,KeyError,SyntaxError,ArithmeticError):return False
 
 class Ledger:
- def __init__(self,path,limit=.05):
-  self.path=Path(path);self.limit=limit;self.reserved=0.;self.rows=[]
+ def __init__(self,path,limit=.05,*,input_price=.4,output_price=1.6,price_source=PRICE_SOURCE):
+  self.path=Path(path);self.limit=limit;self.reserved=0.;self.rows=[];self.input_price=input_price;self.output_price=output_price;self.price_source=price_source
   if self.path.exists():raise ValueError('Use a new ledger; never replay a partial live run')
  def admit(self,messages,output):
   # Upper-bound this fixed UTF-8 text fixture, including chat envelope overhead.
   tokens=len(json.dumps(messages,ensure_ascii=False).encode())+128*len(messages)+256
-  cost=(tokens*.4+output*1.6)/1e6
+  cost=(tokens*self.input_price+output*self.output_price)/1e6
   if len(self.rows)>=16 or self.reserved+cost>self.limit:raise ValueError('Live spend/call reservation limit reached')
   self.reserved+=cost;row={'reserved_usd':cost,'request_sha256':digest(messages),'max_completion_tokens':output,'state':'admitted'};self.rows.append(row);self.flush();return row
  def flush(self):
   with self.path.open('w') as f:
-   json.dump({'price_source':PRICE_SOURCE,'currency':'USD','limit':self.limit,'reserved':self.reserved,'calls':self.rows},f,indent=2);f.flush();os.fsync(f.fileno())
+   json.dump({'price_source':self.price_source,'currency':'USD','limit':self.limit,'reserved':self.reserved,'calls':self.rows},f,indent=2);f.flush();os.fsync(f.fileno())
 
 class Measured:
  def __init__(self,client,ledger):self.client=client;self.model=client.model;self.timeout=client.timeout;self.ledger=ledger;self.records=[]
@@ -85,18 +85,18 @@ class Fixture:
   return {'content':json.dumps(content),'finish_reason':'stop','model':'fixture','usage':{'prompt_tokens':10,'completion_tokens':10},'latency_seconds':0.}
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--aizex',action='store_true',help='Explicitly use Aizex gpt-6-luna and the user-supplied published nominal token prices');p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
  if a.repeats!=2:p.error('This small preflight has exactly two repetitions (16 calls total)')
  a.output.mkdir(mode=0o700,parents=True,exist_ok=False)
  if a.live:
   from agent_runtime.model_broker import BrokerClient
   c=BrokerClient.from_env();info=c.profiles_info();row=next((x for x in info['profiles'] if x['id']==a.profile),None)
-  if not row or row['provider']!='openai' or row['model']!=MODEL or not row['configured']:raise ValueError('Pin a configured official OpenAI gpt-4.1-mini profile')
-  c=c.for_profile(a.profile,MODEL)
+  if not row or row['provider']!=('aizex' if a.aizex else 'openai') or row['model']!=('gpt-6-luna' if a.aizex else MODEL) or not row['configured']:raise ValueError('Pin a configured official OpenAI gpt-4.1-mini profile')
+  c=c.for_profile(a.profile,'gpt-6-luna' if a.aizex else MODEL)
  else:c=Fixture()
  from agent_runtime.runtime import run
  from agent_runtime.worker_session import WorkerSession
- ledger=Ledger(a.output/'ledger.json');client=Measured(c,ledger);rows=[]
+ ledger=Ledger(a.output/'ledger.json',**({'input_price':.1,'output_price':.5,'price_source':'User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored'} if a.aizex else {}));client=Measured(c,ledger);rows=[]
  with WorkerSession(a.output/'runs') as session:
   def call(arm,messages):
    if arm=='direct':return client.complete(messages,256)['content']
@@ -117,7 +117,7 @@ def main():
   finally:session_stats=dict(session.stats)
  pairs=[(next(r for r in rows if r['repeat']==repeat and r['case']==case['id'] and r['arm']=='direct'),next(r for r in rows if r['repeat']==repeat and r['case']==case['id'] and r['arm']=='runtime')) for repeat in range(2) for case in cases()]
  if not all(d['request_hashes']==r['request_hashes'] for d,r in pairs):raise ValueError('Unmatched provider requests; comparison invalid')
- summary={'live':a.live,'supplier_requests':len(ledger.rows) if a.live else 0,'fixture_calls':len(ledger.rows) if not a.live else 0,'model':MODEL,'paired_requests_identical':True,'repeats':2,'tasks_per_arm':6,'reserved_usd':ledger.reserved,'session':session_stats,'arms':{},'limits':['Six small tasks per arm, not an official capability score or significance result','Direct shares the same RAM broker, TLS path and parameters; no raw HTTP speed claim','Same explicit two-turn tool protocol and canonicalized messages in both arms','No prompts, model text or supplier credentials in public summary']}
+ summary={'live':a.live,'supplier_requests':len(ledger.rows) if a.live else 0,'fixture_calls':len(ledger.rows) if not a.live else 0,'model':c.model,'provider':'aizex' if a.aizex else 'openai','paired_requests_identical':True,'repeats':2,'tasks_per_arm':6,'reserved_usd':ledger.reserved,'session':session_stats,'arms':{},'limits':['Six small tasks per arm, not an official capability score or significance result','Direct shares the same RAM broker, TLS path and parameters; no raw HTTP speed claim','Same explicit two-turn tool protocol and canonicalized messages in both arms','No prompts, model text or supplier credentials in public summary']}
  for arm in ('direct','runtime'):
   selected=[r for r in rows if r['arm']==arm];summary['arms'][arm]={'passed':sum(r['passed'] for r in selected),'seconds_sum':sum(r['seconds'] for r in selected),'seconds_median':statistics.median(r['seconds'] for r in selected),'calls':sum(r['calls'] for r in selected),'usage':{k:sum(r['usage'][k] for r in selected) for k in ('prompt_tokens','completion_tokens')}}
  (a.output/'summary.json').write_text(json.dumps(summary,indent=2));print(json.dumps(summary),flush=True)

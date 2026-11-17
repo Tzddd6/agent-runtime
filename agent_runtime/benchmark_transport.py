@@ -52,7 +52,7 @@ def complete(client, messages, max_tokens):
     if type(max_tokens) is not int or not 1<=max_tokens<=4096:raise ModelError('Invalid benchmark token limit')
     body={'model':client.model,'messages':value['messages'],
           'temperature':value['temperature'],'stream':False,**inference_options(client,max_tokens)}
-    reasoning_openai=getattr(client,'provider','deepseek')=='openai' and client.model.startswith(('gpt-5','gpt-6','o1','o3','o4'))
+    reasoning_openai=getattr(client,'provider','deepseek') in ('openai','aizex') and client.model.startswith(('gpt-5','gpt-6','o1','o3','o4'))
     if reasoning_openai:body.pop('temperature')
     if value['tools']:
         body['tools']=value['tools'];body['tool_choice']=value['tool_choice'] or 'auto'

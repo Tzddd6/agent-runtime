@@ -21,6 +21,7 @@ from .model_gateway import DeepSeekClient, ModelError, NoRedirect, MAX_BYTES
 
 BROKER_URL='http://127.0.0.1:18886'
 MULTI_BROKER_URL='http://127.0.0.1:18887'
+FEDERATED_BROKER_URL='http://127.0.0.1:18888'
 ACTIVE=('queued','running')
 
 
@@ -208,7 +209,7 @@ class BrokerClient:
     def __init__(self,token,url=BROKER_URL,*,local_test=False):
         from urllib.parse import urlparse
         parsed=urlparse(url)
-        if (url not in (BROKER_URL,MULTI_BROKER_URL) and not(local_test and parsed.scheme=='http' and parsed.hostname=='127.0.0.1'
+        if (url not in (BROKER_URL,MULTI_BROKER_URL,FEDERATED_BROKER_URL) and not(local_test and parsed.scheme=='http' and parsed.hostname=='127.0.0.1'
                                     and parsed.path=='' and not parsed.username and not parsed.password)):
             raise ModelError('Only the fixed loopback model broker is permitted')
         if not token:raise ModelError('Broker control token is missing')
@@ -250,6 +251,7 @@ class BrokerClient:
             if row is None or not row['configured']:raise ModelError('API profile unavailable')
             if model is not None and model!=row['model']:raise ModelError('API profile model changed before workflow admission')
             client.profile_revision=row['revision'];model=row['model']
+            if self.url==FEDERATED_BROKER_URL and row.get('upstream') is True:client.url=MULTI_BROKER_URL
         if not(identity=='legacy' and self.url==BROKER_URL):client.profile_id=identity
         if model is not None:client.model=model
         return client
@@ -259,11 +261,11 @@ class BrokerClient:
         if self.cancel_event is not None and self.cancel_event.is_set():
             raise ModelError('Local model call cancelled')
         profile=getattr(self,'profile_id',None)
-        if self.url==MULTI_BROKER_URL and profile is None:
+        if self.url in (MULTI_BROKER_URL,FEDERATED_BROKER_URL) and profile is None:
             info=self.status();profile=info.get('profile_id')
             revision=info.get('profile_revision')
         else:revision=getattr(self,'profile_revision',None)
-        if self.url==MULTI_BROKER_URL and profile=='legacy':
+        if self.url in (MULTI_BROKER_URL,FEDERATED_BROKER_URL) and profile=='legacy':
             # Keep the old RAM owner and its exactly-once receipt path, without
             # adding another paid submission/polling hop around it.
             import copy
@@ -308,9 +310,12 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port',type=int,default=18886)
     args=parser.parse_args()
-    if args.port not in (18886,18887):parser.error('Production broker ports are fixed loopback endpoints')
+    if args.port not in (18886,18887,18888):parser.error('Production broker ports are fixed loopback endpoints')
     token=os.environ.get('AGENTRT_PROXY_TOKEN','')
-    if args.port==18887:
+    if args.port==18888:
+        from .federated_profiles import FederatedProfiles
+        broker=FederatedProfiles(token,upstream=BrokerClient(token,MULTI_BROKER_URL),legacy_client=BrokerClient(token,BROKER_URL))
+    elif args.port==18887:
         from .model_profiles import MultiModelBroker
         broker=MultiModelBroker(token,legacy_client=BrokerClient(token,BROKER_URL))
     else:broker=ModelBroker(token)

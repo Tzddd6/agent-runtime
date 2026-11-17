@@ -40,8 +40,9 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 def inference_options(client,max_tokens,thinking=False):
     """Provider-specific output bounds; never send another vendor's options."""
-    if getattr(client,'provider','deepseek')=='openai':
+    if getattr(client,'provider','deepseek') in ('openai','aizex'):
         result={'max_completion_tokens':max_tokens,'store':False}
+        if getattr(client,'provider',None)=='aizex' and client.model.startswith(('gpt-5','gpt-6')) and not thinking:result['reasoning_effort']='minimal'
         if thinking:
             if not client.model.startswith(('gpt-5','gpt-6','o1','o3','o4')):
                 raise ModelError('所选 OpenAI 模型未启用推理参数，请关闭深度思考或更换模型')
@@ -181,6 +182,15 @@ class OpenAIClient(DeepSeekClient):
     official_base='https://api.openai.com/v1'
 
     def __init__(self,key,model='gpt-4.1-mini',timeout=30,base='https://api.openai.com/v1',*,local_test=False):
+        super().__init__(key,model,timeout,base,local_test=local_test)
+
+
+class AizexClient(OpenAIClient):
+    """Explicit third-party origin, separate from official OpenAI credentials."""
+    provider='aizex'
+    official_base='https://ca.memofun.net/v1'
+
+    def __init__(self,key,model='gpt-6-luna',timeout=30,base='https://ca.memofun.net/v1',*,local_test=False):
         super().__init__(key,model,timeout,base,local_test=local_test)
 
 
