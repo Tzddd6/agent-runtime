@@ -30,6 +30,7 @@ def main():
     parser.add_argument('--max-calls',type=int,default=1000)
     parser.add_argument('--budget-ledger',type=Path)
     parser.add_argument('--run',action='store_true')
+    parser.add_argument('--reuse-workers',action='store_true',help='Reuse a credential-free preloader within each task; every Attempt is a fresh process')
     args=parser.parse_args()
     from tau2.runner.helpers import get_tasks,get_info
     from tau2.runner.batch import run_single_task
@@ -56,7 +57,7 @@ def main():
           'task_index':args.task_index,
           'pilot':bool(args.pilot),'official_files_verified':verified,
           'requires_official_gpt41_judge':requires_judge,'limit_cny':args.cny_limit,
-          'arm':args.arm,'submission_type':'custom','user_simulator_model':'deepseek-flash',
+          'arm':args.arm,'reuse_workers':bool(args.reuse_workers and args.arm=='runtime'),'submission_type':'custom','user_simulator_model':'deepseek-flash',
           'evaluator':'official ALL, unchanged','ranking':None}
     print(json.dumps(plan),flush=True)
     if not args.run:return
@@ -66,9 +67,13 @@ def main():
     args.output.mkdir(parents=True,exist_ok=False,mode=0o700)
     from agent_runtime.model_broker import BrokerClient
     from agent_runtime.tau_adapter import TauBridge
-    bridge=TauBridge(BrokerClient.from_env(),args.output/'attempts',arm=args.arm,
+    client=BrokerClient.from_env();provider=client.status()
+    if provider.get('provider','deepseek')!='deepseek' or provider.get('model')!='deepseek-flash':
+        raise SystemExit('This CNY budget is pinned to DeepSeek Flash; refusing another provider/model')
+    if provider.get('profile_id'):client=client.for_profile(provider['profile_id'],provider['model'])
+    bridge=TauBridge(client,args.output/'attempts',arm=args.arm,
         cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),cny_limit=args.cny_limit,
-        max_calls=args.max_calls,ledger=args.budget_ledger)
+        max_calls=args.max_calls,ledger=args.budget_ledger,reuse_workers=args.reuse_workers)
     bridge.install()
     config=TextRunConfig(domain=args.domain,task_split_name='base',llm_agent='deepseek-flash',llm_user='deepseek-flash',
         llm_args_agent={'temperature':0.,'max_tokens':2048},llm_args_user={'temperature':0.,'max_tokens':2048},
@@ -93,6 +98,9 @@ def main():
     except Exception as exc:
         failure=type(exc).__name__
         results.save(args.output/'results.json')
+    finally:
+        try:bridge.close()
+        except Exception:failure=failure or 'WorkerSessionCleanupFailed'
     summary={**plan,'finished':len(results.simulations),'expected':len(selected)*args.trials,
         'completed':failure is None and len(results.simulations)==len(selected)*args.trials,
         'passed_tasks':sum(r.reward_info.reward==1 for r in results.simulations),

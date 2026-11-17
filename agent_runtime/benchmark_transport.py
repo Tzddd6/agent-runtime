@@ -7,7 +7,7 @@ import json
 import math
 import time
 import urllib.request
-from .model_gateway import ModelError, NoRedirect, MAX_BYTES
+from .model_gateway import ModelError, NoRedirect, MAX_BYTES,inference_options
 
 PREFIX='agentrt-native-toolwire-v1:'
 
@@ -50,11 +50,13 @@ def complete(client, messages, max_tokens):
         raise ModelError('Invalid benchmark carrier')
     value=json.loads(messages[0]['content'][len(PREFIX):]);validate(value)
     if type(max_tokens) is not int or not 1<=max_tokens<=4096:raise ModelError('Invalid benchmark token limit')
-    body={'model':client.model,'messages':value['messages'],'max_tokens':max_tokens,
-          'temperature':value['temperature'],'stream':False,'thinking':{'type':'disabled'}}
+    body={'model':client.model,'messages':value['messages'],
+          'temperature':value['temperature'],'stream':False,**inference_options(client,max_tokens)}
+    reasoning_openai=getattr(client,'provider','deepseek')=='openai' and client.model.startswith(('gpt-5','gpt-6','o1','o3','o4'))
+    if reasoning_openai:body.pop('temperature')
     if value['tools']:
         body['tools']=value['tools'];body['tool_choice']=value['tool_choice'] or 'auto'
-    if value['seed'] is not None:body['seed']=value['seed']
+    if value['seed'] is not None and not reasoning_openai:body['seed']=value['seed']
     request=urllib.request.Request(client.base+'/chat/completions',data=json.dumps(body,ensure_ascii=False).encode(),
         headers={'Authorization':'Bearer '+client.key,'Content-Type':'application/json'})
     start=time.monotonic()

@@ -1,0 +1,40 @@
+{
+  "runtime": {
+    "failed_task_ids": [
+      "1",
+      "7",
+      "14",
+      "17",
+      "21",
+      "29",
+      "32",
+      "35",
+      "39",
+      "44",
+      "45"
+    ],
+    "termination_counts": {
+      "user_stop": 11
+    },
+    "db_mismatch": 11,
+    "communication_failures": 2
+  },
+  "direct": {
+    "failed_task_ids": [
+      "1",
+      "14",
+      "15",
+      "17",
+      "20",
+      "29",
+      "32",
+      "39",
+      "44"
+    ],
+    "termination_counts": {
+      "user_stop": 9
+    },
+    "db_mismatch": 9,
+    "communication_failures": 1
+  }
+}

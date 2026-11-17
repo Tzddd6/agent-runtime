@@ -1,6 +1,6 @@
 """Trusted SSE transport. Emits content only to a one-call loopback capability."""
 import base64,json,time,urllib.error,urllib.parse,urllib.request
-from .model_gateway import ModelError,NoRedirect,MAX_BYTES
+from .model_gateway import ModelError,NoRedirect,MAX_BYTES,inference_options
 THINKING_MARKER='agentrt-internal-options-v1:thinking=high'
 PREFIX='agentrt-internal-stream-v1:'
 
@@ -35,8 +35,7 @@ def normalized(messages):
 def complete(client,messages,max_tokens,callback):
     if type(max_tokens) is not int or not 1<=max_tokens<=4096:raise ModelError('Invalid output budget')
     messages,thinking=normalized(messages)
-    value={'model':client.model,'messages':messages,'max_tokens':max_tokens,'stream':True,'stream_options':{'include_usage':True},'thinking':{'type':'enabled' if thinking else 'disabled'}}
-    if thinking:value['reasoning_effort']='high'
+    value={'model':client.model,'messages':messages,'stream':True,'stream_options':{'include_usage':True},**inference_options(client,max_tokens,thinking)}
     data=json.dumps(value,ensure_ascii=False).encode()
     if len(data)>MAX_BYTES:raise ModelError('Streaming request exceeds limit')
     opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())

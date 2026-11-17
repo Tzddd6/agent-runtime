@@ -2,13 +2,17 @@
 import json,urllib.error,urllib.request
 class CompletionFailure(RuntimeError):
     def __init__(self,code):self.code=code
+
+class LocalNoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self,*_):return None
 def complete(task,messages):
     limit=task.get('continuation_limit',0)
     if type(limit) is not int or not 0<=limit<=3:raise ValueError('续写最多三次')
     def request(current):
         req=urllib.request.Request(task['_gateway_url'],data=json.dumps({'messages':current,'max_tokens':task.get('max_tokens',4096),'thinking':task.get('thinking',False)},ensure_ascii=False).encode(),headers={'Authorization':'Bearer '+task['_gateway_token'],'Content-Type':'application/json'})
         try:
-            with urllib.request.urlopen(req,timeout=65) as response:return json.load(response)
+            opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),LocalNoRedirect())
+            with opener.open(req,timeout=65) as response:return json.load(response)
         except urllib.error.HTTPError as exc:
             try:body=json.loads(exc.read(8192))
             except (ValueError,OSError):body={}

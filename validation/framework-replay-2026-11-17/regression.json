@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "tests": 357,
+  "skipped": 2,
+  "supplier_requests": 0,
+  "focused_linux_fault_tests": 17,
+  "command": "python -m unittest discover -q",
+  "environment": "Python 3.12.16; Linux; delegated cgroup v2; bounded 2 CPU / 2 GiB / swap 0",
+  "note": "Profile protocol and HTTP/Worker integration use fixtures, not real GPT API calls."
+}

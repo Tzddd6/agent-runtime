@@ -59,6 +59,10 @@ class Executor:
             # Workers get an allowlist, not the coordinator's ambient secrets,
             # proxy settings, SSH agents or provider credentials.
             environment={'PATH':os.defpath,'LANG':'C.UTF-8','PYTHONDONTWRITEBYTECODE':'1'}
+            if os.name=='nt' and os.environ.get('SystemRoot'):
+                # Windows Winsock's name resolution needs SystemRoot even for
+                # loopback RPC. Keep the allowlist; never inherit API/SSH keys.
+                environment['SystemRoot']=os.environ['SystemRoot']
             if self.backend=='forkserver':
                 from .forkserver import ForkServer
                 if self.worker_session is not None:

@@ -268,6 +268,9 @@ async function refresh(){
     $('connection').textContent=recoveryRequired?'● 已连接 · 待管理员恢复':'● Runtime 已连接';
     $('connection').className=recoveryRequired?'connection recovery':'connection';
     const busy=state.jobs.some(job=>['running','cancelling'].includes(job.status));
+    const profileBusyChanged=apiProfileRunning!==busy;apiProfileRunning=busy;
+    if($('saveProfile'))$('saveProfile').disabled=busy||apiProfileBusy||recoveryRequired;
+    if(profileBusyChanged&&$('apiProfilesPanel')?.open)loadApiProfiles();
     $('runtimeState').textContent=recoveryRequired?'需要管理员恢复':busy?'执行中':'就绪';
     $('enforcement').textContent=state.enforcement==='cgroup_v2'?'cgroups v2 · 硬限制':'仅预算准入';
     $('modelState').textContent=state.model_available===false?'模型服务暂不可用':state.model_configured?state.model:'待配置密钥';
@@ -337,7 +340,62 @@ function renderAgents(job){
   }
   $('agentCommands').textContent=(job.agent_controls||[]).map(c=>new Date(c.time*1000).toLocaleTimeString()+'  '+c.agent_id+'  '+c.operation+'  '+({queued:'排队中',applied:'已执行',rejected:'已拒绝'}[c.status]||c.status)+(c.error?' · '+c.error:'')).join('\n')||'尚无控制指令';
 }
+let apiProfileBusy=false,apiProfileRunning=false;
+function resetApiProfileForm(){
+  $('apiProfileForm').reset();$('editingProfileId').value='';$('profileProvider').disabled=false;
+  $('profileKey').required=true;$('profileKey').placeholder='仅提交到当前 Runtime 的模型服务';
+  $('saveProfile').textContent='添加 API，不切换模型';$('cancelProfileEdit').hidden=true;
+}
+async function loadApiProfiles(){
+  const box=$('apiProfiles');if(!box)return;
+  try{
+    const result=await api('model-profiles');box.replaceChildren();
+    for(const profile of result.profiles){
+      const row=node('div',null,'api-profile-row'),description=node('div',null,'api-profile-description');
+      description.append(node('strong',profile.label),node('small',profile.provider+' · '+profile.model+' · '+(profile.configured?'密钥已保存':'未配置密钥')));
+      if(result.selected===profile.id)description.append(node('span','当前模型','api-profile-current'));
+      const actions=node('div',null,'api-profile-actions');
+      const select=node('button',result.selected===profile.id?'已选择':'设为当前','secondary');select.type='button';select.dataset.apiProfileAction='1';
+      select.disabled=apiProfileBusy||apiProfileRunning||offline||recoveryRequired||!profile.configured||result.selected===profile.id;
+      select.onclick=()=>apiProfileAction('select',{id:profile.id},'已切换当前模型；尚未发送模型请求');actions.append(select);
+      if(!profile.legacy){
+        const edit=node('button','编辑','secondary');edit.type='button';edit.dataset.apiProfileAction='1';edit.disabled=apiProfileBusy||apiProfileRunning||offline||recoveryRequired;
+        edit.onclick=()=>{$('editingProfileId').value=profile.id;$('profileLabel').value=profile.label;$('profileProvider').value=profile.provider;$('profileProvider').disabled=true;$('profileModel').value=profile.model;$('profileKey').value='';$('profileKey').required=false;$('profileKey').placeholder='留空保留现有密钥；输入新值可替换';$('saveProfile').textContent='更新配置，不切换模型';$('cancelProfileEdit').hidden=false;$('profileLabel').focus()};
+        const remove=node('button','移除','secondary danger');remove.type='button';remove.dataset.apiProfileAction='1';remove.disabled=edit.disabled;let armed=false;
+        remove.onclick=()=>{if(!armed){armed=true;remove.textContent='再次点击确认移除';setTimeout(()=>{armed=false;remove.textContent='移除'},5000);return}apiProfileAction('remove',{id:profile.id},'配置已移除；未吊销供应商密钥。移除当前模型后请重新选择。')};
+        actions.append(edit,remove);
+      }
+      row.append(description,actions);box.append(row);
+    }
+  }catch(error){box.replaceChildren(node('p',error.message+'；其他功能可继续使用。','hint'))}
+}
+async function apiProfileAction(action,value,message){
+  if(apiProfileBusy||apiProfileRunning||offline||recoveryRequired)return;
+  apiProfileBusy=true;$('saveProfile').disabled=true;
+  for(const button of document.querySelectorAll('[data-api-profile-action]'))button.disabled=true;
+  try{await api('model-profiles/'+action,value);$('profileNotice').textContent=message;await refresh()}
+  catch(error){$('profileNotice').textContent=error.message}
+  finally{apiProfileBusy=false;$('saveProfile').disabled=apiProfileRunning||offline||recoveryRequired;await loadApiProfiles()}
+}
+async function saveApiProfile(event){
+  event.preventDefault();if(apiProfileBusy||apiProfileRunning||offline||recoveryRequired)return;
+  const existing=$('editingProfileId').value;
+  const value={id:existing||'api-'+crypto.randomUUID().replaceAll('-','').slice(0,24),label:$('profileLabel').value.trim(),provider:$('profileProvider').value,model:$('profileModel').value.trim()};
+  const key=$('profileKey').value.trim();if(key)value.key=key;
+  $('editingProfileId').value=value.id;
+  apiProfileBusy=true;$('saveProfile').disabled=true;
+  try{await api('model-profiles/save',value);resetApiProfileForm();$('profileNotice').textContent='配置已保存，没有发送测试请求。点击“设为当前”后，新对话才会使用它。';await refresh()}
+  catch(error){$('profileNotice').textContent=error.message}
+  finally{apiProfileBusy=false;$('saveProfile').disabled=apiProfileRunning||offline||recoveryRequired;await loadApiProfiles()}
+}
 function initialize(){
+  if($('apiProfilesPanel')){
+    $('apiProfilesPanel').addEventListener('toggle',()=>{if($('apiProfilesPanel').open)loadApiProfiles()});
+    if(location.hash==='#apiProfilesPanel')$('apiProfilesPanel').open=true;
+    $('apiProfileForm').addEventListener('submit',saveApiProfile);
+    $('cancelProfileEdit').onclick=resetApiProfileForm;
+    $('profileProvider').onchange=()=>{$('profileModel').placeholder=$('profileProvider').value==='openai'?'例如 gpt-4.1-mini':'例如 deepseek-flash'};
+  }
   const linkedJob=new URLSearchParams(location.search).get('job');if(/^[a-f0-9]{32}$/.test(linkedJob||''))selected=linkedJob;
   for(const el of document.querySelectorAll('[data-view]'))el.onclick=e=>{e.preventDefault();showView(el.dataset.view)};
   for(const tab of document.querySelectorAll('[role=tab]'))tab.onkeydown=e=>{const order=['workflow','resources','tasks','agents','logs'];let index=order.indexOf(currentView);
@@ -349,7 +407,7 @@ function initialize(){
   $('exportRun').onclick=()=>{if(!currentDetail)return;const blob=new Blob([JSON.stringify(currentDetail,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='agentrt-'+currentDetail.id+'.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
   $('preset').onchange=updateScene;
   if($('project'))$('project').onchange=updateScene;
-  $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到模型服务内存':'已清除密钥';await refresh()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
+  $('saveKey').onclick=async()=>{if(offline||recoveryRequired)return;const key=$('apiKey').value.trim();$('keyNotice').textContent='';$('saveKey').disabled=true;try{await api('model-config',{key});$('apiKey').value='';$('keyNotice').textContent=key?'已保存到模型服务内存':'已清除密钥';await refresh();if($('apiProfilesPanel')?.open)await loadApiProfiles()}catch(error){$('keyNotice').textContent=error.message}finally{$('saveKey').disabled=offline||recoveryRequired}};
   $('form').onsubmit=async event=>{event.preventDefault();if(offline||recoveryRequired)return;$('notice').textContent='';$('submit').disabled=true;try{const result=await api('jobs',{preset:$('preset').value,workers:Number($('workers').value),policy:$('policy').value,model_budget:{calls:Number($('modelCallsBudget').value),output_tokens:Number($('modelOutputBudget').value)},project:$('project')?.value||'pricing',prompt:$('preset').value==='engineering'?'':$('prompt').value});selectRun(result.id);await refresh()}catch(error){$('notice').textContent=error.message}finally{await refresh()}};
   $('cancel').onclick=async()=>{if(!selected||offline||recoveryRequired)return;try{await api('jobs/'+selected+'/cancel',{});await refresh()}catch(error){$('notice').textContent=error.message}};
   updateScene();showView('workflow');$('saveKey').disabled=true;renderCharts(null,[]);renderContext(null);refresh();setInterval(refresh,1000);

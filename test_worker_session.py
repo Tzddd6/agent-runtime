@@ -8,6 +8,48 @@ from agent_runtime.worker_session import WorkerSession
 
 @unittest.skipUnless(sys.platform=='linux','requires Linux credential-free forkserver')
 class SessionTests(unittest.TestCase):
+    def test_preloader_dies_during_model_call_no_replay_then_next_workflow_recovers(self):
+        with tempfile.TemporaryDirectory() as folder,WorkerSession(folder) as session:
+            class Client:
+                model='fixed';timeout=5
+                calls=0
+                def complete(self,messages,max_tokens):
+                    import time
+                    self.calls+=1
+                    session.preloader.process.kill();session.preloader.process.wait(timeout=3)
+                    time.sleep(.05)
+                    return {'content':'not safely delivered','finish_reason':'stop','usage':{'prompt_tokens':1,'completion_tokens':1}}
+            client=Client()
+            with patch.object(ModelGateway,'from_env',side_effect=lambda log:ModelGateway(client,log)):
+                states,_=run([{'id':'llm','action':'llm','messages':[{'role':'user','content':'fixed'}]}],quiet=True,
+                    output_dir=folder,worker_session=session,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            self.assertEqual(states['llm'],'failed');self.assertEqual(client.calls,1)
+            states,_=run([{'id':'after','message':'safe new workflow'}],quiet=True,output_dir=folder,
+                worker_session=session,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            self.assertEqual(states['after'],'succeeded');self.assertEqual(session.stats['preloader_starts'],2)
+
+    def test_timeout_does_not_poison_next_attempt(self):
+        with tempfile.TemporaryDirectory() as folder,WorkerSession(folder) as session:
+            states,_=run([{'id':'timeout','action':'sleep','seconds':2,'timeout':.3}],quiet=True,output_dir=folder,
+                worker_session=session,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            self.assertNotEqual(states['timeout'],'succeeded')
+            states,_=run([{'id':'after'}],quiet=True,output_dir=folder,worker_session=session,
+                cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'))
+            self.assertEqual(states['after'],'succeeded')
+
+    @unittest.skipUnless(os.environ.get('AGENTRT_TEST_CGROUP'),'requires real delegated cgroup')
+    def test_oom_reclaims_group_and_session_accepts_new_attempt(self):
+        with tempfile.TemporaryDirectory() as folder,WorkerSession(folder) as session:
+            group=os.environ['AGENTRT_TEST_CGROUP']
+            states,events=run([{'id':'oom','action':'load','memory_mib':64,'seconds':1,
+                'resources':{'memory_bytes':32*1024**2}}],quiet=True,output_dir=folder,worker_session=session,cgroup_root=group)
+            self.assertEqual(states['oom'],'failed')
+            failure=next(e for e in events if e['state']=='failed')
+            self.assertGreater(int(dict(line.split() for line in failure['usage']['memory.events'].splitlines())['oom_kill']),0)
+            self.assertFalse(any(p.is_dir() for p in Path(group).iterdir()))
+            states,_=run([{'id':'after'}],quiet=True,output_dir=folder,worker_session=session,cgroup_root=group)
+            self.assertEqual(states['after'],'succeeded')
+
     def test_fresh_attempts_reuse_preloader_and_recover_between_workflows(self):
         with tempfile.TemporaryDirectory() as folder,WorkerSession(folder) as session:
             def execute():

@@ -38,12 +38,28 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
+def inference_options(client,max_tokens,thinking=False):
+    """Provider-specific output bounds; never send another vendor's options."""
+    if getattr(client,'provider','deepseek')=='openai':
+        result={'max_completion_tokens':max_tokens,'store':False}
+        if thinking:
+            if not client.model.startswith(('gpt-5','gpt-6','o1','o3','o4')):
+                raise ModelError('所选 OpenAI 模型未启用推理参数，请关闭深度思考或更换模型')
+            result['reasoning_effort']='high'
+        return result
+    result={'max_tokens':max_tokens,'thinking':{'type':'enabled' if thinking else 'disabled'}}
+    if thinking:result['reasoning_effort']='high'
+    return result
+
+
 class DeepSeekClient:
     supports_stream_callbacks=True
+    provider='deepseek'
+    official_base='https://api.deepseek.com'
     def __init__(self, key, model='deepseek-flash', timeout=30, base='https://api.deepseek.com', *, local_test=False):
         if not key:
             raise ModelError('请在控制进程环境设置 DEEPSEEK_API_KEY')
-        if base != 'https://api.deepseek.com':
+        if base != self.official_base:
             from urllib.parse import urlparse
             url = urlparse(base)
             if not local_test or url.scheme != 'http' or url.hostname != '127.0.0.1':
@@ -60,13 +76,14 @@ class DeepSeekClient:
     def complete(self, messages, max_tokens=256):
         # Isolate blocking DNS/TLS/socket reads behind one absolute local deadline.
         # The child is a trusted model broker, never an Agent/tool Worker.
-        wire=json.dumps({'key':self.key,'model':self.model,'timeout':self.timeout,
+        wire=json.dumps({'key':self.key,'model':self.model,'timeout':self.timeout,'provider':self.provider,
                          'base':self.base,'local_test':self.local_test,
                          'messages':messages,'max_tokens':max_tokens},ensure_ascii=False).encode()
         if len(wire)>MAX_BYTES+4096:
             raise ModelError('模型请求超过 1 MiB')
         environment=dict(os.environ)
         environment.pop('DEEPSEEK_API_KEY',None)
+        environment.pop('OPENAI_API_KEY',None)
         environment.pop('AGENTRT_PROXY_TOKEN',None)
         deadline=time.monotonic()+self.timeout
         proc=subprocess.Popen([sys.executable,'-X','utf8','-m','agent_runtime.model_call'],
@@ -107,8 +124,7 @@ class DeepSeekClient:
         thinking=messages[0]=={'role':'system','content':'agentrt-internal-options-v1:thinking=high'}
         if thinking:messages=messages[1:]
         if not messages:raise ModelError('messages 必须包含实际请求')
-        options={'thinking':{'type':'enabled' if thinking else 'disabled'}}
-        if thinking:options['reasoning_effort']='high'
+        options=inference_options(self,max_tokens,thinking)
         import base64
         normal=[];images=[]
         for message in messages:
@@ -129,7 +145,7 @@ class DeepSeekClient:
             normal.append({'role':'user','content':parts})
         messages=normal
         data = json.dumps({'model': self.model, 'messages': messages,
-                           'max_tokens': max_tokens, 'stream': False,
+                           'stream': False,
                            **options},ensure_ascii=False).encode()
         if len(data) > MAX_BYTES:
             raise ModelError('模型请求超过 1 MiB')
@@ -156,6 +172,15 @@ class DeepSeekClient:
             raise ModelError('模型连接失败或超时；远端是否继续计算及计费未知') from None
         except (ValueError, KeyError, IndexError, TypeError):
             raise ModelError('模型响应格式不符合约定') from None
+
+
+class OpenAIClient(DeepSeekClient):
+    """Official OpenAI Chat Completions transport, including SSE and images."""
+    provider='openai'
+    official_base='https://api.openai.com/v1'
+
+    def __init__(self,key,model='gpt-4.1-mini',timeout=30,base='https://api.openai.com/v1',*,local_test=False):
+        super().__init__(key,model,timeout,base,local_test=local_test)
 
 
 class ModelGateway:

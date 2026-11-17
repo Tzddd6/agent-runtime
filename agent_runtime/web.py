@@ -80,6 +80,35 @@ class Controller:
         if service.get('pids_limit') is not None:pids=min(pids,max(1,service['pids_limit']-16))
         return {'cpu_milli':cpu,'memory_bytes':memory,'pids':pids}
 
+    def model_profiles(self,action=None,value=None):
+        if self.model_broker is None:raise ValueError('多 API 需要独立模型配置服务')
+        if action is None:return self.model_broker.profiles_info()
+        if action not in ('save','select','remove'):raise ValueError('无效的模型配置操作')
+        return self.model_configuration_change(lambda:getattr(self.model_broker,action+'_profile')(value),'profiles.'+action)
+
+    def model_configuration_change(self,operation,audit_action):
+        def change():
+            with self.lock:
+                if self.recovery_required:raise ValueError(RECOVERY_MESSAGE)
+                if any(j['status'] in ('running','cancelling') for j in self.jobs.values()):raise ValueError('请等待运行结束后再修改 API 配置')
+                result=operation()
+                try:self.database.audit('model-config',audit_action,'accepted')
+                except (OSError,sqlite3.Error):self.storage_warning=True
+                return result
+        if self.global_gate is not None:
+            with self.global_gate.lock:
+                self.global_gate.check_idle()
+                return change()
+        return change()
+
+    def configure_legacy_key(self,key):
+        def update():
+            if self.model_broker is not None:return self.model_broker.configure(key)
+            if key:os.environ['DEEPSEEK_API_KEY']=key
+            else:os.environ.pop('DEEPSEEK_API_KEY',None)
+            return {'configured':bool(key)}
+        return self.model_configuration_change(update,'profiles.legacy')
+
     def submit(self, value, *, chat_messages=None, workspace_key=None, attachment_context=None):
         if self.global_gate is not None:
             with self.global_gate.lock:
@@ -158,8 +187,12 @@ class Controller:
                 raise ValueError('已有工作流运行中，请等待结束或停止后再提交')
             # The same lock guards model-config updates: no clear/replace can race
             # between this check and registering the active workflow.
-            if preset in ('auto','llm','team','review','engineering') and not self.model_info()['configured']:
+            provider_info=self.model_info() if preset in ('auto','llm','team','review','engineering') else {}
+            if preset in ('auto','llm','team','review','engineering') and not provider_info['configured']:
                 raise ValueError('模型服务尚未配置 API 密钥或暂不可用')
+            workflow_model=self.model_broker
+            if workflow_model is not None and provider_info.get('profile_id'):
+                workflow_model=workflow_model.for_profile(provider_info['profile_id'],provider_info['model'])
             key = uuid.uuid4().hex
             workspace_key=identity(workspace_key) if workspace_key else key
             project_workspace=self.root/'workspaces'/workspace_key
@@ -173,6 +206,7 @@ class Controller:
             job = {'id':key,'preset':preset,'status':'running','created':time.time(),
                    'workers':workers,'policy':policy,'budget':budget,'model_budget':model_budget,'context_mode':context_mode,'monitor':None,'history':[],
                    'cancel':threading.Event(), 'directory':self.root/key,'workspace_key':workspace_key}
+            if provider_info.get('profile_id'):job['model_profile']={k:provider_info[k] for k in ('profile_id','provider','model')}
             job['_control']=RuntimeControl()
             if preset=='engineering':job['project']=project
             self.store.save(job) # Persist the sole submission intent before starting any Worker.
@@ -215,7 +249,7 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model)
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):
@@ -514,6 +548,11 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token='', *, ten
                     else:self.respond(404,{'error':'Not found'})
                 else:self.respond(404,{'error':'Not found'})
             elif path=='/api/status':self.respond(200,controller.snapshot())
+            elif path=='/api/model-profiles':
+                if router and controller is not base_controller:self.respond(403,{'error':'只有主工作区可以管理共享模型配置'})
+                else:
+                    try:self.respond(200,controller.model_profiles())
+                    except (ValueError,ModelError):self.respond(503,{'error':'多 API 服务尚未就绪'})
             elif path=='/api/chat/status':self.respond(200,controller.chat_status())
             elif path=='/api/memory':
                 try:
@@ -586,23 +625,19 @@ def make_server(controller, host='127.0.0.1', port=18880, proxy_token='', *, ten
                     if not controller.upload_slot.acquire(blocking=False):raise ValueError('正在处理其他附件，请稍后再试')
                     try:self.respond(201,controller.attachments.upload(value))
                     finally:controller.upload_slot.release()
+                elif self.path in ('/api/model-profiles/save','/api/model-profiles/select','/api/model-profiles/remove'):
+                    if router and controller is not base_controller:raise ValueError('只有主工作区可以管理共享模型配置')
+                    try:self.respond(200,controller.model_profiles(self.path.rsplit('/',1)[1],value))
+                    except ModelError:raise ValueError('API 配置服务未确认操作；请刷新列表核对状态') from None
                 elif self.path=='/api/model-config':
                     if router and controller is not base_controller:raise ValueError('只有主工作区可以管理共享模型配置')
+                    if set(value)!={'key'}:raise ValueError('API 配置字段无效')
                     key=value.get('key')
                     if not isinstance(key,str) or len(key)>512 or '\n' in key or '\r' in key:
                         raise ValueError('API Key 格式无效')
                     if key and len(key)<16:raise ValueError('API Key 长度不足')
-                    with controller.lock:
-                        if controller.recovery_required:
-                            raise ValueError(RECOVERY_MESSAGE)
-                        if any(j['status'] in ('running','cancelling') for j in controller.jobs.values()):
-                            raise ValueError('请等待运行结束后再更新模型配置')
-                        if controller.model_broker is not None:
-                            try:controller.model_broker.configure(key)
-                            except ModelError:raise ValueError('模型服务未确认配置，请检查服务状态') from None
-                        elif key:os.environ['DEEPSEEK_API_KEY']=key
-                        else:os.environ.pop('DEEPSEEK_API_KEY',None)
-                    self.respond(200,{'configured':bool(key)})
+                    try:self.respond(200,controller.configure_legacy_key(key))
+                    except ModelError:raise ValueError('模型服务未确认配置，请检查服务状态') from None
                 elif self.path=='/api/jobs':self.respond(202,{'id':controller.submit(value)})
                 elif self.path=='/api/chat/turns':self.respond(202,controller.submit_chat(value))
                 elif len(self.path.split('/'))==7 and self.path.startswith('/api/jobs/') and self.path.split('/')[4]=='agents':

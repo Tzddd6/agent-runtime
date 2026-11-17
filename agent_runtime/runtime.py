@@ -135,8 +135,9 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None):
     validate(tasks)
+    if model_client is not None and not callable(getattr(model_client,'complete',None)):raise ValueError('Invalid model client')
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
             or not isinstance(timeout,(int,float)) or timeout <= 0 or not math.isfinite(timeout)
@@ -395,7 +396,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                 if task.get('action') == 'llm' or task.get('plugin')=='computer.run':
                     try:
                         if gateway is None:
-                            gateway = ModelGateway.from_env(root / 'model-calls.jsonl')
+                            gateway = ModelGateway(model_client,root/'model-calls.jsonl') if model_client is not None else ModelGateway.from_env(root / 'model-calls.jsonl')
                             gateway.budgets=registry.model_budgets
                             gateway.output_observer=output_observer
                             gateway.memory_repository=memory_repository

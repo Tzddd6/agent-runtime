@@ -1,0 +1,88 @@
+{
+  "passed": true,
+  "supplier_requests": 0,
+  "unique_recorded_conversations": 100,
+  "repetitions": 2,
+  "case_executions": 600,
+  "all_request_dialogue_reward_checks_identical": true,
+  "arms": {
+    "baseline": {
+      "case_executions": 200,
+      "seconds": 358.26001907398324,
+      "cgroup_cpu_seconds": 300.741938,
+      "cgroup_memory_peak_bytes_max": 477868032,
+      "source_commits": [
+        "b6a1013aa1e46b0fe58f5da1c52e4e1bb94b8612"
+      ]
+    },
+    "candidate": {
+      "case_executions": 200,
+      "seconds": 268.9785900179799,
+      "cgroup_cpu_seconds": 230.44175,
+      "cgroup_memory_peak_bytes_max": 345268224,
+      "source_commits": [
+        "4cf27b8ffda5156bed3629d2b860ebb0cfd97879"
+      ]
+    },
+    "direct": {
+      "case_executions": 200,
+      "seconds": 156.0325227599747,
+      "cgroup_cpu_seconds": 165.842288,
+      "cgroup_memory_peak_bytes_max": 303079424,
+      "source_commits": [
+        "4cf27b8ffda5156bed3629d2b860ebb0cfd97879"
+      ]
+    }
+  },
+  "paired_blocks": [
+    {
+      "fixture": "recorded-runtime",
+      "repeat": 0,
+      "host_cohort": "before_external_restart",
+      "candidate_seconds_ratio": 0.7529012728446307,
+      "candidate_cpu_ratio": 0.7656954732642351
+    },
+    {
+      "fixture": "recorded-runtime",
+      "repeat": 1,
+      "host_cohort": "before_external_restart",
+      "candidate_seconds_ratio": 0.7536428695717283,
+      "candidate_cpu_ratio": 0.7653654754774676
+    },
+    {
+      "fixture": "recorded-direct",
+      "repeat": 0,
+      "host_cohort": "before_external_restart",
+      "candidate_seconds_ratio": 0.7509378975345935,
+      "candidate_cpu_ratio": 0.768459517876198
+    },
+    {
+      "fixture": "recorded-direct",
+      "repeat": 1,
+      "host_cohort": "after_external_restart",
+      "candidate_seconds_ratio": 0.7458394763857746,
+      "candidate_cpu_ratio": 0.7654448279436636
+    }
+  ],
+  "candidate_time_reduction_vs_old_runtime": 0.24920846397199037,
+  "candidate_cpu_reduction_vs_old_runtime": 0.23375585216851258,
+  "candidate_time_ratio_vs_direct": 1.723862341389881,
+  "external_restart": true,
+  "discarded_partial_runs": 1,
+  "original_live_scores_unchanged": {
+    "runtime": 39,
+    "direct": 41,
+    "tasks_each": 50
+  },
+  "official_pr": "https://github.com/sierra-research/tau2-bench/pull/763",
+  "official_pr_state": "draft",
+  "official_rank": null,
+  "limits": [
+    "Recorded replies are fixtures, not fresh inference or a new capability score",
+    "Request hashes, tool executions, full dialogue and ALL reward stay identical; supplier token/billing changes are not claimed",
+    "Measured optimization source is 4cf27b8; later multi-API additions are not part of these timing samples",
+    "Shared page/page-cache ownership can affect cgroup memory attribution; peak differences do not prove intrinsic memory reduction",
+    "An external host reboot interrupted one partial sample; all three arms of the final matched block were rerun after reboot; no partial samples included",
+    "Runtime remains slower and consumes more local resources than bare direct execution"
+  ]
+}

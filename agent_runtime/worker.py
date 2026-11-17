@@ -14,7 +14,9 @@ import re
 def ipc(task, **value):
     request = urllib.request.Request(task['_ipc_url'], data=json.dumps(value,ensure_ascii=False).encode(),
         headers={'Authorization': 'Bearer ' + task['_ipc_token'], 'Content-Type': 'application/json'})
-    with urllib.request.urlopen(request, timeout=6) as response:
+    from .model_exchange import LocalNoRedirect
+    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),LocalNoRedirect())
+    with opener.open(request, timeout=6) as response:
         return json.load(response)
 
 def perform_plugin(task):

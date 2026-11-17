@@ -15,6 +15,7 @@ def main():
     parser.add_argument('--domain',choices=['airline','telecom'],default='airline')
     parser.add_argument('--budget-ledger',type=Path,required=True)
     parser.add_argument('--cny-limit',type=float,default=10)
+    parser.add_argument('--reuse-workers',action='store_true')
     args=parser.parse_args()
     from tau2.runner.helpers import get_tasks
     from tau2.data_model.simulation import Results
@@ -32,6 +33,7 @@ def main():
             cmd=[sys.executable,str(ROOT/'tools/benchmark_tau.py'),'--official-root',str(args.official_root),
                  '--domain',args.domain,'--arm',arm,'--task-index',str(index),'--output',str(output),
                  '--cny-limit',str(args.cny_limit),'--max-calls','3000','--budget-ledger',str(args.budget_ledger),'--run']
+            if args.reuse_workers and arm=='runtime':cmd.append('--reuse-workers')
             output.parent.mkdir(exist_ok=True)
             with (output.parent/(output.name+'.log')).open('w') as log:
                 result=subprocess.run(cmd,cwd=ROOT,stdout=log,stderr=subprocess.STDOUT)

@@ -111,7 +111,7 @@ class TauBridge:
                 states,events=run([{'id':'tau_turn','agent':'tau-agent','action':'llm','messages':wire,
                     'max_tokens':tokens,'timeout':65,'resources':{'cpu_milli':500,'memory_bytes':128*1024**2,'pids':16}}],
                     max_workers=1,quiet=True,output_dir=self.output/key,cgroup_root=self.cgroup_root,
-                    budget={'cpu_milli':2000,'memory_bytes':1024**3,'pids':128},worker_session=self.worker_session)
+                    budget={'cpu_milli':2000,'memory_bytes':1024**3,'pids':128},worker_session=self.worker_session,model_client=self.client)
                 if states['tau_turn']!='succeeded':raise RuntimeError('Runtime inference turn failed; no replay')
                 event=next(e for e in events if e['task_id']=='tau_turn' and e['state']=='succeeded')
                 result=event['result']['model_call'];record['runtime_usage']=event.get('usage',{})

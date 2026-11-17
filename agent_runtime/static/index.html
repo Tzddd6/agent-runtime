@@ -18,7 +18,7 @@
   <a class="nav" href="#workspace" data-view="tasks"><span>⌘</span>任务与拓扑</a>
   <a class="nav" href="#workspace" data-view="agents"><span>◎</span>Agent 管理</a>
   <a class="nav" href="#workspace" data-view="logs"><span>≡</span>结果与记录</a>
-  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.20.0 / Agent 执行工作台</small></div>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>系统能力区域赛 · PROJ3<br>v0.21.0 / Agent 执行工作台</small></div>
 </aside>
 <main>
   <header><span class="breadcrumb">Agent Runtime <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
@@ -41,7 +41,20 @@
           <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="20000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
           <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
         </form>
-        <details class="model-config"><summary><span>模型配置</span><span id="modelState" class="muted">待配置密钥</span></summary><p class="hint">密钥仅在独立模型服务内存中；模型服务重启后需重填，网页升级不清空。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="输入 API Key"><button id="saveKey" class="secondary">保存密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
+        <details class="model-config" id="apiProfilesPanel"><summary><span>模型与 API</span><span id="modelState" class="muted">待配置密钥</span></summary>
+          <p class="hint">可添加多个 DeepSeek / OpenAI API，手动选择当前模型。保存配置不发送测试请求，也不会自动切换到其他供应商。密钥只保存在独立服务内存中，服务重启后需要重新填写。</p>
+          <div id="apiProfiles" aria-live="polite"><p class="hint">展开后加载 API 配置。</p></div>
+          <form id="apiProfileForm" autocomplete="off">
+            <input id="editingProfileId" type="hidden">
+            <h3>添加 API</h3><label for="profileLabel">名称</label><input id="profileLabel" maxlength="60" placeholder="例如：我的 GPT API" required>
+            <div class="two"><div><label for="profileProvider">供应商</label><select id="profileProvider"><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option></select></div><div><label for="profileModel">模型名称</label><input id="profileModel" maxlength="128" placeholder="例如 gpt-4.1-mini" required></div></div>
+            <label for="profileKey">API Key</label><input id="profileKey" type="password" autocomplete="new-password" spellcheck="false" placeholder="仅提交到当前 Runtime 的模型服务" required>
+            <button id="saveProfile" class="secondary" type="submit">添加 API，不切换模型</button>
+            <button id="cancelProfileEdit" class="secondary" type="button" hidden>取消编辑</button>
+          </form>
+          <p id="profileNotice" class="hint" role="status"></p>
+          <details><summary>原有 DeepSeek 密钥</summary><p class="hint">原有持钥服务保持独立；添加其他 API 不会清空它。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="new-password" placeholder="替换原有 DeepSeek 密钥"><button id="saveKey" class="secondary" type="button">保存原有 DeepSeek 密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
+        </details>
       </article>
       <article class="panel history-panel"><div class="panel-title"><h2>运行历史</h2><span id="jobCount" class="muted">0</span></div><div class="history-tools"><input id="jobSearch" type="search" placeholder="搜索项目或运行 ID" aria-label="搜索运行历史"><select id="jobFilter" aria-label="筛选运行状态"><option value="all">全部状态</option><option value="active">执行中</option><option value="succeeded">已通过</option><option value="failed">未通过</option><option value="interrupted">已中断</option></select></div><div id="jobs"><div class="empty compact">暂无运行记录</div></div></article>
       <div class="reading-note"><b>如何读这张图</b><p><span class="legend-dot actual"></span>实际用量：Linux cgroup 读取</p><p><span class="legend-dot reserved"></span>预留配额：调度器资源账本</p><p>配额代表可用上限，不代表已消耗；“—”表示尚无测量值。</p><p>memory.current 含工具后代、文件缓存及内核记账，不等于主 PID 的 RSS。</p></div>
