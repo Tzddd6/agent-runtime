@@ -77,17 +77,21 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     from .model_network import provider_opener
     opener=provider_opener(client,NoRedirect(),default_no_proxy=True)
     request=urllib.request.Request(client.base+'/responses',data=raw,headers={'Authorization':'Bearer '+client.key,'Content-Type':'application/json'})
+    from .transport_trace import Trace
+    trace=Trace();trace.emit('request_start');events_seen=0;callbacks=0;wire_seen=False;text_seen=False
     started=time.monotonic();last=0.;pending=[];enabled=True;response_value=None
     def emit(force=False):
-        nonlocal last,enabled
+        nonlocal last,enabled,callbacks
         if not callback or not pending or not enabled or not force and time.monotonic()-last<.12:return
         delta=''.join(pending);pending.clear();last=time.monotonic()
         q=urllib.request.Request(callback['url'],data=json.dumps({'delta':delta},ensure_ascii=False).encode(),headers={'Authorization':'Bearer '+callback['token'],'Content-Type':'application/json'})
         try:
             with urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()).open(q,timeout=.5) as r:r.read(128)
-        except OSError:enabled=False;pending.clear()
+            callbacks+=1
+        except OSError:enabled=False;pending.clear();trace.emit('callback_rejected')
     try:
         with opener.open(request,timeout=client.timeout) as response:
+            trace.emit('headers',status=response.status if hasattr(response,'status') else 200,sse='text/event-stream' in getattr(response,'headers',{}).get('Content-Type',''))
             if not callback:
                 raw=response.read(MAX_BYTES+1)
                 if len(raw)>MAX_BYTES:raise ModelError('Responses output exceeds limit')
@@ -98,23 +102,30 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
                 while True:
                     line=response.readline(MAX_BYTES+1);size+=len(line)
                     if not line:break
+                    if not wire_seen:trace.emit('first_wire');wire_seen=True
                     if len(line)>MAX_BYTES or size>8*MAX_BYTES:raise ModelError('Responses SSE exceeds limit')
                     if not line.startswith(b'data:'):continue
                     payload=line[5:].strip()
                     if payload==b'[DONE]':break
-                    event=json.loads(payload);kind=event.get('type')
+                    event=json.loads(payload);kind=event.get('type');events_seen+=1
                     if kind=='response.output_text.delta':
                         delta=event.get('delta')
                         if not isinstance(delta,str):raise ModelError('Invalid Responses delta')
+                        if not text_seen:trace.emit('first_text');text_seen=True
                         text_bytes+=len(delta.encode());text_hash.update(delta.encode())
                         if text_bytes>MAX_BYTES:raise ModelError('Responses text exceeds limit')
                         if enabled:pending.append(delta);emit()
-                    elif kind in ('response.completed','response.incomplete'):response_value=event.get('response');break
+                    elif kind in ('response.completed','response.incomplete'):response_value=event.get('response');trace.emit('terminal',wire_bytes=size,text_bytes=text_bytes,events=events_seen,callbacks=callbacks);break
                     elif kind in ('response.failed','error'):raise ModelError('Responses provider rejected request')
         if response_value is None:raise ModelError('Responses stream incomplete; no retry')
         result=decode(response_value,client.model,native=native_value is not None)
         if callback and native_value is None and text_bytes and text_hash.hexdigest()!=hashlib.sha256(result['content'].encode()).hexdigest():raise ModelError('Responses final text differs from stream')
         emit(True)
+        trace.emit('decoded',events=events_seen,callbacks=callbacks)
         result['latency_seconds']=time.monotonic()-started;return result
-    except urllib.error.HTTPError as exc:raise ModelError('Relay Responses HTTP '+str(exc.code)+'; no retry') from None
-    except (OSError,ValueError,KeyError,TypeError):raise ModelError('Relay Responses failed; billing state unknown; no retry') from None
+    except urllib.error.HTTPError as exc:
+        trace.emit('http_error',status=exc.code)
+        raise ModelError('Relay Responses HTTP '+str(exc.code)+'; no retry') from None
+    except (OSError,ValueError,KeyError,TypeError):
+        trace.emit('transport_error')
+        raise ModelError('Relay Responses failed; billing state unknown; no retry') from None
