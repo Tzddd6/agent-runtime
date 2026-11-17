@@ -38,7 +38,8 @@ def complete(client,messages,max_tokens,callback):
     value={'model':client.model,'messages':messages,'stream':True,'stream_options':{'include_usage':True},**inference_options(client,max_tokens,thinking)}
     data=json.dumps(value,ensure_ascii=False).encode()
     if len(data)>MAX_BYTES:raise ModelError('Streaming request exceeds limit')
-    opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect())
+    from .model_network import provider_opener
+    opener=provider_opener(client,NoRedirect(),default_no_proxy=True)
     req=urllib.request.Request(client.base+'/chat/completions',data=data,headers={'Authorization':'Bearer '+client.key,'Content-Type':'application/json'})
     pending=[];pending_chars=0;output_bytes=0;last=0;enabled=True;start=time.monotonic();parts=[];usage={};finish=None;model=client.model;wire=0;done=False
     def emit(force=False):

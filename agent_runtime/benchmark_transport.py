@@ -61,7 +61,8 @@ def complete(client, messages, max_tokens):
         headers={'Authorization':'Bearer '+client.key,'Content-Type':'application/json'})
     start=time.monotonic()
     try:
-        with urllib.request.build_opener(NoRedirect()).open(request,timeout=client.timeout) as response:
+        from .model_network import provider_opener
+        with provider_opener(client,NoRedirect()).open(request,timeout=client.timeout) as response:
             raw=response.read(MAX_BYTES+1)
         if len(raw)>MAX_BYTES:raise ValueError('response size')
         response=json.loads(raw);choice=response['choices'][0];message=choice['message']

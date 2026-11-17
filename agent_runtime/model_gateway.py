@@ -153,7 +153,8 @@ class DeepSeekClient:
                     headers={'Authorization': 'Bearer '+self.key, 'Content-Type': 'application/json'})
         started = time.monotonic()
         try:
-            with urllib.request.build_opener(NoRedirect()).open(req, timeout=self.timeout) as response:
+            from .model_network import provider_opener
+            with provider_opener(self,NoRedirect()).open(req, timeout=self.timeout) as response:
                 raw = response.read(MAX_BYTES+1)
             if len(raw) > MAX_BYTES:
                 raise ModelError('模型响应超过 1 MiB')
