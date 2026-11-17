@@ -1,0 +1,22 @@
+{
+  "date": "2026-11-10",
+  "platform": "openEuler Python 3.11.6",
+  "tested_archive_sha256": "855f177dbf1d59ba1fca049338e1b5e8a6e81a792cb0ee662de1a53bab8db9cc",
+  "regular_tests_passed": 11,
+  "regular_tests_skipped": 1,
+  "separately_enabled_cgroup_oom": "passed",
+  "runtime_uid": 1000,
+  "service_user": "dev",
+  "systemd_delegate": true,
+  "cpu_limit_milli": 200,
+  "cpu_smoke": {
+    "wall_seconds": 2.15216327199596,
+    "cpu_core_ratio": 0.20881594154481217,
+    "usage_usec": 449406,
+    "nr_periods": 22,
+    "nr_throttled": 21,
+    "throttled_usec": 1676323
+  },
+  "attempt_groups_empty_after_tests": true,
+  "scope": "短时功能烟雾验收，不是性能基准或完整安全沙箱验收"
+}

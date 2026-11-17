@@ -1,0 +1,10 @@
+[
+  {
+    "id": "planner", "agent": "planner", "message": "确定性规划示例：创建两个工作任务和汇总任务",
+    "spawn": [
+      {"id": "analyze", "agent": "analyzer", "depends_on": ["planner"], "action": "sleep", "seconds": 0.2, "contexts": [{"project": "demo", "goal": "检查代码"}]},
+      {"id": "prepare_tests", "agent": "tester", "depends_on": ["planner"], "fail_attempts": 1, "retries": 1, "contexts": [{"project": "demo", "goal": "检查代码"}]},
+      {"id": "review", "agent": "reviewer", "depends_on": ["analyze", "prepare_tests"], "message": "所有依赖完成，汇总"}
+    ]
+  }
+]

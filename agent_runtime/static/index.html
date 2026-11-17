@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Agent Runtime · 运行控制台</title>
+  <link rel="stylesheet" href="static/console.css">
+  <script src="static/console.js" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="./"><span class="brand-mark">a<span>r</span></span><span>Agent Runtime<small>OS EXECUTION CONSOLE</small></span></a>
+  <div class="nav-label">工作空间</div><a class="nav active" href="#overview"><span>◫</span>资源管理器</a><a class="nav" href="#processes"><span>≡</span>任务与进程</a><a class="nav" href="#timelineSection"><span>↦</span>分配时间线</a>
+  <div class="sidebar-bottom"><span class="system-dot"></span> openEuler · NUC<small>真实任务 · 真实资源采样<br>PROJ3 / 多智能体执行时</small></div>
+</aside>
+<main>
+  <header><span class="breadcrumb">工作空间 <span>/</span> 运行控制台</span><div class="header-right"><span id="updated" class="muted">等待采样</span><span id="connection" class="connection">正在连接</span></div></header>
+  <section class="heading" id="overview"><div><div class="eyebrow">MULTI-AGENT RESOURCE MANAGER</div><h1>看见资源如何分配</h1><p>从排队、分配到释放，观察每个 Agent 的真实执行过程。</p></div><span id="enforcement" class="mode-chip">资源模式 —</span></section>
+  <div id="notice" role="alert" aria-live="polite"></div>
+  <section class="machine-grid" aria-label="机器与服务资源概览">
+    <article class="machine-card"><div class="metric-label"><span class="metric-icon teal">◴</span>整机 CPU<span class="tag">HOST</span></div><div class="metric-number" id="hostCpu">—</div><div class="metric-foot" id="hostCpuInfo">等待 Linux 采样</div><div class="mini-meter"><i id="hostCpuMeter"></i></div></article>
+    <article class="machine-card"><div class="metric-label"><span class="metric-icon blue">▤</span>整机内存<span class="tag">HOST</span></div><div class="metric-number" id="hostMemory">—</div><div class="metric-foot" id="hostMemoryInfo">已用 / 物理内存</div><div class="mini-meter blue"><i id="hostMemoryMeter"></i></div></article>
+    <article class="machine-card"><div class="metric-label"><span class="metric-icon teal">⌁</span>Runtime CPU<span class="tag">SERVICE</span></div><div class="metric-number" id="serviceCpu">—</div><div class="metric-foot" id="serviceCpuInfo">服务及其 Worker 的实际用量</div><div class="mini-meter"><i id="serviceCpuMeter"></i></div></article>
+    <article class="machine-card"><div class="metric-label"><span class="metric-icon blue">▥</span>Runtime 内存<span class="tag">SERVICE</span></div><div class="metric-number" id="serviceMemory">—</div><div class="metric-foot" id="serviceMemoryInfo">服务及其 Worker 的实际用量</div><div class="mini-meter blue"><i id="serviceMemoryMeter"></i></div></article>
+  </section>
+  <div class="workspace">
+    <section class="control-column">
+      <article class="panel"><div class="panel-title"><h2>启动工作流</h2><span id="runtimeState" class="small-status">就绪</span></div>
+        <form id="form"><label for="preset">任务场景</label><select id="preset"><option value="resources">资源分配 · 实际 CPU 与内存负载</option><option value="dynamic">动态协作 · 并行与失败重试</option><option value="ipc">Agent 通信 · 消息与引用</option><option value="document">文档处理 · 分析、索引、汇总</option><option value="llm">DeepSeek · 模型对话</option><option value="team">DeepSeek · 四 Agent 协作</option><option value="review">DeepSeek · 写作与评审修订</option></select>
+          <div class="two"><div><label for="workers">Worker 上限</label><select id="workers"><option>1</option><option selected>2</option><option>3</option><option>4</option></select></div><div><label for="policy">调度策略</label><select id="policy"><option value="resource_fit">资源适配</option><option value="aging_fit">老化资源适配</option><option value="fifo">FIFO 基线</option></select></div></div>
+          <div id="promptField" hidden><label for="prompt">任务 / 文档内容</label><textarea id="prompt" maxlength="4000" placeholder="输入你希望 Agent 处理的任务或文本…"></textarea></div>
+          <p id="sceneHint" class="hint"></p><button class="primary" id="submit" type="submit" disabled><span>启动工作流</span><span>↗</span></button>
+        </form>
+        <details class="model-config"><summary><span>模型配置</span><span id="modelState" class="muted">待配置密钥</span></summary><p class="hint">密钥仅保存在服务内存中，重启后需重新填写。</p><label for="apiKey">DeepSeek API Key</label><input id="apiKey" type="password" autocomplete="off" placeholder="输入 API Key"><button id="saveKey" class="secondary">保存密钥</button><p id="keyNotice" class="hint" role="status"></p></details>
+      </article>
+      <article class="panel history-panel"><div class="panel-title"><h2>最近运行</h2><span id="jobCount" class="muted">0</span></div><div id="jobs"><div class="empty compact">暂无运行记录</div></div></article>
+      <div class="reading-note"><b>如何读这张图</b><p><span class="legend-dot actual"></span>实际用量：Linux cgroup 读取</p><p><span class="legend-dot reserved"></span>预留配额：调度器资源账本</p><p>配额代表可用上限，不代表已消耗；“—”表示尚无测量值。</p><p>memory.current 含工具后代、文件缓存及内核记账，不等于主 PID 的 RSS。</p></div>
+    </section>
+    <div class="monitor-column">
+      <section class="panel allocation-panel"><div class="panel-title"><div><h2>工作流资源分配</h2><div class="mono muted" id="jobId">请选择或启动一次运行</div></div><button id="cancel" class="secondary danger" hidden>停止运行</button></div>
+        <div class="allocation-grid" id="allocations"><div class="empty">启动后显示 CPU、内存、进程数与 Worker 槽位的预留。</div></div>
+        <div class="chart-grid"><div class="chart-box"><div class="chart-heading"><h3>Worker CPU</h3><span id="cpuReadout">—</span></div><div id="cpuChart" class="chart"></div><div class="chart-caption"><span><i class="line-key actual"></i>实际核心数</span><span><i class="line-key reserved"></i>预留核心数</span><span id="cpuRange">等待采样</span></div></div><div class="chart-box"><div class="chart-heading"><h3>Worker 内存</h3><span id="memoryReadout">—</span></div><div id="memoryChart" class="chart"></div><div class="chart-caption"><span><i class="line-key actual blue"></i>实际用量</span><span><i class="line-key reserved"></i>预留配额</span><span id="memoryRange">等待采样</span></div></div></div>
+        <div class="context-cache"><div class="context-cache-title"><span>上下文对象缓存</span><small id="contextCacheNote">应用层 JSON 缓存 · 不是模型 KV Cache</small></div><div id="contextCacheStats" class="context-cache-grid"></div></div>
+        <p id="sampleNote" class="hint">曲线属于选中的工作流；顶部指标属于整机或整个 Runtime 服务。</p>
+      </section>
+      <section class="panel" id="processes"><div class="panel-title"><div><h2>任务与 Worker 进程</h2><p class="hint title-hint">实际用量含 Attempt 内工具后代；CPU 按核显示，终态内存显示峰值。</p></div><span id="taskCount" class="muted">0 个任务</span></div><div id="tasks" class="table-scroll"><div class="empty">等待第一次运行</div></div></section>
+      <section class="panel"><div class="panel-title"><h2>任务依赖与调度状态</h2><span class="muted">依赖完成后才可分配资源</span></div><div id="dependencyGraph" class="dependency-graph"><div class="empty compact">暂无任务图</div></div></section>
+      <section class="panel" id="timelineSection"><div class="panel-title"><div><h2>Attempt 执行时间线</h2><p class="hint title-hint">每条代表一次真实执行；重试会生成新的 Attempt。</p></div><span id="timelineDuration" class="muted">—</span></div><div id="timeline" class="timeline"><div class="empty compact">任务启动后显示资源占用区间</div></div></section>
+      <section class="panel" id="answer" hidden><div class="panel-title"><h2>执行结果</h2></div><pre id="answerText" class="answer"></pre></section>
+      <details class="panel event-panel"><summary><span>原始执行事件</span><span id="eventCount" class="muted">0 条</span></summary><pre id="events" class="log">等待工作流启动…</pre><p class="hint">停止模型任务不保证远端模型计算或计费同时停止。</p></details>
+    </div>
+  </div>
+  <footer>产物：<span class="mono">/home/tzd/agent-runtime/web-runs/</span>，按控制台运行 ID / Runtime 工作流 ID 分层保存。历史索引随服务重启清空。</footer>
+</main>
+</body></html>

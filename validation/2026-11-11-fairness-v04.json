@@ -1,0 +1,94 @@
+{
+  "scenario": "finite staggered short sleep jobs keep bypassing a two-core request",
+  "enforcement": "cgroup_v2",
+  "budget": {
+    "cpu_milli": 2000,
+    "memory_bytes": 1073741824,
+    "pids": 128
+  },
+  "workload": {
+    "anchor_seconds": 0.55,
+    "wide_seconds": 0.1,
+    "wide_cpu_milli": 2000,
+    "small_task_count": 18,
+    "small_seconds": 0.4,
+    "small_cpu_milli": 1000,
+    "max_workers": 3,
+    "aging_threshold_seconds": 2.0
+  },
+  "samples": [
+    {
+      "repeat": 0,
+      "policy": "resource_fit",
+      "wide_wait_seconds": 4.909617900848389,
+      "makespan_seconds": 5.081509404999451,
+      "small_tasks_started_before_wide": 18,
+      "wide_ready_time": 1794380957.4001458,
+      "wide_started_time": 1794380962.3097637,
+      "workflow_id": "289bb25e262844f3b85db68cbea478e5"
+    },
+    {
+      "repeat": 0,
+      "policy": "aging_fit",
+      "wide_wait_seconds": 2.4258439540863037,
+      "makespan_seconds": 5.0478371330009395,
+      "small_tasks_started_before_wide": 8,
+      "wide_ready_time": 1794380962.481904,
+      "wide_started_time": 1794380964.907748,
+      "workflow_id": "7d1d92159bea451f9dc0a8f0b32d9844"
+    },
+    {
+      "repeat": 1,
+      "policy": "aging_fit",
+      "wide_wait_seconds": 2.4201011657714844,
+      "makespan_seconds": 5.0472648040013155,
+      "small_tasks_started_before_wide": 8,
+      "wide_ready_time": 1794380967.5298383,
+      "wide_started_time": 1794380969.9499395,
+      "workflow_id": "c457ae848ce54ef88b4dca4cc4db0519"
+    },
+    {
+      "repeat": 1,
+      "policy": "resource_fit",
+      "wide_wait_seconds": 4.857739210128784,
+      "makespan_seconds": 5.089435195999613,
+      "small_tasks_started_before_wide": 18,
+      "wide_ready_time": 1794380972.5771348,
+      "wide_started_time": 1794380977.434874,
+      "workflow_id": "938b6bb1eae64738bb3467219e96cdd7"
+    },
+    {
+      "repeat": 2,
+      "policy": "resource_fit",
+      "wide_wait_seconds": 4.864171266555786,
+      "makespan_seconds": 5.102607467999405,
+      "small_tasks_started_before_wide": 18,
+      "wide_ready_time": 1794380977.6666076,
+      "wide_started_time": 1794380982.530779,
+      "workflow_id": "cd3d31fe9f704c54b17e53b6722a9b45"
+    },
+    {
+      "repeat": 2,
+      "policy": "aging_fit",
+      "wide_wait_seconds": 2.4418985843658447,
+      "makespan_seconds": 5.083124523000151,
+      "small_tasks_started_before_wide": 8,
+      "wide_ready_time": 1794380982.7689173,
+      "wide_started_time": 1794380985.210816,
+      "workflow_id": "b4a87219f4444299bd66d43760135426"
+    }
+  ],
+  "medians": {
+    "resource_fit": {
+      "wide_wait_seconds": 4.864171266555786,
+      "makespan_seconds": 5.089435195999613,
+      "small_tasks_started_before_wide": 18
+    },
+    "aging_fit": {
+      "wide_wait_seconds": 2.4258439540863037,
+      "makespan_seconds": 5.0478371330009395,
+      "small_tasks_started_before_wide": 8
+    }
+  },
+  "interpretation": "Finite constructed workload only; draining can trade utilization for lower wide-task wait. No universal speedup or infinite-arrival starvation proof."
+}

@@ -1,0 +1,36 @@
+{
+  "path": "ECS SSH forward -> NUC console -> strict cgroup Workers",
+  "enforcement": "cgroup_v2",
+  "scenarios": {
+    "dynamic": {
+      "id": "31d26fbe3a1948318b4ee306b99bf6a3",
+      "states": {
+        "planner": "succeeded",
+        "analyze": "succeeded",
+        "prepare_tests": "succeeded",
+        "review": "succeeded"
+      },
+      "status": "succeeded"
+    },
+    "ipc": {
+      "id": "55d6b89ff0e2413db4f018580c208389",
+      "states": {
+        "send": "succeeded",
+        "receive": "succeeded"
+      },
+      "status": "succeeded"
+    },
+    "document": {
+      "id": "5bbce490e84f4fa0a362f4901f17904f",
+      "states": {
+        "plan": "succeeded",
+        "analyze": "succeeded",
+        "index": "succeeded",
+        "review": "succeeded"
+      },
+      "status": "succeeded"
+    }
+  },
+  "live_model": "not called",
+  "browser_limit": "public route requires current existing Basic auth; old handoff credential rejected"
+}

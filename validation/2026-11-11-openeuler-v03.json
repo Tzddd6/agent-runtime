@@ -1,0 +1,41 @@
+{
+  "states": {
+    "cpu_smoke": "succeeded"
+  },
+  "wall_seconds": 2.192481848999705,
+  "cpu_core_ratio": 0.20393829039177608,
+  "cpu_stat": {
+    "usage_usec": "447131",
+    "user_usec": "442235",
+    "system_usec": "4896",
+    "nr_periods": "22",
+    "nr_throttled": "22",
+    "throttled_usec": "1725853",
+    "nr_bursts": "0",
+    "burst_usec": "0"
+  },
+  "oom_test": "passed",
+  "enforcement": "cgroup_v2",
+  "runtime_user": 1001,
+  "document_pipeline": {
+    "plan": "succeeded",
+    "analyze": "succeeded",
+    "index": "succeeded",
+    "review": "succeeded"
+  },
+  "ipc": {
+    "send": "succeeded",
+    "receive": "succeeded"
+  },
+  "pids_test": "passed",
+  "descendant_cleanup": "passed",
+  "timeout_retry_cleanup": "passed",
+  "platform": "6.6.0-159.4.20.174.oe2403sp4.x86_64",
+  "python": "3.11.6 (main, Jun 24 2026, 00:37:42) [GCC 12.3.1 (openEuler 12.3.1-110.oe2403sp4)]",
+  "context_stats": {
+    "puts": 2,
+    "unique_objects": 1,
+    "logical_bytes": 15940,
+    "stored_bytes": 4383
+  }
+}

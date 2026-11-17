@@ -1,0 +1,58 @@
+{
+  "scenario": "synthetic head-of-line blocking with sleep workers",
+  "enforcement": "cgroup_v2",
+  "samples": [
+    {
+      "repeat": 0,
+      "policy": "fifo",
+      "wall_seconds": 1.084956702999989,
+      "small_completion_seconds": 1.0693309307098389,
+      "workflow_id": "46a44103b48442c2ae892cc1ceceb476"
+    },
+    {
+      "repeat": 0,
+      "policy": "resource_fit",
+      "wall_seconds": 0.9579221710000638,
+      "small_completion_seconds": 0.16757535934448242,
+      "workflow_id": "9fd9b1662d924d1dbbea5f5efa94a044"
+    },
+    {
+      "repeat": 1,
+      "policy": "resource_fit",
+      "wall_seconds": 0.9348702179995598,
+      "small_completion_seconds": 0.16530156135559082,
+      "workflow_id": "e9b3874300bd45cd9a13faa8a2d2c955"
+    },
+    {
+      "repeat": 1,
+      "policy": "fifo",
+      "wall_seconds": 1.0921074370007773,
+      "small_completion_seconds": 1.0781328678131104,
+      "workflow_id": "67ce8bb06ff64a0eb8413e8826dbba14"
+    },
+    {
+      "repeat": 2,
+      "policy": "fifo",
+      "wall_seconds": 1.0947797349999746,
+      "small_completion_seconds": 1.0820422172546387,
+      "workflow_id": "755f6792ab9141a3814a26b7fb320691"
+    },
+    {
+      "repeat": 2,
+      "policy": "resource_fit",
+      "wall_seconds": 0.9326520550002897,
+      "small_completion_seconds": 0.16739702224731445,
+      "workflow_id": "9c12d83087f444edaddbebfb1f57ae15"
+    }
+  ],
+  "medians": {
+    "fifo": {
+      "wall_seconds": 1.0921074370007773,
+      "small_completion_seconds": 1.0781328678131104
+    },
+    "resource_fit": {
+      "wall_seconds": 0.9348702179995598,
+      "small_completion_seconds": 0.16739702224731445
+    }
+  }
+}
