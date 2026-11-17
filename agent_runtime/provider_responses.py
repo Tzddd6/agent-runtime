@@ -8,6 +8,17 @@ from .model_gateway import ModelError,NoRedirect,MAX_BYTES
 from .provider_stream import normalized
 
 
+def error_metadata(value):
+    """Return fixed numeric categories only; never expose arbitrary error text."""
+    if not isinstance(value,dict):return {'error_kind':0,'error_param':0}
+    error=value.get('error',value)
+    if not isinstance(error,dict):return {'error_kind':0,'error_param':0}
+    code=error.get('code') or error.get('type')
+    kinds={'rate_limit_exceeded':1,'server_error':2,'timeout':3,'invalid_request_error':4,'insufficient_quota':5,'context_length_exceeded':6,'model_not_found':7,'unsupported_parameter':8,'invalid_value':9,'invalid_api_key':10}
+    params={'input':1,'messages':2,'max_output_tokens':3,'reasoning':4,'reasoning.effort':5,'tools':6,'tool_choice':7,'model':8,'store':9,'stream':10}
+    return {'error_kind':kinds.get(code,0) if isinstance(code,str) else 0,'error_param':params.get(error.get('param'),0) if isinstance(error.get('param'),str) else 0}
+
+
 def encode(messages,*,tools=None):
     instructions=[];items=[]
     for m in messages:
@@ -100,14 +111,13 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
             else:
                 if 'text/event-stream' not in response.headers.get('Content-Type',''):raise ModelError('Responses SSE expected')
                 size=0;text_bytes=0;text_hash=hashlib.sha256()
-                while True:
-                    line=response.readline(MAX_BYTES+1);size+=len(line)
-                    if not line:break
+                from .sse import payloads
+                def observe_wire(total):
+                    nonlocal size,wire_seen
+                    size=total
                     if not wire_seen:trace.emit('first_wire');wire_seen=True
-                    if len(line)>MAX_BYTES or size>8*MAX_BYTES:raise ModelError('Responses SSE exceeds limit')
-                    if not line.startswith(b'data:'):continue
-                    payload=line[5:].strip()
-                    if payload==b'[DONE]':break
+                for payload in payloads(response,MAX_BYTES,observe=observe_wire):
+                    if payload=='[DONE]':break
                     event=json.loads(payload)
                     if not isinstance(event,dict):raise ValueError('Responses event must be an object')
                     kind=event.get('type');events_seen+=1
@@ -121,10 +131,8 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
                     elif kind in ('response.completed','response.incomplete'):response_value=event.get('response');trace.emit('terminal',wire_bytes=size,text_bytes=text_bytes,events=events_seen,callbacks=callbacks);break
                     elif kind in ('response.failed','error') or event.get('error'):
                         failed_response=event.get('response') if isinstance(event.get('response'),dict) else {}
-                        raw_error=event.get('error') or failed_response.get('error') or {}
-                        error_name=raw_error.get('code',raw_error.get('type')) if isinstance(raw_error,dict) else None
-                        error_kind={'rate_limit_exceeded':1,'server_error':2,'timeout':3,'invalid_request_error':4,'insufficient_quota':5}.get(error_name,0) if isinstance(error_name,str) else 0
-                        trace.emit('provider_error',events=events_seen,wire_bytes=size,error_kind=error_kind)
+                        raw_error=event.get('error') or failed_response.get('error') or event
+                        trace.emit('provider_error',events=events_seen,wire_bytes=size,**error_metadata(raw_error))
                         raise ModelError('Responses provider rejected request',code='MODEL_UPSTREAM_FAILED')
         if response_value is None:
             trace.emit('missing_terminal',events=events_seen,wire_bytes=size,text_bytes=text_bytes)
@@ -135,8 +143,14 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
         trace.emit('decoded',events=events_seen,callbacks=callbacks)
         result['latency_seconds']=time.monotonic()-started;return result
     except urllib.error.HTTPError as exc:
-        trace.emit('http_error',status=exc.code)
-        raise ModelError('Relay Responses HTTP '+str(exc.code)+'; no retry') from None
+        metadata=error_metadata(None)
+        try:
+            body=exc.read(16385)
+            if len(body)<=16384:metadata=error_metadata(json.loads(body))
+        except (OSError,ValueError,TypeError):pass
+        finally:exc.close()
+        trace.emit('http_error',status=exc.code,**metadata)
+        raise ModelError('Relay Responses HTTP '+str(exc.code)+'; no retry',code='MODEL_UPSTREAM_FAILED') from None
     except (TimeoutError,urllib.error.URLError) as exc:
         trace.emit('transport_error')
         raise ModelError('Relay transport timeout or connection failure; billing unknown',code='MODEL_TIMEOUT' if isinstance(exc,TimeoutError) or isinstance(getattr(exc,'reason',None),TimeoutError) else 'MODEL_UPSTREAM_FAILED') from None

@@ -1,7 +1,7 @@
-import io,json,unittest
+import io,json,unittest,urllib.error
 from unittest.mock import patch
 from agent_runtime.model_gateway import AizexClient,ModelError
-from agent_runtime.provider_responses import encode,decode,complete
+from agent_runtime.provider_responses import encode,decode,complete,error_metadata
 KEY='synthetic-responses-key-not-real'
 def response(text='{"ok":true}'):
  return {'model':'gpt-6-luna','status':'completed','output':[{'type':'reasoning','summary':[{'text':'synthetic-private-reasoning-marker'}]},{'type':'message','role':'assistant','content':[{'type':'output_text','text':text}]}],'usage':{'input_tokens':11,'output_tokens':20,'total_tokens':31,'output_tokens_details':{'reasoning_tokens':7}}}
@@ -74,4 +74,34 @@ class ResponseTests(unittest.TestCase):
   self.assertEqual(caught.exception.code,'MODEL_UPSTREAM_FAILED');self.assertTrue(any(t['stage']=='provider_error' and t['error_kind']==2 for t in traces));self.assertNotIn('private-provider-sentinel',json.dumps(traces))
  def test_incomplete_output_stays_incomplete(self):
   v=response();v['status']='incomplete';self.assertEqual(decode(v,'model')['finish_reason'],'length')
+ def test_http_error_categories_never_include_body_or_parameter_text(self):
+  traces=[]
+  class Trace:
+   def emit(self,stage,**values):traces.append({'stage':stage,**values})
+  body={'error':{'code':'unsupported_parameter','param':'reasoning.effort','message':'SECRET-HTTP-SENTINEL'}}
+  error=urllib.error.HTTPError('https://fixture.invalid',400,'bad request',{},io.BytesIO(json.dumps(body).encode()))
+  class Opener:
+   def open(self,*args,**kwargs):raise error
+  with patch('agent_runtime.transport_trace.Trace',return_value=Trace()),patch('agent_runtime.model_network.provider_opener',return_value=Opener()):
+   with self.assertRaises(ModelError) as caught:complete(AizexClient(KEY),[{'role':'user','content':'fixture'}],128)
+  self.assertEqual(caught.exception.code,'MODEL_UPSTREAM_FAILED')
+  self.assertIn({'stage':'http_error','status':400,'error_kind':8,'error_param':5},traces)
+  self.assertNotIn('SECRET-HTTP-SENTINEL',str(caught.exception)+json.dumps(traces))
+  self.assertEqual(error_metadata({'code':'SECRET-HTTP-SENTINEL','param':'SECRET-HTTP-SENTINEL'}),{'error_kind':0,'error_param':0})
+ def test_top_level_error_event_is_classified(self):
+  self.assertEqual(error_metadata({'type':'error','code':'rate_limit_exceeded','param':None}),{'error_kind':1,'error_param':0})
+ def test_multiline_sse_preserves_complex_format(self):
+  text='**标题**\n\n$$x^2$$\n\n```python\nprint(1)\n```\n\n|A|B|\n|---|---|\n|1|2|'
+  raw='\ufeff: ping\r\n\r\n'
+  for event in ({'type':'response.output_text.delta','delta':text},{'type':'response.completed','response':response(text)}):
+   raw+='event: message\r\n'+''.join('data: '+line+'\r\n' for line in json.dumps(event,ensure_ascii=False,indent=2).splitlines())+'\r\n'
+  class Reply(io.BytesIO):
+   headers={'Content-Type':'text/event-stream'}
+   def __enter__(self):return self
+   def __exit__(self,*args):self.close()
+  class Opener:
+   def open(self,*args,**kwargs):return Reply(raw.encode())
+  with patch('agent_runtime.model_network.provider_opener',return_value=Opener()),patch('urllib.request.build_opener',return_value=self.stream([])):
+   result=complete(AizexClient(KEY),[{'role':'user','content':'fixture'}],256,{'url':'http://127.0.0.1:1/progress','token':'synthetic'})
+  self.assertEqual(result['content'],text)
 if __name__=='__main__':unittest.main()
