@@ -56,13 +56,9 @@ def complete(client,messages,max_tokens,callback):
     try:
         with opener.open(req,timeout=client.timeout) as response:
             if 'text/event-stream' not in response.headers.get('Content-Type',''):raise ModelError('Expected provider SSE')
-            while True:
-                line=response.readline(MAX_BYTES+1);wire+=len(line)
-                if not line:break
-                if len(line)>MAX_BYTES or wire>8*MAX_BYTES:raise ModelError('Streaming response exceeds limit')
-                if not line.startswith(b'data:'):continue
-                payload=line[5:].strip()
-                if payload==b'[DONE]':done=True;break
+            from .sse import payloads
+            for payload in payloads(response,MAX_BYTES):
+                if payload=='[DONE]':done=True;break
                 chunk=json.loads(payload);model=chunk.get('model',model)
                 if isinstance(chunk.get('usage'),dict):usage=chunk['usage']
                 for choice in chunk.get('choices',[]):

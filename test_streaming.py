@@ -11,13 +11,18 @@ from agent_runtime.runtime import run
 
 class StreamingTests(unittest.TestCase):
     def setUp(self):
-        self.requests=[];self.missing_done=False;owner=self
+        self.requests=[];self.missing_done=False;self.multiline=False;owner=self
         class Provider(BaseHTTPRequestHandler):
             def log_message(self,*args):pass
             def do_POST(self):
                 owner.requests.append(json.loads(self.rfile.read(int(self.headers['Content-Length']))))
                 self.send_response(200);self.send_header('Content-Type','text/event-stream');self.end_headers()
-                def send(data):self.wfile.write(b'data: '+json.dumps(data,ensure_ascii=False).encode()+b'\n\n');self.wfile.flush()
+                def send(data):
+                    if owner.multiline:
+                        wire=': keepalive\r\nevent: message\r\n'+''.join('data: '+line+'\r\n' for line in json.dumps(data,ensure_ascii=False,indent=2).splitlines())+'\r\n'
+                        self.wfile.write(wire.encode())
+                    else:self.wfile.write(b'data: '+json.dumps(data,ensure_ascii=False).encode()+b'\n\n')
+                    self.wfile.flush()
                 try:
                     send({'choices':[{'delta':{'reasoning_content':'PRIVATE-REASONING'}}]})
                     send({'choices':[{'delta':{'content':'第一段：**正文**。\n'}}]});time.sleep(.25)
@@ -49,6 +54,11 @@ class StreamingTests(unittest.TestCase):
             states,records=run(auto_tasks('解释示例'),quiet=True,output_dir=Path(self.directory.name)/'runs',cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),output_observer=events.append,model_budget={'calls':1,'output_tokens':4096})
         self.assertEqual(states,{'auto_answer':'succeeded'});self.assertTrue(events);self.assertEqual(events[0]['source'],'provider_content_delta')
         result=next(e['result'] for e in records if e['state']=='succeeded');self.assertEqual(result['model_call']['provider_calls'],1)
+    def test_chat_completions_accepts_multiline_sse_without_replaying(self):
+        self.multiline=True;events=[];g=self.gateway();g.output_observer=events.append
+        result=self.request(g,g.issue('assistant',stream_key='auto_answer'))
+        self.assertEqual(result['content'],'第一段：**正文**。\n第二段完成。')
+        self.assertEqual(len(self.requests),1);self.assertGreaterEqual(len(events),2)
     def test_unfinished_sse_fails_without_replaying_and_callback_cannot_be_forged(self):
         self.missing_done=True;g=self.gateway();g.output_observer=lambda e:None;token=g.issue('a',stream_key='auto_answer')
         with self.assertRaises(HTTPError):self.request(g,token)
