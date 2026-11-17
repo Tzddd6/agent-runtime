@@ -1,0 +1,12 @@
+{
+  "tests": 15,
+  "passed": 15,
+  "supplier_requests": 0,
+  "environment": "LinuxPython3.12, officialtau2v1.0.1",
+  "coverage": [
+    "checkpoint uniqueness and prefix preservation",
+    "official infrastructure failure envelope with zero automatic retries",
+    "prepaid frozen source validation",
+    "native transport and shared budget guards"
+  ]
+}

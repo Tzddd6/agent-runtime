@@ -1,0 +1,10 @@
+[
+  {
+    "origin": "original_call_failure",
+    "task_id": "10",
+    "trial": 3,
+    "seed": 303,
+    "id": "b188fb54-aa2f-4ba2-b71d-8a4b45f9f158",
+    "termination_reason": "infrastructure_error"
+  }
+]

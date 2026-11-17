@@ -1,0 +1,6 @@
+{
+  "executed_sha256_raw": "68f100ebc68e15081c25e5d8a086992e95e674b5525610bdd24d0a040f91c6c9",
+  "normalized_lf_sha256": "234e10bddc316ac884f153a49f2c62d7f8a9cdf5a492e8cc56d221e1e33bea61",
+  "ast_identical_after_line_end_normalization": true,
+  "runtime_core_commit": "ada18ba942fbc051761742fe6dc0471232cb28cb"
+}

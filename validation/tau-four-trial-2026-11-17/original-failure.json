@@ -1,0 +1,19 @@
+{
+  "failed_calls": [
+    {
+      "id": "e10a083e002a477298cb68f7736b09b2",
+      "actor": "agent",
+      "status": "failed",
+      "seconds": 30.095217285001127,
+      "reserved_peak_cny": 2.113536,
+      "events": [
+        {
+          "state": "failed",
+          "code": "MODEL_UPSTREAM_FAILED"
+        }
+      ]
+    }
+  ],
+  "finished_task_count": 160,
+  "official_log_files": []
+}

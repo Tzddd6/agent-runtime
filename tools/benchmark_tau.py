@@ -17,6 +17,18 @@ sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 UPSTREAM='fc0055dc4e0a316c3f83133267fbd6faaa770992'
 
 
+def frozen_source_commit(root):
+    """Fail before any paid call if Git ownership/identity is unreadable."""
+    import subprocess,re
+    try:
+        commit=subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],stderr=subprocess.DEVNULL,text=True).strip()
+        if not re.fullmatch(r'[0-9a-f]{40}',commit):raise ValueError('Invalid commit')
+        subprocess.run(['git','-C',str(root),'diff','--quiet','HEAD','--','agent_runtime'],stderr=subprocess.DEVNULL,check=True)
+        return commit
+    except (OSError,ValueError,subprocess.CalledProcessError):
+        raise ValueError('Cannot verify frozen Runtime source; fix worktree ownership or source changes before paid evaluation') from None
+
+
 def main():
     parser=argparse.ArgumentParser()
     parser.add_argument('--official-root',type=Path,required=True)
@@ -61,6 +73,7 @@ def main():
           'evaluator':'official ALL, unchanged','ranking':None}
     print(json.dumps(plan),flush=True)
     if not args.run:return
+    frozen_source_commit(Path(__file__).resolve().parents[1])
     if args.pilot<0 or args.trials<1:raise SystemExit('Invalid run size')
     if requires_judge:raise SystemExit('Official GPT-4.1 judge unavailable: refusing silent grader replacement')
     if args.budget_ledger is None:raise SystemExit('A shared persistent budget ledger is required')

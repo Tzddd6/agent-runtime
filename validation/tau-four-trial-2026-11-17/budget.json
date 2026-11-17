@@ -1,0 +1,12 @@
+{
+  "authorized_total_limit_cny": 20,
+  "cumulative_spent_or_reserved_cny": 9.90318887999997,
+  "known_peak_cost_this_run_cny": 5.25613264,
+  "previous_known_peak_cost_cny": 2.53352023999999,
+  "unknown_call_reservation_cny": 2.113536,
+  "unknown_billing_calls": 1,
+  "actual_invoice_checked": false,
+  "cumulative_supplier_calls": 4689,
+  "ledger_canonical_restored": true,
+  "key_owners_restarted": false
+}

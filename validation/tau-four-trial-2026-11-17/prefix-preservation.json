@@ -1,0 +1,10 @@
+{
+  "preserved_simulations": 160,
+  "raw_original_prefix_sha256": "37da8cdc923b03aec033708cde4d8402096d81306a526b7c8d1ccc267592c245",
+  "raw_completed_prefix_sha256": "37da8cdc923b03aec033708cde4d8402096d81306a526b7c8d1ccc267592c245",
+  "public_non_cost_prefix_sha256": "30d6fc7f40bb25d160819ba248d3e160ae6042d99e15fcf321d657d5d98b794b",
+  "raw_prefix_identical": true,
+  "public_non_cost_prefix_identical": true,
+  "completed_simulations_replayed": 0,
+  "original_failure_kept_outside_final_scored_attempt_as_official_task_recovery": true
+}
