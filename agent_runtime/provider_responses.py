@@ -117,8 +117,15 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
                         if text_bytes>MAX_BYTES:raise ModelError('Responses text exceeds limit')
                         if enabled:pending.append(delta);emit()
                     elif kind in ('response.completed','response.incomplete'):response_value=event.get('response');trace.emit('terminal',wire_bytes=size,text_bytes=text_bytes,events=events_seen,callbacks=callbacks);break
-                    elif kind in ('response.failed','error'):raise ModelError('Responses provider rejected request')
-        if response_value is None:raise ModelError('Responses stream incomplete; no retry')
+                    elif kind in ('response.failed','error') or event.get('error'):
+                        raw_error=event.get('error') or (event.get('response') or {}).get('error') or {}
+                        error_name=raw_error.get('code',raw_error.get('type')) if isinstance(raw_error,dict) else None
+                        error_kind={'rate_limit_exceeded':1,'server_error':2,'timeout':3,'invalid_request_error':4,'insufficient_quota':5}.get(error_name,0) if isinstance(error_name,str) else 0
+                        trace.emit('provider_error',events=events_seen,wire_bytes=size,error_kind=error_kind)
+                        raise ModelError('Responses provider rejected request',code='MODEL_UPSTREAM_FAILED')
+        if response_value is None:
+            trace.emit('missing_terminal',events=events_seen,wire_bytes=size,text_bytes=text_bytes)
+            raise ModelError('Responses stream incomplete; no retry',code='MODEL_UPSTREAM_FAILED')
         result=decode(response_value,client.model,native=native_value is not None)
         if callback and native_value is None and text_bytes and text_hash.hexdigest()!=hashlib.sha256(result['content'].encode()).hexdigest():raise ModelError('Responses final text differs from stream')
         emit(True)
@@ -130,6 +137,9 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     except (TimeoutError,urllib.error.URLError) as exc:
         trace.emit('transport_error')
         raise ModelError('Relay transport timeout or connection failure; billing unknown',code='MODEL_TIMEOUT' if isinstance(exc,TimeoutError) or isinstance(getattr(exc,'reason',None),TimeoutError) else 'MODEL_UPSTREAM_FAILED') from None
-    except (OSError,ValueError,KeyError,TypeError):
+    except (ValueError,KeyError,TypeError):
+        trace.emit('parser_error')
+        raise ModelError('Relay Responses schema failed; billing unknown; no retry',code='MODEL_UPSTREAM_FAILED') from None
+    except OSError:
         trace.emit('transport_error')
         raise ModelError('Relay Responses failed; billing state unknown; no retry') from None

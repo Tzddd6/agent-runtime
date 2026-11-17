@@ -89,7 +89,7 @@ class Fixture:
   return {'content':json.dumps(content),'finish_reason':'stop','model':'fixture','usage':{'prompt_tokens':10,'completion_tokens':10},'latency_seconds':0.}
 
 def execute_case(case,arm,client,invoke,repeat):
- start=time.monotonic();cpu=time.process_time();attempt_start=len(client.ledger.rows);record_start=len(client.records);error_type=None
+ start=time.monotonic();cpu=time.process_time();attempt_start=len(client.ledger.rows);record_start=len(client.records);error_type=None;failure_code=None
  try:
   text=invoke(arm,case['messages'])
   if case['id']=='tool_chain':
@@ -100,9 +100,9 @@ def execute_case(case,arm,client,invoke,repeat):
  except Exception as exc:
   # Resource recovery failure is not an ordinary model-task failure.
   if isinstance(exc,RuntimeError) and str(exc).startswith(('CLEANUP_FAILED:','TEARDOWN_FAILED:')):raise
-  passed=False;error_type=type(exc).__name__
+  passed=False;error_type=type(exc).__name__;failure_code=getattr(exc,'code',None)
  attempts=client.ledger.rows[attempt_start:];records=client.records[record_start:]
- return {'repeat':repeat,'case':case['id'],'arm':arm,'seconds':time.monotonic()-start,'coordinator_cpu_seconds':time.process_time()-cpu,'passed':passed,'request_hashes':[r['request_sha256'] for r in attempts],'calls':len(attempts),'usage':{k:sum(r['usage'][k] for r in records) for k in ('prompt_tokens','completion_tokens')},'usage_unknown_calls':sum('usage' not in r for r in attempts),'broker_seconds':sum(r.get('transport_timings',{}).get('broker_seconds',0) for r in records),'provider_seconds':sum(r.get('provider_seconds') or 0 for r in records),'case_error_type':error_type}
+ return {'repeat':repeat,'case':case['id'],'arm':arm,'seconds':time.monotonic()-start,'coordinator_cpu_seconds':time.process_time()-cpu,'passed':passed,'request_hashes':[r['request_sha256'] for r in attempts],'calls':len(attempts),'usage':{k:sum(r['usage'][k] for r in records) for k in ('prompt_tokens','completion_tokens')},'usage_unknown_calls':sum('usage' not in r for r in attempts),'broker_seconds':sum(r.get('transport_timings',{}).get('broker_seconds',0) for r in records),'provider_seconds':sum(r.get('provider_seconds') or 0 for r in records),'case_error_type':error_type,'failure_code':failure_code}
 
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--aizex',action='store_true',help='Explicitly use Aizex gpt-6-luna and the user-supplied published nominal token prices');p.add_argument('--limit-usd',type=float,default=.05);p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
@@ -122,7 +122,11 @@ def main():
   def call(arm,messages):
    if arm=='direct':return client.complete(messages,256)['content']
    states,events=run([{'id':'model','action':'llm','messages':messages,'max_tokens':256,'timeout':120}],quiet=True,output_dir=a.output/'runs',worker_session=session,model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),model_budget={'calls':1,'output_tokens':256})
-   if states['model']!='succeeded':raise ValueError('Runtime execution failed; no paid retry')
+   if states['model']!='succeeded':
+    from agent_runtime.failures import event_failure
+    from agent_runtime.model_gateway import ModelError
+    failed=next((e for e in reversed(events) if e['state'] in ('failed','timeout','cancelled')),events[-1])
+    raise ModelError('Runtime execution failed; no paid retry',code=event_failure(failed)['code'])
    return next(e['result']['result'] for e in events if e['state']=='succeeded')
   try:
    for repeat in range(2):

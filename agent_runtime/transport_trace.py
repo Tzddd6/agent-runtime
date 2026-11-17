@@ -3,8 +3,8 @@ import json,os,stat,time,uuid
 from pathlib import Path
 MARKER=Path('/home/tzd/.config/agentrt/transport-diagnostics.json')
 LOG=Path('/home/tzd/.config/agentrt/transport-phases.jsonl')
-STAGES={'request_start','headers','first_wire','first_text','terminal','decoded','http_error','transport_error','parser_error','callback_rejected'}
-FIELDS={'status','sse','wire_bytes','text_bytes','events','callbacks'}
+STAGES={'request_start','headers','first_wire','first_text','terminal','decoded','http_error','transport_error','parser_error','callback_rejected','provider_error','missing_terminal'}
+FIELDS={'status','sse','wire_bytes','text_bytes','events','callbacks','error_kind'}
 class Trace:
  def __init__(self,*,marker=MARKER,log=LOG):
   self.started=time.monotonic();self.identity=uuid.uuid4().hex;self.log=Path(log);self.enabled=False;self.phases={}
