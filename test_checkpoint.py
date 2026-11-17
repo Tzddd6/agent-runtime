@@ -148,3 +148,17 @@ class CheckpointTests(unittest.TestCase):
             self.assertEqual(set(data['model_ledger']['agents']),{'parent','new-agent'})
             states,_=run(tasks,max_workers=1,resume=True,**options)
             self.assertTrue(all(v=='succeeded' for v in states.values()));self.assertEqual(client.calls,1)
+
+    def test_restart_with_unconfirmed_old_scope_quarantines_new_admission(self):
+        import time,uuid
+        from agent_runtime.web import Controller
+        with tempfile.TemporaryDirectory() as tmp:
+            c=Controller(Path(tmp)/'console',user_identity='alice');key=uuid.uuid4().hex;directory=c.root/key
+            options=dict(output_dir=directory,checkpoint_dir=directory/'recovery',recovery_owner='alice',quiet=True)
+            tasks=[{'id':'pause','action':'sleep','seconds':.01}];self.interrupt(tasks,options,'pause')
+            state=directory/'recovery/state.json';value=json.loads(state.read_text());value['clean_shutdown']=False;value['cgroup_root']=None;state.write_text(json.dumps(value))
+            c.store.save({'id':key,'preset':'dynamic','status':'running','created':time.time(),'history':[]})
+            recovered=Controller(c.root,user_identity='alice')
+            self.assertTrue(recovered.recovery_required)
+            self.assertEqual(recovered.jobs[key]['status'],'recovery_required')
+            with self.assertRaises(ValueError):recovered.submit({'preset':'dynamic'})

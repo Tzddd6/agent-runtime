@@ -217,7 +217,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                            workflow_id=root.name+('-r'+uuid.uuid4().hex[:8] if restored else ''),model_budget=model_budget)
     agent_journal=(root/'agents.jsonl').open('a' if restored else 'w',encoding='utf-8');registry.journal=agent_journal
     executor.agent_roots=registry.groups
-    store = ContextStore(root / 'contexts',compression_level=context_compression_level)
+    store = ContextStore(root / 'contexts',compression_level=context_compression_level,durable=_checkpoint is not None)
     tasks = [dict(t) for t in tasks]
     task_by_id = {t['id']: t for t in tasks}
     states = dict(restored['states']) if restored else {t['id']: 'waiting' for t in tasks}
@@ -320,7 +320,7 @@ def _run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         # Preserve every journal event, but sample cgroups once per dispatch or
         # completion batch instead of rereading every Agent for every task.
         registry.synchronize(states)
-        checkpoint_state()
+        if state!='running':checkpoint_state() # The prelaunch intent is already durable.
 
     def cleanup_attempt(key, handle, limits):
         if gateway and handle.get('gateway_token'):gateway.revoke(handle['gateway_token'])

@@ -46,6 +46,7 @@ def recovery_view(directory,owner):
             'uncertain_tasks':uncertain,'blocked_tasks':blocked,'paused_agents':paused,
             'mailbox_reconciliation_required':unsupported_mailbox,
             'clean_shutdown':data.get('clean_shutdown',False),
+            'old_resources_confirmed':old_scope_quiescent(data),
             'automatic_model_replay':False,'model_budget_preserved':bool(data.get('model_ledger')),
             'policy':'confirmed results retained; uncertain model/tool side effects require reconciliation'}
 
@@ -53,6 +54,17 @@ def recovery_view(directory,owner):
 def replay_safe(task):
     action=task.get('action','echo')
     return action in PURE_ACTIONS or action=='plugin' and task.get('plugin') in PURE_PLUGINS
+
+
+def old_scope_quiescent(data):
+    if data.get('clean_shutdown'):return True
+    group=data.get('cgroup_root')
+    if not group:return False
+    path=Path(group).resolve()
+    if not path.is_relative_to('/sys/fs/cgroup') or path==Path('/sys/fs/cgroup'):return False
+    try:return 'populated 1' not in (path/'cgroup.events').read_text()
+    except FileNotFoundError:return True
+    except OSError:return False
 
 
 class WorkflowCheckpoint:
@@ -78,13 +90,8 @@ class WorkflowCheckpoint:
                 if blocked:raise RecoveryBlocked('Uncertain side effects; no automatic replay: '+','.join(blocked))
                 if view['paused_agents'] or view['mailbox_reconciliation_required']:
                     raise RecoveryBlocked('Paused Agent or mailbox needs explicit reconciliation')
-                if not self.data.get('clean_shutdown'):
-                    group=self.data.get('cgroup_root')
-                    if not group or not str(group).startswith('/sys/fs/cgroup/'):
-                        raise RecoveryBlocked('Crashed execution needs verified old cgroup cleanup')
-                    try:populated='populated 1' in (Path(group)/'cgroup.events').read_text()
-                    except FileNotFoundError:populated=False
-                    if populated:raise RecoveryBlocked('Old cgroup is still populated; no duplicate execution')
+                if not old_scope_quiescent(self.data):
+                    raise RecoveryBlocked('Old execution cleanup is not confirmed; no duplicate execution')
                 self.data['states']={k:('waiting' if v=='running' else v) for k,v in self.data['states'].items()}
                 self.data['resumes']=self.data.get('resumes',0)+1
             else:

@@ -57,6 +57,12 @@ class Controller:
         for job in self.store.load():
             self.jobs[job['id']]=job
             if job['status']=='recovery_required':self.recovery_required=True
+            if job['status']=='interrupted' and (job['directory']/'recovery'/'state.json').exists():
+                from .checkpoint import read_checkpoint,old_scope_quiescent
+                try:confirmed=old_scope_quiescent(read_checkpoint(job['directory']/'recovery',user_identity))
+                except (OSError,ValueError,KeyError,TypeError):confirmed=False
+                if not confirmed:
+                    self.recovery_required=True;job['status']='recovery_required';job['error']=RECOVERY_MESSAGE
         self.model_broker = None
         if os.environ.get('AGENTRT_MODEL_BROKER_URL'):
             from .model_broker import BrokerClient
@@ -489,7 +495,7 @@ class Controller:
                 result['recovery']=recovery_view(directory/'recovery',self.user_identity)
                 result['recovery']['can_resume_demo']=(result['status']=='interrupted' and result['preset'] in ('dynamic','resources','document')
                     and not result['recovery']['blocked_tasks'] and not result['recovery']['mailbox_reconciliation_required']
-                    and not result['recovery']['paused_agents'])
+                    and not result['recovery']['paused_agents'] and result['recovery']['old_resources_confirmed'])
             except (ValueError,OSError,KeyError,TypeError):result['recovery']={'available':False,'can_resume_demo':False}
         return result
 
