@@ -1,0 +1,38 @@
+[
+  {
+    "repeat": 0,
+    "case": "structured",
+    "arm": "direct",
+    "seconds": 12.10059970599923,
+    "coordinator_cpu_seconds": 1.756580421,
+    "passed": false,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 67
+    },
+    "broker_seconds": 11.930638551712036,
+    "provider_seconds": 11.870222628000192
+  },
+  {
+    "repeat": 0,
+    "case": "structured",
+    "arm": "runtime",
+    "seconds": 8.716815165999833,
+    "coordinator_cpu_seconds": 1.3873372329999998,
+    "passed": false,
+    "request_hashes": [
+      "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa"
+    ],
+    "calls": 1,
+    "usage": {
+      "prompt_tokens": 79,
+      "completion_tokens": 60
+    },
+    "broker_seconds": 8.410715579986572,
+    "provider_seconds": 8.353509764000592
+  }
+]

@@ -190,8 +190,12 @@ class AizexClient(OpenAIClient):
     provider='aizex'
     official_base='https://ca.memofun.net/v1'
 
-    def __init__(self,key,model='gpt-6-luna',timeout=30,base='https://ca.memofun.net/v1',*,local_test=False):
+    def __init__(self,key,model='gpt-6-luna',timeout=45,base='https://ca.memofun.net/v1',*,local_test=False):
         super().__init__(key,model,timeout,base,local_test=local_test)
+
+    def _complete_direct(self,messages,max_tokens=256):
+        from .provider_responses import complete
+        return complete(self,messages,max_tokens)
 
 
 class ModelGateway:

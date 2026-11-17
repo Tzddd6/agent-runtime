@@ -1,0 +1,61 @@
+{
+  "price_source": "User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored",
+  "currency": "USD",
+  "limit": 0.05,
+  "reserved": 0.0006689,
+  "calls": [
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 67,
+        "total_tokens": 146,
+        "completion_tokens_details": {
+          "reasoning_tokens": 34
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 11.982078017000276,
+      "provider_seconds": 11.870222628000192,
+      "transport_timings": {
+        "client_seconds": 11.982061949999661,
+        "broker_seconds": 11.930638551712036,
+        "completion_detection_seconds": 0.04069089889526367,
+        "status_reads": 197
+      }
+    },
+    {
+      "reserved_usd": 0.0002165,
+      "request_sha256": "0c45aa79b836295190e37e6bdf955612de79eb6546ef0230fbdfc879d6505ffa",
+      "max_completion_tokens": 256,
+      "state": "succeeded",
+      "usage": {
+        "prompt_tokens": 79,
+        "completion_tokens": 60,
+        "total_tokens": 139,
+        "completion_tokens_details": {
+          "reasoning_tokens": 27
+        }
+      },
+      "response_model": "gpt-6-luna",
+      "seconds": 8.459661863999827,
+      "provider_seconds": 8.353509764000592,
+      "transport_timings": {
+        "client_seconds": 8.459648130999994,
+        "broker_seconds": 8.410715579986572,
+        "completion_detection_seconds": 0.0376889705657959,
+        "status_reads": 138
+      }
+    },
+    {
+      "reserved_usd": 0.00023590000000000001,
+      "request_sha256": "041115e55d5f78ffaf94c04c8877dd98e556a88431d4ff19bf92d2f4d5bb43ab",
+      "max_completion_tokens": 256,
+      "state": "failed_billing_unknown",
+      "seconds": 30.061670510000113
+    }
+  ]
+}

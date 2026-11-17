@@ -67,7 +67,11 @@ class Measured:
   try:
    result=self.client.complete(messages,max_tokens)
    if result.get('finish_reason')!='stop':raise ValueError('Incomplete output; no automatic retry')
-   if not isinstance(result.get('usage'),dict) or not all(type(result['usage'].get(k)) is int for k in ('prompt_tokens','completion_tokens')):raise ValueError('Missing provider usage')
+   if not isinstance(result.get('usage'),dict) or not all(type(result['usage'].get(k)) is int and result['usage'][k]>=0 for k in ('prompt_tokens','completion_tokens')):raise ValueError('Missing provider usage')
+   actual=(result['usage']['prompt_tokens']*self.ledger.input_price+result['usage']['completion_tokens']*self.ledger.output_price)/1e6
+   if actual>row['reserved_usd']:
+    self.ledger.reserved+=actual-row['reserved_usd'];row['reserved_usd']=actual
+   row['reported_nominal_usd']=actual
    row.update(state='succeeded',usage=result['usage'],response_model=result.get('model'),seconds=time.monotonic()-start,provider_seconds=result.get('latency_seconds'),transport_timings=result.get('transport_timings',{}))
    self.records.append(row.copy());return result
   except BaseException:
@@ -100,7 +104,7 @@ def main():
  with WorkerSession(a.output/'runs') as session:
   def call(arm,messages):
    if arm=='direct':return client.complete(messages,256)['content']
-   states,events=run([{'id':'model','action':'llm','messages':messages,'max_tokens':256,'timeout':45}],quiet=True,output_dir=a.output/'runs',worker_session=session,model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),model_budget={'calls':1,'output_tokens':256})
+   states,events=run([{'id':'model','action':'llm','messages':messages,'max_tokens':256,'timeout':65}],quiet=True,output_dir=a.output/'runs',worker_session=session,model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),model_budget={'calls':1,'output_tokens':256})
    if states['model']!='succeeded':raise ValueError('Runtime execution failed; no paid retry')
    return next(e['result']['result'] for e in events if e['state']=='succeeded')
   try:

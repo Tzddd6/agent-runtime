@@ -33,6 +33,9 @@ def normalized(messages):
     return normal,thinking
 
 def complete(client,messages,max_tokens,callback):
+    if getattr(client,'provider',None)=='aizex':
+        from .provider_responses import complete as response_complete
+        return response_complete(client,messages,max_tokens,callback)
     if type(max_tokens) is not int or not 1<=max_tokens<=4096:raise ModelError('Invalid output budget')
     messages,thinking=normalized(messages)
     value={'model':client.model,'messages':messages,'stream':True,'stream_options':{'include_usage':True},**inference_options(client,max_tokens,thinking)}

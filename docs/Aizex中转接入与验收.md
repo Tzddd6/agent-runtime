@@ -1,6 +1,6 @@
 # Aizex 中转接入
 
-独立供应商 `aizex` 固定使用用户明确提供的香港地址 `https://ca.memofun.net/v1`，通过该站文档声明兼容的 Chat Completions 接口接入已有 Runtime。保留官方 OpenAI、DeepSeek 的独立供应商身份；禁止修改旧配置的供应商来搬用原密钥。没有任意 Base URL 输入、自动切换域名或降级到 HTTP，也不关闭 TLS 校验、不跟随带凭据的重定向。Cloudflare 备用地址不自动使用。
+独立供应商 `aizex` 固定使用用户明确提供的香港地址 `https://ca.memofun.net/v1`，通过该站推荐的原生 Responses 接口接入已有 Runtime。保留官方 OpenAI、DeepSeek 的独立供应商身份；禁止修改旧配置的供应商来搬用原密钥。没有任意 Base URL 输入、自动切换域名或降级到 HTTP，也不关闭 TLS 校验、不跟随带凭据的重定向。Cloudflare 备用地址不自动使用。
 
 网页选择“Aizex 中转（香港）”，填写具体模型（小样本拟用 gpt-6-luna）和在站点轮换后的专用密钥。不要使用截图中已暴露的旧密钥，不要把官方 OpenAI 密钥填到中转项。保存不发起请求，也不自动设为当前。非深度思考时，中转 GPT-5/6 系列明确使用 minimal 档；打开深度思考使用 high。模型必须支持所填名称与对应参数。
 
@@ -16,4 +16,8 @@
 
 先用新密钥进行一个128输出token的小请求，确认正文与usage均完整；失败立即停止，不自动重放。之后小样本对照使用 `tools/benchmark_provider_paired.py --live --aizex --profile <id> --output <新目录>`，两轮交错、每臂6个任务和8个调用，累计16次，对照脚本预留上限0.05标称美元。须将先前试调用单独计入总预算，不能覆盖失败账本。工具请求与返回在两臂相同；直接调用共用同一安全broker和网络，仅比较Runtime上层开销。不是官方大规模能力评分。
 
-当前只接入该站明确声明的兼容接口；没有宣称完成其全部 Responses 专有功能。图片与流式沿用已测试的 Chat Completions 通道，原始文件仍由 Runtime 受控解析。
+原生 Responses 适配覆盖文本、已标准化图片、SSE及工具调用ID映射；只交付assistant消息中的output_text，忽略独立reasoning项目，保留包括推理token在内的原用量。不会通过正则抽取JSON来放宽判分。流式必须有终态回执，且最终正文与已流出的正文一致。文件仍由Runtime受控解析，并未声明覆盖Responses全部专有功能。
+
+首轮真实兼容接口对照保留为失败记录：两个结构化回答带有前置think标签，第三个请求约30秒失败。小样本不完整，不能计算成功率或声称速度优势。切换原生Responses后两臂使用同一适配。中转模型子进程期限45秒、broker客户端55秒、微型评测任务65秒；超时不重放。服务端排队消耗同一总期限，不无界延长。
+
+协议参考：https://developers.openai.com/api/reference/resources/responses/methods/create 。用量口径：https://developers.openai.com/api/docs/guides/token-counting 。

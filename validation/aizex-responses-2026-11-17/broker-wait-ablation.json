@@ -1,0 +1,106 @@
+{
+  "supplier_requests": 0,
+  "fixture_calls": 10,
+  "fixed_provider_seconds": 0.3,
+  "all_results_identical": true,
+  "rows": [
+    {
+      "repeat": 0,
+      "arm": "poll",
+      "seconds": 0.3202951049997864,
+      "process_cpu_seconds": 0.066637284,
+      "status_reads": 6,
+      "detection_seconds": 0.009021759033203125
+    },
+    {
+      "repeat": 0,
+      "arm": "wait",
+      "seconds": 0.31063392800024303,
+      "process_cpu_seconds": 0.018159287999999996,
+      "status_reads": 1,
+      "detection_seconds": 0.00044155120849609375
+    },
+    {
+      "repeat": 1,
+      "arm": "wait",
+      "seconds": 0.31587726099951396,
+      "process_cpu_seconds": 0.029599020000000004,
+      "status_reads": 1,
+      "detection_seconds": 0.0048885345458984375
+    },
+    {
+      "repeat": 1,
+      "arm": "poll",
+      "seconds": 0.3164279809998334,
+      "process_cpu_seconds": 0.05980408899999998,
+      "status_reads": 6,
+      "detection_seconds": 0.007699251174926758
+    },
+    {
+      "repeat": 2,
+      "arm": "poll",
+      "seconds": 0.31742720599959284,
+      "process_cpu_seconds": 0.06164536200000004,
+      "status_reads": 6,
+      "detection_seconds": 0.008910894393920898
+    },
+    {
+      "repeat": 2,
+      "arm": "wait",
+      "seconds": 0.3100564779997512,
+      "process_cpu_seconds": 0.018189597000000002,
+      "status_reads": 1,
+      "detection_seconds": 0.0004475116729736328
+    },
+    {
+      "repeat": 3,
+      "arm": "wait",
+      "seconds": 0.3206770189999588,
+      "process_cpu_seconds": 0.035425085999999995,
+      "status_reads": 1,
+      "detection_seconds": 0.0006144046783447266
+    },
+    {
+      "repeat": 3,
+      "arm": "poll",
+      "seconds": 0.3154003780000494,
+      "process_cpu_seconds": 0.05956453100000003,
+      "status_reads": 6,
+      "detection_seconds": 0.0064296722412109375
+    },
+    {
+      "repeat": 4,
+      "arm": "poll",
+      "seconds": 0.3158004790002451,
+      "process_cpu_seconds": 0.059618899999999975,
+      "status_reads": 6,
+      "detection_seconds": 0.0072116851806640625
+    },
+    {
+      "repeat": 4,
+      "arm": "wait",
+      "seconds": 0.31008284600011393,
+      "process_cpu_seconds": 0.017667183999999947,
+      "status_reads": 1,
+      "detection_seconds": 0.0004382133483886719
+    }
+  ],
+  "arms": {
+    "poll": {
+      "seconds": 0.3164279809998334,
+      "process_cpu_seconds": 0.05980408899999998,
+      "status_reads": 6,
+      "detection_seconds": 0.007699251174926758
+    },
+    "wait": {
+      "seconds": 0.31063392800024303,
+      "process_cpu_seconds": 0.018189597000000002,
+      "status_reads": 1,
+      "detection_seconds": 0.0004475116729736328
+    }
+  },
+  "limits": [
+    "Synthetic 300ms fixture; not real model latency or quality",
+    "CPU includes client and local server threads in the same process; no deployment-wide RSS claim"
+  ]
+}

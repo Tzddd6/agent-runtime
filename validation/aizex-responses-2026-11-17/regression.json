@@ -1,0 +1,9 @@
+{
+  "tests_run": 379,
+  "passed": 377,
+  "skipped": 2,
+  "supplier_calls_in_tests": 0,
+  "old_key_owners_kept": true,
+  "responses_and_stream_text_verified": true,
+  "completion_wait_verified": true
+}

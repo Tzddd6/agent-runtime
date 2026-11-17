@@ -1,0 +1,34 @@
+{
+  "provider": "aizex",
+  "requested_model": "gpt-6-luna",
+  "calls_attempted": 2,
+  "reserved_nominal_usd": 0.0002642,
+  "rows": [
+    {
+      "arm": "direct",
+      "passed": true,
+      "seconds": 24.741533651999816,
+      "model_returned": "gpt-6-luna",
+      "usage": {
+        "prompt_tokens": 31,
+        "completion_tokens": 13,
+        "total_tokens": 44
+      },
+      "finish_reason": "stop"
+    },
+    {
+      "arm": "runtime",
+      "passed": true,
+      "seconds": 8.352622782000253,
+      "model_returned": "gpt-6-luna",
+      "usage": {
+        "prompt_tokens": 31,
+        "completion_tokens": 13,
+        "total_tokens": 44
+      },
+      "finish_reason": "stop"
+    }
+  ],
+  "no_automatic_retry": true,
+  "public_prompt": "synthetic JSON readiness check only"
+}

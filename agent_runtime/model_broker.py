@@ -35,6 +35,7 @@ class ModelBroker:
         self.slots=threading.BoundedSemaphore(concurrency)
         self.history_limit,self.max_pending,self.max_requests=history_limit,max_pending,max_requests
         self.lock=threading.RLock()
+        self.condition=threading.Condition(self.lock)
         self._key=''
         self.model='deepseek-flash'
         self.calls,self.receipts={},{}
@@ -127,15 +128,18 @@ class ModelBroker:
             finally:
                 if entered:self.slots.release()
                 with self.lock:
-                    call.update(status=final,result=result,finished=time.time())
+                    call.update(status=final,result=result,finished=time.time());self.condition.notify_all()
                     completed=[k for k,c in self.calls.items() if c['status'] not in ACTIVE]
                     for old in completed[:-self.history_limit]:self.calls.pop(old,None)
         threading.Thread(target=execute,name='agentrt-model-call',daemon=True).start()
         return {'call_id':call_id,'reused':False}
 
-    def detail(self,identity):
-        with self.lock:
+    def detail(self,identity,wait=0):
+        if type(wait) not in (int,float) or not 0<=wait<=.5:raise ValueError('Invalid read wait')
+        with self.condition:
             if identity not in self.calls:raise KeyError(identity)
+            call=self.calls[identity]
+            if wait and call['status'] in ACTIVE:self.condition.wait_for(lambda:call['status'] not in ACTIVE or self.closed,timeout=wait)
             return {k:v for k,v in self.calls[identity].items() if k!='cancel'}
 
     def cancel(self,identity):
@@ -149,6 +153,7 @@ class ModelBroker:
             self.closed=True
             self._key=''
             for call in self.calls.values():call['cancel'].set()
+            self.condition.notify_all()
 
 
 def make_server(broker,port=18886):
@@ -174,9 +179,11 @@ def make_server(broker,port=18886):
             if not self.authorized():return
             if self.path=='/status':self.respond(200,broker.status())
             elif self.path=='/profiles' and hasattr(broker,'profiles_info'):self.respond(200,broker.profiles_info())
-            elif re.fullmatch(r'/calls/[a-f0-9]{32}',self.path):
-                try:self.respond(200,broker.detail(self.path.rsplit('/',1)[1]))
+            elif re.fullmatch(r'/calls/[a-f0-9]{32}(?:\?wait=0\.[0-9]{1,3})?',self.path):
+                path,_,query=self.path.partition('?')
+                try:self.respond(200,broker.detail(path.rsplit('/',1)[1],float(query[5:]) if query else 0))
                 except KeyError:self.respond(410,{'error':'Response unavailable; request must not be resubmitted'})
+                except ValueError:self.respond(400,{'error':'Invalid read wait'})
             else:self.respond(404,{'error':'Not found'})
         def do_POST(self):
             if not self.authorized():return
@@ -252,6 +259,7 @@ class BrokerClient:
             if model is not None and model!=row['model']:raise ModelError('API profile model changed before workflow admission')
             client.profile_revision=row['revision'];model=row['model']
             if self.url==FEDERATED_BROKER_URL and row.get('upstream') is True:client.url=MULTI_BROKER_URL
+            if row.get('provider')=='aizex':client.timeout=55
         if not(identity=='legacy' and self.url==BROKER_URL):client.profile_id=identity
         if model is not None:client.model=model
         return client
@@ -285,7 +293,7 @@ class BrokerClient:
                 if self.cancel_event is not None and self.cancel_event.is_set():
                     raise ModelError('Local model call cancelled; remote billing state unknown')
                 try:
-                    call=self._request('/calls/'+identity)
+                    call=self._request('/calls/'+identity+('?wait=0.5' if self.url==FEDERATED_BROKER_URL else ''))
                     reads+=1
                 except ModelError:
                     time.sleep(.1);continue # Read-only polling can be retried.
@@ -298,7 +306,7 @@ class BrokerClient:
                         'status_reads':reads}
                     return result
                 if call['status'] not in ACTIVE:raise ModelError('Model broker call failed or cancelled; remote billing state unknown')
-                time.sleep(.05)
+                if self.url!=FEDERATED_BROKER_URL:time.sleep(.05)
             raise ModelError('Model broker deadline exceeded; remote billing state unknown')
         except BaseException:
             try:self._request('/calls/'+identity+'/cancel',{})
@@ -314,7 +322,7 @@ def main():
     token=os.environ.get('AGENTRT_PROXY_TOKEN','')
     if args.port==18888:
         from .federated_profiles import FederatedProfiles
-        broker=FederatedProfiles(token,upstream=BrokerClient(token,MULTI_BROKER_URL),legacy_client=BrokerClient(token,BROKER_URL))
+        broker=FederatedProfiles(token,upstream=BrokerClient(token,MULTI_BROKER_URL),legacy_client=BrokerClient(token,BROKER_URL),selection_path='/home/tzd/.config/agentrt/model-route-selection.json')
     elif args.port==18887:
         from .model_profiles import MultiModelBroker
         broker=MultiModelBroker(token,legacy_client=BrokerClient(token,BROKER_URL))

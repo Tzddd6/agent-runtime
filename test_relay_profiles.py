@@ -29,14 +29,14 @@ class RelayTests(unittest.TestCase):
    def log_message(self,*args):pass
    def do_POST(self):
     request=json.loads(self.rfile.read(int(self.headers['Content-Length'])));captured.append((self.path,request))
-    raw=json.dumps({'model':'gpt-6-luna','choices':[{'message':{'content':'{"ready":true}'},'finish_reason':'stop'}],'usage':{'prompt_tokens':10,'completion_tokens':5}}).encode()
+    raw=json.dumps({'model':'gpt-6-luna','status':'completed','output':[{'type':'reasoning','summary':[]},{'type':'message','role':'assistant','content':[{'type':'output_text','text':'{"ready":true}'}]}],'usage':{'input_tokens':10,'output_tokens':5,'total_tokens':15}}).encode()
     self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(raw)));self.end_headers();self.wfile.write(raw)
   server=ThreadingHTTPServer(('127.0.0.1',0),Handler);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
   try:
    client=AizexClient(KEY,base='http://127.0.0.1:'+str(server.server_port),local_test=True)
    result=client.complete([{'role':'user','content':'synthetic fixture'}],128)
-   self.assertEqual(json.loads(result['content']),{'ready':True});self.assertEqual(captured[0][0],'/chat/completions')
-   body=captured[0][1];self.assertNotIn('thinking',body);self.assertEqual(body['reasoning_effort'],'minimal');self.assertEqual(body['max_completion_tokens'],128)
+   self.assertEqual(json.loads(result['content']),{'ready':True});self.assertEqual(captured[0][0],'/responses')
+   body=captured[0][1];self.assertNotIn('thinking',body);self.assertEqual(body['reasoning']['effort'],'minimal');self.assertEqual(body['max_output_tokens'],128)
   finally:server.shutdown();server.server_close();thread.join()
  def test_relay_reasoning_native_protocol_omits_unsupported_sampling(self):
   from agent_runtime.benchmark_transport import complete,encode
@@ -44,12 +44,12 @@ class RelayTests(unittest.TestCase):
   class Response:
    def __enter__(self):return self
    def __exit__(self,*args):pass
-   def read(self,*args):return json.dumps({'model':'gpt-6-luna','choices':[{'message':{'role':'assistant','content':'fixture'},'finish_reason':'stop'}],'usage':{'prompt_tokens':1,'completion_tokens':1}}).encode()
+   def read(self,*args):return json.dumps({'model':'gpt-6-luna','status':'completed','output':[{'type':'message','role':'assistant','content':[{'type':'output_text','text':'fixture'}]}],'usage':{'input_tokens':1,'output_tokens':1,'total_tokens':2}}).encode()
   class Opener:
    def open(self,request,**kwargs):captured.append(json.loads(request.data));return Response()
   with patch('agent_runtime.model_network.provider_opener',return_value=Opener()):
    complete(AizexClient(KEY),encode([{'role':'user','content':'fixture'}],temperature=0,seed=1),128)
-  self.assertNotIn('temperature',captured[0]);self.assertNotIn('seed',captured[0]);self.assertEqual(captured[0]['reasoning_effort'],'minimal')
+  self.assertNotIn('temperature',captured[0]);self.assertNotIn('seed',captured[0]);self.assertEqual(captured[0]['reasoning']['effort'],'minimal')
  def test_keys_cannot_change_origin_by_metadata_edit(self):
   b=MultiModelBroker(TOKEN);b.save_profile({'id':'p','label':'test','provider':'openai','model':'gpt-4.1-mini','key':KEY})
   with self.assertRaises(ValueError):b.save_profile({'id':'p','label':'test','provider':'aizex','model':'gpt-6-luna'})
@@ -68,6 +68,14 @@ class RelayTests(unittest.TestCase):
   upstream.busy=1
   with self.assertRaises(ModelError):b.select_profile({'id':'old'})
   b.close()
+ @unittest.skipUnless(__import__('os').name=='posix','private metadata uses Unix owner permissions')
+ def test_restart_does_not_fall_back_from_lost_local_key(self):
+  from pathlib import Path
+  with tempfile.TemporaryDirectory() as tmp:
+   path=Path(tmp)/'selection.json';upstream=Upstream();b=FederatedProfiles(TOKEN,upstream=upstream,legacy_client=upstream,selection_path=path)
+   b.save_profile({'id':'local','label':'relay','provider':'aizex','model':'gpt-6-luna','key':KEY});b.select_profile({'id':'local'});b.close()
+   self.assertEqual(json.loads(path.read_text()),{'selected':'local'});self.assertNotIn(KEY,path.read_text())
+   after=FederatedProfiles(TOKEN,upstream=upstream,legacy_client=upstream,selection_path=path);self.assertIsNone(after.selected);self.assertFalse(after.status()['configured']);after.close()
  def test_upstream_bound_call_avoids_nested_paid_submission(self):
   c=BrokerClient(TOKEN,FEDERATED_BROKER_URL)
   with patch.object(c,'profiles_info',return_value={'profiles':Upstream().profiles_info()['profiles'][1:][0:1]}) as info:
