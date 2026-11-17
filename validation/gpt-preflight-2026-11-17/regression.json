@@ -1,0 +1,11 @@
+{
+  "tests_run": 363,
+  "passed": 361,
+  "skipped": 2,
+  "supplier_requests_in_regression": 0,
+  "real_pilot_attempts": 1,
+  "real_pilot_succeeded": false,
+  "real_pilot_usage_available": false,
+  "network_blocked": true,
+  "temporary_egress_active": false
+}
