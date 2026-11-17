@@ -249,7 +249,7 @@ class Controller:
                 states, completed_events = run(tasks, workers, 75, output_dir=job['directory'], policy=policy,
                                 cgroup_root=self.cgroup_root, cancel_event=job['cancel'], quiet=True,
                                 budget=budget,observer=observe,control=job['_control'],
-                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model)
+                                agents=agent_specs if preset=='agents' else None,model_budget=model_budget,workspace=project_workspace,context_mode=context_mode,output_observer=output,memory_repository=self.memory,model_client=workflow_model,model_task_timeout=(workflow_model.timeout+20 if provider_info.get('provider')=='aizex' else None))
                 for e in completed_events:
                     phase=e.get('result',{}).get('result',{})
                     if isinstance(phase,dict) and phase.get('phase') in ('baseline','correction','verified_delivery','unresolved'):

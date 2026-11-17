@@ -69,7 +69,7 @@ def main():
             value=native_complete(client,messages,request['max_tokens'])
         else:
             value=stream_complete(client,messages,request['max_tokens'],callback) if callback else client._complete_direct(messages,request['max_tokens'])
-    except ModelError as exc:value={'error':str(exc)}
+    except ModelError as exc:value={'error':str(exc),'error_code':exc.code}
     except Exception:value={'error':'模型代理子进程请求失败'}
     sys.stdout.write(json.dumps(value,ensure_ascii=False))
 

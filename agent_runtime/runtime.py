@@ -135,8 +135,13 @@ def validate(tasks):
 
 def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
         policy='resource_fit', cgroup_root=None, max_tasks=100, cancel_event=None, quiet=False, observer=None,
-        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None):
+        agents=None, control=None, model_budget=None, workspace=None,context_mode='balanced',worker_backend='auto',output_observer=None,context_compression_level=9,memory_repository=None,worker_session=None,model_client=None,model_task_timeout=None):
     validate(tasks)
+    if model_task_timeout is not None and (type(model_task_timeout) not in (int,float) or not math.isfinite(model_task_timeout) or not 1<=model_task_timeout<=180):raise ValueError('Invalid trusted model task deadline')
+    def bound_model_task(task):
+        if model_task_timeout is None or task.get('action')!='llm':return task
+        return dict(task,timeout=max(task.get('timeout',timeout),model_task_timeout*(1+task.get('continuation_limit',0))))
+    tasks=[bound_model_task(t) for t in tasks]
     if model_client is not None and not callable(getattr(model_client,'complete',None)):raise ValueError('Invalid model client')
     if context_mode not in ('balanced','full'):raise ValueError('上下文策略无效')
     if (type(max_workers) is not int or max_workers < 1 or isinstance(timeout,bool)
@@ -401,6 +406,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                             gateway.output_observer=output_observer
                             gateway.memory_repository=memory_repository
                         payload['_gateway_url'] = gateway.url
+                        payload['_gateway_timeout'] = min(180,max(65,float(gateway.client.timeout)+10))
                         payload['_gateway_token'] = gateway.issue(agent,stream_key=key if output_observer and task.get('action')=='llm' and key in ('auto_answer','assistant','review') else None)
                     except ModelError as exc:
                         if broker:broker.revoke(payload.get('_ipc_token'))
@@ -484,6 +490,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
                         store.label_source(output_ref,{'task_id':key,'agent':task.get('agent',key),'action':task.get('action','echo'),
                             'attempt':attempts[key],'kind':'model_claim' if task.get('action')=='llm' else 'tool_observation' if task.get('action') in ('plugin','project_validate','project_baseline') else 'task_output'})
                         children = result.get('spawn', [])
+                        if isinstance(children,list):children=[bound_model_task(child) if isinstance(child,dict) else child for child in children]
                         if not isinstance(children, list) or len(tasks) + len(children) > max_tasks:
                             raise ValueError('动态任务批次超过限制')
                         if children:
@@ -529,7 +536,7 @@ def run(tasks, max_workers=2, timeout=10, *, output_dir=None, budget=None,
             # Reconsider a changed DAG immediately. Otherwise Linux pidfds wake
             # us on process exit, with a bounded fallback for control/cancel and
             # unsupported platforms. Cleanup still owns every budget release.
-            if len(events)==cycle_sequence:completion.wait(.02)
+            if len(events)==cycle_sequence:completion.wait(.1 if completion.files and not completion.stats['fallback_registrations'] else .02)
     except BaseException:
         execution_failed=True
         raise

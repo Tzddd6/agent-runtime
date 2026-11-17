@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "seconds": 1.1121151820007071,
+      "coordinator_cpu_seconds": 0.01600252699999999,
+      "iterations": 52,
+      "waits": 50,
+      "exit_wakeups": 2
+    },
+    {
+      "seconds": 1.0493162379989371,
+      "coordinator_cpu_seconds": 0.012212670000000009,
+      "iterations": 52,
+      "waits": 50,
+      "exit_wakeups": 2
+    },
+    {
+      "seconds": 1.046713492998606,
+      "coordinator_cpu_seconds": 0.01223748799999999,
+      "iterations": 50,
+      "waits": 48,
+      "exit_wakeups": 1
+    }
+  ],
+  "supplier_calls": 0,
+  "all_replies_identical": true,
+  "fixed_provider_seconds": 1
+}

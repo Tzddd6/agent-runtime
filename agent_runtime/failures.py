@@ -24,6 +24,8 @@ def failure(code):
 
 def model_code(error):
     # Error text is inspected, never returned. Arbitrary clients may include secrets.
+    code=getattr(error,'code',None)
+    if code in ('MODEL_TIMEOUT','MODEL_UPSTREAM_FAILED','MODEL_BUDGET_EXHAUSTED','MODEL_TRANSPORT_FAILED'):return code
     message=str(error).lower()
     if any(s in message for s in ('预算','budget','槽位')):return 'MODEL_BUDGET_EXHAUSTED'
     if '连接失败或超时' in message:return 'MODEL_UPSTREAM_FAILED'

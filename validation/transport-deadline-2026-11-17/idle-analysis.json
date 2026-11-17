@@ -1,0 +1,24 @@
+{
+  "supplier_calls": 0,
+  "fixed_reply_identical": true,
+  "sample_count_each": 3,
+  "provider_wait_seconds": 1,
+  "baseline": {
+    "seconds": 1.0493162379989371,
+    "coordinator_cpu_seconds": 0.01223748799999999,
+    "iterations": 52,
+    "waits": 50
+  },
+  "candidate": {
+    "seconds": 1.052066101001401,
+    "coordinator_cpu_seconds": 0.007884542000000008,
+    "iterations": 14,
+    "waits": 12
+  },
+  "limits": [
+    "Three samples in sequential arm blocks, not randomized confidence intervals",
+    "CPU is coordinator process CPU, not total model service or machine resources",
+    "pidfd wakeup remains immediate; human control fallback bounded at100ms; non-pidfd fallback stays20ms"
+  ],
+  "coordinator_cpu_reduction": 0.3557058442059339
+}

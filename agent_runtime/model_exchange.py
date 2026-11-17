@@ -12,7 +12,7 @@ def complete(task,messages):
         req=urllib.request.Request(task['_gateway_url'],data=json.dumps({'messages':current,'max_tokens':task.get('max_tokens',4096),'thinking':task.get('thinking',False)},ensure_ascii=False).encode(),headers={'Authorization':'Bearer '+task['_gateway_token'],'Content-Type':'application/json'})
         try:
             opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),LocalNoRedirect())
-            with opener.open(req,timeout=65) as response:return json.load(response)
+            with opener.open(req,timeout=task.get('_gateway_timeout',65)) as response:return json.load(response)
         except urllib.error.HTTPError as exc:
             try:body=json.loads(exc.read(8192))
             except (ValueError,OSError):body={}

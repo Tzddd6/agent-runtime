@@ -105,7 +105,8 @@ def execute_case(case,arm,client,invoke,repeat):
  return {'repeat':repeat,'case':case['id'],'arm':arm,'seconds':time.monotonic()-start,'coordinator_cpu_seconds':time.process_time()-cpu,'passed':passed,'request_hashes':[r['request_sha256'] for r in attempts],'calls':len(attempts),'usage':{k:sum(r['usage'][k] for r in records) for k in ('prompt_tokens','completion_tokens')},'usage_unknown_calls':sum('usage' not in r for r in attempts),'broker_seconds':sum(r.get('transport_timings',{}).get('broker_seconds',0) for r in records),'provider_seconds':sum(r.get('provider_seconds') or 0 for r in records),'case_error_type':error_type}
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--aizex',action='store_true',help='Explicitly use Aizex gpt-6-luna and the user-supplied published nominal token prices');p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--live',action='store_true');p.add_argument('--profile');p.add_argument('--aizex',action='store_true',help='Explicitly use Aizex gpt-6-luna and the user-supplied published nominal token prices');p.add_argument('--limit-usd',type=float,default=.05);p.add_argument('--output',type=Path,required=True);p.add_argument('--repeats',type=int,default=2);a=p.parse_args()
+ if not 0<a.limit_usd<=.05:p.error('Spend limit must be positive and at most0.05 nominalUSD')
  if a.repeats!=2:p.error('This small preflight has exactly two repetitions (16 calls total)')
  a.output.mkdir(mode=0o700,parents=True,exist_ok=False)
  if a.live:
@@ -116,11 +117,11 @@ def main():
  else:c=Fixture()
  from agent_runtime.runtime import run
  from agent_runtime.worker_session import WorkerSession
- ledger=Ledger(a.output/'ledger.json',**({'input_price':.1,'output_price':.5,'price_source':'User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored'} if a.aizex else {}));client=Measured(c,ledger);rows=[]
+ ledger=Ledger(a.output/'ledger.json',limit=a.limit_usd,**({'input_price':.1,'output_price':.5,'price_source':'User-provided Aizex pricing screenshot 2026-11-17; nominal USD/million tokens; discounts ignored'} if a.aizex else {}));client=Measured(c,ledger);rows=[]
  with WorkerSession(a.output/'runs') as session:
   def call(arm,messages):
    if arm=='direct':return client.complete(messages,256)['content']
-   states,events=run([{'id':'model','action':'llm','messages':messages,'max_tokens':256,'timeout':65}],quiet=True,output_dir=a.output/'runs',worker_session=session,model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),model_budget={'calls':1,'output_tokens':256})
+   states,events=run([{'id':'model','action':'llm','messages':messages,'max_tokens':256,'timeout':120}],quiet=True,output_dir=a.output/'runs',worker_session=session,model_client=client,cgroup_root=os.environ.get('AGENTRT_TEST_CGROUP'),model_budget={'calls':1,'output_tokens':256})
    if states['model']!='succeeded':raise ValueError('Runtime execution failed; no paid retry')
    return next(e['result']['result'] for e in events if e['state']=='succeeded')
   try:

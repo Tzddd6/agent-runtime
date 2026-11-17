@@ -120,10 +120,12 @@ class ModelBroker:
                 encoded=json.dumps(result,ensure_ascii=False).encode()
                 if len(encoded)>2*MAX_BYTES:raise ModelError('Model response exceeds broker limit')
                 final='cancelled' if cancel.is_set() else 'succeeded'
-            except Exception:
+            except Exception as exc:
                 # An arbitrary injected client exception may contain secrets.
                 # Do not retain its text, traceback, prompt, headers, or key.
                 result={'error':'Model call cancelled or failed; remote billing state may be unknown'}
+                code=getattr(exc,'code',None)
+                if isinstance(exc,ModelError) and isinstance(code,str) and code in ('MODEL_TIMEOUT','MODEL_UPSTREAM_FAILED','MODEL_BUDGET_EXHAUSTED','MODEL_TRANSPORT_FAILED'):result['error_code']=code
                 final='cancelled' if cancel.is_set() else 'failed'
             finally:
                 if entered:self.slots.release()
@@ -223,6 +225,7 @@ class BrokerClient:
         self.token,self.url=token,url
         self.model,self.timeout='deepseek-flash',40
         self.cancel_event=None
+        self._transport_state=threading.local()
         self.supports_stream_callbacks=os.environ.get('AGENTRT_PROVIDER_STREAMING')=='1'
 
     @classmethod
@@ -234,7 +237,10 @@ class BrokerClient:
         data=None if body is None else json.dumps(body,ensure_ascii=False).encode()
         request=urllib.request.Request(self.url+path,data=data,headers=headers)
         try:
-            with urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()).open(request,timeout=2) as response:
+            opener=getattr(self._transport_state,'opener',None)
+            if opener is None:
+                opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect());self._transport_state.opener=opener
+            with opener.open(request,timeout=2) as response:
                 raw=response.read(2*MAX_BYTES+2049)
             if len(raw)>2*MAX_BYTES+2048:raise ModelError('Broker response exceeds limit')
             return json.loads(raw)
@@ -259,7 +265,7 @@ class BrokerClient:
             if model is not None and model!=row['model']:raise ModelError('API profile model changed before workflow admission')
             client.profile_revision=row['revision'];model=row['model']
             if self.url==FEDERATED_BROKER_URL and row.get('upstream') is True:client.url=MULTI_BROKER_URL
-            if row.get('provider')=='aizex':client.timeout=55
+            if row.get('provider')=='aizex':client.timeout=100
         if not(identity=='legacy' and self.url==BROKER_URL):client.profile_id=identity
         if model is not None:client.model=model
         return client
@@ -305,9 +311,9 @@ class BrokerClient:
                         'completion_detection_seconds':max(0,time.time()-call['finished']),
                         'status_reads':reads}
                     return result
-                if call['status'] not in ACTIVE:raise ModelError('Model broker call failed or cancelled; remote billing state unknown')
+                if call['status'] not in ACTIVE:raise ModelError('Model broker call failed or cancelled; remote billing state unknown',code=call.get('result',{}).get('error_code'))
                 if self.url!=FEDERATED_BROKER_URL:time.sleep(.05)
-            raise ModelError('Model broker deadline exceeded; remote billing state unknown')
+            raise ModelError('Model broker deadline exceeded; remote billing state unknown',code='MODEL_TIMEOUT')
         except BaseException:
             try:self._request('/calls/'+identity+'/cancel',{})
             except ModelError:pass

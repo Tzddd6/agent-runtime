@@ -79,6 +79,7 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     request=urllib.request.Request(client.base+'/responses',data=raw,headers={'Authorization':'Bearer '+client.key,'Content-Type':'application/json'})
     from .transport_trace import Trace
     trace=Trace();trace.emit('request_start');events_seen=0;callbacks=0;wire_seen=False;text_seen=False
+    callback_opener=urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()) if callback else None
     started=time.monotonic();last=0.;pending=[];enabled=True;response_value=None
     def emit(force=False):
         nonlocal last,enabled,callbacks
@@ -86,7 +87,7 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
         delta=''.join(pending);pending.clear();last=time.monotonic()
         q=urllib.request.Request(callback['url'],data=json.dumps({'delta':delta},ensure_ascii=False).encode(),headers={'Authorization':'Bearer '+callback['token'],'Content-Type':'application/json'})
         try:
-            with urllib.request.build_opener(urllib.request.ProxyHandler({}),NoRedirect()).open(q,timeout=.5) as r:r.read(128)
+            with callback_opener.open(q,timeout=.5) as r:r.read(128)
             callbacks+=1
         except OSError:enabled=False;pending.clear();trace.emit('callback_rejected')
     try:
@@ -126,6 +127,9 @@ def complete(client,messages,max_tokens,callback=None,*,native_value=None):
     except urllib.error.HTTPError as exc:
         trace.emit('http_error',status=exc.code)
         raise ModelError('Relay Responses HTTP '+str(exc.code)+'; no retry') from None
+    except (TimeoutError,urllib.error.URLError) as exc:
+        trace.emit('transport_error')
+        raise ModelError('Relay transport timeout or connection failure; billing unknown',code='MODEL_TIMEOUT' if isinstance(exc,TimeoutError) or isinstance(getattr(exc,'reason',None),TimeoutError) else 'MODEL_UPSTREAM_FAILED') from None
     except (OSError,ValueError,KeyError,TypeError):
         trace.emit('transport_error')
         raise ModelError('Relay Responses failed; billing state unknown; no retry') from None

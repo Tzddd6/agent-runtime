@@ -28,8 +28,12 @@ def public_timings(value):
             ('client_seconds','broker_seconds','completion_detection_seconds','status_reads') if key in value}
 
 
+MODEL_ERROR_CODES={'MODEL_TIMEOUT','MODEL_UPSTREAM_FAILED','MODEL_BUDGET_EXHAUSTED','MODEL_TRANSPORT_FAILED'}
 class ModelError(RuntimeError):
-    pass
+    def __init__(self,message,*,code=None):
+        super().__init__(message)
+        self.code=code if isinstance(code,str) and code in MODEL_ERROR_CODES else None
+
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -96,7 +100,7 @@ class DeepSeekClient:
                     raise ModelError('本地模型调用已取消；远端计算与计费状态未知')
                 remaining=deadline-time.monotonic()
                 if remaining<=0:
-                    raise ModelError('模型调用超过绝对总期限；远端计算与计费状态未知')
+                    raise ModelError('模型调用超过绝对总期限；远端计算与计费状态未知',code='MODEL_TIMEOUT')
                 try:
                     raw,_=proc.communicate(input=wire if first else None,timeout=min(.1,remaining))
                     break
@@ -105,7 +109,7 @@ class DeepSeekClient:
             if proc.returncode!=0 or len(raw)>2*MAX_BYTES:
                 raise ModelError('模型代理子进程失败或响应超过限制')
             value=json.loads(raw)
-            if 'error' in value:raise ModelError(value['error'])
+            if 'error' in value:raise ModelError(value['error'],code=value.get('error_code'))
             return value
         except (OSError,ValueError):
             raise ModelError('模型代理通信失败') from None
@@ -190,7 +194,7 @@ class AizexClient(OpenAIClient):
     provider='aizex'
     official_base='https://ca.memofun.net/v1'
 
-    def __init__(self,key,model='gpt-6-luna',timeout=45,base='https://ca.memofun.net/v1',*,local_test=False):
+    def __init__(self,key,model='gpt-6-luna',timeout=90,base='https://ca.memofun.net/v1',*,local_test=False):
         super().__init__(key,model,timeout,base,local_test=local_test)
 
     def _complete_direct(self,messages,max_tokens=256):

@@ -21,6 +21,27 @@ class WaitTests(unittest.TestCase):
    self.assertEqual(r['status'],'succeeded');self.assertGreater(elapsed,.06);self.assertLess(elapsed,.5)
    with self.assertRaises(ValueError):b.detail(accepted['call_id'],.9)
   finally:b.close();server.shutdown();server.server_close();t.join()
+ def test_http_handlers_reused_per_thread_not_across_threads(self):
+  import io,json
+  from unittest.mock import patch
+  owners=[]
+  class Response(io.BytesIO):
+   def __enter__(self):return self
+   def __exit__(self,*args):self.close()
+  class Opener:
+   def __init__(self):self.owner=threading.get_ident();owners.append(self.owner)
+   def open(self,*args,**kwargs):
+    if threading.get_ident()!=self.owner:raise AssertionError('cross-thread opener')
+    return Response(b'{"configured":true}')
+  c=BrokerClient(TOKEN,FEDERATED_BROKER_URL)
+  with patch('urllib.request.build_opener',side_effect=lambda *args:Opener()) as build:
+   c.status();c.status();self.assertEqual(build.call_count,1)
+   errors=[]
+   def request():
+    try:c.status();c.status()
+    except BaseException as e:errors.append(type(e).__name__)
+   t=threading.Thread(target=request);t.start();t.join()
+   self.assertFalse(errors);self.assertEqual(build.call_count,2)
  def test_new_client_uses_wait_only_for_new_protocol_port(self):
   c=BrokerClient(TOKEN,FEDERATED_BROKER_URL);c.profile_id='fixture';paths=[]
   def request(path,body=None):
