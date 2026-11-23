@@ -1,0 +1,81 @@
+{
+  "timestamp": "2026-11-23 18:11:14",
+  "priority_1_queue_and_3way_baseline": {
+    "queue_wait": {
+      "local_batch_20ms": {
+        "calls": 20,
+        "avg_wait_ms": 30.437,
+        "median_wait_ms": 30.79,
+        "max_wait_ms": 31.35,
+        "wall_seconds": 0.7305,
+        "throughput_calls_per_sec": 27.38
+      },
+      "cloud_api_path": {
+        "calls": 20,
+        "avg_wait_ms": 0.083,
+        "median_wait_ms": 0.077,
+        "max_wait_ms": 0.188,
+        "wall_seconds": 0.1696,
+        "throughput_calls_per_sec": 117.9
+      }
+    },
+    "three_way_baseline": {
+      "total_calls": 24,
+      "simulated_provider_io_ms": 10.0,
+      "bare_direct_sequential": {
+        "wall_seconds": 0.2475,
+        "throughput_calls_per_sec": 96.97,
+        "peak_py_memory_kib": 2.0
+      },
+      "bare_direct_concurrent_8": {
+        "wall_seconds": 0.0328,
+        "throughput_calls_per_sec": 730.81,
+        "peak_py_memory_kib": 86.4
+      },
+      "resident_kernel_sequential": {
+        "wall_seconds": 0.2537,
+        "overhead_vs_bare_seq_percent": 2.51,
+        "throughput_calls_per_sec": 94.59,
+        "peak_py_memory_kib": 95.6
+      },
+      "resident_kernel_concurrent_8": {
+        "wall_seconds": 0.036,
+        "overhead_vs_bare_conc_8_percent": 9.66,
+        "speedup_vs_bare_seq": 6.87,
+        "throughput_calls_per_sec": 666.43,
+        "peak_py_memory_kib": 258.8
+      }
+    }
+  },
+  "priority_2_resident_task_scope": {
+    "tasks": 8,
+    "cold_start_per_task_sec": 0.8587,
+    "resident_task_scope_seq_sec": 0.365,
+    "resident_task_scope_conc_sec": 0.1694,
+    "speedup_resident_seq_vs_cold": 2.35,
+    "speedup_resident_conc_vs_cold": 5.07,
+    "zero_residual_after_exit": true
+  },
+  "priority_3_context_control": {
+    "scope": "synthetic_char_count_not_real_tokenizer",
+    "naive_input_chars": 28081,
+    "optimized_input_chars": 4391,
+    "synthetic_char_reduction_percent": 84.36,
+    "constraints_preserved": true
+  },
+  "priority_4_validation_and_parallel_tools": {
+    "invalid_param_rejected_locally": true,
+    "wasted_kernel_syscalls_on_invalid_params": 0,
+    "serial_3_readonly_tools_sec": 0.3655,
+    "parallel_3_readonly_tools_sec": 0.1361,
+    "parallel_tool_speedup": 2.68,
+    "all_parallel_succeeded": true
+  },
+  "priority_5_recovery_and_log_decoupling": {
+    "task_survived_broken_log_pipe": true,
+    "dropped_logs_safely_absorbed": 3,
+    "uncertain_failure_status_code": 500,
+    "provider_calls_on_uncertain_failure": 1,
+    "zero_duplicate_retries_verified": true
+  }
+}

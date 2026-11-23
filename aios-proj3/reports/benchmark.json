@@ -1,0 +1,49 @@
+{
+  "scenario": "AIOS FIFO vs RR Time-Slicing & Context Deduplication/Gzip",
+  "medians": {
+    "fifo": {
+      "wall_seconds": 0.253032,
+      "long_query_slices": 1.0,
+      "context_saving_ratio": 0.9746
+    },
+    "rr": {
+      "wall_seconds": 0.123194,
+      "long_query_slices": 3.0,
+      "context_saving_ratio": 0.9746
+    }
+  },
+  "samples": [
+    {
+      "repeat": 0,
+      "policy": "fifo",
+      "wall_seconds": 0.320491,
+      "long_query_slices": 1,
+      "short_query_wait_sec": 0.060731,
+      "context_saving_ratio": 0.9746
+    },
+    {
+      "repeat": 0,
+      "policy": "rr",
+      "wall_seconds": 0.123875,
+      "long_query_slices": 3,
+      "short_query_wait_sec": 3.9e-05,
+      "context_saving_ratio": 0.9746
+    },
+    {
+      "repeat": 1,
+      "policy": "rr",
+      "wall_seconds": 0.122514,
+      "long_query_slices": 3,
+      "short_query_wait_sec": 3.9e-05,
+      "context_saving_ratio": 0.9746
+    },
+    {
+      "repeat": 1,
+      "policy": "fifo",
+      "wall_seconds": 0.185572,
+      "long_query_slices": 1,
+      "short_query_wait_sec": 0.06199,
+      "context_saving_ratio": 0.9746
+    }
+  ]
+}

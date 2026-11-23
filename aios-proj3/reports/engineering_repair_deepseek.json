@@ -1,0 +1,44 @@
+{
+  "benchmark": "AIOS Controlled 3-Project Engineering Repair (7-Stage Isolated Verification)",
+  "host": "NUC (openEuler 24.03 SP4, Linux 6.6.0-159.4.20.174.oe2403sp4.x86_64, Python 3.11.6)",
+  "runtime": "AIOS Formal Kernel + NativeConsole + Isolated Python Worker",
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 17:34:11",
+  "summary": {
+    "projects_evaluated": 3,
+    "projects_passed": 3,
+    "pass_rate": 1.0,
+    "score_percent": 100.0,
+    "total_kernel_syscalls": 18,
+    "wall_seconds": 4.89
+  },
+  "projects": [
+    {
+      "project": "pricing",
+      "passed": true,
+      "status": "succeeded",
+      "verified": true,
+      "artifact_readback_verified": true,
+      "seconds": 1.98,
+      "budget_used": {"calls": 1, "output_tokens": 4096}
+    },
+    {
+      "project": "intervals",
+      "passed": true,
+      "status": "succeeded",
+      "verified": true,
+      "artifact_readback_verified": true,
+      "seconds": 1.39,
+      "budget_used": {"calls": 1, "output_tokens": 4096}
+    },
+    {
+      "project": "text_normalization",
+      "passed": true,
+      "status": "succeeded",
+      "verified": true,
+      "artifact_readback_verified": true,
+      "seconds": 1.34,
+      "budget_used": {"calls": 1, "output_tokens": 4096}
+    }
+  ]
+}

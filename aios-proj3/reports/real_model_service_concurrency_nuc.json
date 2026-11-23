@@ -1,0 +1,23 @@
+{
+  "benchmark": "Real Cloud API (deepseek-chat) Concurrency: Bare HTTPS vs AIOS Kernel + RAM-Only ModelService",
+  "host": "NUC (openEuler 24.03 SP4, Linux 6.6.0-159.4.20.174.oe2403sp4.x86_64, Python 3.11.6)",
+  "calls_per_mode": 4,
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 18:32:33",
+  "bare_https_concurrent_4": {
+    "wall_seconds": 1.322,
+    "avg_call_seconds": 1.283,
+    "throughput_calls_per_sec": 3.02
+  },
+  "aios_kernel_model_service_sequential_4": {
+    "wall_seconds": 5.476,
+    "avg_queue_wait_ms": 0.222,
+    "throughput_calls_per_sec": 0.73
+  },
+  "aios_kernel_model_service_concurrent_4": {
+    "wall_seconds": 4.916,
+    "avg_queue_wait_ms": 1.287,
+    "throughput_calls_per_sec": 0.81,
+    "note": "ModelService uses a single isolated process pipe protected by self.lock for RAM-only key isolation, so concurrent ModelService calls serialize at the pipe boundary."
+  }
+}

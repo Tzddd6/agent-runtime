@@ -1,0 +1,42 @@
+{
+  "timestamp": "2026-11-23 17:48:56",
+  "queue_wait_benchmark": {
+    "local_batch_20ms": {
+      "calls": 20,
+      "avg_wait_ms": 30.392,
+      "median_wait_ms": 30.99,
+      "max_wait_ms": 31.699,
+      "wall_seconds": 0.7423,
+      "throughput_calls_per_sec": 26.94
+    },
+    "cloud_api_path": {
+      "calls": 20,
+      "avg_wait_ms": 0.082,
+      "median_wait_ms": 0.079,
+      "max_wait_ms": 0.136,
+      "wall_seconds": 0.1694,
+      "throughput_calls_per_sec": 118.03
+    }
+  },
+  "three_way_baseline": {
+    "total_calls": 24,
+    "simulated_provider_io_ms": 10.0,
+    "bare_direct_no_kernel": {
+      "wall_seconds": 0.2481,
+      "throughput_calls_per_sec": 96.75,
+      "peak_py_memory_kib": 2.0
+    },
+    "resident_kernel_sequential": {
+      "wall_seconds": 0.2535,
+      "overhead_vs_bare_percent": 2.2,
+      "throughput_calls_per_sec": 94.66,
+      "peak_py_memory_kib": 92.1
+    },
+    "resident_kernel_concurrent_8": {
+      "wall_seconds": 0.0363,
+      "speedup_vs_bare": 6.84,
+      "throughput_calls_per_sec": 662.0,
+      "peak_py_memory_kib": 261.0
+    }
+  }
+}

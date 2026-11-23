@@ -1,0 +1,75 @@
+{
+  "timestamp": "2026-11-23 19:39:21",
+  "host": "NUC openEuler 24.03 SP4 (Linux 6.6.0-159.4.20.174.oe2403sp4.x86_64, Python 3.11.6)",
+  "nuc_regression": {
+    "tests_passed": 74,
+    "tests_total": 74,
+    "tests_skipped": 0,
+    "validate_linux_cpu_core_ratio": 0.2032,
+    "validate_linux_nr_throttled": 21,
+    "validate_linux_zero_orphan_cgroups": true,
+    "resident_worker_unix_socket_verified": true
+  },
+  "concurrent_model_service": {
+    "benchmark": "Real Cloud API (deepseek-chat) Concurrency: Bare HTTPS vs AIOS Kernel + Multiplexed RAM-Only ModelService",
+    "calls_per_mode": 4,
+    "model": "deepseek-chat",
+    "timestamp": "2026-11-23 19:36:21",
+    "before_fix_single_pipe_lock_concurrent_4_wall_seconds": 4.916,
+    "bare_https_concurrent_4": {
+      "wall_seconds": 1.05,
+      "avg_call_seconds": 0.91,
+      "throughput_calls_per_sec": 3.81
+    },
+    "aios_kernel_model_service_sequential_4": {
+      "wall_seconds": 2.804,
+      "avg_queue_wait_ms": 0.234,
+      "throughput_calls_per_sec": 1.43
+    },
+    "aios_kernel_model_service_concurrent_4": {
+      "wall_seconds": 0.542,
+      "avg_queue_wait_ms": 2.171,
+      "throughput_calls_per_sec": 7.38,
+      "speedup_vs_sequential": 5.17,
+      "speedup_vs_before_fix": 9.07,
+      "note": "ModelService uses request-ID multiplexed IPC with an internal ThreadPoolExecutor(max_workers=16) inside the isolated key-holding process, enabling true multi-agent concurrency without leaking supplier keys."
+    }
+  },
+  "tau2_real_p2_p3_rss": {
+    "cold_uncompacted": {
+      "mode": "cold_per_task_uncompacted",
+      "tasks": 6,
+      "passed": 5,
+      "pass_rate": 0.8333,
+      "wall_seconds": 90.12,
+      "total_llm_calls": 66,
+      "agent_prompt_tokens": 166120,
+      "avg_prompt_tokens_per_call": 2517.0,
+      "agent_completion_tokens": 4168,
+      "total_tokens": 184240,
+      "rss_before_kib": 61164,
+      "rss_after_kib": 85124,
+      "vm_hwm_peak_kib": 87760,
+      "zero_residual": true
+    },
+    "resident_compacted": {
+      "mode": "resident_task_scope_and_p3_compacted",
+      "tasks": 6,
+      "passed": 5,
+      "pass_rate": 0.8333,
+      "wall_seconds": 88.91,
+      "total_llm_calls": 77,
+      "agent_prompt_tokens": 185708,
+      "avg_prompt_tokens_per_call": 2411.8,
+      "agent_completion_tokens": 4204,
+      "total_tokens": 206960,
+      "rss_before_kib": 66412,
+      "rss_after_kib": 86956,
+      "vm_hwm_peak_kib": 88016,
+      "zero_residual": true
+    },
+    "per_call_prompt_token_reduction_percent": 4.18,
+    "wall_time_delta_percent": -1.34,
+    "peak_rss_delta_mib": 0.25
+  }
+}

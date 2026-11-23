@@ -1,0 +1,25 @@
+{
+  "scenario": "App-Layer Full-Copy Serial Baseline vs. AIOS Kernel (8 consumers, 20268B shared context)",
+  "timestamp": "2026-11-23 17:40:13",
+  "app_layer_baseline": {
+    "wall_seconds": 0.3235,
+    "ipc_wire_bytes": 162616,
+    "context_storage_bytes": 162144,
+    "healthy_branch_survival_under_fault": "0/6",
+    "cascading_abort": true
+  },
+  "aios_kernel": {
+    "wall_seconds": 0.2538,
+    "ipc_wire_bytes": 864,
+    "context_storage_bytes": 1285,
+    "dedup_hits": 7,
+    "healthy_branch_survival_under_fault": "6/6",
+    "fault_downstream_isolated": "2/2",
+    "cascading_abort": false
+  },
+  "improvements": {
+    "wall_speedup": 1.27,
+    "ipc_wire_reduction_percent": 99.47,
+    "context_storage_reduction_percent": 99.21
+  }
+}

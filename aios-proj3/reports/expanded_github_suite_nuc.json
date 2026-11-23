@@ -1,0 +1,153 @@
+{
+  "timestamp": "2026-11-23 20:39:24",
+  "model": "deepseek-chat",
+  "host_platform": "linux",
+  "aios_concurrency_200": {
+    "attribution": "PURE_RUNTIME_CAPABILITY",
+    "levels": [
+      {
+        "concurrent_agents": 5,
+        "passed": 5,
+        "success_rate": 1.0,
+        "wall_seconds": 0.0221,
+        "throughput_req_per_sec": 226.31,
+        "avg_wait_ms": 20.02
+      },
+      {
+        "concurrent_agents": 10,
+        "passed": 10,
+        "success_rate": 1.0,
+        "wall_seconds": 0.0234,
+        "throughput_req_per_sec": 427.99,
+        "avg_wait_ms": 20.229
+      },
+      {
+        "concurrent_agents": 20,
+        "passed": 20,
+        "success_rate": 1.0,
+        "wall_seconds": 0.0241,
+        "throughput_req_per_sec": 828.41,
+        "avg_wait_ms": 18.455
+      },
+      {
+        "concurrent_agents": 50,
+        "passed": 50,
+        "success_rate": 1.0,
+        "wall_seconds": 0.0272,
+        "throughput_req_per_sec": 1836.62,
+        "avg_wait_ms": 17.727
+      },
+      {
+        "concurrent_agents": 100,
+        "passed": 100,
+        "success_rate": 1.0,
+        "wall_seconds": 0.0522,
+        "throughput_req_per_sec": 1916.28,
+        "avg_wait_ms": 18.118
+      },
+      {
+        "concurrent_agents": 200,
+        "passed": 200,
+        "success_rate": 1.0,
+        "wall_seconds": 0.1075,
+        "throughput_req_per_sec": 1860.49,
+        "avg_wait_ms": 21.46
+      }
+    ],
+    "mem_kib": {
+      "vm_rss_kib": 41584,
+      "vm_hwm_kib": 42552
+    }
+  },
+  "bfcl_v4_parallel_30": {
+    "benchmark": "ShishirPatil/gorilla BFCL_v4_parallel",
+    "tasks": 30,
+    "model_capability": {
+      "passed": 25,
+      "accuracy": 0.8333
+    },
+    "runtime_value_add": {
+      "seq_6_wall_seconds": 7.66,
+      "conc_6way_30_wall_seconds": 5.94,
+      "estimated_concurrency_speedup": 6.45,
+      "avg_queue_wait_ms": 0.541,
+      "p4_local_schema_guard_blocked_invalid": true
+    }
+  },
+  "humaneval_20": {
+    "benchmark": "openai/human-eval (strided across 164)",
+    "tasks": 20,
+    "model_capability": {
+      "pass_at_1": 20,
+      "pass_at_1_rate": 1.0
+    },
+    "runtime_value_add": {
+      "repair_at_2": 20,
+      "repair_at_2_rate": 1.0,
+      "rescued_by_dynamic_round_2": 0,
+      "net_gain_percentage_points": 0.0,
+      "concurrent_4way_wall_seconds": 7.55,
+      "isolated_sandbox_zero_api_key_leak": true
+    }
+  },
+  "mbpp_20": {
+    "benchmark": "google-research/mbpp",
+    "tasks": 20,
+    "model_capability": {
+      "pass_at_1": 18,
+      "pass_at_1_rate": 0.9
+    },
+    "runtime_value_add": {
+      "repair_at_2": 18,
+      "repair_at_2_rate": 0.9,
+      "rescued_by_dynamic_round_2": 0,
+      "net_gain_percentage_points": 0.0,
+      "concurrent_4way_wall_seconds": 4.92,
+      "isolated_sandbox_zero_api_key_leak": true
+    }
+  },
+  "full_feature_matrix": {
+    "attribution": "PURE_RUNTIME_CAPABILITY",
+    "checks": {
+      "multiplexed_model_service_8way": {
+        "passed": 6,
+        "total": 8,
+        "wall_seconds": 0.96,
+        "throughput_calls_per_sec": 8.34
+      },
+      "resident_worker_af_unix_crash_recovery": {
+        "transport": "unix",
+        "pid_before": 56771,
+        "pid_after": 56773,
+        "restarted": true,
+        "exec_before_ok": true,
+        "exec_after_ok": true
+      },
+      "amem_zettelkasten_recall": {
+        "linked_1hop": true,
+        "recalled_both": true
+      },
+      "lsfs_rollback_and_traversal_guard": {
+        "rolled_back_ok": true,
+        "traversal_blocked_in_unit_test_403": true
+      },
+      "litecua_gui_snapshot_restore": {
+        "active_window": "AIOS_Code_Workspace",
+        "tree_nodes": 3,
+        "ok": true
+      },
+      "agent_hub_manifest_sandbox": {
+        "allowed_tool_ok": true,
+        "undeclared_tool_denied": true
+      },
+      "mailbox_ipc_and_acl_revocation": {
+        "received_ok": true,
+        "revoked_blocked": true
+      }
+    },
+    "mem_kib": {
+      "vm_rss_kib": 44088,
+      "vm_hwm_kib": 44128
+    }
+  }
+}

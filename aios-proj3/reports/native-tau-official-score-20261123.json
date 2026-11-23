@@ -1,0 +1,21 @@
+{
+  "benchmark": "sierra-research/tau2-bench v1.0.1 airline base",
+  "source": "d068d454aa41e6163b90f6a62d8d2580de5ef0ef",
+  "official_source": "fc0055dc4e0a316c3f83133267fbd6faaa770992",
+  "trials_per_task": 1,
+  "runtime": {
+    "passed": 37,
+    "tasks": 50,
+    "pass_1": 0.74
+  },
+  "direct": {
+    "passed": 34,
+    "tasks": 50,
+    "pass_1": 0.68
+  },
+  "official_cost_field_valid": false,
+  "known_peak_cost_cny": 2.3015925200000025,
+  "ranking": null,
+  "official_acceptance": false,
+  "note": "Scores recomputed by official compute_metrics; trajectory cost fields unset. See separate conservative CNY usage ledger."
+}

@@ -1,0 +1,130 @@
+{
+  "completed": 100,
+  "expected": 100,
+  "complete": true,
+  "failures": [],
+  "infrastructure_incidents": [
+    {
+      "type": "BrokenPipeError",
+      "no_replay": true,
+      "trial": 0,
+      "task_index": 23,
+      "arm": "runtime",
+      "task_id": "23"
+    }
+  ],
+  "ranking": null,
+  "official_acceptance": false,
+  "arms": {
+    "runtime": {
+      "completed": 50,
+      "passed": 37,
+      "success_rate_observed": 0.74,
+      "task_seconds_total": 1160.7793137939952,
+      "task_seconds_median": 21.34214377200078,
+      "coordinator_cpu_seconds": 46.89147966499999,
+      "peak_cost_or_reserved_cny": 1.1437077999999925,
+      "roles": {
+        "agent": {
+          "calls": 432,
+          "failed_calls": 0,
+          "seconds": 720.5753889720108,
+          "usage": {
+            "prompt_tokens": 3066046,
+            "completion_tokens": 60123,
+            "prompt_cache_hit_tokens": 2916340
+          },
+          "queue_wait_seconds": 21.912916660308838
+        },
+        "simulator": {
+          "calls": 291,
+          "failed_calls": 0,
+          "seconds": 394.0126545569874,
+          "usage": {
+            "prompt_tokens": 265774,
+            "completion_tokens": 12900,
+            "prompt_cache_hit_tokens": 198005
+          },
+          "queue_wait_seconds": 0
+        },
+        "judge": {
+          "calls": 0,
+          "failed_calls": 0,
+          "seconds": 0,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "prompt_cache_hit_tokens": 0
+          },
+          "queue_wait_seconds": 0
+        }
+      }
+    },
+    "direct": {
+      "completed": 50,
+      "passed": 34,
+      "success_rate_observed": 0.68,
+      "task_seconds_total": 1125.8676126439896,
+      "task_seconds_median": 21.748445979499593,
+      "coordinator_cpu_seconds": 46.406339218999996,
+      "peak_cost_or_reserved_cny": 1.1578847200000073,
+      "roles": {
+        "agent": {
+          "calls": 433,
+          "failed_calls": 0,
+          "seconds": 700.0639753829964,
+          "usage": {
+            "prompt_tokens": 2973314,
+            "completion_tokens": 60899,
+            "prompt_cache_hit_tokens": 2819704
+          },
+          "queue_wait_seconds": 0
+        },
+        "simulator": {
+          "calls": 292,
+          "failed_calls": 0,
+          "seconds": 379.8162239039957,
+          "usage": {
+            "prompt_tokens": 268102,
+            "completion_tokens": 13387,
+            "prompt_cache_hit_tokens": 200314
+          },
+          "queue_wait_seconds": 0
+        },
+        "judge": {
+          "calls": 0,
+          "failed_calls": 0,
+          "seconds": 0,
+          "usage": {
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "prompt_cache_hit_tokens": 0
+          },
+          "queue_wait_seconds": 0
+        }
+      }
+    }
+  },
+  "paired_tasks": 50,
+  "quality_discordance": {
+    "runtime_only_success": 6,
+    "direct_only_success": 3,
+    "mcnemar_exact_p_two_sided": 0.5078125
+  },
+  "runtime_time_change_vs_direct": 0.031008708979574306,
+  "runtime_prompt_tokens_change_vs_direct": 0.027890280050447025,
+  "runtime_completion_tokens_change_vs_direct": -0.017001857685162713,
+  "budget_after": {
+    "limit_cny": 20,
+    "spent_or_reserved_cny": 12.258829479999974,
+    "calls": 6187
+  },
+  "caveats": [
+    "One real-provider trial is not a repeatability proof or official accepted rank.",
+    "Official tools and simulator unchanged, cloud outputs can still differ between paired runs.",
+    "Model-provider and shared broker resources excluded from local coordinator measurements.",
+    "Historical cumulative bill reservations are preserved; peak-list cost is not an invoice.",
+    "Direct arm bypasses syscalls but retains an idle kernel; memory and startup claims against a clean bare process are unsupported.",
+    "Current official result cost fields are unset; do not publish zero cost as measured cost."
+  ]
+}

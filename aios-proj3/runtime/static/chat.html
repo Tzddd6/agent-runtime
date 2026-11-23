@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="ink-classic">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AIOS · 多智能体协同对话与工作台</title>
+  <link rel="stylesheet" href="/static/guizang.css">
+  <script src="/static/chat.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div>
+      <div class="brand-block">
+        <span class="brand-index">AIOS WORKBENCH / PROJ3</span>
+        <a class="brand-title serif-title" href="/">AIOS 智能体工作台</a>
+        <div class="brand-sub">LLM AS OS · AGENTS AS APPS</div>
+      </div>
+
+      <button class="btn btn-primary" id="newChatBtn" style="margin-top:0;margin-bottom:14px;">＋ 新建协同会话</button>
+
+      <div class="nav-section-label">内核与子系统</div>
+      <nav class="nav-list">
+        <a class="nav-item" href="/console"><span><span class="nav-num">01</span>打开内核运行控制台</span><span>↗</span></a>
+        <a class="nav-item" href="/console#pane-amem"><span><span class="nav-num">02</span>A-Mem 卡片盒记忆</span><span class="mono" id="sideAmemCount">0</span></a>
+        <a class="nav-item" href="/console#pane-amem"><span><span class="nav-num">03</span>双语 FTS5 知识库</span><span class="mono" id="sideKbCount">0</span></a>
+        <a class="nav-item" href="/console#pane-cerebrum"><span><span class="nav-num">04</span>36 工具与 17 Skill</span><span class="mono">53</span></a>
+      </nav>
+
+      <div class="nav-section-label">当前用户会话记录</div>
+      <div id="convList" class="nav-list"><p class="hint">尚无历史会话</p></div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div><strong>归藏版式系统 · 去 AI 味</strong></div>
+      <div>瑞士网格 · 宣纸炭墨 · 零冗余修饰</div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="breadcrumb">AIOS WORKBENCH / <span id="currConvLabel">新建会话</span></div>
+      <div class="topbar-controls">
+        <select id="themeSwitcher" style="width:auto;padding:4px 8px;">
+          <option value="ink-classic">杂志 · 纸墨经典 (Ink Classic)</option>
+          <option value="swiss-ikb">瑞士 · 克莱因蓝 (Swiss IKB)</option>
+          <option value="forest-ink">杂志 · 松烟墨绿 (Forest Ink)</option>
+          <option value="midnight-ink">深色 · 子夜墨色 (Midnight Ink)</option>
+        </select>
+        <span class="tag" id="chatModelBadge">mock-aios-core</span>
+        <a class="btn btn-sm" href="/console">运行控制台 ↗</a>
+      </div>
+    </header>
+
+    <div class="content-container" style="display:flex;flex-direction:column;justify-content:space-between;min-height:calc(100vh - 54px);">
+      <div>
+        <section class="editorial-header">
+          <div>
+            <div class="kicker">CEREBRUM SDK → AIOS KERNEL SYSCALLS</div>
+            <h1>多智能体任务拆解、记忆检索与受控执行</h1>
+            <p>每一轮请求均经由 AIOS 内核转化为原子系统调用，自动注入 A-Mem 关联记忆与 FTS5 知识库分块引用。</p>
+          </div>
+          <span class="tag tag-ok">WriteBarrier 已启用</span>
+        </section>
+
+        <!-- Preset Quick Prompts -->
+        <div class="card-grid" id="quickPrompts" style="margin-bottom:24px;">
+          <div class="info-card" style="cursor:pointer;" data-mode="auto" data-prompt="检索 openEuler cgroup v2 资源隔离方案，并总结 CPU 与内存 swap 限制的关键参数。">
+            <div class="kicker">01 / KNOWLEDGE & A-MEM</div>
+            <h3>openEuler cgroup v2 核查</h3>
+            <p class="hint">联合检索 A-Mem 卡片盒记忆与 FTS5 知识库，输出带引用标记的技术说明。</p>
+          </div>
+          <div class="info-card" style="cursor:pointer;" data-mode="team" data-prompt="为多智能体操作系统内核设计一套防止单点崩溃级联扩散的容错与检查点恢复方案。">
+            <div class="kicker">02 / FOUR-AGENT DAG</div>
+            <h3>四 Agent 协同架构评审</h3>
+            <p class="hint">依次调度 Planner、Analyst、Tester、Reviewer，通过 SHA256 上下文引用传递结果。</p>
+          </div>
+          <div class="info-card" style="cursor:pointer;" data-mode="engineering" data-prompt="修复 pricing.py 中的折扣取整、5000分免邮边界与按比例退款精度缺陷，并运行公开与隐藏测试集。">
+            <div class="kicker">03 / PYTHON ENGINEERING REPAIR</div>
+            <h3>受控 Python 工程闭环修复</h3>
+            <p class="hint">执行原始失败核验、AST 受限补丁生成、真实测试验证与哈希比对。</p>
+          </div>
+          <div class="info-card" style="cursor:pointer;" data-mode="lsfs" data-prompt="retrieve files about kernel">
+            <div class="kicker">04 / LSFS SEMANTIC TERMINAL</div>
+            <h3>LSFS 自然语言文件检索</h3>
+            <p class="hint">通过 IntentRouter 将自然语言指令翻译为 StorageSyscall 并返回匹配文件片段。</p>
+          </div>
+        </div>
+
+        <!-- Messages Stream -->
+        <div id="messagesBox" style="display:flex;flex-direction:column;gap:14px;margin-bottom:24px;"></div>
+      </div>
+
+      <!-- Composer Dock -->
+      <section class="panel" style="margin-bottom:0;border-top:2px solid var(--border-strong);">
+        <form id="chatForm">
+          <div style="display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;align-items:center;">
+            <div>
+              <label for="chatMode" style="display:inline;margin-right:4px;">执行模式：</label>
+              <select id="chatMode" style="width:auto;padding:4px 8px;">
+                <option value="auto">自动路由 (A-Mem + 工具 + LLM)</option>
+                <option value="team">四 Agent 协同 (Planner/Analyst/Tester/Reviewer)</option>
+                <option value="engineering">受控 Python 工程修复 (pricing.py)</option>
+                <option value="lsfs">LSFS 语义文件终端 (IntentRouter)</option>
+              </select>
+            </div>
+            <label style="display:inline-flex;align-items:center;gap:4px;margin:0;cursor:pointer;">
+              <input type="checkbox" id="useKnowledgeToggle" checked> 启用 FTS5 知识库引用
+            </label>
+            <label style="display:inline-flex;align-items:center;gap:4px;margin:0;cursor:pointer;">
+              <input type="checkbox" id="useAmemToggle" checked> 启用 A-Mem 关联记忆注入
+            </label>
+          </div>
+          <textarea id="chatPrompt" rows="3" placeholder="输入技术问题、工程修复目标或 LSFS 文件指令（严禁输入私钥或 API 密钥）…" required></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+            <span class="hint">每次执行均记录至内核 Syscall 账本，可在运行控制台核查 PID 与耗时。</span>
+            <button class="btn btn-accent" type="submit" id="sendChatBtn" style="min-width:140px;">提交至 AIOS 内核 →</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+{
+  "benchmark": "sierra-research/tau2-bench (~2.5k stars) Airline Domain (pass^1)",
+  "runtime": "AIOS Formal Kernel (LLMQuery + ToolQuery) + AirlineToolKit",
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 21:34:53",
+  "summary": {
+    "tasks_evaluated": 20,
+    "tasks_passed": 15,
+    "pass_1_rate": 0.75,
+    "score_percent": 75.0,
+    "db_match_count": 15,
+    "comm_match_count": 18,
+    "total_llm_calls": 281,
+    "total_tool_calls": 177,
+    "total_kernel_syscalls": 458,
+    "total_tokens": 1072224,
+    "wall_seconds": 100.26
+  },
+  "tasks": [
+    {
+      "task_id": "0",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 18.61
+    },
+    {
+      "task_id": "1",
+      "passed": false,
+      "db_match": false,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 12.51
+    },
+    {
+      "task_id": "2",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 7,
+      "terminated": "user_stop",
+      "seconds": 14.91
+    },
+    {
+      "task_id": "3",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "transferred",
+      "seconds": 10.8
+    },
+    {
+      "task_id": "4",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "transferred",
+      "seconds": 14.29
+    },
+    {
+      "task_id": "5",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 18.1
+    },
+    {
+      "task_id": "6",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 7,
+      "terminated": "user_stop",
+      "seconds": 17.02
+    },
+    {
+      "task_id": "7",
+      "passed": false,
+      "db_match": false,
+      "comm_match": false,
+      "steps": 6,
+      "terminated": "transferred",
+      "seconds": 19.52
+    },
+    {
+      "task_id": "8",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 15.48
+    },
+    {
+      "task_id": "9",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 3,
+      "terminated": "transferred",
+      "seconds": 15.14
+    },
+    {
+      "task_id": "10",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 7,
+      "terminated": "user_stop",
+      "seconds": 34.66
+    },
+    {
+      "task_id": "11",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "user_stop",
+      "seconds": 14.65
+    },
+    {
+      "task_id": "12",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 15.25
+    },
+    {
+      "task_id": "13",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 3,
+      "terminated": "transferred",
+      "seconds": 9.51
+    },
+    {
+      "task_id": "14",
+      "passed": false,
+      "db_match": false,
+      "comm_match": false,
+      "steps": 8,
+      "terminated": "user_stop",
+      "seconds": 24.42
+    },
+    {
+      "task_id": "15",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 20.27
+    },
+    {
+      "task_id": "16",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 14.2
+    },
+    {
+      "task_id": "17",
+      "passed": false,
+      "db_match": false,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 13.28
+    },
+    {
+      "task_id": "18",
+      "passed": false,
+      "db_match": false,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 29.9
+    },
+    {
+      "task_id": "19",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 7,
+      "terminated": "user_stop",
+      "seconds": 15.23
+    }
+  ]
+}

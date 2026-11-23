@@ -1,0 +1,319 @@
+{
+  "benchmark": "THUDM/AgentBench (~3.8k stars) OS-Interaction (dev.json)",
+  "runtime": "AIOS Formal Kernel + Linux User/Mount/PID Namespace Sandbox",
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 21:33:12",
+  "summary": {
+    "tasks_evaluated": 26,
+    "tasks_passed": 16,
+    "pass_rate": 0.6154,
+    "score_percent": 61.54,
+    "total_llm_calls": 73,
+    "total_tool_calls": 47,
+    "total_kernel_syscalls": 120,
+    "total_tokens": 46382,
+    "wall_seconds": 67.29
+  },
+  "tasks": [
+    {
+      "index": 0,
+      "labels": [
+        "file",
+        "process",
+        "background"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 3,
+      "seconds": 19.6,
+      "detail": "match expected='1' actual='1'"
+    },
+    {
+      "index": 1,
+      "labels": [
+        "file",
+        "process",
+        "background"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 4,
+      "seconds": 29.43,
+      "detail": "match expected='log' actual='log'"
+    },
+    {
+      "index": 2,
+      "labels": [
+        "file",
+        "process",
+        "background"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 4,
+      "seconds": 25.84,
+      "detail": "match expected='.plain.log' actual='.plain.log'"
+    },
+    {
+      "index": 3,
+      "labels": [
+        "command"
+      ],
+      "passed": false,
+      "status": "finished",
+      "turns": 4,
+      "seconds": 25.87,
+      "detail": "check_script rc=1 out='/tmp/ab_os_v93l2f1b/cmd_1795440751347410.sh: line 7: calc: command not found'"
+    },
+    {
+      "index": 4,
+      "labels": [
+        "file",
+        "process",
+        "background"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 4,
+      "seconds": 31.67,
+      "detail": "match expected='3' actual='3'"
+    },
+    {
+      "index": 5,
+      "labels": [
+        "command"
+      ],
+      "passed": true,
+      "status": "finished",
+      "turns": 4,
+      "seconds": 25.65,
+      "detail": "check_script rc=0 out=''"
+    },
+    {
+      "index": 6,
+      "labels": [
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 9.2,
+      "detail": "py_check rc=1 expected='8' actual='6'"
+    },
+    {
+      "index": 7,
+      "labels": [
+        "file"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 5.54,
+      "detail": "py_check rc=0 expected='2' actual='2'"
+    },
+    {
+      "index": 8,
+      "labels": [
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 16.18,
+      "detail": "py_check rc=1 expected='4.0K' actual='/home and all of its contents are using 4.0K of disk space.'"
+    },
+    {
+      "index": 9,
+      "labels": [
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 16.07,
+      "detail": "py_check rc=1 expected='2' actual='There are 2 empty files in /home and all of its content.'"
+    },
+    {
+      "index": 10,
+      "labels": [
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 3,
+      "seconds": 3.98,
+      "detail": "py_check rc=1 expected='0' actual='17'"
+    },
+    {
+      "index": 11,
+      "labels": [
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 2.13,
+      "detail": "py_check rc=1 expected='2' actual='There are 2 directories (recursively) in the /home directory.'"
+    },
+    {
+      "index": 12,
+      "labels": [
+        "file"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 1.81,
+      "detail": "py_check rc=0 expected='3' actual='3'"
+    },
+    {
+      "index": 13,
+      "labels": [
+        "device",
+        "system"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 1.62,
+      "detail": "py_check rc=0 expected='8' actual='8'"
+    },
+    {
+      "index": 14,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 2.05,
+      "detail": "py_check rc=0 expected='49' actual='49'"
+    },
+    {
+      "index": 15,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 2.02,
+      "detail": "py_check rc=0 expected='26' actual='26'"
+    },
+    {
+      "index": 16,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 2.0,
+      "detail": "py_check rc=0 expected='26' actual='26'"
+    },
+    {
+      "index": 17,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 2.55,
+      "detail": "py_check rc=0 expected='26' actual='26'"
+    },
+    {
+      "index": 18,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 1.94,
+      "detail": "py_check rc=0 expected='26' actual='26'"
+    },
+    {
+      "index": 19,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 6,
+      "seconds": 9.33,
+      "detail": "py_check rc=0 expected='3' actual='3'"
+    },
+    {
+      "index": 20,
+      "labels": [
+        "user"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 4,
+      "seconds": 5.53,
+      "detail": "py_check rc=0 expected='0' actual='0'"
+    },
+    {
+      "index": 21,
+      "labels": [
+        "command",
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 1.56,
+      "detail": "py_check rc=1 expected='3' actual='There are 3 files with the .helloworld extension.'"
+    },
+    {
+      "index": 22,
+      "labels": [
+        "command",
+        "packages"
+      ],
+      "passed": true,
+      "status": "answered",
+      "turns": 2,
+      "seconds": 1.3,
+      "detail": "py_check rc=0 expected='not-yet' actual='not-yet'"
+    },
+    {
+      "index": 23,
+      "labels": [
+        "command",
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 3,
+      "seconds": 4.58,
+      "detail": "py_check rc=1 expected='122084' actual='The maximum number of threads in your computer is 122084, as set by the kernel parameter `/proc/sys/kernel/threads-max`. Note that a single user is limited to 61042 threads/processes by `ulimit -u`, and `pid_max` (4194304) is not the binding constraint.'"
+    },
+    {
+      "index": 24,
+      "labels": [
+        "permission",
+        "user"
+      ],
+      "passed": false,
+      "status": "llm_error_502",
+      "turns": 1,
+      "seconds": 6.87,
+      "detail": "match expected='Awesome-AgentBench' actual=''"
+    },
+    {
+      "index": 25,
+      "labels": [
+        "log",
+        "file"
+      ],
+      "passed": false,
+      "status": "answered",
+      "turns": 5,
+      "seconds": 6.4,
+      "detail": "py_check rc=1 expected='grep: /usr/stock.log: No such file or directory\\n0' actual='The file /usr/stock.log does not exist on this system, and no stock log file could be found anywhere. Therefore I cannot determine how many times Bob sold a stock. Please provide the correct path to the stock log file.'"
+    }
+  ]
+}

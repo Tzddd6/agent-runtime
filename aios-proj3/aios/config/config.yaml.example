@@ -1,0 +1,43 @@
+api_keys:
+  openai: ""
+  deepseek: ""
+  gemini: ""
+  anthropic: ""
+
+llms:
+  default_model: "mock-aios-core"
+  routing_strategy: "sequential"
+  models:
+    - name: "mock-aios-core"
+      backend: "mock"
+      max_new_tokens: 1024
+    - name: "deepseek-chat"
+      backend: "openai"
+      hostname: "https://api.deepseek.com/v1"
+
+memory:
+  provider: "in-house"
+  memory_limit: 104857600
+  eviction_k: 2
+  write_barrier:
+    enabled: true
+    timeout_seconds: 5.0
+
+storage:
+  root_dir: "root_storage"
+  filesystem_type: "lsfs"
+  use_vector_db: false
+
+scheduler:
+  policy: "fifo"
+  batch_interval: 0.05
+  time_slice: 0.2
+  max_workers: 32
+  drf_enabled: true
+  cpu_milli_budget: 4000
+  memory_bytes_budget: 1073741824
+  pids_budget: 128
+
+server:
+  host: "127.0.0.1"
+  port: 8000

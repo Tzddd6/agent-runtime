@@ -1,0 +1,40 @@
+{
+  "benchmark": "THUDM/AgentBench (~3.8k stars) OS-Interaction (dev.json)",
+  "host": "NUC (openEuler 24.03 SP4, Linux 6.6.0-159.4.20.174.oe2403sp4.x86_64, Python 3.11.6)",
+  "runtime": "AIOS Formal Kernel + Linux User/Mount/PID Namespace Sandbox",
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 16:52:57",
+  "summary": {
+    "tasks_evaluated": 20,
+    "tasks_passed": 11,
+    "pass_rate": 0.55,
+    "score_percent": 55.0,
+    "total_llm_calls": 56,
+    "total_tool_calls": 36,
+    "total_kernel_syscalls": 92,
+    "total_tokens": 38142,
+    "wall_seconds": 101.66
+  },
+  "tasks": [
+    {"index": 0, "labels": ["file", "process", "background"], "passed": true, "status": "answered", "turns": 3, "seconds": 15.97, "detail": "match expected='1' actual='1'"},
+    {"index": 1, "labels": ["file", "process", "background"], "passed": true, "status": "answered", "turns": 3, "seconds": 4.87, "detail": "match expected='log' actual='log'"},
+    {"index": 2, "labels": ["file", "process", "background"], "passed": true, "status": "answered", "turns": 5, "seconds": 11.71, "detail": "match expected='.plain.log' actual='.plain.log'"},
+    {"index": 3, "labels": ["command"], "passed": true, "status": "finished", "turns": 4, "seconds": 6.59, "detail": "check_script rc=0 out=''"},
+    {"index": 4, "labels": ["file", "process", "background"], "passed": true, "status": "answered", "turns": 3, "seconds": 19.11, "detail": "match expected='3' actual='3'"},
+    {"index": 5, "labels": ["command"], "passed": true, "status": "finished", "turns": 6, "seconds": 9.54, "detail": "check_script rc=0 out=''"},
+    {"index": 6, "labels": ["file"], "passed": false, "status": "answered", "turns": 2, "seconds": 1.74, "detail": "py_check rc=1 expected='8' actual='6'"},
+    {"index": 7, "labels": ["file"], "passed": true, "status": "answered", "turns": 2, "seconds": 2.14, "detail": "py_check rc=0 expected='2' actual='2'"},
+    {"index": 8, "labels": ["file"], "passed": false, "status": "answered", "turns": 2, "seconds": 1.84, "detail": "py_check rc=1 expected='4.0K' actual='/home and all of its contents are using 4.0K of disk space.'"},
+    {"index": 9, "labels": ["file"], "passed": false, "status": "answered", "turns": 2, "seconds": 1.84, "detail": "py_check rc=1 expected='2' actual='There are 2 empty files in /home and all of its content.'"},
+    {"index": 10, "labels": ["file"], "passed": false, "status": "answered", "turns": 2, "seconds": 1.95, "detail": "py_check rc=1 expected='0' actual='17'"},
+    {"index": 11, "labels": ["file"], "passed": false, "status": "answered", "turns": 2, "seconds": 2.04, "detail": "py_check rc=1 expected='2' actual='There are 2 directories (recursively) in the /home directory.'"},
+    {"index": 12, "labels": ["file"], "passed": true, "status": "answered", "turns": 2, "seconds": 2.05, "detail": "py_check rc=0 expected='3' actual='3'"},
+    {"index": 13, "labels": ["device", "system"], "passed": true, "status": "answered", "turns": 2, "seconds": 1.74, "detail": "py_check rc=0 expected='8' actual='8'"},
+    {"index": 14, "labels": ["user"], "passed": false, "status": "answered", "turns": 2, "seconds": 1.75, "detail": "py_check rc=1 expected='49' actual='There are 49 groups in your system.'"},
+    {"index": 15, "labels": ["user"], "passed": false, "status": "finished", "turns": 2, "seconds": 2.03, "detail": "py_check rc=1 expected='26' actual=''"},
+    {"index": 16, "labels": ["user"], "passed": true, "status": "answered", "turns": 2, "seconds": 2.25, "detail": "py_check rc=0 expected='26' actual='26'"},
+    {"index": 17, "labels": ["user"], "passed": false, "status": "finished", "turns": 2, "seconds": 2.15, "detail": "py_check rc=1 expected='26' actual=''"},
+    {"index": 18, "labels": ["user"], "passed": true, "status": "answered", "turns": 2, "seconds": 1.63, "detail": "py_check rc=0 expected='26' actual='26'"},
+    {"index": 19, "labels": ["user"], "passed": false, "status": "finished", "turns": 6, "seconds": 8.61, "detail": "py_check rc=1 expected='3' actual=''"}
+  ]
+}

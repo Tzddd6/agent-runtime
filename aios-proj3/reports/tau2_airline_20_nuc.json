@@ -1,0 +1,201 @@
+{
+  "benchmark": "sierra-research/tau2-bench (~2.5k stars) Airline Domain (pass^1)",
+  "runtime": "AIOS Formal Kernel (LLMQuery + ToolQuery) + AirlineToolKit",
+  "model": "deepseek-chat",
+  "timestamp": "2026-11-23 20:51:05",
+  "summary": {
+    "tasks_evaluated": 20,
+    "tasks_passed": 16,
+    "pass_1_rate": 0.8,
+    "score_percent": 80.0,
+    "db_match_count": 16,
+    "comm_match_count": 17,
+    "total_llm_calls": 244,
+    "total_tool_calls": 140,
+    "total_kernel_syscalls": 384,
+    "total_tokens": 832869,
+    "wall_seconds": 319.23
+  },
+  "tasks": [
+    {
+      "task_id": "0",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "transferred",
+      "seconds": 12.55
+    },
+    {
+      "task_id": "1",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "transferred",
+      "seconds": 12.58
+    },
+    {
+      "task_id": "2",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "user_stop",
+      "seconds": 13.11
+    },
+    {
+      "task_id": "3",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "transferred",
+      "seconds": 15.9
+    },
+    {
+      "task_id": "4",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "transferred",
+      "seconds": 16.46
+    },
+    {
+      "task_id": "5",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 16.61
+    },
+    {
+      "task_id": "6",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 19.19
+    },
+    {
+      "task_id": "7",
+      "passed": false,
+      "db_match": false,
+      "comm_match": false,
+      "steps": 4,
+      "terminated": "agent_err_502",
+      "seconds": 17.68
+    },
+    {
+      "task_id": "8",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 16.15
+    },
+    {
+      "task_id": "9",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 3,
+      "terminated": "transferred",
+      "seconds": 14.78
+    },
+    {
+      "task_id": "10",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 3,
+      "terminated": "agent_err_502",
+      "seconds": 20.79
+    },
+    {
+      "task_id": "11",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 4,
+      "terminated": "user_stop",
+      "seconds": 15.13
+    },
+    {
+      "task_id": "12",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 12.6
+    },
+    {
+      "task_id": "13",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 3,
+      "terminated": "transferred",
+      "seconds": 8.29
+    },
+    {
+      "task_id": "14",
+      "passed": false,
+      "db_match": false,
+      "comm_match": false,
+      "steps": 8,
+      "terminated": "user_stop",
+      "seconds": 25.5
+    },
+    {
+      "task_id": "15",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 16.58
+    },
+    {
+      "task_id": "16",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 5,
+      "terminated": "user_stop",
+      "seconds": 14.65
+    },
+    {
+      "task_id": "17",
+      "passed": false,
+      "db_match": false,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 21.09
+    },
+    {
+      "task_id": "18",
+      "passed": false,
+      "db_match": false,
+      "comm_match": false,
+      "steps": 3,
+      "terminated": "agent_err_502",
+      "seconds": 16.61
+    },
+    {
+      "task_id": "19",
+      "passed": true,
+      "db_match": true,
+      "comm_match": true,
+      "steps": 6,
+      "terminated": "user_stop",
+      "seconds": 12.91
+    }
+  ]
+}

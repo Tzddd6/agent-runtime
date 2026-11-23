@@ -1,0 +1,175 @@
+{
+  "benchmark": "agiresearch/AIOS (COLM 2025, ~6.6k stars) Aligned Official Suite",
+  "host": "NUC (openEuler 24.03 SP4, Linux 6.6.0-159.4.20.174.oe2403sp4.x86_64, Python 3.11.6)",
+  "timestamp": "2026-11-23 16:31:06",
+  "dimensions": {
+    "1_scheduling_concurrency": {
+      "levels": [
+        {
+          "agents": 4,
+          "sequential": {
+            "wall_seconds": 0.2769,
+            "avg_turnaround_ms": 50.98,
+            "p90_turnaround_ms": 51.28
+          },
+          "fifo": {
+            "wall_seconds": 0.1034,
+            "speedup_vs_seq": 2.68,
+            "avg_wait_ms": 50.84,
+            "p90_wait_ms": 51.13,
+            "light_p90_wait_ms": 50.91,
+            "avg_turnaround_ms": 51.22,
+            "p90_turnaround_ms": 51.75,
+            "avg_heavy_slices": 1,
+            "completed": 4
+          },
+          "rr": {
+            "wall_seconds": 0.103,
+            "speedup_vs_seq": 2.69,
+            "avg_wait_ms": 13.97,
+            "p90_wait_ms": 18.69,
+            "light_p90_wait_ms": 18.69,
+            "avg_turnaround_ms": 27.04,
+            "p90_turnaround_ms": 51.24,
+            "avg_heavy_slices": 3,
+            "completed": 4
+          }
+        },
+        {
+          "agents": 8,
+          "sequential": {
+            "wall_seconds": 0.4588,
+            "avg_turnaround_ms": 50.89,
+            "p90_turnaround_ms": 50.98
+          },
+          "fifo": {
+            "wall_seconds": 0.1107,
+            "speedup_vs_seq": 4.14,
+            "avg_wait_ms": 54.3,
+            "p90_wait_ms": 55.27,
+            "light_p90_wait_ms": 55.27,
+            "avg_turnaround_ms": 57.28,
+            "p90_turnaround_ms": 58.52,
+            "avg_heavy_slices": 1,
+            "completed": 8
+          },
+          "rr": {
+            "wall_seconds": 0.1575,
+            "speedup_vs_seq": 2.91,
+            "avg_wait_ms": 23.49,
+            "p90_wait_ms": 38.0,
+            "light_p90_wait_ms": 38.0,
+            "avg_turnaround_ms": 46.07,
+            "p90_turnaround_ms": 104.88,
+            "avg_heavy_slices": 3,
+            "completed": 8
+          }
+        },
+        {
+          "agents": 16,
+          "sequential": {
+            "wall_seconds": 0.8659,
+            "avg_turnaround_ms": 50.84,
+            "p90_turnaround_ms": 51.24
+          },
+          "fifo": {
+            "wall_seconds": 0.1054,
+            "speedup_vs_seq": 8.21,
+            "avg_wait_ms": 51.74,
+            "p90_wait_ms": 52.69,
+            "light_p90_wait_ms": 52.5,
+            "avg_turnaround_ms": 52.36,
+            "p90_turnaround_ms": 53.44,
+            "avg_heavy_slices": 1,
+            "completed": 16
+          },
+          "rr": {
+            "wall_seconds": 0.2655,
+            "speedup_vs_seq": 3.26,
+            "avg_wait_ms": 43.1,
+            "p90_wait_ms": 77.17,
+            "light_p90_wait_ms": 77.17,
+            "avg_turnaround_ms": 84.33,
+            "p90_turnaround_ms": 198.57,
+            "avg_heavy_slices": 3,
+            "completed": 16
+          }
+        }
+      ]
+    },
+    "2_four_queue_throughput": {
+      "total_syscalls": 160,
+      "success_rate": 1.0,
+      "wall_seconds": 1.1801,
+      "throughput_syscalls_per_sec": 135.59,
+      "per_queue": {
+        "llm": {
+          "passed": 40,
+          "total": 40,
+          "avg_ms": 20.12,
+          "p95_ms": 50.54
+        },
+        "memory": {
+          "passed": 40,
+          "total": 40,
+          "avg_ms": 0.6,
+          "p95_ms": 1.14
+        },
+        "storage": {
+          "passed": 40,
+          "total": 40,
+          "avg_ms": 1.83,
+          "p95_ms": 6.02
+        },
+        "tool": {
+          "passed": 40,
+          "total": 40,
+          "avg_ms": 375.65,
+          "p95_ms": 462.69
+        }
+      }
+    },
+    "3_amem_and_isolation_matrix": {
+      "notes_indexed": 24,
+      "linked_note_ratio": 1.0,
+      "evolved_notes": 18,
+      "topic_recall_at_3": 1.0,
+      "isolation_matrix_passed": 5,
+      "isolation_matrix_total": 5,
+      "isolation_checks": {
+        "same_user_same_agent_private_allow": true,
+        "same_user_other_agent_private_deny": true,
+        "same_user_other_agent_shared_allow": true,
+        "cross_user_same_agent_private_deny": true,
+        "cross_user_shared_deny": true
+      }
+    },
+    "4_lsfs_and_context_store": {
+      "intent_prompts_succeeded": true,
+      "rollback_exact": true,
+      "path_traversal_blocked": true,
+      "context_dedup_exact": true,
+      "context_dedup_hits": 4,
+      "context_storage_saving_ratio": 0.9926
+    },
+    "5_dag_scaling_and_fault_isolation": {
+      "w1_sec": 0.4133,
+      "w4_sec": 0.1084,
+      "w8_sec": 0.0574,
+      "speedup_4w": 3.81,
+      "speedup_8w": 7.2,
+      "healthy_branch_survival": "6/6",
+      "fault_downstream_isolated": "2/2",
+      "drf_leaked_cpu_milli": 0
+    }
+  },
+  "scorecard": {
+    "scheduling_concurrency": 20.0,
+    "four_queue_throughput": 20.0,
+    "amem_and_isolation": 20.0,
+    "lsfs_and_context": 20.0,
+    "dag_and_fault_isolation": 20.0,
+    "total_score": 100.0,
+    "max_score": 100.0
+  }
+}

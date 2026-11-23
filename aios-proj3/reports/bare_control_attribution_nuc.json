@@ -1,0 +1,236 @@
+{
+  "timestamp": "2026-11-23 21:00:29",
+  "mode": "BARE_DIRECT_HTTPS_NO_AIOS",
+  "bfcl_v4_parallel_30": {
+    "tasks": 30,
+    "passed": 25,
+    "accuracy": 0.8333,
+    "wall_seconds": 10.74,
+    "failed_tasks": [
+      {
+        "id": "parallel_3",
+        "passed": false,
+        "status": 200,
+        "error": "",
+        "calls_count": 3,
+        "gt_count": 3
+      },
+      {
+        "id": "parallel_9",
+        "passed": false,
+        "status": 200,
+        "error": "",
+        "calls_count": 1,
+        "gt_count": 2
+      },
+      {
+        "id": "parallel_19",
+        "passed": false,
+        "status": 200,
+        "error": "",
+        "calls_count": 3,
+        "gt_count": 3
+      },
+      {
+        "id": "parallel_26",
+        "passed": false,
+        "status": 200,
+        "error": "",
+        "calls_count": 2,
+        "gt_count": 4
+      },
+      {
+        "id": "parallel_29",
+        "passed": false,
+        "status": 200,
+        "error": "",
+        "calls_count": 2,
+        "gt_count": 2
+      }
+    ]
+  },
+  "mbpp_20": {
+    "tasks": 20,
+    "passed": 18,
+    "accuracy": 0.9,
+    "wall_seconds": 7.17,
+    "failed_tasks": [
+      {
+        "idx": 2,
+        "task_id": 13,
+        "passed": false,
+        "error": "['red','green','black','pink','black','white','black','eyes','white','black','orange','pink','pink','red','red','white','orange','white',\"black\",'pink','green','green','pink','green','pink','white','orange',\"orange\",'red']) == [('pink', 6),"
+      },
+      {
+        "idx": 4,
+        "task_id": 15,
+        "passed": false,
+        "error": "Traceback (most recent call last):\n  File \"/tmp/tmpkkrid5y6.py\", line 16, in <module>\n    assert split_lowerstring(\"AbCd\")==['bC','d']\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      }
+    ]
+  },
+  "agentbench_os_26": {
+    "tasks": 26,
+    "passed": 16,
+    "pass_rate": 0.6154,
+    "wall_seconds": 126.4,
+    "rows": [
+      {
+        "index": 0,
+        "passed": true,
+        "detail": "match expected='1' actual='1'",
+        "seconds": 17.22
+      },
+      {
+        "index": 1,
+        "passed": true,
+        "detail": "match expected='log' actual='log'",
+        "seconds": 6.46
+      },
+      {
+        "index": 2,
+        "passed": true,
+        "detail": "match expected='.plain.log' actual='.plain.log'",
+        "seconds": 12.29
+      },
+      {
+        "index": 3,
+        "passed": true,
+        "detail": "check_script rc=0 out=''",
+        "seconds": 6.58
+      },
+      {
+        "index": 4,
+        "passed": true,
+        "detail": "match expected='3' actual='3'",
+        "seconds": 14.92
+      },
+      {
+        "index": 5,
+        "passed": true,
+        "detail": "check_script rc=0 out=''",
+        "seconds": 7.82
+      },
+      {
+        "index": 6,
+        "passed": false,
+        "detail": "py_check rc=1 expected='8' actual='6'",
+        "seconds": 1.61
+      },
+      {
+        "index": 7,
+        "passed": true,
+        "detail": "py_check rc=0 expected='2' actual='2'",
+        "seconds": 2.59
+      },
+      {
+        "index": 8,
+        "passed": false,
+        "detail": "py_check rc=1 expected='4.0K' actual='/home and all of its contents are using 4.0K of disk space.'",
+        "seconds": 1.91
+      },
+      {
+        "index": 9,
+        "passed": false,
+        "detail": "py_check rc=1 expected='2' actual='There are 2 empty files in /home and all of its content.'",
+        "seconds": 1.85
+      },
+      {
+        "index": 10,
+        "passed": false,
+        "detail": "py_check rc=1 expected='0' actual='17'",
+        "seconds": 2.66
+      },
+      {
+        "index": 11,
+        "passed": true,
+        "detail": "py_check rc=0 expected='2' actual='2'",
+        "seconds": 1.94
+      },
+      {
+        "index": 12,
+        "passed": true,
+        "detail": "py_check rc=0 expected='3' actual='3'",
+        "seconds": 1.95
+      },
+      {
+        "index": 13,
+        "passed": true,
+        "detail": "py_check rc=0 expected='8' actual='8'",
+        "seconds": 1.74
+      },
+      {
+        "index": 14,
+        "passed": false,
+        "detail": "py_check rc=1 expected='49' actual='There are 49 groups in your system.'",
+        "seconds": 1.74
+      },
+      {
+        "index": 15,
+        "passed": false,
+        "detail": "py_check rc=1 expected='26' actual='There are 26 groups with an index (GID) greater than 50.'",
+        "seconds": 2.46
+      },
+      {
+        "index": 16,
+        "passed": true,
+        "detail": "py_check rc=0 expected='26' actual='26'",
+        "seconds": 2.36
+      },
+      {
+        "index": 17,
+        "passed": true,
+        "detail": "py_check rc=0 expected='26' actual='26'",
+        "seconds": 1.94
+      },
+      {
+        "index": 18,
+        "passed": true,
+        "detail": "py_check rc=0 expected='26' actual='26'",
+        "seconds": 1.74
+      },
+      {
+        "index": 19,
+        "passed": false,
+        "detail": "py_check rc=1 expected='3' actual='0'",
+        "seconds": 3.02
+      },
+      {
+        "index": 20,
+        "passed": true,
+        "detail": "py_check rc=0 expected='0' actual='0'",
+        "seconds": 3.9
+      },
+      {
+        "index": 21,
+        "passed": false,
+        "detail": "py_check rc=1 expected='3' actual='There are 3 files with the .helloworld extension.'",
+        "seconds": 2.41
+      },
+      {
+        "index": 22,
+        "passed": true,
+        "detail": "py_check rc=0 expected='not-yet' actual='not-yet'",
+        "seconds": 1.94
+      },
+      {
+        "index": 23,
+        "passed": true,
+        "detail": "py_check rc=0 expected='122084' actual='122084'",
+        "seconds": 3.07
+      },
+      {
+        "index": 24,
+        "passed": false,
+        "detail": "match expected='Awesome-AgentBench' actual='The output is:\\n\\n```\\n/bin/bash: line 10: /root/test: No such file or directory\\n```\\n\\nwith exit code 127. This is because `~/test` expands to `/root/test`, which does not exist in the home directory (the home directory `/root` is essentially empty). The only `test` on the system is `/usr/bin/test`, which is not what `~/test` refers to.'",
+        "seconds": 15.86
+      },
+      {
+        "index": 25,
+        "passed": false,
+        "detail": "py_check rc=1 expected='grep: /usr/stock.log: No such file or directory\\n0' actual='The file /usr/stock.log does not exist on this system, and no stock log file could be found anywhere. Therefore, I cannot determine how many times Bob sold a stock. Please verify the file path or provide the correct location of the stock log.'",
+        "seconds": 4.42
+      }
+    ]
+  }
+}

@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="ink-classic">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AIOS Kernel · 操作系统级多智能体执行控制台</title>
+  <link rel="stylesheet" href="/static/guizang.css">
+  <script src="/static/console.js" defer></script>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar">
+    <div>
+      <div class="brand-block">
+        <span class="brand-index">AIOS KERNEL / PROJ3</span>
+        <a class="brand-title serif-title" href="/">AIOS 执行时内核</a>
+        <div class="brand-sub">COLM'25 · NAACL'25 · ICLR'25</div>
+      </div>
+
+      <a class="nav-item" href="/">
+        <span><span class="nav-num">←</span>返回对话工作台</span>
+      </a>
+
+      <div class="nav-section-label">内核视图导航</div>
+      <nav class="nav-list" id="sideNav">
+        <button class="nav-item active" data-tab="workflow"><span><span class="nav-num">01</span>协作与工程修复</span></button>
+        <button class="nav-item" data-tab="syscalls"><span><span class="nav-num">02</span>内核队列与系统调用</span></button>
+        <button class="nav-item" data-tab="agents"><span><span class="nav-num">03</span>Agent 控制块与生命周期</span></button>
+        <button class="nav-item" data-tab="amem"><span><span class="nav-num">04</span>A-Mem 记忆图谱与知识库</span></button>
+        <button class="nav-item" data-tab="lsfs"><span><span class="nav-num">05</span>LSFS 终端与 LiteCUA 桌面</span></button>
+        <button class="nav-item" data-tab="cerebrum"><span><span class="nav-num">06</span>Cerebrum 应用与能力库</span></button>
+      </nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div><strong>openEuler / Linux cgroup v2</strong></div>
+      <div>全国大学生计算机系统能力大赛 · Proj3</div>
+      <div class="mono" id="kernelVersionLabel">AIOS Formal Kernel v0.3</div>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <div class="breadcrumb">AIOS KERNEL / EXECUTION CONSOLE / <span id="activeTabLabel">01 协作与工程修复</span></div>
+      <div class="topbar-controls">
+        <label for="themeSwitcher" style="margin:0;display:inline;font-weight:500;">版式主题：</label>
+        <select id="themeSwitcher" style="width:auto;padding:4px 8px;">
+          <option value="ink-classic">杂志 · 纸墨经典 (Ink Classic)</option>
+          <option value="swiss-ikb">瑞士 · 克莱因蓝 (Swiss IKB)</option>
+          <option value="forest-ink">杂志 · 松烟墨绿 (Forest Ink)</option>
+          <option value="midnight-ink">深色 · 子夜墨色 (Midnight Ink)</option>
+        </select>
+        <span class="tag" id="enforcementBadge">资源模式: 采样中</span>
+        <span class="tag tag-ok" id="connBadge">内核在线</span>
+      </div>
+    </header>
+
+    <div class="content-container">
+      <section class="editorial-header">
+        <div>
+          <div class="kicker">MULTI-AGENT OPERATING SYSTEM RUNTIME</div>
+          <h1>多智能体内核调度与资源审计工作台</h1>
+          <p>四路独立系统调用队列、DRF 主导资源份额准入、SHA256 上下文去重压缩、A-Mem 卡片盒记忆演化与单点故障隔离。</p>
+        </div>
+        <div class="mono" id="lastSampleTime">等待采样</div>
+      </section>
+
+      <div id="globalNotice" class="panel" style="display:none;border-color:var(--accent-primary);"></div>
+
+      <!-- 4-Cell Swiss Metric Grid -->
+      <section class="swiss-grid-4" aria-label="系统与内核指标">
+        <div class="metric-cell">
+          <div class="metric-head"><span>01 / HOST & CGROUP</span><span>CPU</span></div>
+          <div class="metric-val" id="metricCpu">4000 mCPU</div>
+          <div class="metric-sub" id="metricCpuSub">逻辑核心与调度预算</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-head"><span>02 / MEMORY POOL</span><span>LRU-K</span></div>
+          <div class="metric-val" id="metricMem">100.0 MiB</div>
+          <div class="metric-sub" id="metricMemSub">A-Mem 内存池与写屏障</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-head"><span>03 / CONTEXT STORE</span><span>GZIP+SHA256</span></div>
+          <div class="metric-val" id="metricCtx">0.0%</div>
+          <div class="metric-sub" id="metricCtxSub">物理存储节省率与去重命中</div>
+        </div>
+        <div class="metric-cell">
+          <div class="metric-head"><span>04 / SYSCALL LEDGER</span><span>4 QUEUES</span></div>
+          <div class="metric-val" id="metricSyscalls">0</div>
+          <div class="metric-sub" id="metricSyscallsSub">LLM / Memory / Storage / Tool</div>
+        </div>
+      </section>
+
+      <div class="workspace-split">
+        <!-- Left Column: Job Submission, Multi-API Profiles, History -->
+        <section>
+          <article class="panel">
+            <div class="panel-header">
+              <h2>01 / 启动内核工作流</h2>
+              <span class="tag" id="runtimeStatusTag">空闲</span>
+            </div>
+            <form id="jobForm">
+              <label for="preset">预设验收场景</label>
+              <select id="preset">
+                <option value="kernel">AIOS 六篇论文 · 内核服务全链路免费验收</option>
+                <option value="engineering">受控 Python 工程修复 · 七阶段测试与评审</option>
+                <option value="dynamic">Proj3 4.2/4.4 · 动态孵化子任务与故障分支隔离</option>
+                <option value="agents">Proj3 4.3 · Agent 控制块生命周期 (暂停/恢复/终止)</option>
+                <option value="resources">Proj3 4.2 · DRF 主导份额与时间片抢占负载</option>
+                <option value="ipc">Proj3 4.7 · Agent 邮箱通信与零拷贝引用转授</option>
+                <option value="document">ICLR'25 LSFS · 自然语言文件回滚与共享链接</option>
+                <option value="litecua">LiteCUA MCP · 虚拟桌面无障碍树观察与操控</option>
+                <option value="llm">真实模型 · 单 Agent 流式问答</option>
+                <option value="team">真实模型 · 四 Agent 协同规划与评审</option>
+              </select>
+
+              <div id="projectBox" style="display:none;">
+                <label for="projectSelect">受控修复工程</label>
+                <select id="projectSelect">
+                  <option value="pricing">pricing.py · 金额计算（折扣、免邮与按比例退款）</option>
+                  <option value="intervals">intervals.py · 时间区间（相交时长、窗口分桶与 TTL）</option>
+                  <option value="text_normalization">text_normalization.py · 文本规范化（空白折叠、词数与前缀）</option>
+                </select>
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="workers">并发 Worker 上限</label>
+                  <select id="workers">
+                    <option value="1">1</option>
+                    <option value="2" selected>2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="policy">内核调度策略</label>
+                  <select id="policy">
+                    <option value="drf">DRF · 主导资源份额公平</option>
+                    <option value="rr">RR · 时间片抢占与上下文切换</option>
+                    <option value="fifo">FIFO · 时间窗批处理基线</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="two-col">
+                <div>
+                  <label for="modelCallsBudget">模型调用上限</label>
+                  <input id="modelCallsBudget" type="number" min="0" max="128" value="32">
+                </div>
+                <div>
+                  <label for="modelTokensBudget">输出 Token 预算</label>
+                  <input id="modelTokensBudget" type="number" min="256" max="262144" value="16384">
+                </div>
+              </div>
+
+              <div id="promptBox" style="display:none;">
+                <label for="taskPrompt">任务输入 / 终端指令</label>
+                <textarea id="taskPrompt" rows="3" placeholder="输入任务目标、文档内容或自然语言指令…"></textarea>
+              </div>
+
+              <p class="hint" id="presetHint">执行 A-Mem 卡片盒记忆演化、LSFS 版本回滚、LiteCUA 桌面观察、Context 去重与 IPC 引用传递，无需消耗外部 API 额度。</p>
+              <button class="btn btn-primary" type="submit" id="submitJobBtn">执行内核工作流 →</button>
+            </form>
+          </article>
+
+          <article class="panel" id="apiProfilesPanel">
+            <div class="panel-header">
+              <h2>02 / 内存持钥与多 API 配置</h2>
+              <span class="tag" id="activeModelTag">mock-aios-core</span>
+            </div>
+            <p class="hint">密钥仅存于独立 `ModelProfileBroker` 内存中，不写入磁盘或日志。支持 OpenAI / DeepSeek Chat Completions SSE 与 Aizex Responses SSE。</p>
+            <div id="profileList" style="margin:10px 0;"></div>
+            <details style="margin-top:10px;">
+              <summary style="cursor:pointer;font-weight:600;font-size:12.5px;">＋ 添加或更新供应商密钥配置</summary>
+              <form id="profileForm" style="margin-top:8px;">
+                <div class="two-col">
+                  <div>
+                    <label for="profId">配置标识 (ID)</label>
+                    <input id="profId" type="text" placeholder="如 deepseek_main" required>
+                  </div>
+                  <div>
+                    <label for="profLabel">显示名称</label>
+                    <input id="profLabel" type="text" placeholder="如 DeepSeek 官方" required>
+                  </div>
+                </div>
+                <div class="two-col">
+                  <div>
+                    <label for="profProvider">协议供应商</label>
+                    <select id="profProvider">
+                      <option value="deepseek">DeepSeek (Chat SSE)</option>
+                      <option value="openai">OpenAI (Chat SSE)</option>
+                      <option value="aizex">Aizex Relay (Responses SSE)</option>
+                      <option value="ollama">Ollama 本地后端</option>
+                      <option value="vllm">vLLM 本地后端</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label for="profModel">模型标识</label>
+                    <input id="profModel" type="text" placeholder="如 deepseek-chat" required>
+                  </div>
+                </div>
+                <label for="profKey">API 密钥 (16~512 字符，仅驻留内存)</label>
+                <input id="profKey" type="password" placeholder="sk-..." required>
+                <button class="btn" type="submit" style="width:100%;margin-top:10px;">保存至内存持钥服务</button>
+              </form>
+            </details>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <h2>03 / 工作流运行记录</h2>
+              <span class="tag" id="jobTotalTag">0 条</span>
+            </div>
+            <div id="jobHistoryList"><p class="hint">暂无运行记录，请从上方启动一次工作流。</p></div>
+          </article>
+        </section>
+
+        <!-- Right Column: 6 Tabbed Editorial Panels -->
+        <section>
+          <div class="swiss-tabs" id="topTabs">
+            <button class="swiss-tab active" data-tab="workflow">01 / 协作与工程修复</button>
+            <button class="swiss-tab" data-tab="syscalls">02 / 内核队列与系统调用</button>
+            <button class="swiss-tab" data-tab="agents">03 / Agent 控制块</button>
+            <button class="swiss-tab" data-tab="amem">04 / A-Mem 与知识库</button>
+            <button class="swiss-tab" data-tab="lsfs">05 / LSFS 与 LiteCUA</button>
+            <button class="swiss-tab" data-tab="cerebrum">06 / Cerebrum 与能力库</button>
+          </div>
+
+          <!-- TAB 01: Workflow DAG & Controlled Python Engineering Repair -->
+          <div class="tab-pane" id="pane-workflow">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">WORKFLOW DAG & FAULT ISOLATION</span>
+                  <h2 id="selectedJobTitle">尚未选择运行记录</h2>
+                </div>
+                <span class="tag" id="selectedJobStatus">待命</span>
+              </div>
+              <p class="hint" id="selectedJobMeta">启动左侧预设场景后，此处实时呈现 DAG 节点状态、动态孵化子任务（spawn_tasks）、单点故障隔离（isolated_skipped）及上下文哈希引用。</p>
+              <div id="dagTaskTableWrap" style="margin-top:14px;"></div>
+            </article>
+
+            <article class="panel" id="engineeringBox" style="display:none;">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">CONTROLLED PYTHON REPAIR PIPELINE</span>
+                  <h2 id="engProjectTitle">受控 Python 工程七阶段修复</h2>
+                </div>
+                <span class="tag tag-ok" id="engVerdictBadge">已验证</span>
+              </div>
+              <div id="engPhaseList" class="card-grid" style="margin-bottom:14px;"></div>
+              <div class="two-col">
+                <div>
+                  <label>原始含缺陷源码 (Baseline Failing)</label>
+                  <pre class="code-block" id="engOriginalCode"></pre>
+                </div>
+                <div>
+                  <label>AST 受检补丁源码 (Public + Heldout Verified)</label>
+                  <pre class="code-block" id="engPatchedCode"></pre>
+                </div>
+              </div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <h2>工作流输出与事件账本</h2>
+                <span class="mono" id="eventCountLabel">0 events</span>
+              </div>
+              <pre class="code-block" id="workflowEventsPre">等待运行工作流…</pre>
+            </article>
+          </div>
+
+          <!-- TAB 02: AIOS 4 Queues & Syscall Ledger & Context Store -->
+          <div class="tab-pane" id="pane-syscalls" style="display:none;">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">COLM 2025 · AIOS KERNEL SYSCALLS</span>
+                  <h2>四路独立系统调用队列与时间片度量</h2>
+                </div>
+                <span class="tag" id="schedulerPolicyBadge">Policy: FIFO/RR</span>
+              </div>
+              <div id="contextStoreGrid" class="card-grid" style="margin-bottom:16px;"></div>
+              <div style="overflow-x:auto;">
+                <table class="swiss-table">
+                  <thead>
+                    <tr>
+                      <th>Syscall ID</th>
+                      <th>PID</th>
+                      <th>Agent</th>
+                      <th>Subsystem</th>
+                      <th>Status</th>
+                      <th>Wait (s)</th>
+                      <th>Turnaround (s)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="syscallTableBody">
+                    <tr><td colspan="7" class="hint">尚无系统调用记录</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <!-- TAB 03: First-Class Agent Control Blocks & Lifecycle -->
+          <div class="tab-pane" id="pane-agents" style="display:none;">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">PROJ3 4.3 · FIRST-CLASS OS AGENT ABSTRACTION</span>
+                  <h2>Agent 控制块（ACB）、DRF 主导份额与生命周期控制</h2>
+                </div>
+                <span class="tag" id="agentTotalBadge">0 Agents</span>
+              </div>
+              <p class="hint">状态机：created → ready → running → paused → terminated。暂停阻止新系统调用准入；终止立即回收资源、销毁 cgroup 切片并吊销 IPC 凭据。</p>
+              <div id="agentCardsGrid" class="card-grid" style="margin-top:14px;"></div>
+            </article>
+          </div>
+
+          <!-- TAB 04: A-Mem Zettelkasten Graph & SQLite FTS5 Knowledge Base -->
+          <div class="tab-pane" id="pane-amem" style="display:none;">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">ARXIV 2502.12110 · A-MEM ZETTELKASTEN AGENT MEMORY</span>
+                  <h2>A-Mem 卡片盒动态记忆网络（自动建链与邻居演化）</h2>
+                </div>
+                <span class="tag" id="amemCountBadge">0 笔记</span>
+              </div>
+              <form id="amemForm" class="two-col" style="align-items:end;margin-bottom:14px;">
+                <div>
+                  <label for="amemContent">新增记忆卡片内容（自动提取关键词并与相关历史笔记双向建链演化）</label>
+                  <input id="amemContent" type="text" placeholder="例如：openEuler cgroup v2 使用 memory.swap.max=0 严格限制交换分区" required>
+                </div>
+                <div>
+                  <button class="btn btn-accent" type="submit">写入 A-Mem 并触发演化</button>
+                </div>
+              </form>
+              <div id="amemNotesGrid" class="card-grid"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">SQLITE FTS5 BILINGUAL KNOWLEDGE BASE</span>
+                  <h2>本地双语知识库（BM25 检索与不可变版本快照 [K1]..[K4]）</h2>
+                </div>
+                <span class="tag" id="kbCountBadge">0 篇文档</span>
+              </div>
+              <form id="kbForm" style="margin-bottom:14px;">
+                <div class="two-col">
+                  <div>
+                    <label for="kbTitle">资料标题</label>
+                    <input id="kbTitle" type="text" placeholder="例如：Linux cgroup v2 委派规范" required>
+                  </div>
+                  <div>
+                    <label for="kbSearchInput">检索测试</label>
+                    <input id="kbSearchInput" type="search" placeholder="输入关键词实时检索知识库…">
+                  </div>
+                </div>
+                <label for="kbBody">资料正文 (UTF-8，自动拒绝含私钥或 sk- 密钥文本)</label>
+                <textarea id="kbBody" rows="3" placeholder="输入技术规范或团队知识文档…" required></textarea>
+                <button class="btn" type="submit" style="margin-top:8px;">保存并建立 FTS5 索引</button>
+              </form>
+              <div id="kbListWrap"></div>
+            </article>
+          </div>
+
+          <!-- TAB 05: LSFS Terminal ("From Commands to Prompts") & LiteCUA Virtual Desktop -->
+          <div class="tab-pane" id="pane-lsfs" style="display:none;">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">ICLR 2025 · FROM COMMANDS TO PROMPTS (LSFS)</span>
+                  <h2>LSFS 语义文件终端（自然语言意图路由、多版本回滚与安全共享）</h2>
+                </div>
+                <span class="tag">IntentRouter</span>
+              </div>
+              <form id="lsfsPromptForm" class="two-col" style="align-items:end;margin-bottom:12px;">
+                <div>
+                  <label for="lsfsPromptInput">输入自然语言文件指令（支持写入、读取、语义检索 retrieve、版本回滚 rollback、生成共享链接 share）</label>
+                  <input id="lsfsPromptInput" type="text" value="retrieve files about kernel" required>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <button class="btn btn-accent" type="submit">路由并执行 Syscall</button>
+                  <button class="btn btn-sm" type="button" data-lsfs="write 'AIOS LSFS v1' to docs/note.md">示例：写入 v1</button>
+                  <button class="btn btn-sm" type="button" data-lsfs="write 'AIOS LSFS v2' to docs/note.md">示例：覆盖 v2</button>
+                  <button class="btn btn-sm" type="button" data-lsfs="请回滚 docs/note.md 1 个版本">示例：回滚版本</button>
+                  <button class="btn btn-sm" type="button" data-lsfs="share docs/note.md with auditor_agent">示例：生成共享链接</button>
+                </div>
+              </form>
+              <pre class="code-block" id="lsfsTerminalOutput">等待输入自然语言文件指令…</pre>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">ARXIV 2505.18829 · LITECUA COMPUTER AS MCP SERVER</span>
+                  <h2>LiteCUA 虚拟桌面控制器与无障碍树（Accessibility Tree）</h2>
+                </div>
+                <span class="tag" id="vmWindowBadge">AIOS_Code_Workspace</span>
+              </div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                <button class="btn btn-sm" type="button" data-cua="observe">刷新无障碍树 (observe)</button>
+                <button class="btn btn-sm" type="button" data-cua="click_search">点击搜索框 (click)</button>
+                <button class="btn btn-sm" type="button" data-cua="type_query">输入查询词 (type)</button>
+                <button class="btn btn-sm" type="button" data-cua="hotkey_run">发送快捷键 Ctrl+Shift+F (hotkey)</button>
+                <button class="btn btn-sm" type="button" data-cua="restore_boot">回滚至初始桌面快照 (snapshot)</button>
+              </div>
+              <div id="litecuaTreeGrid" class="card-grid"></div>
+            </article>
+          </div>
+
+          <!-- TAB 06: Cerebrum AgentHub ("Agents as Apps") & 36 Tools / 17 Skills Library -->
+          <div class="tab-pane" id="pane-cerebrum" style="display:none;">
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">NAACL 2025 CEREBRUM & ARXIV 2312.03815 AGENTS AS APPS</span>
+                  <h2>Cerebrum Agent 应用商店（Manifest 权限边界与配额沙箱）</h2>
+                </div>
+                <span class="tag" id="hubAppCountBadge">内置 Apps</span>
+              </div>
+              <div id="agentHubGrid" class="card-grid"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-header">
+                <div>
+                  <span class="kicker">CURATED CAPABILITY REGISTRY</span>
+                  <h2>受控工具插件（36 项）与领域/归藏设计 Skill（17 项）</h2>
+                </div>
+                <input id="capSearchInput" type="search" placeholder="搜索工具或 Skill…" style="width:240px;">
+              </div>
+              <div id="capabilitiesGrid" class="card-grid"></div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

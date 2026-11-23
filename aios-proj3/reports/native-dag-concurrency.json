@@ -1,0 +1,71 @@
+{
+  "scope": "synthetic waiting tasks; identical handlers, resources and expected output",
+  "provider_calls": 0,
+  "rows": [
+    {
+      "repeat": 0,
+      "workers": 1,
+      "seconds": 0.248203,
+      "quality_passed": true
+    },
+    {
+      "repeat": 0,
+      "workers": 4,
+      "seconds": 0.06627,
+      "quality_passed": true
+    },
+    {
+      "repeat": 1,
+      "workers": 4,
+      "seconds": 0.064678,
+      "quality_passed": true
+    },
+    {
+      "repeat": 1,
+      "workers": 1,
+      "seconds": 0.247531,
+      "quality_passed": true
+    },
+    {
+      "repeat": 2,
+      "workers": 1,
+      "seconds": 0.24716,
+      "quality_passed": true
+    },
+    {
+      "repeat": 2,
+      "workers": 4,
+      "seconds": 0.064984,
+      "quality_passed": true
+    },
+    {
+      "repeat": 3,
+      "workers": 4,
+      "seconds": 0.064672,
+      "quality_passed": true
+    },
+    {
+      "repeat": 3,
+      "workers": 1,
+      "seconds": 0.248149,
+      "quality_passed": true
+    },
+    {
+      "repeat": 4,
+      "workers": 1,
+      "seconds": 0.247752,
+      "quality_passed": true
+    },
+    {
+      "repeat": 4,
+      "workers": 4,
+      "seconds": 0.06506,
+      "quality_passed": true
+    }
+  ],
+  "serial_median_seconds": 0.247752,
+  "parallel_median_seconds": 0.064984,
+  "speedup": 3.813,
+  "quality_passed": 10,
+  "quality_total": 10
+}
