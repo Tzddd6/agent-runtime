@@ -1,81 +1,133 @@
-# Agent Runtime · AIOS Proj3 正式交付
+# Agent Runtime · AIOS Proj3
 
-**最新成品：2026-11-23 冻结版。**
+**面向多智能体的操作系统级执行时 · openEuler 实机验证版**
 
-- [正式源码与快速启动](aios-proj3/)
-- [完整交付包、PPT与验收日志](releases/proj3-20261123/)
+本项目面向全国大学生计算机系统能力大赛操作系统设计赛 Proj3，将多个 Agent 的模型调用、工具执行、上下文和系统资源交给统一 Runtime 管理。它既提供浏览器对话入口，也提供任务编排、资源监控和故障恢复能力。
 
-采用常驻内核、四类Syscall队列、DAG编排、上下文共享/隔离、Agent生命周期、IPC与Linux cgroup v2资源控制。NUC归档验收第一阶段89/89通过；能力边界与受控基准说明见交付目录。旧原型继续保留在 `agent_runtime/`。
+架构参考 [agiresearch/AIOS](https://github.com/agiresearch/AIOS)，结合 Linux cgroup v2 实现资源硬限制。本项目是参赛团队的独立工程实现，**不是官方 AIOS 发行版**。
 
----
+> 当前交付：2026-11-23 冻结版。正式代码位于 [`aios-proj3/`](aios-proj3/)，根目录的 `agent_runtime/` 是保留的早期原型。
 
-## 早期原型说明（历史版本）
+**[正式源码](aios-proj3/) · [完整交付包与报告](releases/proj3-20261123/) · [答辩 PPT](releases/proj3-20261123/AIOS-Proj3-答辩PPT.pptx) · [NUC 复验日志](releases/proj3-20261123/nuc-final-bound-acceptance-20261123.log) · [赛题原文存档](docs/赛题要求.md)**
 
-# Agent Runtime：面向多智能体的操作系统级执行时
+## 它解决什么问题
 
-本仓库是 **2026 年全国大学生计算机系统能力大赛—操作系统设计赛—中西部与华南区域赛—功能挑战赛道** 赛题
-「面向多智能体的操作系统级执行时（Multi-Agent-Oriented Operating System-Level Agent Runtime）」的参赛项目。
-赛题难度 A，维护单位武汉大学。完整赛题见 [docs/赛题要求.md](docs/赛题要求.md)。
+| 多 Agent 执行中的问题 | Runtime 的处理方式 |
+| --- | --- |
+| 多个任务争抢 CPU、内存和执行槽位 | 统一队列、资源感知准入、DRF 份额管理和老化机制 |
+| 长上下文被反复传递、保存 | 内容寻址去重、压缩、预算视图、分页读取和引用传递 |
+| 模型、工具、存储接口各自为政 | LLM / Memory / Storage / Tool 四类 Syscall 抽象 |
+| 单个工具超时、OOM 或进程崩溃影响全局 | 受控 Worker、cgroup v2、失败分支隔离和有界恢复 |
+| 执行过程难以观察和干预 | Web 控制台、Agent 生命周期、DAG、队列及资源状态 |
 
-## 目标
+## 总体架构
 
-现有多 Agent 系统大多停留在应用层框架（Workflow/Graph 调度），缺乏操作系统级的统一执行时，导致：
-调度不统一、上下文（Context/KV Cache）冗余拷贝、模型/工具/系统资源缺乏统一抽象、执行过程缺乏系统级可观测性与控制。
-
-本项目把 Agent 提升为“操作系统一等公民”，在国内开源 OS（计划 openEuler）上实现对 Agent 任务的统一建模、调度、资源管理与上下文优化。
-
-## 赛题要求与当前进度
-
-| 赛题要求 | 内容 | 当前状态 |
-| --- | --- | --- |
-| 4.1 OS 基础与兼容性 | 基于 openEuler / openKylin / OpenHarmony 至少一个开发，鼓励多发行版测试 | 待在 NUC 的 openEuler 上验证 |
-| 4.2 多 Agent 任务调度 | 任务依赖、动态生成任务、资源感知调度 | 已有静态依赖校验与有限并发；动态任务、资源感知调度待做 |
-| 4.3 统一执行抽象 | Agent 生命周期、状态转换、与 OS 资源的关系 | 已有独立 Worker 进程与事件输出；完整状态机与资源映射待设计 |
-| 4.4 执行容错 | 隔离单个 Agent 故障，避免级联失败 | 已有超时终止与失败分支隔离；进程树清理、重试、持久化待做 |
-| 4.5 上下文管理 | 上下文复用、压缩、隔离，降低执行开销 | 待做 |
-| 4.6 复杂场景验证 | 构建真实多 Agent 应用验证可用性与稳定性 | 待做 |
-| 4.7 Agent 间通信 | 高效通信机制 | 待做（计划 IPC 服务） |
-
-## 评分权重
-
-| 维度 | 权重 |
-| --- | ---: |
-| 系统设计与机制创新 | 30% |
-| 功能完整性与实现深度 | 25% |
-| 性能优化效果 | 20% |
-| 工程实现质量 | 15% |
-| 实验与分析质量 | 10% |
-
-## 快速开始（当前最小原型）
-
-Python 3.9+，只使用标准库。在本目录执行：
-
-```bash
-python -m agent_runtime
-python -m unittest -v
+```mermaid
+flowchart TB
+    UI[浏览器对话与运行控制台] --> APP[Agent 应用 / Cerebrum 客户端]
+    APP --> FLOW[DAG 工作流与动态任务]
+    APP --> KERNEL[常驻 Runtime 内核服务]
+    FLOW --> KERNEL
+    KERNEL --> SCHED[四类队列 / FIFO 与 RR / DRF 资源准入]
+    SCHED --> LLM[LLM Core 与独立持钥 ModelService]
+    SCHED --> MEM[Memory / A-Mem / ContextStore]
+    SCHED --> STORE[Storage / LSFS]
+    SCHED --> TOOL[Tool / 受控执行]
+    TOOL --> WORKER[Worker 进程与监督恢复]
+    WORKER --> OS[openEuler / Linux cgroup v2]
 ```
 
-输出是逐行 JSON 事件。示例先执行 plan，再并行执行 analyze 和 test_plan，最后执行 review。
-可用 `python -m agent_runtime --tasks tasks.json --workers 2 --timeout 10` 加载自定义任务数组，字段参照 `agent_runtime/__main__.py` 中的 `DEMO`。
+这里的“内核”指用户态 Runtime 常驻服务；底层硬限制由 Linux 内核提供。
 
-当前功能：静态依赖校验、有限并发、独立 Worker 进程、超时终止、失败分支隔离和事件输出。模拟动作包括 echo、sleep、fail。
+## 已实现的主要功能
 
-当前限制：尚未接入真实大模型、动态任务、上下文管理、IPC 服务、cgroups、进程树清理、可靠持久化或重试；超时只终止 Worker 本身。它是跨平台教学原型，不能作为最终比赛作品或安全沙箱。
+- **Agent 执行管理**：控制块、生命周期、调用与 token 预算、与 Worker 和 OS 资源的关联。
+- **任务编排与调度**：DAG 依赖、动态子任务、并发执行、四类请求队列及资源感知准入。
+- **上下文与通信**：SHA256 去重、gzip 存储、预算视图、分页、ACL、带确认与幂等控制的 Mailbox IPC。
+- **隔离与恢复**：CPU / 内存 / PIDs 限制、OOM 识别、超时回收、检查点、Worker 监督，以及不确定操作的非盲目重放策略。
+- **模型接入**：多供应商配置、Chat Completions / Responses 流式协议、纯内存持钥进程隔离；业务子进程环境变量不继承供应商 Key。
+- **交互与生态**：对话与监控页面、Markdown / 公式 / 代码显示、文件附件、知识库、工具与 Skill，以及 A-Mem、LSFS、AgentHub 等组件。
 
-## 路线图
+实现和实验的具体范围以源码、交付手册及对应测试为准；功能名称不代表与参考论文或第三方协议完全兼容。
 
-1. 在 NUC 的 openEuler 环境运行并验证当前原型。
-2. 动态任务生成与资源感知调度。
-3. 进程树管理与 cgroups v2 资源控制（需确认目标环境的 cgroup v2 委派权限）。
-4. Agent 生命周期状态机与故障隔离、重试、持久化。
-5. 上下文复用、压缩、隔离机制。
-6. Agent 间通信（IPC 服务）。
-7. 真实大模型适配、复杂多 Agent 场景与性能实验。
+## 快速启动
 
-## 参考资料
+需要 **Python 3.11+**。以下为 Linux / openEuler 命令：
 
-赛题列出的参考方向，PDF 见 [docs/references](docs/references)：
+```bash
+git clone https://github.com/Tzddd6/agent-runtime.git
+cd agent-runtime/aios-proj3
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install pymupdf pillow
 
-- AIOS: LLM Agent Operating System
-- 多 Agent 框架：LangGraph / AutoGen / CrewAI
-- Linux 调度器（CFS / EEVDF）与 cgroup v2 容器资源管理
+# 免费本地回归，不需要供应商 API Key
+python -B -m unittest discover -s tests -v
+
+# 仅绑定 127.0.0.1
+python -m runtime.web --port 8765
+```
+
+- 对话工作台：<http://127.0.0.1:8765/>
+- 运行控制台：<http://127.0.0.1:8765/console/>
+- Windows 使用 `python -m venv .venv` 创建环境，使用 `.venv\Scripts\Activate.ps1` 激活；Linux 硬隔离专项需在 Linux 委派环境运行。
+- PyMuPDF、Pillow 用于完整 PDF / 图片附件功能。普通会话的测试可能跳过 Linux 专项，不能据此认定硬隔离验收完成。
+- 真实模型交互需另行配置 API，并可能产生费用。不要将密钥写入源码、提交记录或公开日志。
+
+远程访问可用 SSH 转发：
+
+```bash
+ssh -L 8765:127.0.0.1:8765 user@host
+```
+
+## openEuler 实机验收
+
+下载并解压[完整交付包](releases/proj3-20261123/)，进入包内 `AIOS-Proj3-最终交付候选包/`，按 `02_acceptance/OPEN_EULER_RUNBOOK.md` 准备虚拟环境和 cgroup v2 委派权限，然后执行：
+
+```bash
+set -o pipefail
+AIOS_PYTHON="$HOME/aios-venv/bin/python3" \
+  bash 02_acceptance/FINAL_CHECK.sh 2>&1 \
+  | tee "/tmp/aios-acceptance-$(date +%Y%m%d-%H%M%S).log"
+```
+
+新日志保存在包外，避免覆盖受 `FILES.sha256` 保护的归档证据。脚本显式向 systemd 传递 Python 绝对路径。
+
+归档的版本绑定复验结果（openEuler 24.03 SP4 / Python 3.11.6）：
+
+| 验证项 | 归档结果 |
+| --- | --- |
+| 第一阶段完整回归 | **89/89 通过，0 跳过**，10.881 秒 |
+| 原生 Worker CPU 限流 | 约 0.1988 核，发生实际节流 |
+| 原生 Worker OOM 与回收 | `oom_kill=1`，无孤儿 cgroup |
+| 第二阶段重复回归 | 88 通过、1 项委派专项跳过；该专项已在第一阶段通过 |
+| 第二阶段独立 CPU / 场景验证 | 约 0.2074 核，复杂场景通过，无残留 cgroup |
+
+完整记录见[最终复验日志](releases/proj3-20261123/nuc-final-bound-acceptance-20261123.log)。耗时是该次运行观测值，不是所有机器上的性能承诺。
+
+## 评测与能力边界
+
+- 交付材料中的 **5 套公开任务子集＋1 套合成压测** 属于受控实验，不能等同于官方完整评测或排行榜排名。
+- 不同加速比对应不同基线：旧 Runtime、直接调用以及串并行配置必须分开比较。尚未证明所有场景均更快、更省 token 且质量不下降。
+- `LiteCUA / VMController` 当前为**内存态桌面模拟**，用于观测、动作与快照协议验证，不代表已接管 NUC 真实桌面。
+- 通过回归测试不代表没有缺陷或绝对安全；进程持钥、ACL 和 cgroup 的保护范围应结合实际配置理解。
+
+## 代码与交付目录
+
+```text
+aios-proj3/
+├── aios/       # 调度、Syscall、资源与上下文等内核组件
+├── cerebrum/   # 客户端与类型化协议
+├── runtime/    # 常驻服务、Agent 循环、工作流场景与 Web
+├── tests/      # 回归与独立边界测试
+├── tools/      # 诊断、Linux 验收和实验脚本
+├── examples/   # 端到端示例
+└── docs/       # 设计与实现说明
+releases/proj3-20261123/  # 原始交付 ZIP、PPT、复验日志和校验摘要
+agent_runtime/            # 历史最小原型
+docs/                     # 早期赛题与参考资料
+```
+
+## 参考与致谢
+
+本项目参考 [AIOS](https://github.com/agiresearch/AIOS) 及 Cerebrum、LSFS、A-Mem、LiteCUA 等工作。公开任务实验涉及 BFCL、HumanEval、MBPP、AgentBench 和 tau2-bench；具体来源、实验配置与边界见交付包报告。第三方代码和资源的许可声明保留在对应目录中。
