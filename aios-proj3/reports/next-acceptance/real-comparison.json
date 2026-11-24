@@ -1,0 +1,337 @@
+{
+  "scope": "cold end-to-end; direct orchestration shares low-level OS Worker/checker, bypasses Kernel/Syscall/DAG",
+  "provider": "deepseek-flash",
+  "same_prompt_hash_by_pair": [
+    true,
+    true
+  ],
+  "summary": {
+    "runtime": {
+      "runs": 2,
+      "successes": 2,
+      "median_seconds": 5.677286266498413,
+      "calls": 2,
+      "prompt_tokens": 2864,
+      "completion_tokens": 474
+    },
+    "direct": {
+      "runs": 2,
+      "successes": 2,
+      "median_seconds": 3.0340451970041613,
+      "calls": 2,
+      "prompt_tokens": 2864,
+      "completion_tokens": 474
+    }
+  },
+  "cost_cny": 0.011513600000000679,
+  "budget_after_cny": 12.644096559999976,
+  "resource_boundary": "coordinator CPU and Worker cgroup receipts; no per-arm total RSS attribution",
+  "rows": [
+    {
+      "pair": 0,
+      "arm": "runtime",
+      "status": "succeeded",
+      "initialization_seconds": 0.009339764998003375,
+      "tests_run": 13,
+      "source_sha256": "14d1378d75961f55c1e87529eb564769f5974681a107d6a5dcdc084f296f477b",
+      "worker_receipts": [
+        {
+          "id": "87a203cb1fa448aaa4e0bc6663c80bb3",
+          "agent": "order-5af8e9fe5ccc4d729e7d9fb3231b227d-testing",
+          "pid": 81891,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_1178e9382c8943b99627dac1/87a203cb1fa448aaa4e0bc6663c80bb3-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "19795968\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 130193\nuser_usec 115407\nsystem_usec 14785\nnr_periods 3\nnr_throttled 2\nthrottled_usec 81093\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450315.4021394
+        },
+        {
+          "id": "0497db8370c04a72b58cc2ea7f25d4db",
+          "agent": "order-5af8e9fe5ccc4d729e7d9fb3231b227d-testing",
+          "pid": 81907,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_1178e9382c8943b99627dac1/0497db8370c04a72b58cc2ea7f25d4db-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "18092032\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 119841\nuser_usec 105035\nsystem_usec 14806\nnr_periods 3\nnr_throttled 2\nthrottled_usec 84098\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450318.137914
+        }
+      ],
+      "seconds": 3.09123874999932,
+      "coordinator_cpu_seconds": 0.05626126000000001,
+      "provider_calls": [
+        {
+          "input_sha256": "309d4825649463195f3141179ea26b28695142f3685fc856aaaf05cb8f3c7860",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {
+            "prompt_tokens": 1432,
+            "completion_tokens": 237,
+            "total_tokens": 1669,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            },
+            "prompt_cache_hit_tokens": 0,
+            "prompt_cache_miss_tokens": 1432
+          },
+          "cost_cny": 0.00476,
+          "response_text": "```json\n{\"files\":{\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\",\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return (gross * (100 - discount_pct)) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\"}}\n```",
+          "seconds": 2.3850230150055722
+        }
+      ]
+    },
+    {
+      "pair": 0,
+      "arm": "direct",
+      "status": "succeeded",
+      "tests_run": 13,
+      "source_sha256": "14d1378d75961f55c1e87529eb564769f5974681a107d6a5dcdc084f296f477b",
+      "worker_receipts": [
+        {
+          "id": "737d49b6b9254794a32ec01d13534c41",
+          "agent": "direct-order",
+          "pid": 81910,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_6c9ecf5e93884eb510be8a02/737d49b6b9254794a32ec01d13534c41-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "18092032\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 116147\nuser_usec 101983\nsystem_usec 14163\nnr_periods 2\nnr_throttled 1\nthrottled_usec 46002\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450318.4399326
+        },
+        {
+          "id": "366a57307d73452e8a9c56cab252af24",
+          "agent": "direct-order",
+          "pid": 81923,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_6c9ecf5e93884eb510be8a02/366a57307d73452e8a9c56cab252af24-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "17776640\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 112965\nuser_usec 100185\nsystem_usec 12779\nnr_periods 2\nnr_throttled 1\nthrottled_usec 46406\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450321.2599583
+        }
+      ],
+      "seconds": 3.0544463860060205,
+      "coordinator_cpu_seconds": 0.010660176999999993,
+      "provider_calls": [
+        {
+          "input_sha256": "309d4825649463195f3141179ea26b28695142f3685fc856aaaf05cb8f3c7860",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {
+            "prompt_tokens": 1432,
+            "completion_tokens": 237,
+            "total_tokens": 1669,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 152
+          },
+          "cost_cny": 0.0022511999999999996,
+          "response_text": "```json\n{\"files\":{\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\",\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return (gross * (100 - discount_pct)) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\"}}\n```",
+          "seconds": 2.523132403002819
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "arm": "direct",
+      "status": "succeeded",
+      "tests_run": 13,
+      "source_sha256": "14d1378d75961f55c1e87529eb564769f5974681a107d6a5dcdc084f296f477b",
+      "worker_receipts": [
+        {
+          "id": "8c16340bc2cd4991b33d7f8e95f2439a",
+          "agent": "direct-order",
+          "pid": 81926,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_6c9ecf5e93884eb510be8a02/8c16340bc2cd4991b33d7f8e95f2439a-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "19140608\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 120671\nuser_usec 102860\nsystem_usec 17810\nnr_periods 2\nnr_throttled 1\nthrottled_usec 48650\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450321.4886007
+        },
+        {
+          "id": "05c679556a304aa48bfe96ecb78e7def",
+          "agent": "direct-order",
+          "pid": 81940,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_6c9ecf5e93884eb510be8a02/05c679556a304aa48bfe96ecb78e7def-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "18878464\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 119941\nuser_usec 110017\nsystem_usec 9923\nnr_periods 2\nnr_throttled 2\nthrottled_usec 86918\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450324.2739253
+        }
+      ],
+      "seconds": 3.013644008002302,
+      "coordinator_cpu_seconds": 0.01068603700000001,
+      "provider_calls": [
+        {
+          "input_sha256": "309d4825649463195f3141179ea26b28695142f3685fc856aaaf05cb8f3c7860",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {
+            "prompt_tokens": 1432,
+            "completion_tokens": 237,
+            "total_tokens": 1669,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 152
+          },
+          "cost_cny": 0.0022511999999999996,
+          "response_text": "```json\n{\"files\":{\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\",\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return (gross * (100 - discount_pct)) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\"}}\n```",
+          "seconds": 2.444125838999753
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "arm": "runtime",
+      "status": "succeeded",
+      "initialization_seconds": 0.0038390949994209222,
+      "tests_run": 13,
+      "source_sha256": "14d1378d75961f55c1e87529eb564769f5974681a107d6a5dcdc084f296f477b",
+      "worker_receipts": [
+        {
+          "id": "0c75454fd370482cbfcad54085bf8457",
+          "agent": "order-b499ed8cdc2b4c4c8d79d033a772a37f-testing",
+          "pid": 81951,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_aba8089b104d5e2bd58fafc7/0c75454fd370482cbfcad54085bf8457-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "18616320\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 126369\nuser_usec 114536\nsystem_usec 11832\nnr_periods 3\nnr_throttled 2\nthrottled_usec 81991\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450324.5612564
+        },
+        {
+          "id": "05d6aa8872694464ab08cf300e559064",
+          "agent": "order-b499ed8cdc2b4c4c8d79d033a772a37f-testing",
+          "pid": 81980,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "cgroup_v2",
+          "cgroup": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/agentrt-next-live-1795450314.service/attempts/agent_aba8089b104d5e2bd58fafc7/05d6aa8872694464ab08cf300e559064-attempt-1",
+          "limits": {
+            "cpu_milli": 500,
+            "memory_bytes": 134217728,
+            "pids": 16
+          },
+          "usage": {
+            "memory.peak": "18092032\n",
+            "memory.events": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\noom_group_kill 0\n",
+            "cpu.stat": "usage_usec 115258\nuser_usec 104315\nsystem_usec 10942\nnr_periods 2\nnr_throttled 2\nthrottled_usec 74676\nnr_bursts 0\nburst_usec 0\n",
+            "pids.events": "max 0\n",
+            "pids.peak": "2\n"
+          },
+          "finished": 1795450332.4673536
+        }
+      ],
+      "seconds": 8.263333782997506,
+      "coordinator_cpu_seconds": 0.08930792199999998,
+      "provider_calls": [
+        {
+          "input_sha256": "309d4825649463195f3141179ea26b28695142f3685fc856aaaf05cb8f3c7860",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {
+            "prompt_tokens": 1432,
+            "completion_tokens": 237,
+            "total_tokens": 1669,
+            "prompt_tokens_details": {
+              "cached_tokens": 1280
+            },
+            "prompt_cache_hit_tokens": 1280,
+            "prompt_cache_miss_tokens": 152
+          },
+          "cost_cny": 0.0022511999999999996,
+          "response_text": "```json\n{\"files\":{\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\",\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return (gross * (100 - discount_pct)) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\"}}\n```",
+          "seconds": 7.607703378002043
+        }
+      ]
+    }
+  ]
+}

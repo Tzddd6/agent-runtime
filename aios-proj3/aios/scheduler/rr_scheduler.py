@@ -1,3 +1,9 @@
+# Project module contract / 项目模块说明
+# 职责：维护请求/工作流调度及准入；不把远端API响应轮转等同于GPU内核抢占。
+# 主要接口：RRScheduler。
+# 来源：架构参考 agiresearch/AIOS；具体借用及第三方说明见 THIRD_PARTY_NOTICES.md。
+# 开源：团队有权许可的自研代码及修改采用 MIT；第三方原许可不被覆盖。
+# AI辅助与审查边界：见 docs/AI工具使用说明.md；不以自动测试代替人工理解。
 from queue import Empty
 from cerebrum.utils.communication import Response
 import time

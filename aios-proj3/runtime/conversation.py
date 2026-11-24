@@ -1,3 +1,9 @@
+# Project module contract / 项目模块说明
+# 职责：连接常驻内核、工作流与网页；业务成功必须由真实执行结果确认。
+# 主要接口：Conversations。
+# 来源：架构参考 agiresearch/AIOS；具体借用及第三方说明见 THIRD_PARTY_NOTICES.md。
+# 开源：团队有权许可的自研代码及修改采用 MIT；第三方原许可不被覆盖。
+# AI辅助与审查边界：见 docs/AI工具使用说明.md；不以自动测试代替人工理解。
 """Conversation orchestration through native kernel syscalls and workflows."""
 from hashlib import sha256
 import json
@@ -22,14 +28,21 @@ class Conversations:
         mode = value.get('mode', 'auto')
         if not isinstance(prompt, str) or not 0 < len(prompt) <= 20000 or mode not in ('auto', 'llm', 'team', 'engineering', 'lsfs'):
             raise ValueError('Invalid conversation input or mode')
+        budget = value.get('model_budget', {'calls': 8, 'output_tokens': 16384})
+        if (not isinstance(budget, dict) or type(budget.get('calls')) is not int
+                or not 0 <= budget['calls'] <= 8 or type(budget.get('output_tokens')) is not int
+                or not 0 <= budget['output_tokens'] <= 16384):
+            raise ValueError('模型预算需为 0—8 次调用、0—16384 输出 token 上限')
         if not self.lock.acquire(blocking=False):
             raise ValueError('请等待当前对话结束')
+        self._intent_owned = False
         try:
             return self.execute(value, prompt, mode, observer, workflow_id)
         except Exception:
             try:
-                self.store.update(value.get('conversation_id'), value.get('request_id'), status='failed',
-                                  answer='本次执行未完成，未自动重提模型请求。')
+                if self._intent_owned:
+                    self.store.update(value.get('conversation_id'), value.get('request_id'), status='failed',
+                                      answer='本次执行未完成，未自动重提模型请求。')
             except (FileNotFoundError, ValueError, KeyError, StopIteration):
                 pass
             raise
@@ -41,23 +54,38 @@ class Conversations:
         key, request = value.get('conversation_id'), value.get('request_id')
         attachments = value.get('attachments', [])
         context = console.attachments.context(attachments, key)
-        chat, turn, duplicate = self.store.intent(key, request, prompt, mode=mode, attachments=attachments)
+        chat, turn, duplicate = self.store.intent(key, request, prompt, mode=mode, attachments=attachments,
+                                                project=value.get('project', 'pricing'),
+                                                budget=value.get('model_budget', {'calls': 8, 'output_tokens': 16384}),
+                                                use_knowledge=value.get('use_knowledge', True))
         if duplicate:
             return turn
+        self._intent_owned = True
         workflow = workflow_id or uuid4().hex
         agent = 'chat-' + key
         kernel.scheduler.drf_controller.register_agent(agent, max_model_calls=64, max_tokens=131072)
-        used = {'calls': 0, 'output_tokens': 0}
+        limits = value.get('model_budget', {'calls': 8, 'output_tokens': 16384})
+        used = {'calls': 0, 'output_tokens': 0, 'actual_input_tokens': 0,
+                'actual_output_tokens': 0, 'usage_reported_calls': 0, 'limits': limits}
+        role_agents = []
         budget_lock = Lock()
-        def model(messages, output_tokens=2048, tools=None, return_response=False):
+        def model(messages, output_tokens=2048, tools=None, return_response=False, agent_name=None):
             with budget_lock:
-                if used['calls'] >= 8 or used['output_tokens'] + output_tokens > 16384:
+                if used['calls'] >= limits['calls'] or used['output_tokens'] + output_tokens > limits['output_tokens']:
                     raise RuntimeError('Conversation model budget exceeded')
                 used['calls'] += 1
                 used['output_tokens'] += output_tokens
-            query = LLMQuery(messages=messages, max_new_tokens=output_tokens, stream=True, user_id='local' if value.get('use_memory', True) else None, tools=tools)
+            query = LLMQuery(messages=messages, max_new_tokens=output_tokens, stream=True,
+                             temperature=0.0 if mode == 'engineering' else 0.7,
+                             user_id='local' if value.get('use_memory', True) else None, tools=tools)
             query.stream_observer = observer
-            response = kernel.execute_request(agent, query)['response']
+            response = kernel.execute_request(agent_name or agent, query)['response']
+            usage = getattr(response, 'usage', None) or {}
+            with budget_lock:
+                if any(k in usage for k in ('prompt_tokens', 'input_tokens', 'completion_tokens', 'output_tokens')):
+                    used['actual_input_tokens'] += int(usage.get('prompt_tokens', usage.get('input_tokens', 0)) or 0)
+                    used['actual_output_tokens'] += int(usage.get('completion_tokens', usage.get('output_tokens', 0)) or 0)
+                    used['usage_reported_calls'] += 1
             if response.status_code >= 400 or response.error:
                 raise RuntimeError('模型请求未完成，未自动重试')
             return response if return_response else response.response_message
@@ -96,6 +124,10 @@ class Conversations:
                 tasks.append({'id': 'answer', 'agent': agent, 'depends_on': ['analysis', 'testing'],
                               'handler': lambda task, upstream, attempt: {'text': model([*messages,
                                   {'role': 'user', 'content': '结合上游分析回答，并核对分歧。' + json.dumps(upstream, ensure_ascii=False)}])}})
+            elif mode == 'engineering' and value.get('project') == 'order_project':
+                from runtime.engineering_workflow import build
+                spec, tasks = build(console, workflow, model)
+                role_agents = spec['role_agents']
             else:
                 from aios.tool.engineering import manifest, canonical_project
                 project = canonical_project(value.get('project', 'pricing'))
@@ -201,7 +233,13 @@ class Conversations:
                     console.jobs[workflow]['engineering'] = {
                         'title': spec['project'], 'file': spec['file'], 'accepted': True,
                         'original_source': spec['source'], 'patched_source': output['source'],
-                        'phases': [{'id': node, 'label': node, 'status': state} for node, state in result['states'].items()]}
+                        'artifact': output.get('artifact'),
+                        'tests_run': output.get('tests_run'),
+                        'test_engine': output.get('test_engine', 'controlled_assertions'),
+                        'phases': [{'id': node, 'label': node,
+                                    'status': 'tests_failed' if isinstance(result['results'].get(node), dict)
+                                    and result['results'][node].get('success') is False else state}
+                                   for node, state in result['states'].items()]}
                 console.save(console.jobs[workflow])
             return self.store.update(key, request, status=status, answer=answer, budget_used=used,
                                      citations=sources['sources'], quality_verified=success)
@@ -211,3 +249,14 @@ class Conversations:
                 console.save(console.jobs[workflow])
             self.store.update(key, request, status='failed', answer='本次执行未完成，未自动重提模型请求。', budget_used=used)
             raise
+        finally:
+            for name in role_agents:
+                try:
+                    kernel.process_service.release_agent(name)
+                    kernel.scheduler.drf_controller.terminate_agent(name, ipc_manager=kernel.ipc_manager)
+                except Exception:
+                    with console.lock:
+                        console.jobs[workflow].update(status='failed', error='Agent 回收未确认，禁止发布成功产物')
+                        console.save(console.jobs[workflow])
+                    self.store.update(key, request, status='failed', answer='Agent 回收未确认。', budget_used=used)
+                    raise RuntimeError('Agent cleanup unconfirmed') from None

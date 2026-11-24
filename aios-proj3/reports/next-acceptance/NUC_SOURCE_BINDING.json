@@ -1,0 +1,1001 @@
+{
+  "tested_source_zip_sha256": "59b16a96f04f3566725115cc95c2e2dc955b5ce57bbaa329c9eccd8562bac0fa",
+  "note": "Per-file binding of NUC-tested snapshot. README/docs and acceptance tooling may be newer.",
+  "members": [
+    {
+      "path": "LICENSE",
+      "sha256": "fbe34b5d3a542aba734c87ccedd93c67394c2013108e4aea294551b732522d0a",
+      "current_matches": true
+    },
+    {
+      "path": "README.md",
+      "sha256": "7e719c65384c158c6d83235dd8e54322e73b156ce34cd4fb3887982658ad3c15",
+      "current_matches": false
+    },
+    {
+      "path": "THIRD_PARTY_NOTICES.md",
+      "sha256": "0ba4bab5c71dd7fcef29252a2c543b3fd467ce49316f608c4282439e12d2a5dd",
+      "current_matches": true
+    },
+    {
+      "path": "aios/__init__.py",
+      "sha256": "e2a8e31b0af20d1fe8fd3f575f4e85c9e4aecd77ac5b1e83aa6fdaef3e971fdb",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/client.py",
+      "sha256": "6303477372c16b85026781df0fa9110d52260ce46d339341150997636d2ff800",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/hub.py",
+      "sha256": "a4428a2f66c3286b4c1fcfe4ae66650729b537b686e71baa3582082c01a7efa2",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/interface.py",
+      "sha256": "3596ac86cc3c21b62ecec613f11ebe5e5f23fcf6372580e0792268e50fe4673e",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/__init__.py",
+      "sha256": "82c264d0265bd6bcbf8dcdebdd8165a2ec4a98094ce8815ad54ba7b2899fdbe1",
+      "current_matches": true
+    },
+    {
+      "path": "docs/AIOS六篇论文生态落地对照.md",
+      "sha256": "ae11ef461fc0c136a06a4bcda2d38ba8121dd83a29c7b649b27efb64956e2512",
+      "current_matches": true
+    },
+    {
+      "path": "docs/AIOS新版统一架构与控制台设计方案.md",
+      "sha256": "4da58012b6f72655301fd58200bf0e288a666803b5fcfec2603ebcdb53af5812",
+      "current_matches": true
+    },
+    {
+      "path": "docs/AI工具使用说明.md",
+      "sha256": "590386adc4a04b01431276acb936428b4179a4b5c159fdf05d2629acf77f5916",
+      "current_matches": true
+    },
+    {
+      "path": "docs/module-header-inventory.json",
+      "sha256": "3fab0631a57f883ca6a3b7d96fd456184eccfdca6f63f7a4801fbb5c6ef1c2b6",
+      "current_matches": true
+    },
+    {
+      "path": "docs/NUC实机验收-2026-11-23.md",
+      "sha256": "9bfa602626637c186dfcbe615e7d0796a3852eba6d6d418a865f96e8112099e2",
+      "current_matches": true
+    },
+    {
+      "path": "docs/Proj3_综合架构与评测报告.md",
+      "sha256": "9b2d896245e6e902bb57550a796dff3fa073b87eefa910a4d5d87d91c07e9323",
+      "current_matches": true
+    },
+    {
+      "path": "docs/原生控制台接入验收.md",
+      "sha256": "e1ff77ea023f55a2dec151d50b09046f564d71909251d27cd614a1c943d0c66b",
+      "current_matches": true
+    },
+    {
+      "path": "docs/开源与第三方说明.md",
+      "sha256": "dcddc2063ff34447566a5a90fd454362f7ebc369e199ca986fb96b50aa258861",
+      "current_matches": true
+    },
+    {
+      "path": "docs/录屏与现场演示.md",
+      "sha256": "e4df9e2268fe35ff74e79db8008dab1c9917d0ed522a86d0c16a27cf6f206242",
+      "current_matches": true
+    },
+    {
+      "path": "docs/扩量公开基准与全功能对比报告-2026-11-23.md",
+      "sha256": "3e9023122a12a71e881aee5cde99114d0caa22560126772c519e2a2f70fbf7b9",
+      "current_matches": true
+    },
+    {
+      "path": "docs/新版AIOS_tau2正式评测报告-20261123.md",
+      "sha256": "f165898731c96312c3b02833847a75b4bdbeda65acf7e856e940ff0f80720583",
+      "current_matches": true
+    },
+    {
+      "path": "docs/新版tau2评测准备-20261123.md",
+      "sha256": "9cc198e7b2f753e674bb3a76fcd82a0d8d1ce520895f13c4a871d7ede3b4928f",
+      "current_matches": true
+    },
+    {
+      "path": "docs/新版网页更新与NUC复验-20261123.md",
+      "sha256": "1a567e25529ad766fddf82c0ed803c72ef61c68b97b036e481c84081707ababd",
+      "current_matches": true
+    },
+    {
+      "path": "docs/研发过程与问题解决.md",
+      "sha256": "0a5dd4720a5fabd76cf0cbb9baaf189006e66618fa2f6095754ef8f0363c0b98",
+      "current_matches": true
+    },
+    {
+      "path": "docs/类似项目对比.md",
+      "sha256": "9c09ff622cf055674d5e21fbaffbf0c460097cf356225ac247c5ce97f00fb378",
+      "current_matches": true
+    },
+    {
+      "path": "docs/赛题评分与证据索引.md",
+      "sha256": "a48ee95ee1705f93a63b4e8869816f1367476049959813865ae9909f66f8a494",
+      "current_matches": true
+    },
+    {
+      "path": "examples/proj3_full_verification.py",
+      "sha256": "f5ea902d7f434cd174c9a18cff121d4037655bc5239bfcb803a5748762758536",
+      "current_matches": true
+    },
+    {
+      "path": "examples/quickstart_demo.py",
+      "sha256": "f11d5700637404a0cb5d906a081c999291f927d9158ed8fea28be1388a3982b4",
+      "current_matches": true
+    },
+    {
+      "path": "reports/ablation_vs_app_framework.json",
+      "sha256": "7e00d454db65c14415c46fb600eb15ac13910078a33fecd38719a89b02da872b",
+      "current_matches": true
+    },
+    {
+      "path": "reports/agentbench_os_26_nuc.json",
+      "sha256": "bb8547b041ba93a15db6501cc43552bef52509275566fdc1b36a14a0e03ba9f7",
+      "current_matches": true
+    },
+    {
+      "path": "reports/agentbench_os_26_opt_nuc.json",
+      "sha256": "411f3586cd4f2b92698496d982eee385047af2dbd60b7eba3360422e6738c62b",
+      "current_matches": true
+    },
+    {
+      "path": "reports/agentbench_os_deepseek.json",
+      "sha256": "d9154fdb19197604cb6fa5d631fb27821a7c70ca22c99b7b99481f13c419ac2d",
+      "current_matches": true
+    },
+    {
+      "path": "reports/aios_official_benchmark.json",
+      "sha256": "72415c3c08ea4fa3680f4be77f7e923325bf839fdbfedbad17b29524e131b797",
+      "current_matches": true
+    },
+    {
+      "path": "reports/aios_official_benchmark_nuc.json",
+      "sha256": "b2bb9571c7c8759279865fd8c308586d447d56bb14d5de77d0d4269f65840b95",
+      "current_matches": true
+    },
+    {
+      "path": "reports/bare_control_attribution_nuc.json",
+      "sha256": "f8f97261297975e02a3ecac443d8f9d2c68ac72f10f3c3e4fa2d055dcf2c6474",
+      "current_matches": true
+    },
+    {
+      "path": "reports/benchmark.json",
+      "sha256": "bfd52951f998a8379c5819dc0a6c4e48b2b09d5be968d164b4e48aa6bbbe100b",
+      "current_matches": true
+    },
+    {
+      "path": "reports/engineering_repair_deepseek.json",
+      "sha256": "099a74e27e88bd647d60b530041b338db304721e5e58f95fbd170e0b5ac2deac",
+      "current_matches": true
+    },
+    {
+      "path": "reports/expanded_github_suite_nuc.json",
+      "sha256": "5b384b61396704bcae0f1f72d2875dcdc6d76da875f5fd6f285cc7d989d6e34c",
+      "current_matches": true
+    },
+    {
+      "path": "reports/expanded_github_suite_opt_nuc.json",
+      "sha256": "85f362d737bca1b4a74a2101ae7ab5cb37ab3bf16f736f68cee4f74b98362e92",
+      "current_matches": true
+    },
+    {
+      "path": "reports/native-dag-concurrency.json",
+      "sha256": "cb4e33fd81bbab2f6a6705635902e892e2e02c35a12d750055f9d60fa25cd847",
+      "current_matches": true
+    },
+    {
+      "path": "reports/native-tau-official-score-20261123.json",
+      "sha256": "cb5d900aa4f06a7c3a2140de9e84175a723c777015751cf200fa8f534aafd34e",
+      "current_matches": true
+    },
+    {
+      "path": "reports/native-tau-paired-analysis-20261123.json",
+      "sha256": "8cd334c39c547308a1e6d6ccf3b92ce7d3d16d5bb02ebd27118c3af2f8af009c",
+      "current_matches": true
+    },
+    {
+      "path": "reports/p1_to_p5_acceptance.json",
+      "sha256": "11a46f58a945348e42681cb97b50723604d5f0d303424edff60c55cc7cb850bf",
+      "current_matches": true
+    },
+    {
+      "path": "reports/queue_opt_and_baseline.json",
+      "sha256": "4d6ca92e190ec7996fad52b89d2b08e660efe23c25713b8545e1610a6abb8c34",
+      "current_matches": true
+    },
+    {
+      "path": "reports/real_gaps_closed_nuc.json",
+      "sha256": "522bd80c054dc3617ef5e6c8f9cf65cd2af6e1791d103f7f125e76611d4711d6",
+      "current_matches": true
+    },
+    {
+      "path": "reports/real_model_service_concurrency_nuc.json",
+      "sha256": "8795f66bce60e70ccf973e76ad269f0b342e4866bf1a3d8faee846dd0e486300",
+      "current_matches": true
+    },
+    {
+      "path": "reports/tau2_airline_20_nuc.json",
+      "sha256": "f721242a91375cd0e4bae41f991b06428e7174fd7757d113cb41979f9b6884d6",
+      "current_matches": true
+    },
+    {
+      "path": "reports/tau2_airline_20_opt_nuc.json",
+      "sha256": "d75e1dad3fa1bcb1d53f308996b45d484880cef762328e2e727a1861f5854658",
+      "current_matches": true
+    },
+    {
+      "path": "reports/tau2_airline_deepseek.json",
+      "sha256": "f96cd7a70b2b62bb519e78b30fd777ff3bfdd6cbe77f9b4f87f48d8aefbe0f91",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/agent_loop.py",
+      "sha256": "2182cd2d650c38073c6879c6dbf5314aa795c58ba59d2abf4059bd64a95950de",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/conversation.py",
+      "sha256": "74dccae4de23b5cdb5bb16c5262353e73f8cca7c5f7c3f64e73d13fef0723999",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/engineering_workflow.py",
+      "sha256": "05da6a5ba7ecf3989e1720e123f78988c35ad6aeed1caeeb2ac46c699b1c9e1e",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/launch.py",
+      "sha256": "ea28f72675651cac516f4fb17b3d95b3a42cba26428eed5eb88600e4c49ab927",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/scenarios.py",
+      "sha256": "13cb81585203c70571b709c3bcd818d7df3ed729b2d6dff3e4ce4574c393a40e",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/web.py",
+      "sha256": "15320422218d91fe2edfb7ce2f2796ea90293f5d03cec36a1e4d56f9d7c3ec32",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/__init__.py",
+      "sha256": "7f20ca6fcb71ae85b796166d58f8dbb245fc71978a3e956cbff219004747626a",
+      "current_matches": true
+    },
+    {
+      "path": "tests/native_browser_fixture.py",
+      "sha256": "80c0582d0886a6cbb94d82703499e5cef928d5773386e322b5d4b785b7abd9da",
+      "current_matches": true
+    },
+    {
+      "path": "tests/order_browser_fixture.py",
+      "sha256": "8525dbe8410c0ab1ab78b1faceeffdef7c956816fe162f230a7a41ac5731bc28",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_aios_kernel.py",
+      "sha256": "6c309c8e89620189d9922b26964fe45367658c045a14220176ece511a2354af5",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_aios_paper_ecosystem.py",
+      "sha256": "4163ac7c95291863a434e4569ab2813f489d9eebeb029eca2c0f044557355d69",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_architecture_gaps_closed.py",
+      "sha256": "0841c3c9ea579d72b13d0d10159c4cba058794422818900fbbd15de1b7dd83a1",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_benchmark_progress.py",
+      "sha256": "99548ef0ba25cc31a5085cc53211687bb0d1417643b2696985587baf4fe2bdf9",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_expanded_boundaries.py",
+      "sha256": "44430af5f6e5ca47af8b0f35909e725674cb3d807817eb12e74287a7e38343d6",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_expanded_scheduler.py",
+      "sha256": "26a40e8f572890dc05a4fd964e75c83b0a0ca9dd7d4e5e1c4359b9e1c089b137",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_kernel_boundaries.py",
+      "sha256": "8c17f07b6492cdd29f2dab8ef4bfb5729cb389ac3c1a77a0731fd9c73d7e3869",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_acceptance.py",
+      "sha256": "c4514b10f7e25c4b2100bff77e916bf2d526916877c14465769782af837b5ef6",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_budget_and_cleanup.py",
+      "sha256": "512cfed70021b1a801d007e3da818cf15f13ab29705eebd0f314e2cccce6bcc4",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_dag_concurrency.py",
+      "sha256": "dfa685ea694051ed654e90c7d01f4936205235ba9495353b6c6bb4e77e469b77",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_isolation_and_uploads.py",
+      "sha256": "f3b2b971b41ab548b151ed3d87a89796b161b6d226e6bc5a65e70efad752c18a",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_linux.py",
+      "sha256": "3e0859defad2aadaff5ca727898c871fb4826c76434cf767b007b32de6937a7e",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_product.py",
+      "sha256": "1f865b71334fc235c15437345205ac2de99c7cfec3d09abe11360f6dcfd81194",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_recovery.py",
+      "sha256": "0b7ed13b1926ab2206a24a1a12dcd2283f7e7f5e7a4caf491a82918872592487",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_tau_bridge.py",
+      "sha256": "afc77cad603392ee7f85548134874b7b5cda7f6c280eceefd6f0b78135c8875d",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_tool_protocol.py",
+      "sha256": "a243cda4df43df41a3f8f46f86a58fb5386de85915c7d18989879c83e2bac443",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_native_web.py",
+      "sha256": "aad70f9203b0e5f78cbce82a7ca0169773c71fe2d92512f00b629bb83646c714",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_order_project.py",
+      "sha256": "2ce9f95f17a13356d81e0aa2d8d17c9349ca0b97b3611b581499945ac0919f26",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_p1_to_p5_optimizations.py",
+      "sha256": "b47e2d79eba49e37efe3fcb5976b8cacb34f569997ef2416b684ac8bfbbc7fce",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_proj3_requirements.py",
+      "sha256": "680638a7d0d6a757efb376458f7def2684e09cb2ec99db833dae5aed0403f565",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_review_r2_edges.py",
+      "sha256": "160144e8c3701f32b3d264267cd574a806197c7e466843be007c21cc282e50e0",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_review_task_scope.py",
+      "sha256": "0ab02f002fb17b9e42707fddc080b69ed4c56218853f87eafdb5f9e4b158ec70",
+      "current_matches": true
+    },
+    {
+      "path": "tests/test_sse_and_streaming.py",
+      "sha256": "3a0f5a080f6d208ff677888a43db1447c054242dc53395ae70acbb9d638bb5a3",
+      "current_matches": true
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_ablation_vs_app_framework.py",
+      "sha256": "a50d8896639d4eebf88a4aea9520af832e1342f6e7cb454ea65c34334f627d2c",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_agentbench_os.py",
+      "sha256": "56035e44847d2730e8be347509d4e789ee0e820dc2b3770c8acf57ed580d0ddd",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_aios.py",
+      "sha256": "cff0cdd770dadce0a54ab86cfba6fdb927a7315923cd18c0879d4752faa3b666",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_aios_official_suite.py",
+      "sha256": "15cc9e72de152184054961c0b2a25a8823fddbc2a31cd4edeb30c02ea57bca83",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_bare_vs_runtime_attribution.py",
+      "sha256": "304847f7b68daaf002fc8d8c9ff65cfc8236a7633ddf74360553f40d19e94651",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_engineering_deepseek.py",
+      "sha256": "e3532e40952173ddc89a8655c470b05f159e0e3af47737d9ec5a8ca3feb34f20",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_expanded_github_suite.py",
+      "sha256": "f44d83c16e914f70ed5d71c5d36f42e2bb8e0e1ab879795a023f4859dc6524c2",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_native_dag.py",
+      "sha256": "0abd35e453cb5ff0346dafa37bc2f78a45fb175e4461ce2b8a66b4c7fcd58eb3",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_p1_to_p5_acceptance.py",
+      "sha256": "211eb73eaa57e1d8ace1a5808c117b197374693d1aaed5f12e21fae570083010",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_queue_and_baseline.py",
+      "sha256": "3b1f7bfba45abe1ee348f3a2668baa40edbfcbc4993ebc6ee52a8ca45aae166a",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_real_model_service.py",
+      "sha256": "6d05c0dfccb38d0aaf01e30002960861208f6a289801b71c27bbd52820f8e385",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_real_p2_p3_rss.py",
+      "sha256": "7107c582e239415891ab088b4b8842e3574ab50ffb002edde6f8eabc302a8cf7",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_tau2_airline.py",
+      "sha256": "f16aaaf167e23a7a4a1f89a593b2d83f2ee43217a5f8552b9d3335095f83282b",
+      "current_matches": true
+    },
+    {
+      "path": "tools/benchmark_tau_native.py",
+      "sha256": "dd916e63886297012695db70fb706c320a0ea7621ca2bdff958bdfc1b9cae439",
+      "current_matches": true
+    },
+    {
+      "path": "tools/compare_order_runtime.py",
+      "sha256": "5c36f00f3a5b5f34c2bff9aef1ce43d7d984f1a90a15a904fc4a4e4901de0c44",
+      "current_matches": true
+    },
+    {
+      "path": "tools/doctor.py",
+      "sha256": "a27221b08da67ab0e701da82d1fc1ab894a6086b3a29dffe6a47b5308b2e6d87",
+      "current_matches": true
+    },
+    {
+      "path": "tools/validate_linux.py",
+      "sha256": "e9c1b7429f7b4268b950af9336a63e2dea7e86e8b79f1355ab657b4c454ef1e0",
+      "current_matches": true
+    },
+    {
+      "path": "tools/validate_stream_formats.py",
+      "sha256": "97380f7bfc0afbd9384b8f5320ad381bc998005a3c5e114baea45a3687ea1f44",
+      "current_matches": true
+    },
+    {
+      "path": "aios/benchmarks/progress.py",
+      "sha256": "f132046e441a5cb78fa919e70324e646bc28e72440ef25e531774621d3944445",
+      "current_matches": true
+    },
+    {
+      "path": "aios/benchmarks/tau_bridge.py",
+      "sha256": "0aa42d1098c4b4a3f3264087ca200d023782c1298bacc2750875b5ff299d30a7",
+      "current_matches": true
+    },
+    {
+      "path": "aios/benchmarks/__init__.py",
+      "sha256": "a9e7c472d6bd9242796a38957a08fc8e8d4d71516e00d0917f584dc847d00acb",
+      "current_matches": true
+    },
+    {
+      "path": "aios/config/config.yaml",
+      "sha256": "2049f782a80f1c994ff9e6d953d97ad11c062a739e5c978c9582f13118d783f2",
+      "current_matches": true
+    },
+    {
+      "path": "aios/config/config.yaml.example",
+      "sha256": "b5991cc7d8b77b38afa5387826536833a72b4a49f1a6f9f8b817b2eed640d209",
+      "current_matches": true
+    },
+    {
+      "path": "aios/config/config_manager.py",
+      "sha256": "0adff6c54c343c25ceeffc63ef09aadc8a17d1e7b12120b488b451c24eeda062",
+      "current_matches": true
+    },
+    {
+      "path": "aios/config/__init__.py",
+      "sha256": "4167547aa53971d5c375836e488b8f9056cf0d6963f61fa92fe04467e580e415",
+      "current_matches": true
+    },
+    {
+      "path": "aios/context/base.py",
+      "sha256": "0a8bdd0631dc9e0853207a7b1c1a8910e508bfb3c20fd1b78e9a68ec8a5dbfed",
+      "current_matches": true
+    },
+    {
+      "path": "aios/context/context_store.py",
+      "sha256": "5fba948abb99c88a76f693161fc6dfa045987055fead63b154c3ecc5383d55d5",
+      "current_matches": true
+    },
+    {
+      "path": "aios/context/simple_context.py",
+      "sha256": "241521b9bd0840329a7250c80671f341215e3074ce0ac88e2ccef9ead4d54742",
+      "current_matches": true
+    },
+    {
+      "path": "aios/context/__init__.py",
+      "sha256": "edf14858886dc7da4bb9465b6d8b63f4dee15cb98069eae0f507d9466949ff82",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/__init__.py",
+      "sha256": "2727db36cf024f200e27698a7761cf3b57e77a94c5c56565cdb1bc97c863cdd7",
+      "current_matches": true
+    },
+    {
+      "path": "aios/ipc/mailbox.py",
+      "sha256": "205c447c26a2186e0faf8af58ace0dda5522b922f1a1dcd6442a6fcc5094bd70",
+      "current_matches": true
+    },
+    {
+      "path": "aios/ipc/__init__.py",
+      "sha256": "b3d199a7cba29fc6bd5d4a76825806f3a0a18eda3a3f9f73896a2b9f31828664",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/adapter.py",
+      "sha256": "d6a49fd62721dc0679e66e5a6c831c62a7435ea028e0ebca4bd8479e1b2c857e",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/model_service.py",
+      "sha256": "dd71a041af19e218b667b0e72a9c335da5fe17333a5bfbe1999eec09eee8a719",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/profiles.py",
+      "sha256": "3aaa5fcc0d2ba4c2e58dff2f059554d6a2b9b37f39aa137b715f2a57c42db642",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/routing.py",
+      "sha256": "097aefeb716c0b866cc53e514431938bc578ae211f05c6d0c363ec32c10e394a",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/sse.py",
+      "sha256": "5ff010698cb45bae630fbc6a94931e49a1af495ae38beb6024cdb791bfdb31f2",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/streaming.py",
+      "sha256": "4009c4f88dad12e0727ac79f12b3ddae85f79aa81d88f97905c41c3118e4a69b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/tau_adapter.py",
+      "sha256": "24ad06bbf6bfad8d8b709ca7f64c8836445ec57bbbd6223f82c82e86285ee74a",
+      "current_matches": true
+    },
+    {
+      "path": "aios/llm_core/__init__.py",
+      "sha256": "b8d2b692f4e6bc0c9aaad2cf9bdbca2399803f4ed4f7ca825d93afd18d02f282",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/amem.py",
+      "sha256": "c3bc83699d9171d9a14a9f49fa5e2947633eb0997c4ef9cfb5bda1572fe7632d",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/context_injector.py",
+      "sha256": "584186c1ed6dded4153ae2a6a881fd405c966cfa62022312f1914318a638aefd",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/manager.py",
+      "sha256": "f79e34ee6fd931ff8b01b6f98bf1520a83d113ea000ac0b1768e23dba50c011b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/note.py",
+      "sha256": "fb0a2b8e23a301f70ff7a0c9470c2c266a6f09c9e992f3dafee789f13457cda8",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/write_barrier.py",
+      "sha256": "15465385573023d833b058d41a55d13bda5f7e4e157020de56c8d45d92a6b282",
+      "current_matches": true
+    },
+    {
+      "path": "aios/memory/__init__.py",
+      "sha256": "6f2e1ffd34c8680f6309b5f92da44cbbe5f60613fcc52d376db6a378a35ebcae",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/cgroup_v2.py",
+      "sha256": "60f3dbc06cd7793b134b16a703d5ab1ee851e4d2d5ada94e8e2f919364cb75f6",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/executor.py",
+      "sha256": "3599d96ad53e9ee187f15e8b070ff1e3e440d1aece4fb0c9e39d7eb309d4f34b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/process_service.py",
+      "sha256": "7c309ded61e9829961ee75bb43dabb0afe26431e2536491dc36406cfbddfc8ce",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/telemetry.py",
+      "sha256": "56ca6786969bd2b9665a188c6e08ef5e86f71ad99d10e82e1b0f8a33ef133ea2",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/worker_supervisor.py",
+      "sha256": "bcb90d44764d88f612fd0cab54802ad0a24e4b4dc017a4eda0353608e7fb55a3",
+      "current_matches": true
+    },
+    {
+      "path": "aios/os_kernel/__init__.py",
+      "sha256": "c1e9712ec6995b73c17d1d51d1326d54ea0c5b7e712ef921f603d7e81f1685b5",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/base.py",
+      "sha256": "dbc13a2712666fc86f8e92cc153a82a7c3e1883fb7818d1e2fa3dbeee5f90af6",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/drf_admission.py",
+      "sha256": "765fc452a3d7e8ae871f27dc161ab93b1a448620c4720652222e82c8ed277db1",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/fifo_scheduler.py",
+      "sha256": "7b0b87fed03e5c9f9d107985cbfe99fadf57a32612c7d9273b0e8a8cd5fe93d4",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/rr_scheduler.py",
+      "sha256": "ed7c5e851904af17bbe2b3234122cb161d03293f533a274bcc0b5d6f750059fc",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/workflow_engine.py",
+      "sha256": "3a866c7523132a5a98f497651863d80e9381a1f2befb6b874d70c596d5ac5acd",
+      "current_matches": true
+    },
+    {
+      "path": "aios/scheduler/__init__.py",
+      "sha256": "c18b3225aa933109d463cce004149f7df050a604b53cad814a8e8fde93525d30",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/attachments.py",
+      "sha256": "b09b3a65f93414d746b24805f0524331a45a3598d8e7077b43710077d7c777e4",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/chat_store.py",
+      "sha256": "42e7cec248698c2e9454263069ffd05e9d9011854f524a850c1e6ebd2961bdd7",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/database.py",
+      "sha256": "632203fc1741945cc08a025bdebeabe9a973334a59f48284349929a256627ad8",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/document_parser.py",
+      "sha256": "6d51ad8d6acd5d6c875d54c385086ebd30d30f5e3ba8dc4d768c4685cb4dae63",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/job_store.py",
+      "sha256": "25165b29c8c258886408a0ef06981ea04e210395aab68927ebbc5fd7d6869880",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/knowledge.py",
+      "sha256": "1e2057f08fb7b80f32cc7f6af0eb03a0561acfbabd663f4fa7627a3d0f25d322",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/storage.py",
+      "sha256": "acc308823d5230ecee7635067839fa0f37fbe125a607dd63a36d579d757127d9",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/__init__.py",
+      "sha256": "3edf91d0e4c2907aa3c44e64f5df7ee18eca097e5917a5d96e1ce2857416002e",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/llm.py",
+      "sha256": "fec4c5f58b77bdf284a180c62f5e19f7cc3516766758853961c61391d67e5f62",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/memory.py",
+      "sha256": "1464060383cca4330fe969cb36ecbca499047d3be510642a5cafb29a3dd76e0c",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/storage.py",
+      "sha256": "bd8d1555481305a80efb9f5f05695d7882b602a3528317ff31f33ad2de9bc855",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/syscall.py",
+      "sha256": "eb47251567fdff660aa3c7d2c936e3dab1c4a54ca34ea6f455bb8acda6ecd6cf",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/tool.py",
+      "sha256": "7ee1c7e01138d2fe21b8b216c54028a955d8abe2e3ae3facffc62f842c08ddc6",
+      "current_matches": true
+    },
+    {
+      "path": "aios/syscall/__init__.py",
+      "sha256": "17f6279ec611faeabbaec3827d69ec88792df7c7047da4510ea1863f5aa762e1",
+      "current_matches": true
+    },
+    {
+      "path": "aios/terminal/intent_router.py",
+      "sha256": "9a074c2402bbc4527be185572d6be0c599d9a3ca2b4f74795234a09cac24371e",
+      "current_matches": true
+    },
+    {
+      "path": "aios/terminal/__init__.py",
+      "sha256": "7cac703be29fb91cd91473418d08136c5ecbf852012276666d1450691bdaa627",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/bindings.py",
+      "sha256": "999a43cfc0b98cf7665dd0ac1e02ad52f4238c06013d2161bbc741a903dd2a3b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/catalog.py",
+      "sha256": "f9550404d2f0cbf8a0944eac2be0b45124e3956540c3e7b642d3f16374bbcd5f",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/engineering.py",
+      "sha256": "748d8b570eea0dc260daf680716956e768cd9b5a53713b5057fc49402f7b72a6",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/library.py",
+      "sha256": "4e52c93a37180c494ab7f7ff05b5c6780c6b84649624a72ef81e7b60b8e23e01",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/manager.py",
+      "sha256": "220ba0d0809b085125cfe383a2b245316b2ac667d11090aa8e85bb39d3df96f7",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/mcp_server.py",
+      "sha256": "651f6cf4c51fc8760d0ea7f4d489d8b7bb6ee7bd43e9bfb5ddebac059307aded",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/order_project.py",
+      "sha256": "cf5713382fd8bf793ecd4650dc55716df0069c066a0a254de00b3220c43054d2",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/public_network.py",
+      "sha256": "1b3cd4e34a8db82f00cd64cc6aca018e6c65949f0884bd512fd444d37a5af404",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/worker.py",
+      "sha256": "8b8ade0bda6a8cf781161d9dc9222e9f85ba89011f9411804e67fd9ab166657f",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/__init__.py",
+      "sha256": "9cb13e0db77194992d1262ba3d61798b46a019ff466608e647a2561bca45e734",
+      "current_matches": true
+    },
+    {
+      "path": "aios/utils/id_generator.py",
+      "sha256": "e47e4621470787d195677a56b967512035b46d599b33026bfdba7b1aa9ef7e1e",
+      "current_matches": true
+    },
+    {
+      "path": "aios/utils/logger.py",
+      "sha256": "6e6f5dd2ea2e019eac15905eee6ff8397c6124e730e62e1eb0e53b7182c37d43",
+      "current_matches": true
+    },
+    {
+      "path": "aios/utils/__init__.py",
+      "sha256": "a26ffb94d7817c58272caf2813d3b717c55db981c5f400938cb376905c736c8f",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/llm.py",
+      "sha256": "be66a01112399c1572175a1d8ccb1231d5141e60ffe81f741bfe028ce56f408c",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/memory.py",
+      "sha256": "c67bf70a36eef5771b42412b1fe6ba321832dcb937a034726a70b558eddb88c3",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/scheduler.py",
+      "sha256": "0af73b6c0038fe394c10a939a97af5a42b31ede6e4c4c856e0c168501e60d746",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/storage.py",
+      "sha256": "7cb57ea3549824a0e277a8c6f3db1f1bb987cbf32b4ea777d505e145838baf25",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/tool.py",
+      "sha256": "0cb211e37eddad31e246042b4b83f1e588864493efc481540173e1d0c5096c28",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/modules/__init__.py",
+      "sha256": "ffe949c552d6953a058d6fa41a9b1403509804299a310659ccbcb45c8ad8750b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/stores/processes.py",
+      "sha256": "93dd942e0afe2a7f81bb75a57ef614154d6fa1c476ca5036d2c25b6551926ffc",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/stores/queue.py",
+      "sha256": "a8f539a6b9ec06bd335fa3aeaaa1e055993f6dba193e868a14ffefc2cac2c58e",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/stores/_global.py",
+      "sha256": "d5a1362287426d173d4587569c9b96fd4f6e1918defd51d57ae418424518769b",
+      "current_matches": true
+    },
+    {
+      "path": "aios/hooks/stores/__init__.py",
+      "sha256": "3f6db719c95f7e85f13c52f4b2af2a438779c5db410026be807712a7c0b332e5",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/filesystem/lsfs.py",
+      "sha256": "5abe85a78347d124520a9dfa6d4dcb9c314942cb68f849e4d0794e1a0d5149ce",
+      "current_matches": true
+    },
+    {
+      "path": "aios/storage/filesystem/__init__.py",
+      "sha256": "53475b618564e77c924b7136cc1e3ceaa25ad94a8339bd78dcca618ce4a6a2d6",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/virtual_env/desktop_env.py",
+      "sha256": "0c4b7da745c9d4c1d84d23be6b9eb8b97c2e53b5b8a17a154daf49a6e0dd64b7",
+      "current_matches": true
+    },
+    {
+      "path": "aios/tool/virtual_env/__init__.py",
+      "sha256": "7dea064d43c36df90104184dabb88571ce650ffa81f0a1db134d913b02e02045",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/llm/apis.py",
+      "sha256": "d97d6ab4bb028aa4b2d06a1194b366564a32102fd55245855897807e3467d02f",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/llm/__init__.py",
+      "sha256": "b37c35bbfbb063a8d2ba8c25032c7015ce13a75f3dada0e615bf5aacf08e93df",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/memory/apis.py",
+      "sha256": "440a74b5b793ad763810c85f5db3ef328aecf0055357be0a0471c627a8ef5b45",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/memory/__init__.py",
+      "sha256": "94903eac7611cb0c1881fbadd167ff146a31a75f1de4e1608d6bf974f18c1612",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/storage/apis.py",
+      "sha256": "13d72be0f5aeb5a90fe06fb53f9c1e941c9570e380125ce87c8984a3b9c53dd8",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/storage/__init__.py",
+      "sha256": "ee44b3b41c99f7bd0560eb7cbc68eb987578c6286833a140bdc96f93acdb504d",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/tool/apis.py",
+      "sha256": "74daecdab006dc67689ae532edd62d16a435f4ecb241b2936ac4ff6ee1eed358",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/tool/__init__.py",
+      "sha256": "ca8f578388ba1eb0dc759e4562e29c9731018fb398ccbc91c827f2270757acd8",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/utils/communication.py",
+      "sha256": "06fbbf0f7a950eabf246f0d0a2634b6540291f5a873c711aa7fd023d8e66de8d",
+      "current_matches": true
+    },
+    {
+      "path": "cerebrum/utils/__init__.py",
+      "sha256": "d76fa237c42fa4179bc504885e64dd7857e0a3bd629b2ed56bc5c8eb6a5d17c3",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/chat.html",
+      "sha256": "90ed0d4889a7cb112b51dc1838567fe14d5f2cd0e8fd35681d8bbd03ae3a5b93",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/chat.js",
+      "sha256": "78b34122c8c604c9e7f63d4f9b43ae2fc8dae83d895f7e0fddcdd081f865374f",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/console.html",
+      "sha256": "c3e247166ede78d85182a64bbd4bd8612c0d3515d34aeaeac94dfc24f337dc95",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/console.js",
+      "sha256": "5185886357e50caa855e63ef73c5b6e8a0ed36f950411e78d02753cad1818694",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/guizang.css",
+      "sha256": "37c14e5b5a2229f46850c9bf31be6cf04e5ec83e5eba120ab23f35684e70186e",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/markdown.js",
+      "sha256": "f255c368be467a5de788abb561d8a3b6f4ae1df76c13b711ccc63fb5855c1ec4",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/native-chat.js",
+      "sha256": "15c048a77d85d1057f1202fcd26552cf8b24e25f5a5e4bc0a76ca14b0193437e",
+      "current_matches": true
+    },
+    {
+      "path": "runtime/static/native-console.js",
+      "sha256": "aa9e7abb9ffc9211fcc94092dba46240b98b00d92be7ff8834cfd5242d0d11e5",
+      "current_matches": true
+    }
+  ]
+}

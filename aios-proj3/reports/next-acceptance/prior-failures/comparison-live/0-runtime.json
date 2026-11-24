@@ -1,0 +1,46 @@
+{
+  "pair": 0,
+  "arm": "runtime",
+  "status": "failed",
+  "error_type": "RuntimeError",
+  "seconds": 3.5822575240017613,
+  "coordinator_cpu_seconds": 0.06448606099999998,
+  "provider_calls": [
+    {
+      "input_sha256": "8191fa5ead0675b99cd5bf5015376d8aeed1a26032139c8bdd0f1732e47919b2",
+      "max_tokens": 4096,
+      "temperature": 0.0,
+      "status": "succeeded",
+      "usage": {
+        "prompt_tokens": 1421,
+        "completion_tokens": 232,
+        "total_tokens": 1653,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 1421
+      },
+      "cost_cny": 0.004698,
+      "seconds": 1.4876833810048993
+    },
+    {
+      "input_sha256": "b95a6e0b66b97cc7b75c1776bba644d983c6b419d6add0392b2d997f532500d7",
+      "max_tokens": 4096,
+      "temperature": 0.0,
+      "status": "succeeded",
+      "usage": {
+        "prompt_tokens": 899,
+        "completion_tokens": 232,
+        "total_tokens": 1131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 899
+      },
+      "cost_cny": 0.003654,
+      "seconds": 1.2318614929972682
+    }
+  ]
+}

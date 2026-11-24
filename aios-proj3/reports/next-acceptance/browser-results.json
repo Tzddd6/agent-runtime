@@ -1,0 +1,31 @@
+{
+  "scope": "offline fixed model; real browser, HTTP, Worker and unittest",
+  "rows": [
+    {
+      "case": "browser_order_two_round_download_retest",
+      "passed": true,
+      "job": "bc339d82259f42439993fe5064496f86"
+    },
+    {
+      "case": "refresh_restores_completed_job",
+      "passed": true
+    },
+    {
+      "case": "zero_budget_no_provider_no_artifact",
+      "passed": true
+    },
+    {
+      "case": "invalid_image_visible_failure",
+      "passed": true
+    },
+    {
+      "case": "browser_valid_png_pdf_docx_text_uploads",
+      "passed": true
+    },
+    {
+      "case": "attachment_stream_math_code_table_long_xss",
+      "passed": true
+    }
+  ],
+  "errors": []
+}

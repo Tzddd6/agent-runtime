@@ -1,0 +1,48 @@
+{
+  "pair": 0,
+  "arm": "direct",
+  "status": "failed",
+  "error_type": "RuntimeError",
+  "seconds": 6.300388110998028,
+  "coordinator_cpu_seconds": 0.017972317999999987,
+  "provider_calls": [
+    {
+      "input_sha256": "8191fa5ead0675b99cd5bf5015376d8aeed1a26032139c8bdd0f1732e47919b2",
+      "max_tokens": 4096,
+      "temperature": 0.0,
+      "status": "succeeded",
+      "usage": {
+        "prompt_tokens": 1421,
+        "completion_tokens": 236,
+        "total_tokens": 1657,
+        "prompt_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 141
+      },
+      "cost_cny": 0.0022212,
+      "response_text": "```json\n{\"files\":{\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return gross - (gross * discount_pct) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\",\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\"}}\n```",
+      "seconds": 2.5594832669958123
+    },
+    {
+      "input_sha256": "8a63eefbeeadf4f38429aafe6a8f8678531708752eba5a1009e218aedbeafd3c",
+      "max_tokens": 4096,
+      "temperature": 0.0,
+      "status": "succeeded",
+      "usage": {
+        "prompt_tokens": 899,
+        "completion_tokens": 232,
+        "total_tokens": 1131,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "prompt_cache_hit_tokens": 0,
+        "prompt_cache_miss_tokens": 899
+      },
+      "cost_cny": 0.003654,
+      "response_text": "{\"files\":{\"order_app/pricing.py\":\"def line_total_cents(unit_cents, quantity, discount_pct):\\n    if unit_cents < 0 or quantity < 0 or discount_pct < 0 or discount_pct > 100:\\n        raise ValueError(\\\"invalid\\\")\\n    gross = unit_cents * quantity\\n    return gross - (gross * discount_pct) // 100\\n\",\"order_app/shipping.py\":\"def shipping_cents(subtotal_cents):\\n    if subtotal_cents < 0:\\n        raise ValueError(\\\"invalid\\\")\\n    if subtotal_cents >= 5000:\\n        return 0\\n    return 599\\n\",\"order_app/orders.py\":\"from order_app.pricing import line_total_cents\\nfrom order_app.shipping import shipping_cents\\n\\ndef total_cents(unit_cents, quantity, discount_pct):\\n    subtotal = line_total_cents(unit_cents, quantity, discount_pct)\\n    return subtotal + shipping_cents(subtotal)\\n\"}}",
+      "seconds": 2.8763348150023376
+    }
+  ]
+}

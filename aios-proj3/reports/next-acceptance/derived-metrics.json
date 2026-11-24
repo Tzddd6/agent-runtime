@@ -1,0 +1,8 @@
+{
+  "outside_provider_median_seconds": {
+    "runtime": 0.6809230699946056,
+    "direct": 0.5504160760028753
+  },
+  "extra_runtime_seconds": 0.13050699399173027,
+  "method": "For each run: total wall minus provider wall; then median per arm. Not pure scheduler CPU."
+}

@@ -1,0 +1,18 @@
+test_discount (tests.test_orders.OrderTests.test_discount) ... ok
+test_discount_threshold (tests.test_orders.OrderTests.test_discount_threshold) ... ok
+test_free_order (tests.test_orders.OrderTests.test_free_order) ... ok
+test_full_discount (tests.test_orders.OrderTests.test_full_discount) ... ok
+test_invalid_discount (tests.test_orders.OrderTests.test_invalid_discount) ... ok
+test_negative_price (tests.test_orders.OrderTests.test_negative_price) ... ok
+test_negative_quantity (tests.test_orders.OrderTests.test_negative_quantity) ... ok
+test_negative_subtotal (tests.test_orders.OrderTests.test_negative_subtotal) ... ok
+test_order (tests.test_orders.OrderTests.test_order) ... ok
+test_percentage_floor_once (tests.test_orders.OrderTests.test_percentage_floor_once) ... ok
+test_shipping_below (tests.test_orders.OrderTests.test_shipping_below) ... ok
+test_shipping_boundary (tests.test_orders.OrderTests.test_shipping_boundary) ... ok
+test_zero_quantity (tests.test_orders.OrderTests.test_zero_quantity) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.000s
+
+OK

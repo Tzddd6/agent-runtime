@@ -1,0 +1,287 @@
+{
+  "scope": "cold end-to-end; direct orchestration shares low-level OS Worker/checker, bypasses Kernel/Syscall/DAG",
+  "provider": "fixed synthetic; no tokenizer or billing claims",
+  "same_prompt_hash_by_pair": [
+    true,
+    true,
+    true
+  ],
+  "summary": {
+    "runtime": {
+      "runs": 3,
+      "successes": 3,
+      "median_seconds": 0.5947002000175416,
+      "calls": 3,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    },
+    "direct": {
+      "runs": 3,
+      "successes": 3,
+      "median_seconds": 0.35838020010851324,
+      "calls": 3,
+      "prompt_tokens": 0,
+      "completion_tokens": 0
+    }
+  },
+  "cost_cny": 0,
+  "budget_after_cny": 0,
+  "resource_boundary": "coordinator CPU and Worker cgroup receipts; no per-arm total RSS attribution",
+  "rows": [
+    {
+      "pair": 0,
+      "arm": "runtime",
+      "status": "succeeded",
+      "initialization_seconds": 0.11569290002807975,
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "e698a35a1cc74366b94614e1f235ef12",
+          "agent": "order-7bc3008a5ede407a941eca9d0851c332-testing",
+          "pid": 9912,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449583.058225
+        },
+        {
+          "id": "fdf8130ad67e44bcb6c694d6f6351989",
+          "agent": "order-7bc3008a5ede407a941eca9d0851c332-testing",
+          "pid": 61432,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449583.2813714
+        }
+      ],
+      "seconds": 0.6675181000027806,
+      "coordinator_cpu_seconds": 0.140625,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "pair": 0,
+      "arm": "direct",
+      "status": "succeeded",
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "c2a0c2e3d4af4caebe20ac631ca3506f",
+          "agent": "direct-order",
+          "pid": 79616,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449583.5776925
+        },
+        {
+          "id": "ae6eec13fa204f32b45898b33d5f74fe",
+          "agent": "direct-order",
+          "pid": 81168,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449583.7530077
+        }
+      ],
+      "seconds": 0.35838020010851324,
+      "coordinator_cpu_seconds": 0.0,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "arm": "direct",
+      "status": "succeeded",
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "df653ebc7d7e4d4086291f507c14e852",
+          "agent": "direct-order",
+          "pid": 79576,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449583.9340832
+        },
+        {
+          "id": "16e74536c25b4d029a5be5e6f17b7d85",
+          "agent": "direct-order",
+          "pid": 7848,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449584.1166215
+        }
+      ],
+      "seconds": 0.36260399990715086,
+      "coordinator_cpu_seconds": 0.015625,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "pair": 1,
+      "arm": "runtime",
+      "status": "succeeded",
+      "initialization_seconds": 0.06257309997454286,
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "fa720bb4521b43a2b862f80a46e346d1",
+          "agent": "order-a13277c0e9b544668cf2442c0fc9ac71-testing",
+          "pid": 11836,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449584.3905144
+        },
+        {
+          "id": "cf202670e7f44b9cac055b239468e197",
+          "agent": "order-a13277c0e9b544668cf2442c0fc9ac71-testing",
+          "pid": 43020,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449584.6048076
+        }
+      ],
+      "seconds": 0.5947002000175416,
+      "coordinator_cpu_seconds": 0.0625,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "arm": "runtime",
+      "status": "succeeded",
+      "initialization_seconds": 0.06022079987451434,
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "422881a499a5498b9aaec75a611e94e1",
+          "agent": "order-76188bb0f8114b41bf0b2da08f1b4cbf-testing",
+          "pid": 79152,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449584.9865427
+        },
+        {
+          "id": "07758f6618674eaf9775cfa97090fc5e",
+          "agent": "order-76188bb0f8114b41bf0b2da08f1b4cbf-testing",
+          "pid": 59724,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449585.2007992
+        }
+      ],
+      "seconds": 0.5887771998532116,
+      "coordinator_cpu_seconds": 0.078125,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    },
+    {
+      "pair": 2,
+      "arm": "direct",
+      "status": "succeeded",
+      "tests_run": 13,
+      "source_sha256": "7796434144094d5ecae25a37515eca359f7ec29d697f77aa8227579a671f140f",
+      "worker_receipts": [
+        {
+          "id": "878f34eb623a4477bfb5b3515823c737",
+          "agent": "direct-order",
+          "pid": 64760,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449585.4801874
+        },
+        {
+          "id": "4ba7e6b699164cf7935c92f990701dfd",
+          "agent": "direct-order",
+          "pid": 27492,
+          "operation": "project.workspace_check",
+          "reclaimed": true,
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795449585.6581254
+        }
+      ],
+      "seconds": 0.35699820006266236,
+      "coordinator_cpu_seconds": 0.015625,
+      "provider_calls": [
+        {
+          "input_sha256": "4cd8b2ed8830e90971ddcd899b2e39c223b4e13d6f7fecf5945f6276a5335ed3",
+          "max_tokens": 4096,
+          "temperature": 0.0,
+          "status": "succeeded",
+          "usage": {},
+          "cost_cny": null,
+          "synthetic": true
+        }
+      ]
+    }
+  ]
+}

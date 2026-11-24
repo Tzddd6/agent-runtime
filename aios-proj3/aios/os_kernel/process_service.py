@@ -1,5 +1,12 @@
+# Project module contract / 项目模块说明
+# 职责：管理受控Worker、资源限制、遥测与回收；严格隔离要求有效Linux委派子树。
+# 主要接口：ProcessService。
+# 来源：架构参考 agiresearch/AIOS；具体借用及第三方说明见 THIRD_PARTY_NOTICES.md。
+# 开源：团队有权许可的自研代码及修改采用 MIT；第三方原许可不被覆盖。
+# AI辅助与审查边界：见 docs/AI工具使用说明.md；不以自动测试代替人工理解。
 """Kernel-owned Worker execution with bounded input and verified cleanup."""
 from hashlib import sha256
+from copy import deepcopy
 import json
 from pathlib import Path
 from threading import RLock
@@ -10,7 +17,7 @@ from aios.os_kernel.executor import Executor
 
 
 class ProcessService:
-    OPERATIONS = {'text.stats', 'math.calculate', 'project.test', 'project.patch_check', 'runtime.load', 'web.fetch'}
+    OPERATIONS = {'text.stats', 'math.calculate', 'project.test', 'project.patch_check', 'project.workspace_check', 'runtime.load', 'web.fetch'}
 
     def __init__(self, root, cgroup_root=None):
         self.root = Path(root)
@@ -52,6 +59,8 @@ class ProcessService:
                 self.executor.agent_roots[agent] = group
             handle = self.executor.launch({'id': identity, 'agent': agent, 'operation': operation,
                                            'parameters': parameters, 'timeout': timeout}, directory, limits)
+            handle['operation'] = operation
+            handle['limits'] = dict(limits)
             self.active[identity] = (agent, handle)
         pid = handle['proc'].pid
         try:
@@ -78,6 +87,8 @@ class ProcessService:
                 self.receipts.append({'id': identity, 'agent': agent, 'pid': pid,
                                       'operation': operation, 'reclaimed': True,
                                       'enforcement': 'cgroup_v2' if handle['group'] else 'process_group',
+                                      'cgroup': str(handle['group']) if handle['group'] else None,
+                                      'limits': dict(limits),
                                       'usage': handle.get('_usage', {}), 'finished': time.time()})
                 if receipt_observer is not None:
                     receipt_observer(dict(self.receipts[-1]))
@@ -92,7 +103,29 @@ class ProcessService:
 
     def snapshot(self):
         with self.lock:
-            return {'active': len(self.active), 'quarantined_agents': sorted(self.quarantined_agents), 'receipts': list(self.receipts)}
+            workers = []
+            for identity, (agent, handle) in self.active.items():
+                sample = {}
+                if handle['group']:
+                    for name in ('cpu.stat', 'memory.current', 'pids.current'):
+                        try: sample[name] = (handle['group']/name).read_text()
+                        except OSError: sample[name] = None
+                workers.append({'id': identity, 'agent': agent, 'pid': handle['proc'].pid,
+                                'operation': handle['operation'], 'limits': handle['limits'],
+                                'cgroup': str(handle['group']) if handle['group'] else None, 'usage': sample})
+            return deepcopy({'active': len(self.active), 'active_workers': workers,
+                             'quarantined_agents': sorted(self.quarantined_agents), 'receipts': list(self.receipts)})
+
+    def release_agent(self, agent):
+        """Release an idle role's OS slice; never release an in-flight worker."""
+        with self.lock:
+            if any(owner == agent for owner, _ in self.active.values()) or agent in self.quarantined_agents:
+                raise RuntimeError('Cannot release an active or quarantined Agent')
+            group = self.executor.agent_roots.get(agent)
+            if group is not None:
+                group.rmdir()
+                self.executor.agent_roots.pop(agent)
+            self.terminated.add(agent)
 
     def close(self):
         with self.lock:

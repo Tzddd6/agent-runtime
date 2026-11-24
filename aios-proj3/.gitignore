@@ -6,5 +6,8 @@ __pycache__/
 !.env.example
 *.pem
 *.key
-root_storage/
 native-web-data/
+root_storage/
+reports/browser-*/
+reports/local-comparison/
+node_modules/

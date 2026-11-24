@@ -3,11 +3,11 @@
 
 > **参赛项目仓库**：`d:\gemini\aios`  
 > **目标国产操作系统**：`openEuler 24.03 SP4`（Linux 内核 `6.6.0-159.4.20.174.oe2403sp4.x86_64`，`cgroup v2` unified 委派模式）  
-> **报告组织方式**：严格对齐大赛官网 `proj3` 五大官方评审维度（**30% 系统设计与机制创新 / 25% 功能完整性与实现深度 / 20% 性能优化效果 / 15% 工程实现质量 / 10% 实验与分析质量**）。
+> **历史材料说明**：下文按旧技术主题组织，不是区域赛官方评分表。区域赛权重和最新证据见《赛题评分与证据索引》《类似项目对比》；其中历史性能与“官方对齐”字样不代表官方排名。
 
 ---
 
-## 一、系统设计与机制创新（对应评审要点 30%）
+## 一、系统设计与机制创新（历史技术主题）
 
 ### 1.1 问题定位：为什么应用层多 Agent 框架不是操作系统？
 现有应用层框架（如 LangGraph、AutoGen、CrewAI）将多智能体协作停留在用户态工作流编排层，存在四类本质缺陷：
@@ -44,7 +44,7 @@ flowchart TB
 
 ---
 
-## 二、功能完整性与实现深度（对应评审要点 25%）
+## 二、功能完整性与实现深度（历史技术主题）
 
 | 赛题条款 | 对应核心模块 | 实现深度与实测验证 |
 | :--- | :--- | :--- |
@@ -58,7 +58,7 @@ flowchart TB
 
 ---
 
-## 三、性能优化效果（对应评审要点 20%）
+## 三、性能优化效果（历史技术主题）
 
 ### 3.1 消融实验：应用层全量拷贝框架 vs AIOS 正式内核
 脚本：[benchmark_ablation_vs_app_framework.py](file:///d:/gemini/aios/tools/benchmark_ablation_vs_app_framework.py) · 报告：[ablation_vs_app_framework.json](file:///d:/gemini/aios/reports/ablation_vs_app_framework.json)  
@@ -84,7 +84,7 @@ flowchart TB
 
 ---
 
-## 四、工程实现质量（对应评审要点 15%）
+## 四、工程实现质量（历史技术主题）
 
 1. **架构解耦与零双轨债务**：彻底摒弃历史兼容层，Web 控制台（[runtime/web.py](file:///d:/gemini/aios/runtime/web.py)）、对话编排（[runtime/conversation.py](file:///d:/gemini/aios/runtime/conversation.py)）与远程 SDK（[cerebrum/client.py](file:///d:/gemini/aios/cerebrum/client.py)）统一通过内核 `SyscallExecutor` 调度。
 2. **安全边界与容错设计**：
@@ -96,7 +96,7 @@ flowchart TB
 
 ---
 
-## 五、实验与分析质量（对应评审要点 10%）
+## 五、实验与分析质量（历史技术主题）
 
 除内核微基准外，我们在 **openEuler 24.03 SP4 NUC** 上接入真实大模型（`deepseek-chat`）完成了三项端到端真实 Agent 能力公榜/工程评测：
 

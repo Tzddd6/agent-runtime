@@ -1,0 +1,28 @@
+{
+  "pair": 0,
+  "arm": "direct",
+  "status": "failed",
+  "error_type": "JSONDecodeError",
+  "seconds": 1.670944686004077,
+  "coordinator_cpu_seconds": 0.006367862000000002,
+  "provider_calls": [
+    {
+      "input_sha256": "8191fa5ead0675b99cd5bf5015376d8aeed1a26032139c8bdd0f1732e47919b2",
+      "max_tokens": 4096,
+      "temperature": 0.0,
+      "status": "succeeded",
+      "usage": {
+        "prompt_tokens": 1421,
+        "completion_tokens": 236,
+        "total_tokens": 1657,
+        "prompt_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "prompt_cache_hit_tokens": 1280,
+        "prompt_cache_miss_tokens": 141
+      },
+      "cost_cny": 0.0022212,
+      "seconds": 1.3794229019986233
+    }
+  ]
+}

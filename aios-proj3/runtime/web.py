@@ -1,3 +1,9 @@
+# Project module contract / 项目模块说明
+# 职责：连接常驻内核、工作流与网页；业务成功必须由真实执行结果确认。
+# 主要接口：NativeConsole, create_server, main。
+# 来源：架构参考 agiresearch/AIOS；具体借用及第三方说明见 THIRD_PARTY_NOTICES.md。
+# 开源：团队有权许可的自研代码及修改采用 MIT；第三方原许可不被覆盖。
+# AI辅助与审查边界：见 docs/AI工具使用说明.md；不以自动测试代替人工理解。
 """Loopback console backed by the native AIOS workflow engine."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
@@ -5,6 +11,7 @@ from copy import deepcopy
 from hmac import compare_digest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
+from hashlib import sha256
 import os
 from pathlib import Path
 import secrets
@@ -89,7 +96,7 @@ class NativeConsole:
         self.attachments = AttachmentStore(self.root / 'attachments', self.database)
         self.model_service = ModelService()
         self.kernel.llm.model_service = self.model_service
-        self.telemetry = MachineSampler(kernel.cgroup_manager.root_path if kernel.cgroup_manager.enabled else None)
+        self.telemetry = MachineSampler(kernel.cgroup_manager.cgroup_root if kernel.cgroup_manager.enabled else None)
         self.vm = get_vm_controller()
         self.agent_hub = _default_agent_hub()
         self.conversations = Conversations(self)
@@ -117,7 +124,10 @@ class NativeConsole:
         if graph and job['status'] == 'running':
             job['states'] = {node['id']: node['state'] for node in graph['nodes']}
             job['attempts'] = {node['id']: node['attempts'] for node in graph['nodes']}
-        return job
+        # Dynamic spawn results contain local handlers. Public/persisted details
+        # must use the same representation rather than failing JSON encoding.
+        return json.loads(json.dumps(job, ensure_ascii=False,
+                                     default=lambda value: '<callable>' if callable(value) else str(value)))
 
     def run_litecua(self, value):
         action = value.get('action')
@@ -189,6 +199,7 @@ class NativeConsole:
         try:
             self.conversations.submit({'conversation_id': 'job_' + identity, 'request_id': identity,
                                        'mode': value['preset'], 'project': value.get('project', 'pricing'),
+                                       'model_budget': value.get('model_budget', {'calls': 8, 'output_tokens': 16384}),
                                        'prompt': value.get('prompt') or '完成当前受控任务'}, workflow_id=identity)
         except Exception:
             with self.lock:
@@ -287,6 +298,22 @@ def create_server(console, port=18892):
                 with console.lock:
                     jobs = [{key: job[key] for key in ('id', 'preset', 'policy', 'status')} for job in reversed(console.jobs.values())]
                 self.respond(200, {'jobs': jobs})
+            elif path.startswith('/api/jobs/') and path.endswith('/artifact'):
+                identity = path.split('/')[3]
+                try:
+                    job = console.detail(identity)
+                    artifact = job['results']['answer']['artifact']
+                    if job['status'] != 'succeeded' or len(identity) != 32 or any(c not in '0123456789abcdef' for c in identity):
+                        raise ValueError('Artifact is not committed')
+                    target = console.root / 'artifacts' / (identity + '.zip')
+                    if target.is_symlink():
+                        raise ValueError('Artifact symlink forbidden')
+                    raw = target.read_bytes()
+                    if sha256(raw).hexdigest() != artifact['sha256']:
+                        raise ValueError('Artifact integrity check failed')
+                    self.respond(200, raw, 'application/zip')
+                except (KeyError, ValueError, OSError):
+                    self.respond(404, {'error': 'Verified artifact unavailable'})
             elif path.startswith('/api/jobs/'):
                 try:
                     self.respond(200, console.detail(path.rsplit('/', 1)[1]))

@@ -83,6 +83,15 @@
   }
 
   function renderJobDetail(detail) {
+    function sourceText(value) {
+      try {
+        const files = JSON.parse(value);
+        if (files && typeof files === 'object' && !Array.isArray(files)) {
+          return Object.entries(files).map(([name, code]) => '# ' + name + '\n' + String(code)).join('\n\n');
+        }
+      } catch (_) {}
+      return value || '';
+    }
     document.getElementById("selectedJobTitle").textContent =
       "工作流 [" + detail.preset.toUpperCase() + "] · " + detail.id.slice(0, 10);
     const stBadge = document.getElementById("selectedJobStatus");
@@ -113,8 +122,24 @@
       const eng = detail.engineering;
       document.getElementById("engProjectTitle").textContent = eng.title + " (" + eng.file + ")";
       document.getElementById("engVerdictBadge").textContent = eng.accepted ? "全部测试与哈希核验通过" : "未通过";
-      document.getElementById("engOriginalCode").textContent = eng.original_source || "";
-      document.getElementById("engPatchedCode").textContent = eng.patched_source || "";
+      document.getElementById("engOriginalCode").textContent = sourceText(eng.original_source);
+      document.getElementById("engPatchedCode").textContent = sourceText(eng.patched_source);
+      document.getElementById("engTestSummary").textContent =
+        `${eng.test_engine || 'controlled_assertions'} · ${eng.tests_run || '查看记录'} 项测试`;
+      const usage = detail.model_budget || {};
+      document.getElementById('engTokenSummary').textContent =
+        `模型 ${usage.calls || 0} 次；供应商已报告输入 ${usage.actual_input_tokens || 0} / 输出 ${usage.actual_output_tokens || 0} token` +
+        `（覆盖 ${usage.usage_reported_calls || 0} 次调用）。输出上限预留 ${usage.output_tokens || 0}，不是实际计费 token。`;
+      const download = document.getElementById("engDownload");
+      const downloadUrl = eng.artifact && eng.artifact.download_url;
+      download.hidden = !downloadUrl;
+      if (downloadUrl && /^\/api\/jobs\/[a-f0-9]{32}\/artifact$/.test(downloadUrl)) {
+        download.href = downloadUrl;
+        download.download = 'verified-order-project.zip';
+      } else {
+        download.hidden = true;
+        download.removeAttribute('href');
+      }
       document.getElementById("engPhaseList").innerHTML = (eng.phases || []).map((p) =>
         `<div class="info-card"><div class="mono" style="font-size:11px;color:var(--ink-muted);">${p.id}</div><h3>${escapeText(p.label)}</h3><span class="tag ${p.status === 'succeeded' ? 'tag-ok' : 'tag-warn'}">${p.status}</span></div>`
       ).join("");
@@ -137,6 +162,13 @@
       document.getElementById("lastSampleTime").textContent = new Date().toLocaleTimeString();
 
       const kStatus = st.kernel_status || {};
+      const processes = kStatus.processes || {};
+      const records = [...(processes.active_workers || []).map(w => ({...w, phase: '运行中'})),
+        ...(processes.receipts || []).slice(-8).reverse().map(w => ({...w, phase: w.reclaimed ? '已回收' : '未确认'}))];
+      document.getElementById('workerEvidence').innerHTML = records.length
+        ? '<table class="swiss-table"><thead><tr><th>Agent / PID</th><th>状态与隔离</th><th>资源限额 / 采样</th></tr></thead><tbody>' + records.map(w =>
+          `<tr><td>${escapeText(w.agent)}<br>PID ${escapeText(w.pid)}</td><td>${escapeText(w.phase)}<br>${escapeText(w.cgroup || 'process_group（非 cgroup 硬限制）')}</td><td>${escapeText(JSON.stringify(w.limits || {}))}<br>${escapeText(JSON.stringify(w.usage || {}))}</td></tr>`).join('') + '</tbody></table>'
+        : '<p class="hint">当前没有 Worker 执行记录。</p>';
       const drf = kStatus.drf_resources || {};
       const cap = drf.capacity || { cpu_milli: 4000 };
       const used = drf.used || { cpu_milli: 0 };

@@ -117,6 +117,7 @@
               <div id="projectBox" style="display:none;">
                 <label for="projectSelect">受控修复工程</label>
                 <select id="projectSelect">
+                  <option value="order_project">多文件订单工程 · 真实 unittest、独立角色与 ZIP 交付</option>
                   <option value="pricing">pricing.py · 金额计算（折扣、免邮与按比例退款）</option>
                   <option value="intervals">intervals.py · 时间区间（相交时长、窗口分桶与 TTL）</option>
                   <option value="text_normalization">text_normalization.py · 文本规范化（空白折叠、词数与前缀）</option>
@@ -146,11 +147,11 @@
               <div class="two-col">
                 <div>
                   <label for="modelCallsBudget">模型调用上限</label>
-                  <input id="modelCallsBudget" type="number" min="0" max="128" value="32">
+                  <input id="modelCallsBudget" type="number" min="0" max="8" value="8">
                 </div>
                 <div>
                   <label for="modelTokensBudget">输出 Token 预算</label>
-                  <input id="modelTokensBudget" type="number" min="256" max="262144" value="16384">
+                  <input id="modelTokensBudget" type="number" min="0" max="16384" value="16384">
                 </div>
               </div>
 
@@ -239,6 +240,9 @@
               </div>
               <p class="hint" id="selectedJobMeta">启动左侧预设场景后，此处实时呈现 DAG 节点状态、动态孵化子任务（spawn_tasks）、单点故障隔离（isolated_skipped）及上下文哈希引用。</p>
               <div id="dagTaskTableWrap" style="margin-top:14px;"></div>
+              <h3>真实 Worker 与资源证据</h3>
+              <p class="hint">运行中展示 PID 与当前采样；回收后展示执行回执。规则角色没有 Worker 时不伪造 PID。</p>
+              <div id="workerEvidence"></div>
             </article>
 
             <article class="panel" id="engineeringBox" style="display:none;">
@@ -250,13 +254,16 @@
                 <span class="tag tag-ok" id="engVerdictBadge">已验证</span>
               </div>
               <div id="engPhaseList" class="card-grid" style="margin-bottom:14px;"></div>
+              <p id="engTestSummary"></p>
+              <p id="engTokenSummary" class="hint"></p>
+              <a id="engDownload" hidden>下载已验收项目 ZIP</a>
               <div class="two-col">
                 <div>
                   <label>原始含缺陷源码 (Baseline Failing)</label>
                   <pre class="code-block" id="engOriginalCode"></pre>
                 </div>
                 <div>
-                  <label>AST 受检补丁源码 (Public + Heldout Verified)</label>
+                  <label>补丁源码（独立测试验收）</label>
                   <pre class="code-block" id="engPatchedCode"></pre>
                 </div>
               </div>

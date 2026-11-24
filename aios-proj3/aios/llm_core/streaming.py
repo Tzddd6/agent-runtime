@@ -1,3 +1,9 @@
+# Project module contract / 项目模块说明
+# 职责：适配模型协议、持钥服务与结果校验；不重放不确定付费调用。
+# 主要接口：ModelStreamError, error_metadata, encode_responses_input, decode_responses_output, parse_chat_completions_sse_stream。
+# 来源：架构参考 agiresearch/AIOS；具体借用及第三方说明见 THIRD_PARTY_NOTICES.md。
+# 开源：团队有权许可的自研代码及修改采用 MIT；第三方原许可不被覆盖。
+# AI辅助与审查边界：见 docs/AI工具使用说明.md；不以自动测试代替人工理解。
 """
 Trusted SSE Streaming & Provider Protocol Engine for AIOS LLM Core.
 Supports both:
