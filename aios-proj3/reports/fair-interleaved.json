@@ -1,0 +1,1146 @@
+{
+  "scope": "cold end-to-end, same isolated tool executor; no total memory advantage claimed",
+  "fixed_conditions": {
+    "concurrency": 1,
+    "temperature": 0.0,
+    "max_output_tokens": 4096,
+    "max_patch_rounds": 2
+  },
+  "same_prompt_hash_by_pair": [
+    true,
+    true,
+    true
+  ],
+  "summary": {
+    "A": {
+      "successes": 3,
+      "median_ms": 1943.7963999807835
+    },
+    "B": {
+      "successes": 3,
+      "median_ms": 1263.7938999105245
+    }
+  },
+  "runs": [
+    {
+      "arm": "AIOS_RUNTIME",
+      "arm_code": "A",
+      "round": 1,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1999.9223002232611,
+      "coordinator_cpu_seconds": 0.3125,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "11e1695d004349b7b9717dbf4420fc02",
+          "agent": "tester_agent",
+          "pid": 73604,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_73604",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507511.9099984
+        },
+        {
+          "id": "7278be179b0844fe93434f2f79e61bbf",
+          "agent": "tester_agent",
+          "pid": 56548,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_56548",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507512.2040653
+        },
+        {
+          "id": "4081c9b363a34941b5e7416586b43284",
+          "agent": "tester_agent",
+          "pid": 29700,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_29700",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507512.4430082
+        },
+        {
+          "id": "ab144aef985346f68a573518f709311a",
+          "agent": "tester_agent",
+          "pid": 57444,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_57444",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507512.6119273
+        },
+        {
+          "id": "917438aad9b54fa2980340c5df47ef85",
+          "agent": "tester_agent",
+          "pid": 44020,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_44020",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507512.8247364
+        },
+        {
+          "id": "e04f4d02ecbd4332bf453d843ef5cd9d",
+          "agent": "tester_agent",
+          "pid": 80412,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_80412",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507513.0057747
+        },
+        {
+          "id": "f3b9dbd99ad74563b26044a955a4e6e8",
+          "agent": "tester_agent",
+          "pid": 12724,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_12724",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507513.2124023
+        },
+        {
+          "id": "5f838816240143eca33436233db060bd",
+          "agent": "tester_agent",
+          "pid": 70492,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_70492",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507513.375049
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 5.669984966516495e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 2.3899832740426064e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 2.010003663599491e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.7399899661540985e-05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "arm": "DIRECT_LOOP",
+      "arm_code": "B",
+      "round": 1,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1263.777099782601,
+      "coordinator_cpu_seconds": 0.03125,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "7d248632cac0412f966458c0002feafe",
+          "agent": "tester_agent",
+          "pid": 82308,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_82308",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507513.7574103
+        },
+        {
+          "id": "4e406242abfc4e908cf2a176a71f4dcb",
+          "agent": "tester_agent",
+          "pid": 37036,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_37036",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.0051787
+        },
+        {
+          "id": "5c78a16669e24ca2b78bb063d92efa57",
+          "agent": "tester_agent",
+          "pid": 78336,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_78336",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.1328325
+        },
+        {
+          "id": "80757c8edaee4b8f9a9c2d005dee9cd5",
+          "agent": "tester_agent",
+          "pid": 80616,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_80616",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.2582943
+        },
+        {
+          "id": "8fe406a2a12e4e4c903f30c6144249e7",
+          "agent": "tester_agent",
+          "pid": 83084,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_83084",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.3839545
+        },
+        {
+          "id": "8d4b709defb144fcb37dbc5e3ad73aa8",
+          "agent": "tester_agent",
+          "pid": 28764,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_28764",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.5143461
+        },
+        {
+          "id": "ad218c3037e9470eaa5cb2d551954ccc",
+          "agent": "tester_agent",
+          "pid": 80644,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_80644",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.6390803
+        },
+        {
+          "id": "962fe0df832845d6a56cae6953eeb60f",
+          "agent": "tester_agent",
+          "pid": 75476,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_75476",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507514.7645764
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 4.5000109821558e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 2.0300038158893585e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 1.850002445280552e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.8399907276034355e-05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "arm": "DIRECT_LOOP",
+      "arm_code": "B",
+      "round": 2,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1263.7938999105245,
+      "coordinator_cpu_seconds": 0.046875,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "a417bf09675d4d6e83459d4a23988ad9",
+          "agent": "tester_agent",
+          "pid": 83836,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_83836",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.0182247
+        },
+        {
+          "id": "dcdaef9de77f4c9abf56db9189f60f50",
+          "agent": "tester_agent",
+          "pid": 80132,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_80132",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.269038
+        },
+        {
+          "id": "35bde7e32aa74473a6dcd0561da89e88",
+          "agent": "tester_agent",
+          "pid": 24036,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_24036",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.398674
+        },
+        {
+          "id": "5d93f51d35df44169e9737ad93fc600b",
+          "agent": "tester_agent",
+          "pid": 36672,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_36672",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.5227032
+        },
+        {
+          "id": "f20977e71e1c4a52bd8fa7eab3defe7b",
+          "agent": "tester_agent",
+          "pid": 37436,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_37436",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.6501482
+        },
+        {
+          "id": "051229c3504d4c31b14216ac98b55c3f",
+          "agent": "tester_agent",
+          "pid": 16284,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_16284",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.7798557
+        },
+        {
+          "id": "b12e494560224ab389bc07da894ea57c",
+          "agent": "tester_agent",
+          "pid": 51916,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_51916",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507515.9041722
+        },
+        {
+          "id": "5223c0a1fd854f50bcef8b3831f67dff",
+          "agent": "tester_agent",
+          "pid": 43540,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_43540",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507516.0279143
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 4.20999713242054e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 2.0399922505021095e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 1.9799917936325073e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.9099796190857887e-05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "arm": "AIOS_RUNTIME",
+      "arm_code": "A",
+      "round": 2,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1918.1307000108063,
+      "coordinator_cpu_seconds": 0.265625,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "436c9d43c5814c20b302093d6f03f19a",
+          "agent": "tester_agent",
+          "pid": 75632,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_75632",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507516.3790703
+        },
+        {
+          "id": "edac8595f55c49339110afa5239c4871",
+          "agent": "tester_agent",
+          "pid": 26700,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_26700",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507516.6705296
+        },
+        {
+          "id": "a6805ee36ab94fce9ea7f940d672c40c",
+          "agent": "tester_agent",
+          "pid": 60924,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_60924",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507516.875646
+        },
+        {
+          "id": "b23d8f3d17c24a569fb7623e56351901",
+          "agent": "tester_agent",
+          "pid": 83780,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_83780",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507517.0450997
+        },
+        {
+          "id": "cb37d4dcbfd14eb58148824b346c7dc3",
+          "agent": "tester_agent",
+          "pid": 81216,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_81216",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507517.25161
+        },
+        {
+          "id": "27d906ce19d24ef09ce73dab3c699a29",
+          "agent": "tester_agent",
+          "pid": 82236,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_82236",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507517.4266574
+        },
+        {
+          "id": "0f470f19a93e458f9a29d3f2dec3040d",
+          "agent": "tester_agent",
+          "pid": 32084,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_32084",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507517.6349146
+        },
+        {
+          "id": "36106c53f8a548c58261eda2949cc4b3",
+          "agent": "tester_agent",
+          "pid": 82128,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_82128",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507517.8083014
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 5.010003224015236e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 2.1499814465641975e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 2.259993925690651e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.6800127923488617e-05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "arm": "AIOS_RUNTIME",
+      "arm_code": "A",
+      "round": 3,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1943.7963999807835,
+      "coordinator_cpu_seconds": 0.359375,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "98168b396378479c81ecd43d62efc164",
+          "agent": "tester_agent",
+          "pid": 83480,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_83480",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507518.3185651
+        },
+        {
+          "id": "8925da8b0d21428594a54227f56528ad",
+          "agent": "tester_agent",
+          "pid": 75440,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_75440",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507518.6086156
+        },
+        {
+          "id": "68f0f13929e545e99d455b02214e7232",
+          "agent": "tester_agent",
+          "pid": 30760,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_30760",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507518.8232367
+        },
+        {
+          "id": "1964cee76fae4c19b057303bf496444f",
+          "agent": "tester_agent",
+          "pid": 82528,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_82528",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507519.020354
+        },
+        {
+          "id": "649860f18daf437db0c730e291d94fc3",
+          "agent": "tester_agent",
+          "pid": 20584,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_20584",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507519.2297947
+        },
+        {
+          "id": "3affa8549ff54f889c1ebeaa382078ae",
+          "agent": "tester_agent",
+          "pid": 31824,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_31824",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507519.395106
+        },
+        {
+          "id": "874a3d531d2a443fa5d00c4f9dddc49b",
+          "agent": "tester_agent",
+          "pid": 63424,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_63424",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507519.597585
+        },
+        {
+          "id": "950163846dba4233b0aa3291cab18f37",
+          "agent": "tester_agent",
+          "pid": 61260,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_61260",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507519.7621598
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 5.000014789402485e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 1.929979771375656e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 1.8800143152475357e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.8200138583779335e-05
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "arm": "DIRECT_LOOP",
+      "arm_code": "B",
+      "round": 3,
+      "status": "succeeded",
+      "error_type": null,
+      "elapsed_ms": 1286.4819001406431,
+      "coordinator_cpu_seconds": 0.046875,
+      "projects_passed": 4,
+      "projects_total": 4,
+      "repair_success_rate": 1.0,
+      "model_calls": 4,
+      "input_tokens": 4553,
+      "output_tokens": 825,
+      "token_metric_kind": "estimated_char_div_4_stub",
+      "peak_rss_kib": null,
+      "resource_note": "No per-arm total RSS attribution. Worker receipts retained.",
+      "worker_receipts": [
+        {
+          "id": "65ddb05c7bbf45d99f9bfcac0266d25e",
+          "agent": "tester_agent",
+          "pid": 33436,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_33436",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.1518707
+        },
+        {
+          "id": "4f01f4e972514dc3a616d8009882f13e",
+          "agent": "tester_agent",
+          "pid": 44948,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_44948",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.4127808
+        },
+        {
+          "id": "b46e4cada0004a75ad087794933412bc",
+          "agent": "tester_agent",
+          "pid": 61584,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_61584",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.5414534
+        },
+        {
+          "id": "5cf09ca814ca4ea29808bb4853c049d0",
+          "agent": "tester_agent",
+          "pid": 70696,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_70696",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.6685424
+        },
+        {
+          "id": "9b3374dd9a05444ea44db3b59b39a9d9",
+          "agent": "tester_agent",
+          "pid": 54556,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_54556",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.7958765
+        },
+        {
+          "id": "43f337b715234b1c8fca79f524c91cdb",
+          "agent": "tester_agent",
+          "pid": 38840,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_38840",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507520.920343
+        },
+        {
+          "id": "5766e09796d042a8b96fc113f5f71259",
+          "agent": "tester_agent",
+          "pid": 41652,
+          "operation": "project.test",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_41652",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507521.0496495
+        },
+        {
+          "id": "22e0869b6cb44a35a70a379075d54225",
+          "agent": "tester_agent",
+          "pid": 80932,
+          "operation": "project.patch_check",
+          "reclaimed": true,
+          "cgroup_path": "process_group://isolated/agent_tester_agent/pid_80932",
+          "enforcement": "process_group",
+          "usage": {},
+          "finished": 1795507521.176299
+        }
+      ],
+      "projects": [
+        {
+          "project": "order_service",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 2,
+          "heldout_total": 2,
+          "calls": [
+            {
+              "input_sha256": "c1129d3396a604d12a9f183cec165b8aee49d9ef30becdbcad331403f2c9db6f",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 2908,
+              "output_tokens": 468,
+              "seconds": 4.260009154677391e-05
+            }
+          ]
+        },
+        {
+          "project": "pricing",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "9ebc14a6f9b4fcbd66e89056336e5405d243bc47a31443b71862e06e05e664e3",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 599,
+              "output_tokens": 168,
+              "seconds": 2.0499806851148605e-05
+            }
+          ]
+        },
+        {
+          "project": "intervals",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "8f43d44a9b37a6572c0d04329ed213f4f54025df0d0f1770038f92f9fced77e4",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 511,
+              "output_tokens": 126,
+              "seconds": 1.910002902150154e-05
+            }
+          ]
+        },
+        {
+          "project": "text_normalization",
+          "success": true,
+          "public_passed": 3,
+          "public_total": 3,
+          "heldout_passed": 3,
+          "heldout_total": 3,
+          "calls": [
+            {
+              "input_sha256": "96adb952a53622fb05712adcdf1aa0dda9da7a35c1edcdc0fe9bf1602ed5207e",
+              "temperature": 0.0,
+              "max_tokens": 4096,
+              "status": "succeeded",
+              "input_tokens": 535,
+              "output_tokens": 63,
+              "seconds": 1.8399907276034355e-05
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "stage2_real_deepseek": {
+    "status": "not_run",
+    "reason": "No paid calls; integrate the shared cost ledger before live CLI"
+  }
+}

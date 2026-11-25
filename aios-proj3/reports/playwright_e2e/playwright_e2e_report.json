@@ -1,0 +1,94 @@
+{
+  "timestamp": "2026-11-23T16:57:42.782Z",
+  "base_url": "http://127.0.0.1:55637",
+  "browser": "Chromium Headless (Playwright 1.65.1)",
+  "total_cases": 6,
+  "passed_cases": 6,
+  "console_error_count": 1,
+  "page_error_count": 0,
+  "console_errors": [
+    "[console.error] Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "page_errors": [],
+  "cases": [
+    {
+      "id": "case_01_multifile_order_service_e2e",
+      "title": "多文件 order_service 修复完整链路 + 多 Agent 系统级视图 + 产物 ZIP SHA-256 核验",
+      "passed": true,
+      "job_id": "ca33aa9ebf884f5bb1972a368ae76ed1",
+      "ui_status": "succeeded",
+      "backend_status": "succeeded",
+      "verified_source_sha256": "c11cdf677b939f0e4944107eef4cde69bbed19b5b44f62372117051d28a2edfc",
+      "downloaded_zip_sha256": "45630b4c7bcf4c3f673b8fb8810ff3fec3c3ae525ed68d9bc588ff9bbda256da",
+      "expected_zip_sha256": "45630b4c7bcf4c3f673b8fb8810ff3fec3c3ae525ed68d9bc588ff9bbda256da",
+      "agents_observed": [
+        "analyst_agent",
+        "tester_agent",
+        "patcher_agent",
+        "reviewer_agent",
+        "audit_agent"
+      ],
+      "tester_worker_pids": [
+        51468,
+        82940
+      ],
+      "screenshot": "01_order_service_multifile_repair.png",
+      "zip_cryptographic_verification": {
+        "verified": true,
+        "source_tree_sha256": "c11cdf677b939f0e4944107eef4cde69bbed19b5b44f62372117051d28a2edfc",
+        "files": [
+          "pricing.py",
+          "refunds.py",
+          "shipping.py"
+        ]
+      }
+    },
+    {
+      "id": "case_02_double_click_idempotency",
+      "title": "连续快速双击提交按钮幂等保护（仅创建 1 个有效工作流，无重复调用）",
+      "passed": true,
+      "job_id": "97f1f0bd19d546ef917c787450a6b94e",
+      "jobs_created_count": 1,
+      "backend_status": "succeeded",
+      "screenshot": "02_double_click_idempotency.png"
+    },
+    {
+      "id": "case_03_single_branch_fault_isolation",
+      "title": "单分支故障隔离（无依赖 audit_agent 标红失败，主修复分支照常完成并交付产物）",
+      "passed": true,
+      "job_id": "40429d5aa50d4d3fa198866b1bd7706d",
+      "ui_status": "completed_with_failures",
+      "static_audit_state": "failed",
+      "main_answer_state": "succeeded",
+      "screenshot": "03_isolated_branch_fault.png"
+    },
+    {
+      "id": "case_04_reload_recovery_consistency",
+      "title": "页面刷新恢复与前后端快照强一致（DAG 状态、失败原因与产物下载入口完整恢复）",
+      "passed": true,
+      "job_id": "40429d5aa50d4d3fa198866b1bd7706d",
+      "recovered_ui_status": "completed_with_failures",
+      "backend_status": "completed_with_failures",
+      "download_button_restored": true,
+      "screenshot": "04_reload_state_recovery.png"
+    },
+    {
+      "id": "case_05_budget_exhaustion_and_cleanup",
+      "title": "受控预算耗尽与资源回收（modelCallsBudget=0 明确拦截、无静默重试、活跃 Worker 归零）",
+      "passed": true,
+      "job_id": "ddf21717826141ffaf2e0aeef9853a2d",
+      "backend_status": "failed",
+      "patch_state": "failed",
+      "verify_state": "isolated_skipped",
+      "active_workers_after": 0,
+      "drf_cpu_used_after": 0,
+      "screenshot": "05_budget_exhaustion_reclamation.png"
+    },
+    {
+      "id": "case_06_acb_lifecycle_panel",
+      "title": "控制台 ACB 控制块面板与生命周期状态轨迹可视化核验",
+      "passed": true,
+      "screenshot": "06_acb_lifecycle_and_queues.png"
+    }
+  ]
+}

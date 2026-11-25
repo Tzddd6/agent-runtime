@@ -148,6 +148,7 @@ class AIOSKernelRuntime:
         self.context_injector = ContextInjector(self.memory_manager)
         self.context_store = ContextStore(
             storage_dir=f"{self.storage_root}_contexts",
+            persistent_connection=True,
         )
         self.ipc_manager = IPCManager(context_store=self.context_store)
 
@@ -173,6 +174,7 @@ class AIOSKernelRuntime:
             **{f"get_{name}_syscall": reader(queue) for name, queue in self.queues.items()},
             **options,
         )
+        self.scheduler._wake_queues = lambda: [q.put(self.scheduler.WAKE_SENTINEL) for q in self.queues.values()]
         self.process_service.admission = self.scheduler.drf_controller
         self.workflow_engine = WorkflowEngine(
             self,
@@ -206,6 +208,7 @@ class AIOSKernelRuntime:
         self.worker_supervisor.shutdown()
         self.process_service.close()
         self.tool_manager.cleanup()
+        self.context_store.close()
 
     def __enter__(self) -> "AIOSKernelRuntime":
         return self.start()
@@ -226,6 +229,13 @@ class AIOSKernelRuntime:
                 self.scheduler.drf_controller.consume_model_budget(agent_name, calls=1, tokens=limit)
             except RuntimeError as exc:
                 return {"response": LLMResponse(error=str(exc), status_code=429)}
+            out = self.syscall_executor.execute_request(agent_name, query)
+            resp = out.get("response")
+            usage = getattr(resp, "usage", None) or {}
+            in_tok = usage.get("prompt_tokens") or usage.get("input_tokens") or max(1, len(json.dumps(query.messages, ensure_ascii=False)) // 4)
+            out_tok = usage.get("completion_tokens") or usage.get("output_tokens") or usage.get("total_tokens") or max(1, len(str(getattr(resp, "response_message", "") or "")) // 4)
+            self.scheduler.drf_controller.record_token_usage(agent_name, input_tokens=in_tok, output_tokens=out_tok)
+            return out
         return self.syscall_executor.execute_request(agent_name, query)
 
     @staticmethod

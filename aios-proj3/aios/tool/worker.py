@@ -32,9 +32,12 @@ def execute(operation, parameters):
         return {'result': safe_eval_math(expression)}
     if operation == 'project.test':
         project = parameters.get('project', 'pricing')
-        return engineering.run_check(engineering.manifest(project)['source'], project)
+        spec = engineering.manifest(project)
+        raw_src = spec.get('files') if spec.get('multi_file') else spec['source']
+        return engineering.run_check(raw_src, project)
     if operation == 'project.patch_check':
-        return engineering.run_check(parameters['source'], parameters.get('project', 'pricing'))
+        raw_src = parameters.get('files') if 'files' in parameters else parameters['source']
+        return engineering.run_check(raw_src, parameters.get('project', 'pricing'))
     raise ValueError('Unsupported isolated operation')
 
 

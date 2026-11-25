@@ -1,0 +1,65 @@
+{
+  "source_zip_sha256": "f4cbc22d4b64a348726f9860cdc13f2c6162e0eee91fef33dead263237b8a1c8",
+  "subtest_4a_multi_model_profiles": {
+    "profiles_tested": 3,
+    "all_switched_ok": true,
+    "zero_raw_key_leak": true,
+    "details": [
+      {
+        "profile": "deepseek-main",
+        "model": "deepseek-chat",
+        "save_rc": 200,
+        "select_rc": 200,
+        "active_model": "deepseek-chat",
+        "raw_key_leaked": false
+      },
+      {
+        "profile": "qwen-alt",
+        "model": "qwen-plus",
+        "save_rc": 200,
+        "select_rc": 200,
+        "active_model": "qwen-plus",
+        "raw_key_leaked": false
+      },
+      {
+        "profile": "glm-alt",
+        "model": "glm-4-plus",
+        "save_rc": 200,
+        "select_rc": 200,
+        "active_model": "glm-4-plus",
+        "raw_key_leaked": false
+      }
+    ]
+  },
+  "subtest_4b_concurrent_web_stress": {
+    "concurrent_submit_clients": 10,
+    "accepted_jobs": 1,
+    "rejected_busy_400": 9,
+    "accepted_job_final_status": "succeeded",
+    "concurrent_read_requests": 160,
+    "read_200_ok": 160,
+    "read_p50_ms": 4.86,
+    "read_p95_ms": 514.25
+  },
+  "subtest_4c_multi_browser_sessions": {
+    "sessions_tested": 3,
+    "zero_page_errors": true,
+    "details": [
+      {
+        "session": 1,
+        "title": "AIOS Kernel · 操作系统级多智能体执行控制台",
+        "page_errors": 0
+      },
+      {
+        "session": 2,
+        "title": "AIOS Kernel · 操作系统级多智能体执行控制台",
+        "page_errors": 0
+      },
+      {
+        "session": 3,
+        "title": "AIOS Kernel · 操作系统级多智能体执行控制台",
+        "page_errors": 0
+      }
+    ]
+  }
+}

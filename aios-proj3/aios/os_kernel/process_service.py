@@ -1,4 +1,6 @@
 """Kernel-owned Worker execution with bounded input and verified cleanup."""
+from contextlib import contextmanager
+from copy import deepcopy
 from hashlib import sha256
 import json
 from pathlib import Path
@@ -24,6 +26,7 @@ class ProcessService:
         self.terminated = set()
         self.quarantined_agents = set()
         self.receipts = []
+        self._receipt_captures = {}
 
     def run(self, agent, operation, parameters, resources=None, timeout=10, receipt_observer=None):
         if operation not in self.OPERATIONS:
@@ -75,13 +78,32 @@ class ProcessService:
                 raise RuntimeError('Worker cleanup unconfirmed; Agent resources remain reserved') from None
             with self.lock:
                 self.active.pop(identity, None)
+                agent_cg = self.executor.agent_roots.get(agent)
+                cg_path = str(handle['group']) if handle.get('group') else (
+                    str(agent_cg) if agent_cg else f"process_group://isolated/agent_{agent}/pid_{pid}"
+                )
                 self.receipts.append({'id': identity, 'agent': agent, 'pid': pid,
                                       'operation': operation, 'reclaimed': True,
+                                      'cgroup_path': cg_path,
                                       'enforcement': 'cgroup_v2' if handle['group'] else 'process_group',
                                       'usage': handle.get('_usage', {}), 'finished': time.time()})
+                for capture in self._receipt_captures.values():
+                    capture.append(deepcopy(self.receipts[-1]))
                 if receipt_observer is not None:
                     receipt_observer(dict(self.receipts[-1]))
                 del self.receipts[:-100]
+
+    @contextmanager
+    def capture_receipts(self):
+        """Per-workflow evidence independent of the bounded recent-receipt ring."""
+        identity, capture = uuid4().hex, []
+        with self.lock:
+            self._receipt_captures[identity] = capture
+        try:
+            yield capture
+        finally:
+            with self.lock:
+                self._receipt_captures.pop(identity, None)
 
     def terminate(self, agent):
         with self.lock:
@@ -92,7 +114,7 @@ class ProcessService:
 
     def snapshot(self):
         with self.lock:
-            return {'active': len(self.active), 'quarantined_agents': sorted(self.quarantined_agents), 'receipts': list(self.receipts)}
+            return {'active': len(self.active), 'quarantined_agents': sorted(self.quarantined_agents), 'receipts': deepcopy(self.receipts)}
 
     def close(self):
         with self.lock:

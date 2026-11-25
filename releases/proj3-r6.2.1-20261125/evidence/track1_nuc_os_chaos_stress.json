@@ -1,0 +1,102 @@
+{
+  "source_zip_sha256": "f4cbc22d4b64a348726f9860cdc13f2c6162e0eee91fef33dead263237b8a1c8",
+  "platform": "6.6.0-159.4.20.174.oe2403sp4.x86_64",
+  "python": "3.11.6",
+  "delegated_cgroup_root": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/run-u6.service/workers",
+  "subtest_1a_cgroup_oom_contention": {
+    "elapsed_s": 0.558,
+    "healthy_passed": 6,
+    "healthy_total": 6,
+    "rogue_oom_isolated": 2,
+    "rogue_total": 2,
+    "rogue_details": [
+      {
+        "agent": "rogue_oom_0",
+        "killed": true,
+        "returncode": -9,
+        "oom_kill": 1,
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/run-u6.service/workers/rogue_oom_0"
+      },
+      {
+        "agent": "rogue_oom_1",
+        "killed": true,
+        "returncode": -9,
+        "oom_kill": 1,
+        "cgroup_path": "/sys/fs/cgroup/user.slice/user-1001.slice/user@1001.service/app.slice/run-u6.service/workers/rogue_oom_1"
+      }
+    ],
+    "receipts_recorded": 6,
+    "oom_kill_events_observed": 2,
+    "zero_orphan_cgroups_after_close": true,
+    "leftover_dirs": []
+  },
+  "subtest_1b_high_concurrency_scaling": [
+    {
+      "concurrency": 200,
+      "succeeded": 200,
+      "wall_s": 0.0704,
+      "throughput_req_s": 2839.3,
+      "p50_ms": 22.14,
+      "p95_ms": 24.89,
+      "p99_ms": 32.73,
+      "vmhwm_mib": 40.32
+    },
+    {
+      "concurrency": 500,
+      "succeeded": 500,
+      "wall_s": 0.184,
+      "throughput_req_s": 2717.7,
+      "p50_ms": 43.68,
+      "p95_ms": 50.44,
+      "p99_ms": 53.56,
+      "vmhwm_mib": 42.43
+    },
+    {
+      "concurrency": 1000,
+      "succeeded": 1000,
+      "wall_s": 0.3915,
+      "throughput_req_s": 2554.3,
+      "p50_ms": 47.25,
+      "p95_ms": 53.32,
+      "p99_ms": 56.59,
+      "vmhwm_mib": 43.79
+    }
+  ],
+  "subtest_1c_soak_and_sigkill_chaos": {
+    "rounds_total": 60,
+    "rounds_succeeded": 60,
+    "elapsed_s": 0.516,
+    "sigkill_injections": 3,
+    "sigkill_recoveries_ok": 3,
+    "recoveries": [
+      {
+        "round": 15,
+        "old_pid": 121449,
+        "new_pid": 121451,
+        "pid_changed": true,
+        "recovery_ms": 128.16
+      },
+      {
+        "round": 30,
+        "old_pid": 121451,
+        "new_pid": 121452,
+        "pid_changed": true,
+        "recovery_ms": 128.74
+      },
+      {
+        "round": 45,
+        "old_pid": 121452,
+        "new_pid": 121453,
+        "pid_changed": true,
+        "recovery_ms": 128.81
+      }
+    ],
+    "vmhwm_mib_samples": {
+      "round_1": 43.79,
+      "round_20": 43.79,
+      "round_40": 43.79,
+      "round_60": 43.79
+    },
+    "remaining_context_objects": 0
+  }
+}

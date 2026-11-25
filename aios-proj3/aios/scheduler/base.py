@@ -1,13 +1,19 @@
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+import inspect
 from queue import Empty
 from threading import Thread
+import time
 from typing import Any, Callable, Dict, List, Optional
+from cerebrum.utils.communication import Response
 from aios.scheduler.drf_admission import DRFAdmissionController
 from aios.utils.logger import SchedulerLogger
 
+WAKE_SENTINEL = object()
+
 
 class BaseScheduler(ABC):
+    WAKE_SENTINEL = WAKE_SENTINEL
     """
     Abstract base class for AIOS Kernel schedulers.
     Manages the 4 concurrent syscall processing threads (LLM, Memory, Storage, Tool)
@@ -42,6 +48,7 @@ class BaseScheduler(ABC):
         self.logger = self._setup_logger()
         self.processing_threads: Dict[str, Thread] = {}
         self.drf_controller = drf_controller or DRFAdmissionController()
+        self._wake_queues: Optional[Callable[[], None]] = None
 
     def _setup_logger(self) -> SchedulerLogger:
         return SchedulerLogger(self.__class__.__name__, self.log_mode)
@@ -53,7 +60,54 @@ class BaseScheduler(ABC):
             self.processing_threads[thread_name] = thread
             thread.start()
 
+    @staticmethod
+    def _is_wake_sentinel(item: Any) -> bool:
+        return item is WAKE_SENTINEL or item is None
+
+    @staticmethod
+    def _reader_accepts_timeout(reader: Callable) -> bool:
+        try:
+            sig = inspect.signature(reader)
+        except (TypeError, ValueError):
+            return False
+        for p in sig.parameters.values():
+            if p.kind in (inspect.Parameter.POSITIONAL_ONLY, inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.VAR_POSITIONAL):
+                return True
+        return False
+
+    @staticmethod
+    def _cancel_syscall(sc: Any) -> None:
+        if not sc.event.is_set():
+            sc.set_response(Response(error="Scheduler stopped", status_code=503))
+            sc.set_status("cancelled")
+            sc.set_end_time(time.time())
+            sc.event.set()
+
+    def drain_queues_on_stop(self) -> None:
+        """Drain any stale wake sentinels and cancel all accepted pending syscalls with 503."""
+        for reader in (
+            self.get_llm_syscall,
+            self.get_memory_syscall,
+            self.get_storage_syscall,
+            self.get_tool_syscall,
+        ):
+            while True:
+                try:
+                    sc = reader(0.0) if self._reader_accepts_timeout(reader) else reader()
+                except Empty:
+                    break
+                except Exception:
+                    break
+                if self._is_wake_sentinel(sc):
+                    continue
+                self._cancel_syscall(sc)
+
     def stop_processing_threads(self) -> None:
+        if self._wake_queues is not None:
+            try:
+                self._wake_queues()
+            except Exception:
+                pass
         for thread in list(self.processing_threads.values()):
             if thread.is_alive():
                 thread.join(timeout=2.0)
@@ -70,6 +124,8 @@ class BaseScheduler(ABC):
                 try:
                     syscall = self.get_tool_syscall()
                 except Empty:
+                    continue
+                if self._is_wake_sentinel(syscall):
                     continue
                 running.add(pool.submit(self._execute_syscall, syscall, self.tool_manager.address_request, 'Tool'))
 

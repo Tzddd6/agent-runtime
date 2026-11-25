@@ -1,0 +1,94 @@
+{
+  "source_zip_sha256": "f4cbc22d4b64a348726f9860cdc13f2c6162e0eee91fef33dead263237b8a1c8",
+  "platform": "6.6.0-159.4.20.174.oe2403sp4.x86_64",
+  "python": "3.11.6",
+  "model": "deepseek-chat",
+  "bfcl_v4_parallel_100": {
+    "tasks": 100,
+    "aios_6way": {
+      "passed": 89,
+      "accuracy": 0.89,
+      "wall_s": 20.41,
+      "avg_queue_wait_ms": 0.331,
+      "errors_502": 0,
+      "failed_ids": [
+        "parallel_19",
+        "parallel_26",
+        "parallel_29",
+        "parallel_3",
+        "parallel_32",
+        "parallel_54",
+        "parallel_71",
+        "parallel_72",
+        "parallel_73",
+        "parallel_89",
+        "parallel_9"
+      ]
+    },
+    "bare_direct_2way": {
+      "passed": 89,
+      "accuracy": 0.89,
+      "wall_s": 58.48,
+      "failed_ids": [
+        "parallel_19",
+        "parallel_26",
+        "parallel_29",
+        "parallel_3",
+        "parallel_32",
+        "parallel_54",
+        "parallel_71",
+        "parallel_72",
+        "parallel_73",
+        "parallel_89",
+        "parallel_9"
+      ]
+    },
+    "speedup_aios_vs_bare": 2.86,
+    "identical_failed_set": true
+  },
+  "humaneval_full_164": {
+    "tasks": 164,
+    "aios_6way": {
+      "passed": 154,
+      "accuracy": 0.939,
+      "wall_s": 39.85,
+      "avg_queue_wait_ms": 0.267,
+      "errors_502": 0,
+      "failed_ids": [
+        "HumanEval/1",
+        "HumanEval/103",
+        "HumanEval/106",
+        "HumanEval/132",
+        "HumanEval/145",
+        "HumanEval/20",
+        "HumanEval/32",
+        "HumanEval/38",
+        "HumanEval/50",
+        "HumanEval/93"
+      ]
+    },
+    "bare_direct_2way": {
+      "passed": 157,
+      "accuracy": 0.9573,
+      "wall_s": 82.31,
+      "failed_ids": [
+        "HumanEval/103",
+        "HumanEval/106",
+        "HumanEval/132",
+        "HumanEval/145",
+        "HumanEval/38",
+        "HumanEval/50",
+        "HumanEval/93"
+      ]
+    },
+    "speedup_aios_vs_bare": 2.07,
+    "identical_failed_set": false
+  },
+  "cost_ledger": {
+    "calls": 528,
+    "input_tokens": 129282,
+    "output_tokens": 68344,
+    "est_rmb": 0.8053,
+    "budget_cap_rmb": 25.0
+  }
+}

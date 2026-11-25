@@ -19,8 +19,8 @@ def execute(kernel, syscall, name, params):
     elif name == 'runtime.observe':
         return kernel.status_snapshot()
     elif name == 'project.inspect':
-        from aios.tool.engineering import manifest
-        return {key: value for key, value in manifest(params.get('project', 'pricing')).items() if key != 'reference_fix'}
+        from aios.tool.engineering import manifest, sanitize_context_for_model
+        return sanitize_context_for_model(manifest(params.get('project', 'pricing'), include_reference=False))
     else:
         raise ValueError('Tool has no bound implementation')
     result = kernel.execute_request(agent, query)['response']

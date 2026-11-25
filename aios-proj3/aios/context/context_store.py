@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from contextlib import closing
+from contextlib import closing, contextmanager
 import copy
 import re
 import sqlite3
@@ -11,6 +11,8 @@ import threading
 import time
 from typing import Any, Dict, List, Optional, Set
 
+_ORIG_SQLITE_CONNECT = sqlite3.connect
+
 
 class ContextStore:
     """
@@ -21,11 +23,13 @@ class ContextStore:
     3. Context Isolation (上下文隔离): Per-object owner & Agent ACL table with explicit dynamic delegation.
     """
 
-    def __init__(self, storage_dir: str, gzip_threshold_bytes: int = 256, cache_capacity: int = 64):
+    def __init__(self, storage_dir: str, gzip_threshold_bytes: int = 256, cache_capacity: int = 64, persistent_connection: bool = False):
         self.storage_dir = os.path.abspath(storage_dir)
         os.makedirs(self.storage_dir, exist_ok=True)
         self.gzip_threshold_bytes = gzip_threshold_bytes
         self.cache_capacity = cache_capacity
+        self._persistent_connection = persistent_connection
+        self._db: Optional[sqlite3.Connection] = None
 
         self._lock = threading.RLock()
         self._meta: Dict[str, Dict[str, Any]] = {}
@@ -42,11 +46,57 @@ class ContextStore:
         self.cache_hits: int = 0
         self._load_index()
 
+    def close(self) -> None:
+        with self._lock:
+            if self._db is not None:
+                try:
+                    self._db.close()
+                finally:
+                    self._db = None
+
+    def _open_db(self):
+        if self._persistent_connection and sqlite3.connect is _ORIG_SQLITE_CONNECT:
+            if self._db is None:
+                self._db = sqlite3.connect(self._index_path, timeout=5, check_same_thread=False)
+                self._db.execute("PRAGMA journal_mode=WAL")
+                self._db.execute("PRAGMA synchronous=FULL")
+            return self._db, False
+        db = sqlite3.connect(self._index_path, timeout=5)
+        db.execute("PRAGMA synchronous=FULL")
+        return db, True
+
+    @contextmanager
+    def _write_tx(self):
+        db, should_close = self._open_db()
+        try:
+            yield db
+            db.commit()
+        except Exception:
+            try:
+                db.rollback()
+            except Exception:
+                if not should_close and self._db is db:
+                    try:
+                        db.close()
+                    except Exception:
+                        pass
+                    self._db = None
+            raise
+        finally:
+            if should_close:
+                db.close()
+
     def _load_index(self):
         self._index_path = os.path.join(self.storage_dir, 'context-index.sqlite3')
-        with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+        db, should_close = self._open_db()
+        try:
+            if should_close:
+                db.execute('PRAGMA journal_mode=WAL')
             db.execute('CREATE TABLE IF NOT EXISTS objects(id TEXT PRIMARY KEY, metadata TEXT NOT NULL, acl TEXT NOT NULL)')
             rows = db.execute('SELECT id, metadata, acl FROM objects').fetchall()
+        finally:
+            if should_close:
+                db.close()
         for identity, metadata, acl in rows:
             meta = json.loads(metadata)
             if not re.fullmatch(r'ctx_[a-f0-9]{16,64}', identity) or not re.fullmatch(r'[a-f0-9]{64}', meta['sha256']):
@@ -63,10 +113,9 @@ class ContextStore:
         self.logical_bytes_written = sum(meta['raw_bytes'] for meta in self._meta.values())
 
     def _persist_index(self, identity):
-        with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+        with self._write_tx() as db:
             db.execute('INSERT OR REPLACE INTO objects VALUES(?,?,?)',
                        (identity, json.dumps(self._meta[identity]), json.dumps(sorted(self._acls[identity]))))
-            db.commit()
 
     @staticmethod
     def _sanitize_for_json(obj: Any) -> Any:
@@ -330,13 +379,12 @@ class ContextStore:
                 new_meta = {**self._meta[cid], "holders": sorted(new_holders)}
                 updates.append((cid, new_meta, new_acl, new_holders))
 
-            with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+            with self._write_tx() as db:
                 for cid, new_meta, new_acl, _ in updates:
                     db.execute(
                         "INSERT OR REPLACE INTO objects VALUES(?,?,?)",
                         (cid, json.dumps(new_meta), json.dumps(sorted(new_acl))),
                     )
-                db.commit()
 
             # Phase 3: Publish in memory only after commit succeeded
             for cid, new_meta, new_acl, new_holders in updates:
@@ -369,12 +417,11 @@ class ContextStore:
                     # Other active scopes/agents still reference this deduplicated/IPC-retained context: detach only.
                     updated_meta = {**meta, "holders": sorted(remaining_holders)}
                     updated_acl = set(self._acls.get(ctx_id, set())) - {requester_agent}
-                    with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+                    with self._write_tx() as db:
                         db.execute(
                             "INSERT OR REPLACE INTO objects VALUES(?,?,?)",
                             (ctx_id, json.dumps(updated_meta), json.dumps(sorted(updated_acl))),
                         )
-                        db.commit()
                     self._meta[ctx_id] = updated_meta
                     self._holders[ctx_id] = remaining_holders
                     self._acls[ctx_id] = updated_acl
@@ -382,9 +429,8 @@ class ContextStore:
 
             # Last holder (or admin force-delete): commit SQLite DELETE first
             old_acl = sorted(self._acls.get(ctx_id, set()))
-            with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+            with self._write_tx() as db:
                 db.execute("DELETE FROM objects WHERE id=?", (ctx_id,))
-                db.commit()
 
             file_path = meta.get("file_path")
             if file_path and os.path.exists(file_path):
@@ -393,12 +439,11 @@ class ContextStore:
                 except OSError:
                     # Physical file still exists: restore SQLite row and raise so caller never sees false reclamation.
                     try:
-                        with closing(sqlite3.connect(self._index_path, timeout=5)) as db:
+                        with self._write_tx() as db:
                             db.execute(
                                 "INSERT OR REPLACE INTO objects VALUES(?,?,?)",
                                 (ctx_id, json.dumps(meta), json.dumps(old_acl)),
                             )
-                            db.commit()
                     except Exception:
                         pass
                     raise

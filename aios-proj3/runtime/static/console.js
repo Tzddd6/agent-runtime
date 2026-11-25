@@ -92,19 +92,30 @@
     const states = detail.states || {};
     const attempts = detail.attempts || {};
     const refs = detail.context_refs || {};
+    const graphNodes = detail.graph || [];
+    const nodeMap = {};
+    graphNodes.forEach((n) => { nodeMap[n.id] = n; });
+    const resultsMap = detail.results || {};
+
     const rows = Object.keys(states).map((tid) => {
       const st = states[tid];
       const cls = st === "succeeded" ? "tag-ok" : (st === "failed" || st === "isolated_skipped") ? "tag-err" : "tag-warn";
+      const nodeInfo = nodeMap[tid] || {};
+      const agName = nodeInfo.agent || tid;
+      const deps = (nodeInfo.depends_on || []).map((d) => `${d}(${refs[d] ? refs[d].slice(0, 8) : "—"})`).join(" → ") || "root";
+      const errText = (resultsMap[tid] && resultsMap[tid].error) ? `<div class="mono" style="color:var(--state-err);font-size:11px;margin-top:2px;">${escapeText(resultsMap[tid].error)}</div>` : "";
       return `<tr>
-        <td class="mono"><strong>${tid}</strong></td>
-        <td><span class="tag ${cls}">${st}</span></td>
+        <td class="mono"><strong>${escapeText(tid)}</strong>${errText}</td>
+        <td class="mono">${escapeText(agName)}</td>
+        <td><span class="tag ${cls}">${escapeText(st)}</span></td>
         <td class="mono">${attempts[tid] || 1}</td>
-        <td class="mono">${refs[tid] || "—"}</td>
+        <td class="mono" style="font-size:11px;">${escapeText(deps)}</td>
+        <td class="mono" style="font-size:11px;">${refs[tid] ? escapeText(refs[tid].slice(0, 16)) + "…" : "—"}</td>
       </tr>`;
     }).join("");
 
     document.getElementById("dagTaskTableWrap").innerHTML = rows
-      ? `<table class="swiss-table"><thead><tr><th>Task ID</th><th>State</th><th>Attempts</th><th>Context SHA256 Ref</th></tr></thead><tbody>${rows}</tbody></table>`
+      ? `<table class="swiss-table"><thead><tr><th>Task ID</th><th>Agent ID</th><th>State</th><th>Attempts</th><th>Upstream ctx_ref Lineage</th><th>Output ctx_ref (SHA-256)</th></tr></thead><tbody>${rows}</tbody></table>`
       : `<p class="hint">尚无任务节点状态</p>`;
 
     const engBox = document.getElementById("engineeringBox");
@@ -114,10 +125,47 @@
       document.getElementById("engProjectTitle").textContent = eng.title + " (" + eng.file + ")";
       document.getElementById("engVerdictBadge").textContent = eng.accepted ? "全部测试与哈希核验通过" : "未通过";
       document.getElementById("engOriginalCode").textContent = eng.original_source || "";
-      document.getElementById("engPatchedCode").textContent = eng.patched_source || "";
-      document.getElementById("engPhaseList").innerHTML = (eng.phases || []).map((p) =>
-        `<div class="info-card"><div class="mono" style="font-size:11px;color:var(--ink-muted);">${p.id}</div><h3>${escapeText(p.label)}</h3><span class="tag ${p.status === 'succeeded' ? 'tag-ok' : 'tag-warn'}">${p.status}</span></div>`
-      ).join("");
+      document.getElementById("engPatchedCode").textContent = (eng.unified_diff ? (eng.unified_diff + "\n\n" + (eng.patched_source || "")) : (eng.patched_source || ""));
+
+      const dlBtn = document.getElementById("engDownloadZipBtn");
+      if (dlBtn) {
+        if (eng.artifact && eng.artifact.zip_download_url) {
+          dlBtn.style.display = "inline-block";
+          dlBtn.href = eng.artifact.zip_download_url;
+        } else {
+          dlBtn.style.display = "none";
+        }
+      }
+
+      const telemetry = detail.agent_telemetry || {};
+      const telAgents = Object.values(telemetry);
+      const telWrap = document.getElementById("engAgentTelemetryWrap");
+      if (telWrap) {
+        telWrap.innerHTML = telAgents.length
+          ? `<div style="margin-bottom:8px;font-weight:600;font-size:12px;">系统级多 Agent 资源映射与 Token 账本 (ACB / Worker PID / cgroup / Tokens)</div>
+             <table class="swiss-table"><thead><tr><th>Agent ID</th><th>ACB State</th><th>Worker PID</th><th>OS Isolation / cgroup Path</th><th>Quota (CPU / Mem)</th><th>Model Calls</th><th>Tokens (In / Out)</th></tr></thead><tbody>` +
+            telAgents.map((ag) => `<tr>
+              <td class="mono"><strong>${escapeText(ag.agent_id)}</strong></td>
+              <td><span class="tag tag-ok">${escapeText(ag.state)}</span></td>
+              <td class="mono">${ag.last_pid ? escapeText(ag.last_pid) : "in-kernel"}</td>
+              <td class="mono" style="font-size:11px;">${escapeText(ag.cgroup_path || ag.enforcement)}</td>
+              <td class="mono">${ag.cpu_milli_limit}m / ${((ag.memory_bytes_limit || 0) / (1024 * 1024)).toFixed(0)}MiB</td>
+              <td class="mono">${ag.model_calls_used || 0}</td>
+              <td class="mono">${ag.input_tokens_used || 0} / ${ag.output_tokens_used || 0}</td>
+            </tr>`).join("") + `</tbody></table>`
+          : "";
+      }
+
+      document.getElementById("engPhaseList").innerHTML = (eng.phases || []).map((p) => {
+        const stCls = p.status === "succeeded" ? "tag-ok" : (p.status === "failed" || p.status === "isolated_skipped") ? "tag-err" : "tag-warn";
+        return `<div class="info-card" style="border-left:${p.status === 'failed' ? '3px solid var(--state-err)' : '1px solid var(--border-hairline)'};">
+          <div class="mono" style="font-size:11px;color:var(--ink-muted);">${escapeText(p.id)} · ${escapeText(p.agent || "")}</div>
+          <h3>${escapeText(p.label)}</h3>
+          <span class="tag ${stCls}">${escapeText(p.status)}</span>
+          ${p.ctx_ref ? `<div class="mono" style="font-size:10.5px;margin-top:4px;color:var(--ink-secondary);">ctx_ref: ${escapeText(p.ctx_ref.slice(0, 12))}…</div>` : ""}
+          ${p.error ? `<div class="mono" style="font-size:10.5px;margin-top:4px;color:var(--state-err);">${escapeText(p.error)}</div>` : ""}
+        </div>`;
+      }).join("");
     } else {
       engBox.style.display = "none";
     }
@@ -384,15 +432,24 @@
       document.getElementById("presetHint").textContent = PRESET_HINTS[val] || "";
     });
 
+    let isSubmittingJob = false;
     document.getElementById("jobForm").addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (isSubmittingJob) return;
+      isSubmittingJob = true;
+      const submitBtn = document.getElementById("submitJobBtn");
+      if (submitBtn) submitBtn.disabled = true;
       try {
+        const incAudit = document.getElementById("includeAuditBranchChk");
+        const simFail = document.getElementById("simulateAuditFailureChk");
         const payload = {
           preset: presetSelect.value,
           project: document.getElementById("projectSelect").value,
           workers: parseInt(document.getElementById("workers").value, 10),
           policy: document.getElementById("policy").value,
           prompt: document.getElementById("taskPrompt").value || "AIOS formal architecture verification",
+          include_audit_branch: incAudit ? incAudit.checked : false,
+          simulate_audit_failure: simFail ? simFail.checked : false,
           model_budget: {
             calls: parseInt(document.getElementById("modelCallsBudget").value, 10),
             output_tokens: parseInt(document.getElementById("modelTokensBudget").value, 10)
@@ -405,6 +462,9 @@
         await refreshEcosystem();
       } catch (err) {
         showNotice(err.message, true);
+      } finally {
+        isSubmittingJob = false;
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
 

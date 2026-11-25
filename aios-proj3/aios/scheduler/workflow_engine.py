@@ -154,7 +154,7 @@ class WorkflowEngine:
             "events": events,
         }
         with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, indent=2, default=str)
+            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"), default=str)
         os.replace(tmp_path, cp_path)
         return cp_path
 

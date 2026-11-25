@@ -89,7 +89,7 @@ class NativeConsole:
         self.attachments = AttachmentStore(self.root / 'attachments', self.database)
         self.model_service = ModelService()
         self.kernel.llm.model_service = self.model_service
-        self.telemetry = MachineSampler(kernel.cgroup_manager.root_path if kernel.cgroup_manager.enabled else None)
+        self.telemetry = MachineSampler(kernel.cgroup_manager.cgroup_root if kernel.cgroup_manager.enabled else None)
         self.vm = get_vm_controller()
         self.agent_hub = _default_agent_hub()
         self.conversations = Conversations(self)
@@ -114,10 +114,38 @@ class NativeConsole:
         with self.lock:
             job = deepcopy(self.jobs[identity])
         graph = next((graph for graph in self.kernel.workflow_engine.recent_graphs() if graph['id'] == identity), None)
-        if graph and job['status'] == 'running':
-            job['states'] = {node['id']: node['state'] for node in graph['nodes']}
-            job['attempts'] = {node['id']: node['attempts'] for node in graph['nodes']}
+        if graph:
+            job['graph'] = graph['nodes']
+            if job['status'] == 'running':
+                job['states'] = {node['id']: node['state'] for node in graph['nodes']}
+                job['attempts'] = {node['id']: node['attempts'] for node in graph['nodes']}
         return job
+
+    def download_zip(self, identity):
+        if not isinstance(identity, str) or not identity.isalnum():
+            raise ValueError('无效的任务 ID')
+        with self.lock:
+            if identity not in self.jobs:
+                raise KeyError(identity)
+            job = deepcopy(self.jobs[identity])
+        if job.get('status') not in ('succeeded', 'completed_with_failures'):
+            raise ValueError('仅允许下载已完成且通过主链验收的交付包')
+        eng = job.get('engineering') or {}
+        artifact = eng.get('artifact') or {}
+        expected_zip_sha = artifact.get('zip_sha256')
+        expected_src_sha = eng.get('source_sha256') or artifact.get('sha256')
+        if not eng.get('accepted') or not expected_zip_sha or not expected_src_sha:
+            raise ValueError('该任务未生成已验证的交付产物')
+        zip_path = (self.root / f'{identity}_delivery.zip').resolve()
+        if not zip_path.is_relative_to(self.root.resolve()) or zip_path.is_symlink() or not zip_path.is_file():
+            raise FileNotFoundError(identity)
+        raw = zip_path.read_bytes()
+        from hashlib import sha256
+        if sha256(raw).hexdigest() != expected_zip_sha:
+            raise ValueError('交付压缩包 SHA-256 校验失败，文件可能已损坏或被篡改')
+        from aios.tool.engineering import verify_delivery_zip_bytes
+        verify_delivery_zip_bytes(raw, expected_src_sha, multi_file=bool(eng.get('multi_file', False)))
+        return raw
 
     def run_litecua(self, value):
         action = value.get('action')
@@ -166,8 +194,9 @@ class NativeConsole:
             try:
                 self.save(job)
                 if preset in ('llm', 'team', 'engineering'):
-                    if not self.model_service.request('status')['configured']:
-                        raise ValueError('请先配置模型服务')
+                    use_deterministic_stub = bool(value.get('deterministic_stub', False))
+                    if not use_deterministic_stub and not self.model_service.request('status')['configured']:
+                        raise ValueError('请先配置模型服务（如需离线演示请显式启用 deterministic_stub）')
                     self.pool.submit(self.execute_conversation, identity, value)
                 else:
                     self.pool.submit(self.execute, identity, preset, text, workers)
@@ -180,19 +209,29 @@ class NativeConsole:
         path = self.root / (job['id'] + '.json')
         temporary = path.with_suffix('.tmp')
         with temporary.open('w', encoding='utf-8') as stream:
-            json.dump(job, stream, ensure_ascii=False, default=lambda o: '<callable>' if callable(o) else str(o))
+            json.dump(job, stream, ensure_ascii=False, separators=(',', ':'), default=lambda o: '<callable>' if callable(o) else str(o))
             stream.flush()
             os.fsync(stream.fileno())
         os.replace(temporary, path)
 
     def execute_conversation(self, identity, value):
         try:
-            self.conversations.submit({'conversation_id': 'job_' + identity, 'request_id': identity,
-                                       'mode': value['preset'], 'project': value.get('project', 'pricing'),
-                                       'prompt': value.get('prompt') or '完成当前受控任务'}, workflow_id=identity)
-        except Exception:
+            conv_payload = {
+                'conversation_id': 'job_' + identity,
+                'request_id': identity,
+                'mode': value['preset'],
+                'project': value.get('project', 'pricing'),
+                'prompt': value.get('prompt') or '完成当前受控任务',
+                'allow_repair_round_2': value.get('allow_repair_round_2', True),
+                'include_audit_branch': value.get('include_audit_branch', False),
+                'simulate_audit_failure': value.get('simulate_audit_failure', False),
+                'deterministic_stub': value.get('deterministic_stub', False),
+                'model_budget': value.get('model_budget'),
+            }
+            self.conversations.submit(conv_payload, workflow_id=identity)
+        except Exception as exc:
             with self.lock:
-                self.jobs[identity].update(status='failed', error='执行未完成，未自动重提模型请求')
+                self.jobs[identity].update(status='failed', error=f'执行未完成，未自动重提模型请求 ({exc})')
                 self.save(self.jobs[identity])
 
     def execute(self, identity, preset, text, workers):
@@ -260,6 +299,11 @@ def create_server(console, port=18892):
                 return
             path = urlsplit(self.path).path
             kernel = console.kernel
+            if path == '/favicon.ico':
+                self.send_response(204)
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+                return
             if path == '/':
                 html = (STATIC / 'chat.html').read_text(encoding='utf-8')
                 html = html.replace('/static/chat.js', '/static/native-chat.js').replace('</head>', '<script src="/static/vendor/katex/katex.min.js" defer></script><script src="/static/markdown.js" defer></script><link rel="stylesheet" href="/static/vendor/katex/katex.min.css"></head>')
@@ -288,6 +332,22 @@ def create_server(console, port=18892):
                     jobs = [{key: job[key] for key in ('id', 'preset', 'policy', 'status')} for job in reversed(console.jobs.values())]
                 self.respond(200, {'jobs': jobs})
             elif path.startswith('/api/jobs/'):
+                parts = path.strip('/').split('/')
+                if len(parts) == 4 and parts[3] == 'download':
+                    try:
+                        raw_zip = console.download_zip(parts[2])
+                        self.send_response(200)
+                        self.send_header('Content-Type', 'application/zip')
+                        self.send_header('Content-Disposition', f'attachment; filename="aios_delivery_{parts[2][:10]}.zip"')
+                        self.send_header('Content-Length', str(len(raw_zip)))
+                        self.send_header('Cache-Control', 'no-store')
+                        self.end_headers()
+                        self.wfile.write(raw_zip)
+                        return
+                    except (KeyError, FileNotFoundError):
+                        return self.respond(404, {'error': '交付压缩包不存在'})
+                    except ValueError as exc:
+                        return self.respond(409, {'error': str(exc)})
                 try:
                     self.respond(200, console.detail(path.rsplit('/', 1)[1]))
                 except KeyError:

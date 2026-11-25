@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1120 680" width="1120" height="680" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A"/>
+      <stop offset="100%" stop-color="#1E293B"/>
+    </linearGradient>
+    <linearGradient id="l5Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#1D4ED8"/><stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <linearGradient id="l4Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0F766E"/><stop offset="100%" stop-color="#0D9488"/>
+    </linearGradient>
+    <linearGradient id="l3Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4338CA"/><stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="l2Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0369A1"/><stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+    <linearGradient id="l1Grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B45309"/><stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#94A3B8"/>
+    </marker>
+  </defs>
+
+  <rect width="1120" height="680" rx="14" fill="url(#bgGrad)"/>
+
+  <!-- Header -->
+  <text x="560" y="40" text-anchor="middle" fill="#F8FAFC" font-size="22" font-weight="700">AIOS Proj3 · openEuler 24.03 SP4 操作系统级多智能体运行时总体架构</text>
+  <text x="560" y="64" text-anchor="middle" fill="#94A3B8" font-size="12">Linux 6.6.0 · cgroup v2 委派硬隔离 · AF_UNIX 常驻自愈 · 纯内存多路复用持钥 · 111/111 真机回归</text>
+
+  <!-- L5: Application & Ecosystem Layer -->
+  <rect x="36" y="84" width="1048" height="92" rx="10" fill="#1E293B" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="36" y="84" width="170" height="92" rx="10" fill="url(#l5Grad)"/>
+  <text x="121" y="124" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">L5 应用与生态层</text>
+  <text x="121" y="144" text-anchor="middle" fill="#DBEAFE" font-size="11">App &amp; Ecosystem</text>
+
+  <rect x="224" y="98" width="195" height="64" rx="8" fill="#0F172A" stroke="#60A5FA" stroke-width="1"/>
+  <text x="321" y="122" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">Web Console (127.0.0.1)</text>
+  <text x="321" y="143" text-anchor="middle" fill="#94A3B8" font-size="11">CSRF / SSE 流式 / ZIP 校验下载</text>
+
+  <rect x="434" y="98" width="195" height="64" rx="8" fill="#0F172A" stroke="#60A5FA" stroke-width="1"/>
+  <text x="531" y="122" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">Cerebrum SDK</text>
+  <text x="531" y="143" text-anchor="middle" fill="#94A3B8" font-size="11">LLM / Mem / Storage / Tool API</text>
+
+  <rect x="644" y="98" width="205" height="64" rx="8" fill="#0F172A" stroke="#60A5FA" stroke-width="1"/>
+  <text x="746" y="122" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">AgentHub &amp; Manifest</text>
+  <text x="746" y="143" text-anchor="middle" fill="#94A3B8" font-size="11">声明式权限沙箱 &amp; 配额拦截</text>
+
+  <rect x="864" y="98" width="204" height="64" rx="8" fill="#0F172A" stroke="#60A5FA" stroke-width="1"/>
+  <text x="966" y="122" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">IntentRouter (LSFS)</text>
+  <text x="966" y="143" text-anchor="middle" fill="#94A3B8" font-size="11">自然语言路由 / 版本回滚</text>
+
+  <line x1="560" y1="176" x2="560" y2="196" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- L4: Orchestration & Fault-Tolerance Layer -->
+  <rect x="36" y="198" width="1048" height="88" rx="10" fill="#1E293B" stroke="#14B8A6" stroke-width="1.5"/>
+  <rect x="36" y="198" width="170" height="88" rx="10" fill="url(#l4Grad)"/>
+  <text x="121" y="236" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">L4 编排与容错层</text>
+  <text x="121" y="256" text-anchor="middle" fill="#CCFBF1" font-size="11">Dynamic DAG</text>
+
+  <rect x="224" y="212" width="270" height="60" rx="8" fill="#0F172A" stroke="#2DD4BF" stroke-width="1"/>
+  <text x="359" y="235" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">WorkflowEngine 动态 DAG 引擎</text>
+  <text x="359" y="255" text-anchor="middle" fill="#94A3B8" font-size="11">环路检测 · 动态二轮修复 patch_round_2 → verify_round_2</text>
+
+  <rect x="510" y="212" width="270" height="60" rx="8" fill="#0F172A" stroke="#2DD4BF" stroke-width="1"/>
+  <text x="645" y="235" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">非级联分支隔离与检查点恢复</text>
+  <text x="645" y="255" text-anchor="middle" fill="#94A3B8" font-size="11">签名校验 · 失败分支 isolated_skipped · 不重放在途写操作</text>
+
+  <rect x="796" y="212" width="272" height="60" rx="8" fill="#0F172A" stroke="#2DD4BF" stroke-width="1"/>
+  <text x="932" y="235" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">工程协议与 6 项防作弊护栏</text>
+  <text x="932" y="255" text-anchor="middle" fill="#94A3B8" font-size="11">order_service 多文件 · AST 白名单 · 隐藏测试隔离</text>
+
+  <line x1="560" y1="286" x2="560" y2="306" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- L3: Kernel Scheduling & Control Plane -->
+  <rect x="36" y="308" width="1048" height="92" rx="10" fill="#1E293B" stroke="#6366F1" stroke-width="1.5"/>
+  <rect x="36" y="308" width="170" height="92" rx="10" fill="url(#l3Grad)"/>
+  <text x="121" y="348" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">L3 调度与控制面</text>
+  <text x="121" y="368" text-anchor="middle" fill="#E0E7FF" font-size="11">Scheduler &amp; Control</text>
+
+  <rect x="224" y="322" width="265" height="64" rx="8" fill="#0F172A" stroke="#818CF8" stroke-width="1"/>
+  <text x="356" y="346" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">FIFO / RR 调度器 + WAKE_SENTINEL</text>
+  <text x="356" y="367" text-anchor="middle" fill="#94A3B8" font-size="11">零空等队列(0.27~0.54ms) · 停机 503 排空</text>
+
+  <rect x="505" y="322" width="275" height="64" rx="8" fill="#0F172A" stroke="#818CF8" stroke-width="1"/>
+  <text x="642" y="346" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">DRF 公平准入与 ACB 生命周期</text>
+  <text x="642" y="367" text-anchor="middle" fill="#94A3B8" font-size="11">CPU/Mem/PIDs 矢量 · 模型调用/Token 预算</text>
+
+  <rect x="796" y="322" width="272" height="64" rx="8" fill="#0F172A" stroke="#818CF8" stroke-width="1"/>
+  <text x="932" y="346" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">TaskScope + Mailbox ACL IPC</text>
+  <text x="932" y="367" text-anchor="middle" fill="#94A3B8" font-size="11">互斥作用域 · 零拷贝 ctx_ref · 退出自动回收</text>
+
+  <line x1="560" y1="400" x2="560" y2="420" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- L2: Four Syscall Subsystems -->
+  <rect x="36" y="422" width="1048" height="96" rx="10" fill="#1E293B" stroke="#0EA5E9" stroke-width="1.5"/>
+  <rect x="36" y="422" width="170" height="96" rx="10" fill="url(#l2Grad)"/>
+  <text x="121" y="464" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">L2 四大 Syscall</text>
+  <text x="121" y="484" text-anchor="middle" fill="#E0F2FE" font-size="11">Kernel Subsystems</text>
+
+  <rect x="224" y="436" width="198" height="68" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1"/>
+  <text x="323" y="460" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">LLM Core</text>
+  <text x="323" y="480" text-anchor="middle" fill="#94A3B8" font-size="11">fail-closed 截断守卫(502)</text>
+  <text x="323" y="495" text-anchor="middle" fill="#38BDF8" font-size="10">多路复用 16 线程池</text>
+
+  <rect x="436" y="436" width="198" height="68" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1"/>
+  <text x="535" y="460" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">Memory (A-Mem)</text>
+  <text x="535" y="480" text-anchor="middle" fill="#94A3B8" font-size="11">LRU-K 驱逐 · 写屏障</text>
+  <text x="535" y="495" text-anchor="middle" fill="#38BDF8" font-size="10">卡片盒双向链接与 1-hop 召回</text>
+
+  <rect x="648" y="436" width="204" height="68" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1"/>
+  <text x="750" y="460" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">Storage &amp; ContextStore</text>
+  <text x="750" y="480" text-anchor="middle" fill="#94A3B8" font-size="11">LSFS 403 防穿越 · SHA-256 去重</text>
+  <text x="750" y="495" text-anchor="middle" fill="#38BDF8" font-size="10">WAL+FULL · _write_tx 严格回滚</text>
+
+  <rect x="866" y="436" width="202" height="68" rx="8" fill="#0F172A" stroke="#38BDF8" stroke-width="1"/>
+  <text x="967" y="460" text-anchor="middle" fill="#F1F5F9" font-size="13" font-weight="600">Tool &amp; LiteCUA</text>
+  <text x="967" y="480" text-anchor="middle" fill="#94A3B8" font-size="11">AutoTool 白名单 · 参数校验</text>
+  <text x="967" y="495" text-anchor="middle" fill="#38BDF8" font-size="10">LiteCUA 内存态 GUI 模拟沙箱</text>
+
+  <line x1="560" y1="518" x2="560" y2="538" stroke="#94A3B8" stroke-width="1.8" marker-end="url(#arrow)"/>
+
+  <!-- L1: openEuler OS Primitives Layer -->
+  <rect x="36" y="540" width="1048" height="106" rx="10" fill="#1E293B" stroke="#F59E0B" stroke-width="1.8"/>
+  <rect x="36" y="540" width="170" height="106" rx="10" fill="url(#l1Grad)"/>
+  <text x="121" y="586" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="700">L1 openEuler</text>
+  <text x="121" y="606" text-anchor="middle" fill="#FEF3C7" font-size="11">OS Primitives</text>
+
+  <rect x="224" y="555" width="272" height="76" rx="8" fill="#0F172A" stroke="#FBBF24" stroke-width="1"/>
+  <text x="360" y="579" text-anchor="middle" fill="#FEF3C7" font-size="13" font-weight="700">Linux cgroup v2 委托硬隔离</text>
+  <text x="360" y="599" text-anchor="middle" fill="#CBD5E1" font-size="11">cpu.max(0.2 核) · memory.max(OOM=1)</text>
+  <text x="360" y="617" text-anchor="middle" fill="#FBBF24" font-size="10.5">工具任务粒度子组 · 退出零孤儿目录</text>
+
+  <rect x="512" y="555" width="272" height="76" rx="8" fill="#0F172A" stroke="#FBBF24" stroke-width="1"/>
+  <text x="648" y="579" text-anchor="middle" fill="#FEF3C7" font-size="13" font-weight="700">AF_UNIX 常驻 Worker 监督器</text>
+  <text x="648" y="599" text-anchor="middle" fill="#CBD5E1" font-size="11">Unix Socket 心跳 · VmRSS 遥测</text>
+  <text x="648" y="617" text-anchor="middle" fill="#FBBF24" font-size="10.5">SIGKILL 崩溃自动拉起新 PID (不重放写操作)</text>
+
+  <rect x="800" y="555" width="268" height="76" rx="8" fill="#0F172A" stroke="#FBBF24" stroke-width="1"/>
+  <text x="934" y="579" text-anchor="middle" fill="#FEF3C7" font-size="13" font-weight="700">RAM-Only 多路复用持钥进程</text>
+  <text x="934" y="599" text-anchor="middle" fill="#CBD5E1" font-size="11">独立 spawn 进程纯内存持钥 · 零环境变量透传</text>
+  <text x="934" y="617" text-anchor="middle" fill="#FBBF24" font-size="10.5">请求 ID 多路复用 IPC (4 并发提速 9.07×)</text>
+
+  <text x="560" y="666" text-anchor="middle" fill="#64748B" font-size="11">2026 全国大学生计算机系统能力大赛 · 操作系统设计赛 (proj3) · 对应 AgentCgroup (arXiv:2602.09345v3) 工具粒度隔离范式</text>
+</svg>

@@ -117,10 +117,19 @@
               <div id="projectBox" style="display:none;">
                 <label for="projectSelect">受控修复工程</label>
                 <select id="projectSelect">
+                  <option value="order_service" selected>order_service/ · 多文件订单项目（pricing + shipping + refunds 跨文件修复）</option>
                   <option value="pricing">pricing.py · 金额计算（折扣、免邮与按比例退款）</option>
                   <option value="intervals">intervals.py · 时间区间（相交时长、窗口分桶与 TTL）</option>
                   <option value="text_normalization">text_normalization.py · 文本规范化（空白折叠、词数与前缀）</option>
                 </select>
+                <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;font-size:12px;">
+                  <label style="display:inline-flex;align-items:center;gap:4px;margin:0;cursor:pointer;">
+                    <input type="checkbox" id="includeAuditBranchChk" checked style="width:auto;"> 启用并行静态审计 Agent (audit_agent)
+                  </label>
+                  <label style="display:inline-flex;align-items:center;gap:4px;margin:0;cursor:pointer;">
+                    <input type="checkbox" id="simulateAuditFailureChk" style="width:auto;"> 注入无依赖分支故障 (演示非级联容错)
+                  </label>
+                </div>
               </div>
 
               <div class="two-col">
@@ -245,10 +254,14 @@
               <div class="panel-header">
                 <div>
                   <span class="kicker">CONTROLLED PYTHON REPAIR PIPELINE</span>
-                  <h2 id="engProjectTitle">受控 Python 工程七阶段修复</h2>
+                  <h2 id="engProjectTitle">受控 Python 工程多 Agent 修复与独立验证</h2>
                 </div>
-                <span class="tag tag-ok" id="engVerdictBadge">已验证</span>
+                <div style="display:flex;gap:8px;align-items:center;">
+                  <a id="engDownloadZipBtn" class="btn btn-sm btn-accent" href="#" download style="display:none;text-decoration:none;">下载交付产物 ZIP (含 SHA256SUMS)</a>
+                  <span class="tag tag-ok" id="engVerdictBadge">已验证</span>
+                </div>
               </div>
+              <div id="engAgentTelemetryWrap" style="margin-bottom:14px;"></div>
               <div id="engPhaseList" class="card-grid" style="margin-bottom:14px;"></div>
               <div class="two-col">
                 <div>
@@ -256,7 +269,7 @@
                   <pre class="code-block" id="engOriginalCode"></pre>
                 </div>
                 <div>
-                  <label>AST 受检补丁源码 (Public + Heldout Verified)</label>
+                  <label>AST 受检补丁源码 / Unified Diff (Public + Hidden Verified)</label>
                   <pre class="code-block" id="engPatchedCode"></pre>
                 </div>
               </div>

@@ -1,0 +1,23 @@
+{
+  "verified_files": 53,
+  "filename_aliases": {},
+  "partial_verification": false,
+  "zip_sha256": "b3c1fd06fb5061986ac92f508843da32694f0d263d039268506f9fe4d2aac9bb",
+  "zip_bytes": 19239300,
+  "baseline_code_unchanged": true,
+  "windows_regression": {
+    "discovered": 111,
+    "passed": 110,
+    "skipped": 1,
+    "failures": 0,
+    "elapsed_seconds": 22.137
+  },
+  "delivery_verifier_tests": 9,
+  "new_nuc_run": false,
+  "pattern_scan": {
+    "baseline_files": 276,
+    "candidate_credentials": 0,
+    "known_fake_fixture_excluded": "tests/test_sse_and_streaming.py"
+  },
+  "initial_environment_errors": "PDF dependency missing; sandbox loopback HTTP blocked; rerun passed after installing dependencies and permitting local HTTP"
+}

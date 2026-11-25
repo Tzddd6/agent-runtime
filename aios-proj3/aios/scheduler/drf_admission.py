@@ -29,6 +29,8 @@ class AgentControlBlock:
     model_calls_used: int = 0
     max_model_calls: int = 100
     tokens_used: int = 0
+    input_tokens_used: int = 0
+    output_tokens_used: int = 0
     max_tokens: int = 200_000
     dominant_share: float = 0.0
     cgroup_slices: List[Dict[str, Any]] = field(default_factory=list)
@@ -162,6 +164,12 @@ class DRFAdmissionController:
             acb.model_calls_used += calls
             acb.tokens_used += tokens
 
+    def record_token_usage(self, agent_name: str, input_tokens: int = 0, output_tokens: int = 0) -> None:
+        with self._lock:
+            acb = self.get_or_create_agent(agent_name)
+            acb.input_tokens_used += max(0, int(input_tokens or 0))
+            acb.output_tokens_used += max(0, int(output_tokens or 0))
+
     def can_admit(self, req: Optional[ResourceVector] = None, agent_name: Optional[str] = None) -> bool:
         r = req or ResourceVector()
         with self._lock:
@@ -264,7 +272,11 @@ class DRFAdmissionController:
                         "dominant_share": round(acb.dominant_share, 4),
                         "total_syscalls": acb.total_syscalls,
                         "model_calls_used": acb.model_calls_used,
+                        "max_model_calls": acb.max_model_calls,
                         "tokens_used": acb.tokens_used,
+                        "input_tokens_used": acb.input_tokens_used,
+                        "output_tokens_used": acb.output_tokens_used,
+                        "max_tokens": acb.max_tokens,
                     }
                     for name, acb in self.agents.items()
                 },

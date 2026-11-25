@@ -126,6 +126,7 @@ class ChatStore:
         attachments: List[str] | None = None,
         use_knowledge: bool = True,
         context_mode: str = "balanced",
+        job_id: str | None = None,
     ) -> Tuple[Dict[str, Any], Dict[str, Any], bool]:
         key = identity(key)
         request = identity(request)
@@ -160,7 +161,7 @@ class ChatStore:
             turn = {
                 **signature,
                 "request_id": request,
-                "job_id": None,
+                "job_id": job_id,
                 "syscall_id": None,
                 "created": time.time(),
                 "status": "running",

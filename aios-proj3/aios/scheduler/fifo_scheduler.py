@@ -155,6 +155,8 @@ class FIFOScheduler(BaseScheduler):
             batch: List[Any] = []
             try:
                 first = self._pop_llm_syscall(0.05)
+                if self._is_wake_sentinel(first):
+                    continue
                 batch.append(first)
             except Empty:
                 continue
@@ -163,7 +165,10 @@ class FIFOScheduler(BaseScheduler):
                 # Cloud API calls have no local GPU batching benefit: drain only already-queued items with zero idle wait.
                 while True:
                     try:
-                        batch.append(self._pop_llm_syscall(0.0))
+                        nxt = self._pop_llm_syscall(0.0)
+                        if self._is_wake_sentinel(nxt):
+                            continue
+                        batch.append(nxt)
                     except Empty:
                         break
             elif self.batch_interval > 0:
@@ -173,7 +178,12 @@ class FIFOScheduler(BaseScheduler):
                     if remaining <= 0:
                         break
                     try:
-                        batch.append(self._pop_llm_syscall(remaining))
+                        nxt = self._pop_llm_syscall(remaining)
+                        if self._is_wake_sentinel(nxt):
+                            if not self.active:
+                                break
+                            continue
+                        batch.append(nxt)
                     except Empty:
                         break
 
@@ -185,6 +195,8 @@ class FIFOScheduler(BaseScheduler):
                 syscall = self.get_memory_syscall()
             except Empty:
                 continue
+            if self._is_wake_sentinel(syscall):
+                continue
             self._execute_syscall(syscall, self.memory_manager.address_request, "Memory")
 
     def process_storage_requests(self) -> None:
@@ -192,6 +204,8 @@ class FIFOScheduler(BaseScheduler):
             try:
                 syscall = self.get_storage_syscall()
             except Empty:
+                continue
+            if self._is_wake_sentinel(syscall):
                 continue
             self._execute_syscall(syscall, self.storage_manager.address_request, "Storage")
 
@@ -224,20 +238,4 @@ class FIFOScheduler(BaseScheduler):
         if self._cloud_pool is not None:
             self._cloud_pool.shutdown(wait=True)
             self._cloud_pool = None
-        # Drain any accepted syscalls left waiting in queues so no caller hangs after stop.
-        for reader in (
-            self.get_llm_syscall,
-            self.get_memory_syscall,
-            self.get_storage_syscall,
-            self.get_tool_syscall,
-        ):
-            while True:
-                try:
-                    sc = reader(0.0) if self._reader_accepts_timeout(reader) else reader()
-                except Empty:
-                    break
-                except Exception:
-                    break
-                if sc is None:
-                    break
-                self._cancel_syscall(sc)
+        self.drain_queues_on_stop()

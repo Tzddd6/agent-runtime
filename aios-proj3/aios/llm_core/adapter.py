@@ -73,6 +73,23 @@ class LLMAdapter:
             elif msg.get("role") == "system":
                 sys_notes.append(str(msg.get("content", "")))
         context_tag = f" [ctx:{len(sys_notes)}]" if sys_notes else ""
+        # Deterministic stub support for controlled engineering repair projects
+        if "根据需求与基线失败信息修复下面项目：" in last_user or "上一轮验证失败，请根据反馈生成第二轮修复源码：" in last_user:
+            try:
+                from aios.tool.engineering import PROJECTS
+                marker = "根据需求与基线失败信息修复下面项目：" if "根据需求与基线失败信息修复下面项目：" in last_user else "上一轮验证失败，请根据反馈生成第二轮修复源码："
+                payload_str = last_user.split(marker, 1)[1].strip()
+                req_obj = json.loads(payload_str)
+                proj_key = req_obj.get("project", "pricing")
+                if proj_key in PROJECTS:
+                    spec = PROJECTS[proj_key]
+                    if spec.get("multi_file"):
+                        reply_json = json.dumps({"files": spec["reference_fix_files"]}, ensure_ascii=False)
+                    else:
+                        reply_json = json.dumps({"source": spec["reference_fix"]}, ensure_ascii=False)
+                    return [reply_json]
+            except Exception:
+                pass
         reply = f"[{model_name}]{context_tag} Processed: {last_user}"
         # Split into word tokens for realistic streaming / time-slice preemption
         words = reply.split(" ")

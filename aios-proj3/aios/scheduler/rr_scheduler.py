@@ -75,6 +75,8 @@ class RRScheduler(BaseScheduler):
                 syscall = self.get_llm_syscall()
             except Empty:
                 continue
+            if self._is_wake_sentinel(syscall):
+                continue
             self._execute_syscall(syscall, self.llm.execute_llm_syscall, "LLM")
 
     def process_memory_requests(self) -> None:
@@ -83,6 +85,8 @@ class RRScheduler(BaseScheduler):
                 syscall = self.get_memory_syscall()
             except Empty:
                 continue
+            if self._is_wake_sentinel(syscall):
+                continue
             self._execute_syscall(syscall, self.memory_manager.address_request, "Memory")
 
     def process_storage_requests(self) -> None:
@@ -90,6 +94,8 @@ class RRScheduler(BaseScheduler):
             try:
                 syscall = self.get_storage_syscall()
             except Empty:
+                continue
+            if self._is_wake_sentinel(syscall):
                 continue
             self._execute_syscall(syscall, self.storage_manager.address_request, "Storage")
 
@@ -110,3 +116,4 @@ class RRScheduler(BaseScheduler):
     def stop(self) -> None:
         self.active = False
         self.stop_processing_threads()
+        self.drain_queues_on_stop()
