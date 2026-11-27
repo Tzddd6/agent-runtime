@@ -89,7 +89,7 @@ def _compact_history_for_model(history: List[Dict[str, Any]], keep_recent_tools:
     return compacted
 
 
-def _execute_single_call(kernel: Any, agent: str, call: Dict[str, Any]) -> Tuple[str, str, bool]:
+def _execute_single_call(kernel: Any, agent: str, call: Dict[str, Any], context_holder=None) -> Tuple[str, str, bool]:
     name = call['function']['name']
     try:
         arguments = call['function']['arguments']
@@ -114,7 +114,7 @@ def _execute_single_call(kernel: Any, agent: str, call: Dict[str, Any]) -> Tuple
             raise RuntimeError('Tool operation did not succeed')
         raw_content = json.dumps({'ok': True, 'result': result.response_message}, ensure_ascii=False)
         if len(raw_content) > LARGE_TOOL_RESULT_CHARS and hasattr(kernel, 'context_store'):
-            ctx_id = kernel.context_store.put(agent, result.response_message)
+            ctx_id = kernel.context_store.put(agent, result.response_message, holder_agent=context_holder)
             page = kernel.context_store.read_page(ctx_id, reader_agent=agent, offset=0, limit=LARGE_TOOL_RESULT_CHARS)
             content = json.dumps(
                 {
@@ -135,7 +135,7 @@ def _execute_single_call(kernel: Any, agent: str, call: Dict[str, Any]) -> Tuple
         return call['id'], content, False
 
 
-def run(kernel, agent, messages, model):
+def run(kernel, agent, messages, model, *, context_holder=None):
     history = list(messages)
     declarations = [
         {
@@ -170,9 +170,9 @@ def run(kernel, agent, messages, model):
         all_read_only = len(normalized) > 1 and all(c['function'].get('name') in READ_ONLY_TOOLS for c in normalized)
         if all_read_only:
             with ThreadPoolExecutor(max_workers=len(normalized), thread_name_prefix='aios-ro-tool') as pool:
-                outcomes = list(pool.map(lambda c: _execute_single_call(kernel, agent, c), normalized))
+                outcomes = list(pool.map(lambda c: _execute_single_call(kernel, agent, c, context_holder), normalized))
         else:
-            outcomes = [_execute_single_call(kernel, agent, c) for c in normalized]
+            outcomes = [_execute_single_call(kernel, agent, c, context_holder) for c in normalized]
 
         for call, (call_id, content, ok) in zip(normalized, outcomes):
             if not ok:

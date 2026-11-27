@@ -33,7 +33,9 @@ def analysis_plan(project, spec, baseline):
                 '跨文件缺陷定位：1. pricing.py 先减优惠券再打折且未限制非负下界；'
                 '2. shipping.py 免邮阈值误用 >5000 且在免基础运费时漏收跨区附加费；'
                 '3. refunds.py 先整除再相乘导致精度丢失、未退未发货全退运费且缺少剩余可退额度上限。'
-                if spec.get('multi_file') else f"单文件缺陷定位：{spec['requirements']}")}
+                if project == 'order_service' else
+                (spec['requirements'] if spec.get('provenance') else f"单文件缺陷定位：{spec['requirements']}")
+            )}
 
 
 def patch_messages(project, spec, upstream, *, retry=False):
@@ -67,6 +69,12 @@ def patch_messages(project, spec, upstream, *, retry=False):
             '你是严谨的 Python 工程修复代理。请严格保持原有函数名和参数签名，覆盖所有边界条件（空串、空白、负数、边界相等），'
             '仅使用纯 Python 实现，只输出 JSON 对象 {"source":"完整Python源码"}，不要输出 Markdown 代码块或任何解释。')
         prefix = '根据需求与基线失败信息修复下面项目：'
+    if multi and project != 'order_service':
+        editable = spec['editable_files']
+        instruction['editable_files'] = editable
+        instruction['provenance'] = spec.get('provenance')
+        system = ('根据需求和公开测试修复 Python 工程。保持函数签名，仅修改 editable_files 中的文件。'
+                  '只输出 JSON 对象，files 字段是文件名到完整 Python 源码的映射。')
     return [{'role': 'system', 'content': system}, {'role': 'user', 'content': prefix +
         json.dumps(stable_context(instruction), ensure_ascii=False, sort_keys=True)}]
 

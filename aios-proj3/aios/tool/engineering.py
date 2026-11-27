@@ -16,6 +16,8 @@ import tempfile
 from typing import Any, Dict, List, Optional, Tuple
 import zipfile
 
+from aios.tool.engineering_projects import json_pointer_project
+
 
 ORDER_SERVICE_FILES: Dict[str, str] = {
     "pricing.py": (
@@ -345,6 +347,9 @@ PROJECTS: Dict[str, Dict[str, Any]] = {
 }
 
 
+PROJECTS["json_pointer"] = json_pointer_project()
+
+
 def canonical_project(project: str) -> str:
     aliases = {
         "integer-pricing": "pricing",
@@ -390,6 +395,8 @@ def manifest(project: str = "pricing", include_reference: bool = True) -> Dict[s
         out["files"] = dict(spec["files"])
         out["editable_files"] = list(spec["editable_files"])
         out["public_tests"] = {"tests/test_public.py": spec["tests"]["tests/test_public.py"]}
+    if spec.get("provenance"):
+        out["provenance"] = dict(spec["provenance"])
     if include_reference:
         out["reference_fix"] = spec["reference_fix"]
         if spec.get("multi_file"):
@@ -701,9 +708,9 @@ def run_multifile_check(
     own_temp = None
     if workspace_dir is None:
         own_temp = tempfile.TemporaryDirectory(prefix="aios_order_ws_")
-        ws_root = Path(own_temp.name) / "order_service"
+        ws_root = Path(own_temp.name) / key
     else:
-        ws_root = Path(workspace_dir) / "order_service"
+        ws_root = Path(workspace_dir) / key
 
     try:
         ws_root.mkdir(parents=True, exist_ok=True)
@@ -793,7 +800,7 @@ def run_multifile_check(
             own_temp.cleanup()
 
 
-def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str) -> Tuple[bytes, Dict[str, Any]]:
+def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str, *, evidence=None) -> Tuple[bytes, Dict[str, Any]]:
     """
     Guardrail #5: Package the verified source tree, unified diff patch, test execution logs,
     and `SHA256SUMS.txt` into a deterministic downloadable ZIP archive, and verify that the
@@ -834,6 +841,8 @@ def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str) -
         "heldout": checked_result.get("heldout"),
         "tests_intact": checked_result.get("tests_intact", True),
     }
+    if spec.get("provenance"):
+        test_report["provenance"] = spec["provenance"]
     test_log_text = json.dumps(test_report, ensure_ascii=False, indent=2) + "\n"
 
     sha_lines: List[str] = []
@@ -851,6 +860,16 @@ def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str) -
             pub_test_sha = hashlib.sha256(pub_test_bytes).hexdigest()
             zf.writestr("tests/test_public.py", pub_test_bytes)
             sha_lines.append(f"{pub_test_sha}  tests/test_public.py")
+
+        if spec.get("provenance"):
+            supplementary = {
+                "UPSTREAM.json": json.dumps(spec["provenance"], ensure_ascii=False, indent=2) + "\n",
+                "LICENSE.upstream.txt": spec["license_text"],
+            }
+            for name, content in supplementary.items():
+                raw = content.encode("utf-8")
+                zf.writestr(name, raw)
+                sha_lines.append(f"{hashlib.sha256(raw).hexdigest()}  {name}")
 
         readme = (
             "# Verified controlled project\n\n"
@@ -872,6 +891,11 @@ def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str) -
         zf.writestr("test_verification_log.json", log_bytes)
         sha_lines.append(f"{log_sha}  test_verification_log.json")
 
+        if evidence is not None:
+            encoded = (json.dumps(evidence, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+            zf.writestr("execution_evidence.json", encoded)
+            sha_lines.append(f"{hashlib.sha256(encoded).hexdigest()}  execution_evidence.json")
+
         sha_lines.append(f"{expected_tree_sha}  __SOURCE_TREE_SHA256__")
         sums_text = "\n".join(sha_lines) + "\n"
         zf.writestr("SHA256SUMS.txt", sums_text.encode("utf-8"))
@@ -886,6 +910,34 @@ def build_delivery_zip_bytes(checked_result: Dict[str, Any], workflow_id: str) -
         "files_included": sorted(files_map.keys()),
         "size_bytes": len(zip_bytes),
     }
+
+
+def _verify_execution_evidence(evidence, expected_source_sha256):
+    try:
+        if evidence["schema_version"] != 1 or evidence["verified_source_sha256"] != expected_source_sha256:
+            raise ValueError("Execution evidence source hash mismatch")
+        models = evidence["model"]
+        selected = models.get("patch_round_2") or models["patch"]
+        if selected["candidate_sha256"] != expected_source_sha256:
+            raise ValueError("Delivered source differs from the evidenced candidate")
+        if evidence["resumed"]:
+            first, second = [worker for worker in evidence["verification_workers"]
+                             if worker["operation"] == "project.patch_check"]
+            verification = [node for node in evidence["nodes"] if node["task_id"] == "verify"]
+            starts = [node for node in verification if node["state"] == "running"]
+            completed = next(node for node in verification if node["state"] == "succeeded")
+            patch_starts = [node for node in evidence["nodes"] if node["task_id"] in ("patch", "patch_round_2")
+                            and node["state"] == "running"]
+            if (evidence["model_calls_during_resume"] != 0 or len(patch_starts) != 1
+                    or len(starts) != 2 or starts[0]["input_refs"] != starts[1]["input_refs"]
+                    or first["id"] == second["id"] or not first["returncode"]
+                    or first["interrupted_before_start"] is not True or first["reclaimed"] is not True
+                    or second["returncode"] != 0 or second["reclaimed"] is not True
+                    or first["parameters_sha256"] != second["parameters_sha256"]
+                    or completed["result_sha256"] != second["result_sha256"]):
+                raise ValueError("Recovery evidence does not match the resumed verification")
+    except (AttributeError, KeyError, StopIteration, TypeError) as exc:
+        raise ValueError("Invalid execution evidence") from exc
 
 
 def verify_delivery_zip_bytes(zip_bytes: bytes, expected_source_sha256: str, multi_file: bool = True) -> Dict[str, Any]:
@@ -916,8 +968,10 @@ def verify_delivery_zip_bytes(zip_bytes: bytes, expected_source_sha256: str, mul
                 f"Guardrail #5 mismatch: ZIP source SHA-256 ({recomputed}) != verified workspace SHA-256 ({expected_source_sha256})"
             )
         sums_raw = zf.read("SHA256SUMS.txt").decode("utf-8")
+        checksummed = set()
         for line in sums_raw.strip().splitlines():
             digest, arcname = line.split("  ", 1)
+            checksummed.add(arcname)
             if arcname == "__SOURCE_TREE_SHA256__":
                 if digest != expected_source_sha256:
                     raise ValueError("SHA256SUMS.txt tree hash does not match expected_source_sha256")
@@ -925,12 +979,19 @@ def verify_delivery_zip_bytes(zip_bytes: bytes, expected_source_sha256: str, mul
                 actual_file_sha = hashlib.sha256(zf.read(arcname)).hexdigest()
                 if actual_file_sha != digest:
                     raise ValueError(f"SHA256SUMS.txt entry mismatch for {arcname}")
-        return {
+        result = {
             "verified": True,
             "source_tree_sha256": recomputed,
             "files": extracted_src,
             "sha256sums": sums_raw,
         }
+        if "execution_evidence.json" in names:
+            if "execution_evidence.json" not in checksummed:
+                raise ValueError("Execution evidence is missing its checksum")
+            evidence = json.loads(zf.read("execution_evidence.json"))
+            _verify_execution_evidence(evidence, recomputed)
+            result["execution_evidence"] = evidence
+        return result
 
 
 def run_check(source: Any, project: str = "pricing", workspace_dir: Optional[Path] = None) -> Dict[str, Any]:

@@ -1,9 +1,6 @@
-"""
-Orchestrates the focused Playwright Browser E2E Acceptance Suite against a live AIOS Web Console instance.
-Verifies downloaded ZIP SHA-256 digests with `verify_delivery_zip_bytes` and generates:
-- `reports/playwright_e2e/playwright_e2e_report.json`
-- `docs/Playwright_核心链路浏览器自动验收报告.md`
-"""
+"""Start an isolated console, run browser acceptance, and verify its downloads."""
+import argparse
+import io
 import json
 import os
 from pathlib import Path
@@ -11,119 +8,112 @@ import subprocess
 import sys
 from tempfile import TemporaryDirectory
 from threading import Thread
-import time
+import zipfile
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from aios.tool.engineering import verify_delivery_zip_bytes
+from aios.tool.engineering import manifest, verify_delivery_zip_bytes
 from runtime.launch import AIOSKernelRuntime
 from runtime.web import NativeConsole, create_server
 
 
-def main() -> int:
-    out_dir = PROJECT_ROOT / "reports" / "playwright_e2e"
-    out_dir.mkdir(parents=True, exist_ok=True)
-    node_exe = r"D:\Node.js\node.exe"
-    if not Path(node_exe).exists():
-        node_exe = "node"
+def verify_download(out_dir, row):
+    spec = manifest(row['project'], include_reference=False)
+    raw = (out_dir / row['zip']).read_bytes()
+    verified = verify_delivery_zip_bytes(raw, row['source_sha256'], multi_file=True)
+    if set(verified['files']) != set(spec['editable_files']):
+        raise ValueError('Unexpected delivered source files')
+    with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
+        public = bundle.read('tests/test_public.py')
+        if public != spec['public_tests']['tests/test_public.py'].encode():
+            raise ValueError('Delivered public tests differ from the evaluator')
+        if row.get('execution_evidence'):
+            if json.loads(bundle.read('execution_evidence.json')) != row['execution_evidence']:
+                raise ValueError('Downloaded recovery evidence differs from the workflow record')
+        if 'tests/test_hidden.py' in bundle.namelist():
+            raise ValueError('Hidden tests are present in the delivered ZIP')
+        if spec.get('provenance'):
+            if json.loads(bundle.read('UPSTREAM.json')) != spec['provenance']:
+                raise ValueError('Upstream provenance mismatch')
+            if not bundle.read('LICENSE.upstream.txt'):
+                raise ValueError('Missing upstream license')
 
-    with TemporaryDirectory(prefix="aios_pw_e2e_") as tmp_dir:
-        with AIOSKernelRuntime(storage_root=str(Path(tmp_dir) / "storage"), log_mode="silent") as kernel:
-            console = NativeConsole(kernel, Path(tmp_dir) / "jobs")
+    with TemporaryDirectory(prefix='aios-download-check-') as folder:
+        root = Path(folder)
+        for name, content in verified['files'].items():
+            (root / name).write_bytes(content.encode())
+        (root / 'test_public.py').write_bytes(public)
+        result = subprocess.run([sys.executable, '-B', '-m', 'unittest', 'test_public'],
+                                cwd=root, capture_output=True, text=True, timeout=15)
+        if result.returncode:
+            raise ValueError(result.stderr)
+    return {'source_tree_sha256': verified['source_tree_sha256'], 'public_retest': result.stderr.strip()}
+
+
+def run_browser(args, out_dir, root):
+    with AIOSKernelRuntime(storage_root=str(root / 'storage')) as kernel:
+        console = NativeConsole(kernel, root / 'jobs')
+        try:
             with create_server(console, port=0) as server:
-                port = server.server_port
-                base_url = f"http://127.0.0.1:{port}"
-                srv_thread = Thread(target=server.serve_forever, daemon=True)
-                srv_thread.start()
+                thread = Thread(target=server.serve_forever, daemon=True)
+                thread.start()
                 try:
-                    env = dict(os.environ)
-                    env["AIOS_BASE_URL"] = base_url
-                    env["AIOS_E2E_OUT_DIR"] = str(out_dir)
-                    proc = subprocess.run(
-                        [node_exe, str(PROJECT_ROOT / "tools" / "playwright_e2e_runner.js")],
-                        cwd=str(PROJECT_ROOT),
-                        env=env,
-                        capture_output=True,
-                        text=True,
-                        encoding="utf-8",
-                        timeout=120,
-                    )
-                    if proc.returncode != 0:
-                        print("Playwright runner failed:", proc.stdout, proc.stderr, file=sys.stderr)
-                        return proc.returncode
-
-                    report_path = out_dir / "playwright_e2e_report.json"
-                    report = json.loads(report_path.read_text(encoding="utf-8"))
-
-                    # Perform Python-side cryptographic verification on the downloaded ZIP from Case 1
-                    case1 = report["cases"][0]
-                    zip_files = list(out_dir.glob(f"case1_{case1['job_id'][:10]}_delivery.zip"))
-                    assert len(zip_files) == 1, "Downloaded ZIP file not found"
-                    verified_zip = verify_delivery_zip_bytes(
-                        zip_files[0].read_bytes(),
-                        case1["verified_source_sha256"],
-                        multi_file=True,
-                    )
-                    case1["zip_cryptographic_verification"] = {
-                        "verified": verified_zip["verified"],
-                        "source_tree_sha256": verified_zip["source_tree_sha256"],
-                        "files": sorted(verified_zip["files"].keys()),
-                    }
-                    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2), encoding="utf-8")
-
-                    # Generate Markdown report
-                    md_lines = [
-                        "# AIOS 控制台聚焦版 Playwright 浏览器端到端自动验收报告",
-                        "",
-                        f"- **执行时间**：`{report['timestamp']}`",
-                        f"- **浏览器引擎**：`{report['browser']}`（真实页面点击与表单交互，零 API 绕过）",
-                        f"- **总用例数 / 通过数**：**{report['passed_cases']} / {report['total_cases']}**",
-                        f"- **浏览器 `console.error` / `pageerror` 计数**：`{report['console_error_count']}` / `{report['page_error_count']}`",
-                        "",
-                        "## 核心必测链路验收结果总览",
-                        "",
-                        "| # | 用例标识 | 验收场景描述 | 关联工作流 ID | 前后端状态一致性 | 浏览器截图 | 结果 |",
-                        "|---:|---|---|---|---|---|---|",
-                    ]
-                    for idx, c in enumerate(report["cases"], 1):
-                        jid = f"`{c.get('job_id', 'N/A')[:12]}`" if c.get("job_id") else "`N/A`"
-                        st_desc = f"UI:`{c.get('ui_status') or c.get('recovered_ui_status') or c.get('backend_status', 'ok')}` == Backend:`{c.get('backend_status', 'ok')}`"
-                        verd = "PASS" if c["passed"] else "FAIL"
-                        md_lines.append(
-                            f"| {idx} | `{c['id']}` | {c['title']} | {jid} | {st_desc} | `reports/playwright_e2e/{c['screenshot']}` | **{verd}** |"
-                        )
-
-                    md_lines.extend([
-                        "",
-                        "## 关键证据核查摘要",
-                        "",
-                        "1. **多文件 `order_service` 真实修复与下载产物 SHA-256 强一致（Case 1）**：",
-                        f"   - 工作流 ID：`{case1['job_id']}`",
-                        f"   - 控制台实时观测到 5 个独立内核级 Agent 实体：`{', '.join(case1['agents_observed'])}`",
-                        f"   - 隔离测试 Worker 真实子进程 PID：`{case1['tester_worker_pids']}`",
-                        f"   - 通过测试的工作区源码树 SHA-256：`{case1['verified_source_sha256']}`",
-                        f"   - 浏览器点击下载的 ZIP 包 SHA-256：`{case1['downloaded_zip_sha256']}`（与后端交付清单 `{case1['expected_zip_sha256']}` 完全一致，解压重算 `src/pricing.py`、`src/shipping.py`、`src/refunds.py` 树哈希核验通过）",
-                        "2. **连续快速双击幂等保护（Case 2）**：",
-                        f"   - 同一事件循环内连续触发两次提交按钮点击，后端仅创建 `{report['cases'][1]['jobs_created_count']}` 个有效任务，杜绝重复写盘或付费模型重放。",
-                        "3. **无依赖分支故障非级联隔离（Case 3）**：",
-                        f"   - 注入 `audit_agent` 分支故障后，`static_audit` 节点标红为 `{report['cases'][2]['static_audit_state']}` 并展示明确原因 `AuditBranchFault`，主修复链路 `answer` 节点状态为 `{report['cases'][2]['main_answer_state']}`，整体标记为 `completed_with_failures` 并正常生成可下载修复包。",
-                        "4. **页面刷新状态恢复与快照一致性（Case 4）**：",
-                        f"   - 刷新浏览器后前端恢复展示的状态 `{report['cases'][3]['recovered_ui_status']}` 与后端持久化快照 `{report['cases'][3]['backend_status']}` 完全一致，产物下载按钮保持可用。",
-                        "5. **受控预算耗尽与零残留回收（Case 5）**：",
-                        f"   - 设置 `modelCallsBudget=0` 后，`patch` 节点被内核配额守卫立即拦截为 `{report['cases'][4]['patch_state']}`，下游 `verify` 节点自动标记为 `{report['cases'][4]['verify_state']}`，无静默重试；结束后活跃 Worker 进程数=`{report['cases'][4]['active_workers_after']}`，DRF CPU 占用=`{report['cases'][4]['drf_cpu_used_after']} mCPU`。",
-                        "",
-                    ])
-
-                    doc_path = PROJECT_ROOT / "docs" / "Playwright_核心链路浏览器自动验收报告.md"
-                    doc_path.write_text("\n".join(md_lines), encoding="utf-8")
-                    print(f"Playwright E2E acceptance passed: {report['passed_cases']}/{report['total_cases']}")
-                    return 0
+                    return subprocess.run(
+                        [args.node, str(PROJECT_ROOT / 'tools' / 'playwright_e2e_runner.js')],
+                        cwd=PROJECT_ROOT, timeout=180,
+                        env={**os.environ, 'AIOS_BASE_URL': f'http://127.0.0.1:{server.server_port}',
+                             'AIOS_E2E_OUT_DIR': str(out_dir)},
+                    ).returncode
                 finally:
                     server.shutdown()
-                    srv_thread.join(timeout=3)
-                    console.close()
+                    thread.join()
+        finally:
+            console.close()
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--node', default='node', help='Node.js executable')
+    parser.add_argument('--out-dir', type=Path, required=True, help='New output directory for screenshots, reports and ZIPs')
+    args = parser.parse_args()
+    out_dir = args.out_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    if any(out_dir.iterdir()):
+        parser.error('--out-dir must be empty')
+
+    with TemporaryDirectory(prefix='aios-pw-e2e-') as tmp:
+        try:
+            code = run_browser(args, out_dir, Path(tmp))
+        except (OSError, subprocess.TimeoutExpired) as exc:
+            print(f'Browser acceptance could not finish: {exc}', file=sys.stderr)
+            return 1
+
+    report_path = out_dir / 'playwright_e2e_report.json'
+    if not report_path.is_file():
+        return code or 1
+    report = json.loads(report_path.read_text(encoding='utf-8'))
+    for row in report['cases']:
+        if row['passed'] and row.get('zip'):
+            try:
+                row['zip_verification'] = verify_download(out_dir, row)
+            except (OSError, ValueError, zipfile.BadZipFile, subprocess.TimeoutExpired) as exc:
+                row.update(passed=False, error=str(exc))
+
+    report['total_cases'] = len(report['cases'])
+    report['passed_cases'] = sum(row['passed'] for row in report['cases'])
+    report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    lines = ['# AIOS 浏览器自动验收', '', report['browser'], '',
+             '| 场景 | 工作流 | 截图 | 结果 |', '| --- | --- | --- | --- |']
+    for row in report['cases']:
+        result = '通过' if row['passed'] else '失败'
+        lines.append(f"| {row['title']} | {row.get('job_id', '—')} | [查看]({row['screenshot']}) | {result} |")
+    lines += ['', f"浏览器错误 {len(report['console_errors'])} 条，页面异常 {len(report['page_errors'])} 条。",
+              '', '[原始报告](playwright_e2e_report.json)']
+    (out_dir / 'REPORT.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    print(f"Playwright {report['passed_cases']}/{report['total_cases']} · {report_path}")
+    return code or int(report['passed_cases'] != report['total_cases'])
+
+
+if __name__ == '__main__':
     raise SystemExit(main())

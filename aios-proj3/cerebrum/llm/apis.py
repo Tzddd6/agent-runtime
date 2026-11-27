@@ -25,6 +25,7 @@ class LLMQuery(Query):
     stream: bool = False
     user_id: Optional[str] = None
     query_class: str = "llm"
+    thinking: Optional[bool] = None
 
 
 @dataclass
@@ -36,9 +37,12 @@ class LLMResponse(Response):
     error: Optional[str] = None
     status_code: int = 200
     usage: Dict[str, int] = field(default_factory=dict)
+    error_code: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         data = super().to_dict()
         data["tool_calls"] = self.tool_calls
         data["usage"] = dict(self.usage)
+        if self.error_code is not None:
+            data["error_code"] = self.error_code
         return data

@@ -24,7 +24,7 @@ class Executor:
             if not {'cpu', 'memory', 'pids'} <= set(controls):
                 raise RuntimeError('委派子树尚未向子级启用 cpu/memory/pids 控制器')
 
-    def launch(self, payload, directory, limits):
+    def launch(self, payload, directory, limits, *, interrupt_before_start=False):
         started = time.monotonic()
         directory.mkdir(parents=True)
         payload_path = directory / '.payload.json'
@@ -80,6 +80,16 @@ class Executor:
             timer.daemon=True
             handle['_timer']=timer
             timer.start()
+            if interrupt_before_start:
+                if proc.poll() is not None:
+                    raise RuntimeError('Worker exited before fault injection')
+                self._signal(handle)
+                proc.wait(timeout=5)
+                if proc.returncode == 0:
+                    raise RuntimeError('Fault injection did not terminate the Worker')
+                handle['interrupted_before_start'] = True
+                proc.stdin.close()
+                return handle
             try:proc.stdin.write('G')
             except BrokenPipeError:
                 if not handle['expired'].is_set():raise

@@ -1,15 +1,19 @@
 from dataclasses import dataclass
 import json
 import logging
+from http.client import HTTPException
+from urllib.error import HTTPError
 from typing import Any, Dict, List, Optional, Union
 import urllib.request
 
 from cerebrum.llm.apis import LLMQuery, LLMResponse
 from aios.config.config_manager import config
 from aios.context.simple_context import SimpleContextManager
+from aios.llm_core.diagnostics import MESSAGES, completion_issue
 from aios.llm_core.profiles import ModelProfileBroker, provider_endpoint
 from aios.llm_core.routing import RouterStrategy, SequentialRouting, SmartRouting
 from aios.llm_core.streaming import (
+    ModelStreamError,
     encode_responses_input,
     parse_chat_completions_sse_stream,
     parse_responses_sse_stream,
@@ -109,6 +113,9 @@ class LLMAdapter:
             "temperature": query.temperature,
             "max_tokens": query.max_new_tokens,
         }
+        if (backend == "deepseek" and model_cfg.get("name") in
+                ("deepseek-flash", "deepseek-v4-flash", "deepseek-v4-pro") and isinstance(query.thinking, bool)):
+            payload["thinking"] = {"type": "enabled" if query.thinking else "disabled"}
         if query.tools:
             payload["tools"] = query.tools
         if query.seed is not None:
@@ -198,26 +205,9 @@ class LLMAdapter:
         for model in self.llm_configs:
             if model.get("name") == requested_model and model.get("backend") == "mock":
                 return model
-        broker_status = self.profile_broker.status()
-        if broker_status.get("configured") and requested_model in (None, broker_status.get("model")):
-            prof_id = broker_status.get("profile_id")
-            if prof_id == "legacy":
-                return {
-                    "name": self.profile_broker.legacy_model,
-                    "backend": "deepseek",
-                    "hostname": "https://api.deepseek.com/v1",
-                    "api_key": self.profile_broker._legacy_key,
-                }
-            prof = self.profile_broker.profiles.get(prof_id or "")
-            if prof:
-                provider = prof["provider"]
-                return {
-                    "name": prof["model"],
-                    "backend": provider,
-                    "hostname": prof["base_url"],
-                    "api_key": prof["key"],
-                    "protocol": "responses" if provider == "aizex" else "chat_completions",
-                }
+        profile = self.profile_broker.model_config()
+        if profile and requested_model in (None, profile["name"]):
+            return profile
         return self.router.select(requested_model)
 
     def execute_llm_syscall(
@@ -285,6 +275,14 @@ class LLMAdapter:
                 status_code=200,
                 usage={"total_tokens": len(tokens)},
             )
+        except ModelStreamError:
+            return LLMResponse(error=MESSAGES['stream'], status_code=502, error_code='stream')
+        except (OSError, HTTPException) as exc:
+            issue = completion_issue(exc)
+            status = exc.code if isinstance(exc, HTTPError) else 503
+            if isinstance(exc, HTTPError):
+                exc.close()
+            return LLMResponse(error=MESSAGES[issue], status_code=status, error_code=issue)
         except Exception as exc:
             logger.error("LLM syscall execution error: %s", type(exc).__name__)
             return LLMResponse(

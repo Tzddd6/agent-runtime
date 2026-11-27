@@ -6,6 +6,8 @@ import os
 import re
 import time
 from collections import OrderedDict
+from contextlib import nullcontext
+from math import isfinite
 from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
@@ -13,7 +15,8 @@ from cerebrum.llm.apis import LLMQuery
 from cerebrum.memory.apis import MemoryQuery
 from cerebrum.storage.apis import StorageQuery
 from cerebrum.tool.apis import ToolQuery
-from aios.scheduler.drf_admission import ResourceVector
+from aios.scheduler.workflow_checkpoint import WorkflowCheckpoint
+from aios.scheduler.workflow_dispatch import ReadyNode, remaining_paths, resource_request
 
 
 def validate_contract(output: Any, contract: Optional[Dict[str, Any]]) -> Tuple[bool, Optional[str]]:
@@ -38,6 +41,16 @@ def validate_contract(output: Any, contract: Optional[Dict[str, Any]]) -> Tuple[
             if req_key not in output or output[req_key] in (None, ""):
                 return False, f"Contract violation: missing or empty required key '{req_key}'"
     return True, None
+
+
+class WorkflowInterrupted(RuntimeError):
+    def __init__(self, receipt):
+        super().__init__('Isolated verification Worker was interrupted')
+        self.receipt = receipt
+
+
+class WorkflowNeedsReconciliation(RuntimeError):
+    pass
 
 
 class WorkflowEngine:
@@ -140,33 +153,29 @@ class WorkflowEngine:
         context_refs: Dict[str, str],
         events: List[Dict[str, Any]],
     ) -> Optional[str]:
-        if not self.checkpoint_dir:
-            return None
-        cp_path = os.path.join(self.checkpoint_dir, f"{workflow_id}_checkpoint.json")
-        tmp_path = cp_path + ".tmp"
-        payload = {
-            "workflow_id": workflow_id,
-            "plan_signature": self._plan_signatures.get(workflow_id),
-            "updated_at": time.time(),
-            "states": states,
-            "results": results,
-            "context_refs": context_refs,
-            "events": events,
-        }
-        with open(tmp_path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, ensure_ascii=False, separators=(",", ":"), default=str)
-        os.replace(tmp_path, cp_path)
-        return cp_path
-
-    def load_checkpoint(self, workflow_id: str) -> Optional[Dict[str, Any]]:
         self._validate_workflow_id(workflow_id)
         if not self.checkpoint_dir:
             return None
-        cp_path = os.path.join(self.checkpoint_dir, f"{workflow_id}_checkpoint.json")
-        if not os.path.exists(cp_path):
-            return None
-        with open(cp_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+        checkpoint = WorkflowCheckpoint(self.checkpoint_dir, workflow_id)
+        with checkpoint.writer() as writer:
+            writer.plan_signature = self._plan_signatures.get(workflow_id)
+            writer.snapshot(states, results, context_refs, events)
+        return str(checkpoint.path)
+
+    def load_checkpoint(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+        self._validate_workflow_id(workflow_id)
+        if self.checkpoint_dir:
+            return WorkflowCheckpoint(self.checkpoint_dir, workflow_id).load()
+        return None
+
+    def purge_checkpoint(self, workflow_id: str) -> None:
+        self._validate_workflow_id(workflow_id)
+        with self._graphs_lock:
+            if workflow_id in self._active_workflows:
+                raise RuntimeError("Cannot purge an active workflow")
+            if self.checkpoint_dir:
+                WorkflowCheckpoint(self.checkpoint_dir, workflow_id).purge()
+            self._graphs.pop(workflow_id, None)
 
     @staticmethod
     def _validate_workflow_id(workflow_id: str) -> None:
@@ -204,9 +213,25 @@ class WorkflowEngine:
         byte_budget_per_dep: int = 512,
         max_workers: int = 4,
         admission_timeout: float = 30.0,
+        ready_policy: str = "drf",
+        *,
+        context_holder: Optional[str] = None,
+        dispatch_queue=None,
+        deadline_at: Optional[float] = None,
     ) -> Dict[str, Any]:
+        """Run a DAG, choosing among admissible ready tasks by DRF share or ready order."""
         self._validate_workflow_id(workflow_id)
+        if ready_policy not in ("drf", "fifo"):
+            raise ValueError("ready_policy must be drf or fifo")
+        if dispatch_queue is not None and dispatch_queue.admission is not self.kernel.scheduler.drf_controller:
+            raise ValueError("Shared dispatch must use this kernel's resource admission controller")
+        if deadline_at is not None and (dispatch_queue is None or not isfinite(deadline_at)):
+            raise ValueError("A finite monotonic deadline requires shared dispatch")
         plan_signature = self._plan_signature(tasks)
+        if dispatch_queue is not None:
+            plan_signature = f"shared:{dispatch_queue.policy}:{plan_signature}"
+        elif ready_policy == "fifo":
+            plan_signature = f"fifo:{plan_signature}"
         if type(max_workers) is not int or not 1 <= max_workers <= 32:
             raise ValueError("max_workers must be between 1 and 32")
         if not 0 < admission_timeout <= 300:
@@ -217,9 +242,15 @@ class WorkflowEngine:
             self._active_workflows.add(workflow_id)
             self._plan_signatures[workflow_id] = plan_signature
         try:
-            with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="aios-dag") as pool:
-                return self._run_workflow(workflow_id, tasks, resume, byte_budget_per_dep,
-                                          pool, max_workers, admission_timeout)
+            saved = self.load_checkpoint(workflow_id) if resume else None
+            checkpoint = (WorkflowCheckpoint(self.checkpoint_dir, workflow_id).writer()
+                          if self.checkpoint_dir else nullcontext())
+            with checkpoint as writer, ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="aios-dag") as pool:
+                if writer is not None:
+                    writer.plan_signature = plan_signature
+                return self._run_workflow(workflow_id, tasks, saved, byte_budget_per_dep,
+                                          pool, max_workers, admission_timeout, ready_policy, writer, context_holder,
+                                          dispatch_queue, deadline_at)
         except Exception:
             with self._graphs_lock:
                 for node in self._graphs.get(workflow_id, {}).get("nodes", []):
@@ -227,6 +258,8 @@ class WorkflowEngine:
                         node["state"] = "interrupted"
             raise
         finally:
+            if dispatch_queue is not None:
+                dispatch_queue.remove(workflow_id)
             with self._graphs_lock:
                 self._active_workflows.remove(workflow_id)
                 self._plan_signatures.pop(workflow_id, None)
@@ -236,12 +269,6 @@ class WorkflowEngine:
         agent_name = task.get("agent", task["id"])
         task_error: Optional[str] = None
         output_value: Any = None
-        res_cfg = task.get("resources") or {}
-        task_req_vec = ResourceVector(
-            cpu_milli=int(res_cfg.get("cpu_milli", 250)),
-            memory_bytes=int(res_cfg.get("memory_bytes", 64 * 1024 * 1024)),
-            pids=int(res_cfg.get("pids", 4)),
-        )
         try:
             custom_fn: Optional[Callable] = task.get("handler")
             if custom_fn is not None:
@@ -257,6 +284,8 @@ class WorkflowEngine:
             ok, contract_err = validate_contract(output_value, task.get("contract"))
             if not ok:
                 raise ValueError(contract_err or "Contract validation failed")
+        except (WorkflowInterrupted, WorkflowNeedsReconciliation):
+            raise
         except Exception as exc:
             task_error = str(exc)
 
@@ -265,7 +294,8 @@ class WorkflowEngine:
                 drf.release(agent_name, held_vec)
         return output_value, task_error
 
-    def _run_workflow(self, workflow_id, tasks, resume, byte_budget_per_dep, pool, max_workers, admission_timeout):
+    def _run_workflow(self, workflow_id, tasks, saved, byte_budget_per_dep, pool, max_workers,
+                      admission_timeout, ready_policy, writer, context_holder, dispatch_queue, deadline_at):
         tasks_by_id: Dict[str, Dict[str, Any]] = {}
         for t in tasks:
             tid = str(t["id"])
@@ -283,46 +313,67 @@ class WorkflowEngine:
         context_refs: Dict[str, str] = {}
         events: List[Dict[str, Any]] = []
 
-        if resume:
-            saved = self.load_checkpoint(workflow_id)
-            if saved:
-                if any(state == 'running' for state in saved.get('states', {}).values()):
-                    raise RuntimeError('Recovery blocked: in-flight operations require reconciliation')
-                if saved.get('plan_signature') != self._plan_signatures[workflow_id]:
-                    raise RuntimeError('Recovery blocked: task plan changed or lacks a verifiable signature')
-                saved_ids = set(saved.get('states', {}))
-                known = list(tasks_by_id.values())
-                for parent in known:
-                    for child in parent.get('spawn_tasks', []):
-                        child_id = str(child['id'])
-                        if child_id in saved_ids and child_id not in tasks_by_id:
-                            recovered = dict(child)
-                            recovered['depends_on'] = list(dict.fromkeys([*child.get('depends_on', []), parent['id']]))
-                            tasks_by_id[child_id] = recovered
-                            known.append(recovered)
-                            states[child_id], attempts[child_id] = 'waiting', 0
-                            for join in recovered.get('wire_into', []):
-                                if join in tasks_by_id:
-                                    tasks_by_id[join]['depends_on'] = list(dict.fromkeys([*tasks_by_id[join].get('depends_on', []), child_id]))
-                if saved_ids - tasks_by_id.keys():
-                    raise RuntimeError('Recovery blocked: dynamic task definitions are unavailable')
-                for tid, st in saved.get("states", {}).items():
-                    if tid in states and st == "succeeded":
-                        states[tid] = "succeeded"
-                        results[tid] = saved.get("results", {}).get(tid)
-                        if tid in saved.get("context_refs", {}):
-                            context_refs[tid] = saved["context_refs"][tid]
-                events.extend(saved.get("events", []))
+        if saved:
+            previous_states = saved.get('states', {})
+            if any(state in ('running', 'needs_reconciliation') for state in previous_states.values()):
+                raise RuntimeError('Recovery blocked: in-flight operations require reconciliation')
+            interrupted = {tid for tid, state in previous_states.items() if state == 'interrupted'}
+            if any(not tasks_by_id.get(tid, {}).get('recover_after_interrupt') for tid in interrupted):
+                raise RuntimeError('Recovery blocked: interrupted operation requires reconciliation')
+            if saved.get('plan_signature') != self._plan_signatures[workflow_id]:
+                raise RuntimeError('Recovery blocked: task plan changed or lacks a verifiable signature')
+            saved_ids = set(saved.get('states', {}))
+            known = list(tasks_by_id.values())
+            for parent in known:
+                for child in parent.get('spawn_tasks', []):
+                    child_id = str(child['id'])
+                    if child_id in saved_ids and child_id not in tasks_by_id:
+                        recovered = dict(child)
+                        recovered['depends_on'] = list(dict.fromkeys([*child.get('depends_on', []), parent['id']]))
+                        tasks_by_id[child_id] = recovered
+                        known.append(recovered)
+                        states[child_id], attempts[child_id] = 'waiting', 0
+                        for join in recovered.get('wire_into', []):
+                            if join in tasks_by_id:
+                                tasks_by_id[join]['depends_on'] = list(dict.fromkeys([*tasks_by_id[join].get('depends_on', []), child_id]))
+            if saved_ids - tasks_by_id.keys():
+                raise RuntimeError('Recovery blocked: dynamic task definitions are unavailable')
+            terminal = {"succeeded", "failed", "unschedulable", "isolated_skipped"} if interrupted else {"succeeded"}
+            for tid, st in previous_states.items():
+                if tid in states and st in terminal:
+                    states[tid] = st
+                    if tid in saved.get("results", {}):
+                        results[tid] = saved["results"][tid]
+                    if tid in saved.get("context_refs", {}):
+                        context_refs[tid] = saved["context_refs"][tid]
+            events.extend(saved.get("events", []))
+            if interrupted:
+                for event in events:
+                    tid = event.get("task_id")
+                    if tid in attempts:
+                        attempts[tid] = max(attempts[tid], event.get("attempt", 0))
+                for tid in sorted(interrupted):
+                    events.append({"workflow_id": workflow_id, "task_id": tid,
+                                   "state": "resumed", "time": time.time()})
+
+        if writer:
+            writer.snapshot(states, results, context_refs, events)
+
+        def record(*changed):
+            if writer:
+                writer.append(states, results, context_refs, events, changed)
 
         drf = self.kernel.scheduler.drf_controller
         ctx_store = self.kernel.context_store
         self._publish_graph(workflow_id, tasks_by_id, states, attempts)
 
         running = {}
+        fifo_ready = {}
+        completed_slots = []
         blocked_since = None
         while True:
             # 1. Propagate upstream failures/skips to dependent tasks (Fault Isolation)
-            progressed_skip = False
+            skipped_ids = []
             for tid, task in list(tasks_by_id.items()):
                 if states[tid] != "waiting":
                     continue
@@ -339,9 +390,10 @@ class WorkflowEngine:
                             "time": time.time(),
                         }
                     )
-                    progressed_skip = True
+                    skipped_ids.append(tid)
 
-            if progressed_skip:
+            if skipped_ids:
+                record(*skipped_ids)
                 continue
 
             # 2. Collect ready tasks whose dependencies all succeeded
@@ -351,6 +403,21 @@ class WorkflowEngine:
                 if states[tid] == "waiting"
                 and all(states.get(d) == "succeeded" for d in task.get("depends_on", []))
             ]
+
+            if dispatch_queue is not None:
+                paths = remaining_paths(tasks_by_id, states) if ready_ids else {}
+                nodes = [
+                    ReadyNode(tid, tasks_by_id[tid].get("agent", tid), resource_request(tasks_by_id[tid]),
+                              tasks_by_id[tid].get("handler") is not None, paths[tid], deadline_at)
+                    for tid in ready_ids
+                ]
+                dispatch_queue.publish(workflow_id, nodes, len(running) < max_workers, completed_slots)
+                completed_slots.clear()
+            elif ready_policy == "fifo":
+                ready_set = set(ready_ids)
+                fifo_ready = {tid: None for tid in fifo_ready if tid in ready_set}
+                fifo_ready.update(dict.fromkeys(ready_ids))
+                ready_ids = list(fifo_ready)
 
             if not ready_ids and not running:
                 break
@@ -363,26 +430,42 @@ class WorkflowEngine:
                         continue
                 future = next(iter(completed))
                 chosen_id = running.pop(future)
+                if dispatch_queue is not None:
+                    completed_slots.append(chosen_id)
                 task = tasks_by_id[chosen_id]
                 agent_name = task.get("agent", chosen_id)
                 attempt_no = attempts[chosen_id]
                 max_retries = int(task.get("max_retries", 0))
-                output_value, task_error = future.result()
+                try:
+                    output_value, task_error = future.result()
+                except WorkflowInterrupted as exc:
+                    states[chosen_id] = "interrupted"
+                    events.append({"workflow_id": workflow_id, "task_id": chosen_id, "agent": agent_name,
+                                   "attempt": attempt_no, "state": "interrupted", "worker": exc.receipt,
+                                   "time": time.time()})
+                    record(chosen_id)
+                    self._publish_graph(workflow_id, tasks_by_id, states, attempts)
+                    raise
+                except WorkflowNeedsReconciliation as exc:
+                    states[chosen_id] = "needs_reconciliation"
+                    events.append({"workflow_id": workflow_id, "task_id": chosen_id, "agent": agent_name,
+                                   "attempt": attempt_no, "state": "needs_reconciliation",
+                                   "reason": str(exc), "time": time.time()})
+                    record(chosen_id)
+                    self._publish_graph(workflow_id, tasks_by_id, states, attempts)
+                    raise
             else:
-                # 3. Filter unschedulable tasks exceeding total kernel capacity, then pick via DRF share
+                # 3. Filter ready tasks against the same resource and agent limits for both policies.
                 admissible_ids: List[str] = []
+                rejected_ids = []
                 for tid in ready_ids:
                     task = tasks_by_id[tid]
-                    res_cfg = task.get("resources") or {}
-                    req_vec = ResourceVector(
-                        cpu_milli=int(res_cfg.get("cpu_milli", 250)),
-                        memory_bytes=int(res_cfg.get("memory_bytes", 64 * 1024 * 1024)),
-                        pids=int(res_cfg.get("pids", 4)),
-                    )
+                    req_vec = resource_request(task)
                     agent_name = task.get("agent", tid)
                     acb = drf.get_or_create_agent(agent_name)
                     if acb.state == "terminated":
                         states[tid] = "failed"
+                        rejected_ids.append(tid)
                         events.append(
                             {
                                 "workflow_id": workflow_id,
@@ -400,6 +483,7 @@ class WorkflowEngine:
                         or req_vec.pids > drf.capacity.pids
                     ):
                         states[tid] = "unschedulable"
+                        rejected_ids.append(tid)
                         events.append(
                             {
                                 "workflow_id": workflow_id,
@@ -411,26 +495,35 @@ class WorkflowEngine:
                             }
                         )
                         continue
-                    if drf.can_admit(req_vec, agent_name=agent_name):
+                    if dispatch_queue is not None or drf.can_admit(req_vec, agent_name=agent_name):
                         admissible_ids.append(tid)
 
-                if not admissible_ids and any(states[tid] in ("failed", "unschedulable") for tid in ready_ids):
-                    continue
-                if not admissible_ids:
+                if rejected_ids:
+                    record(*rejected_ids)
+                    if not admissible_ids:
+                        continue
+                grant = None
+                if dispatch_queue is not None and admissible_ids:
+                    if rejected_ids:
+                        continue  # Republish before offering any rejected nodes to the queue.
+                    grant = dispatch_queue.claim(workflow_id)
+                if not admissible_ids or (dispatch_queue is not None and grant is None):
                     if not self.kernel.scheduler.active:
                         raise RuntimeError("Kernel stopped while workflow waited for admission")
                     blocked_since = blocked_since or time.monotonic()
                     if time.monotonic() - blocked_since >= admission_timeout:
                         raise TimeoutError("Workflow resource admission timed out")
-                    time.sleep(0.01)
+                    if dispatch_queue is None:
+                        time.sleep(0.01)
                     continue
                 blocked_since = None
 
-                # Select next task by lowest Agent DRF dominant share
-                admissible_ids.sort(
-                    key=lambda tid: drf.get_or_create_agent(tasks_by_id[tid].get("agent", tid)).dominant_share
-                )
-                chosen_id = admissible_ids[0]
+                if dispatch_queue is None and ready_policy == "drf":
+                    admissible_ids.sort(
+                        key=lambda tid: drf.get_or_create_agent(tasks_by_id[tid].get("agent", tid)).dominant_share
+                    )
+                chosen_id = grant.node.task_id if grant is not None else admissible_ids[0]
+                held_vec = grant.reserved if grant is not None else None
                 task = tasks_by_id[chosen_id]
                 agent_name = task.get("agent", chosen_id)
                 attempts[chosen_id] += 1
@@ -440,19 +533,24 @@ class WorkflowEngine:
                 # 4. Resolve upstream context references with ACL check & budget compression
                 upstream_views: Dict[str, Any] = {}
                 acl_error: Optional[str] = None
-                for dep_id in task.get("depends_on", []):
-                    ctx_id = context_refs.get(dep_id)
-                    if ctx_id and ctx_store is not None:
-                        try:
-                            view = ctx_store.build_budget_view(
-                                ctx_id,
-                                reader_agent=agent_name,
-                                byte_budget=int(task.get("context_byte_budget", byte_budget_per_dep)),
-                            )
-                            upstream_views[dep_id] = view["content"]
-                        except PermissionError as exc:
-                            acl_error = str(exc)
-                            break
+                try:
+                    for dep_id in task.get("depends_on", []):
+                        ctx_id = context_refs.get(dep_id)
+                        if ctx_id and ctx_store is not None:
+                            try:
+                                view = ctx_store.build_budget_view(
+                                    ctx_id,
+                                    reader_agent=agent_name,
+                                    byte_budget=int(task.get("context_byte_budget", byte_budget_per_dep)),
+                                )
+                                upstream_views[dep_id] = view["content"]
+                            except PermissionError as exc:
+                                acl_error = str(exc)
+                                break
+                except BaseException:
+                    if held_vec is not None:
+                        drf.release(agent_name, held_vec)
+                    raise
 
                 if acl_error is not None:
                     states[chosen_id] = "failed"
@@ -468,42 +566,39 @@ class WorkflowEngine:
                             "time": time.time(),
                         }
                     )
+                    if held_vec is not None:
+                        drf.release(agent_name, held_vec)
+                    if dispatch_queue is not None:
+                        completed_slots.append(chosen_id)
+                    record(chosen_id)
                     continue
 
-                # 5. Execute task via custom handler or AIOS Kernel Syscall
-                states[chosen_id] = "running"
-                self._publish_graph(workflow_id, tasks_by_id, states, attempts)
-                events.append(
-                    {
-                        "workflow_id": workflow_id,
-                        "task_id": chosen_id,
-                        "agent": agent_name,
-                        "attempt": attempt_no,
-                        "state": "running",
-                        "cgroup_mode": "admission_only",
-                        "time": time.time(),
-                    }
-                )
-
-                held_vec = None
-                if task.get("handler") is not None:
-                    resources = task.get("resources") or {}
+                # Persist the running state only after resource admission and before dispatch.
+                if grant is None and task.get("handler") is not None:
                     try:
-                        held_vec = drf.acquire(agent_name, ResourceVector(
-                            cpu_milli=int(resources.get("cpu_milli", 250)),
-                            memory_bytes=int(resources.get("memory_bytes", 64 * 1024 * 1024)),
-                            pids=int(resources.get("pids", 4))))
+                        held_vec = drf.acquire(agent_name, resource_request(task))
                     except RuntimeError:
                         states[chosen_id] = "waiting"
                         attempts[chosen_id] -= 1
                         continue
                 try:
-                    self._save_checkpoint(workflow_id, states, results, context_refs, events)
+                    states[chosen_id] = "running"
+                    self._publish_graph(workflow_id, tasks_by_id, states, attempts)
+                    events.append({"workflow_id": workflow_id, "task_id": chosen_id, "agent": agent_name,
+                                   "attempt": attempt_no, "state": "running",
+                                   "cgroup_mode": "admission_only", "time": time.time()})
+                    if grant is not None:
+                        events[-1]["dispatch"] = grant.evidence
+                    if task.get("evidence"):
+                        events[-1]["input_refs"] = {dep: context_refs.get(dep) for dep in task.get("depends_on", [])}
+                        events[-1]["input_version"] = task["evidence"]
+                    record(chosen_id)
                     future = pool.submit(self._execute_task, task, upstream_views, attempt_no, held_vec)
-                except Exception:
+                except BaseException:
                     if held_vec is not None:
                         drf.release(agent_name, held_vec)
                     raise
+                fifo_ready.pop(chosen_id, None)
                 running[future] = chosen_id
                 continue
 
@@ -535,7 +630,7 @@ class WorkflowEngine:
                             "time": time.time(),
                         }
                     )
-                self._save_checkpoint(workflow_id, states, results, context_refs, events)
+                record(chosen_id)
                 continue
 
             # 6. Task succeeded: store immutable context in ContextStore & grant ACL to declared downstream consumers
@@ -557,6 +652,7 @@ class WorkflowEngine:
                     owner_agent=agent_name,
                     data=output_value,
                     authorized_agents=authorized,
+                    holder_agent=context_holder,
                 )
                 context_refs[chosen_id] = ctx_id
 
@@ -618,9 +714,13 @@ class WorkflowEngine:
                     "time": time.time(),
                 }
             )
-            self._save_checkpoint(workflow_id, states, results, context_refs, events)
+            if task.get("evidence"):
+                events[-1]["result_sha256"] = context_refs[chosen_id].removeprefix("ctx_") if ctx_store else None
+            record(chosen_id, *(str(task["id"]) for task in spawn_list))
             self._publish_graph(workflow_id, tasks_by_id, states, attempts)
 
+        if writer:
+            writer.snapshot(states, results, context_refs, events)
         graph = self._publish_graph(workflow_id, tasks_by_id, states, attempts)
         return {
             "workflow_id": workflow_id,

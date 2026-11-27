@@ -9,8 +9,12 @@ def tasks(kernel, preset, identity, text):
                 'query_data': {'tool_calls': [{'name': name, 'parameters': params}], **options}}
 
     if preset == 'resources':
-        return [tool(f'worker-{index}', 'runtime.load', {'seconds': 0.4, 'memory_mib': 8},
-                     resources={'cpu_milli': 250, 'memory_bytes': 64 * 1024**2, 'pids': 4}) for index in range(4)]
+        return [
+            {**tool(f'worker-{index}', 'runtime.load', {'seconds': .4, 'memory_mib': 8},
+                    resources={'cpu_milli': 250, 'memory_bytes': 64 * 1024**2, 'pids': 4}),
+             'estimate_seconds': .450}
+            for index in range(4)
+        ]
     if preset == 'kernel':
         return [tool('calculate', 'math.calculate', {'expression': '(12+3)*2'}),
                 {'id': 'remember', 'agent': identity, 'query': MemoryQuery(operation_type='add_memory',
@@ -33,7 +37,8 @@ def tasks(kernel, preset, identity, text):
             first, second = identity + '-sender', identity + '-recipient'
             token1, token2 = ipc.issue_token(first), ipc.issue_token(second)
             try:
-                ref = kernel.context_store.put(first, {'summary': text or 'native IPC fixture'})
+                ref = kernel.context_store.put(first, {'summary': text or 'native IPC fixture'},
+                                               holder_agent=f'workflow:{identity}')
                 message = ipc.send(sender=first, recipient=second, payload={'reference': ref},
                                    request_id=identity, context_refs=[ref], token=token1)
                 received = ipc.receive(second, token=token2)
@@ -43,6 +48,7 @@ def tasks(kernel, preset, identity, text):
             finally:
                 ipc.revoke_token(first)
                 ipc.revoke_token(second)
+                kernel.context_store.release_agent(second)
         return [{'id': 'exchange', 'handler': exchange}]
     if preset == 'litecua':
         return [

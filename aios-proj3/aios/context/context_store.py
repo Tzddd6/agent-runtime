@@ -138,7 +138,10 @@ class ContextStore:
         data: Any,
         authorized_agents: Optional[List[str]] = None,
         tags: Optional[List[str]] = None,
+        *,
+        holder_agent: Optional[str] = None,
     ) -> str:
+        holder = holder_agent or owner_agent
         raw_bytes = self._canonical_bytes(data)
         digest = hashlib.sha256(raw_bytes).hexdigest()
         ctx_id = f"ctx_{digest}"
@@ -157,7 +160,7 @@ class ContextStore:
                 old_acl = set(self._acls.get(ctx_id, set()))
                 old_holders = set(self._holders.get(ctx_id, set()))
                 new_acl = set(old_acl) | {owner_agent} | set(authorized_agents or ())
-                new_holders = set(old_holders) | {owner_agent}
+                new_holders = set(old_holders) | {holder}
                 new_meta = {**old_meta, "holders": sorted(new_holders)}
 
                 self._meta[ctx_id] = new_meta
@@ -195,7 +198,7 @@ class ContextStore:
 
             phys_len = len(disk_bytes)
             new_acl = {owner_agent} | set(authorized_agents or ())
-            new_holders = {owner_agent}
+            new_holders = {holder}
             new_meta = {
                 "ctx_id": ctx_id,
                 "sha256": digest,
@@ -392,17 +395,18 @@ class ContextStore:
                 self._acls[cid] = new_acl
                 self._holders[cid] = new_holders
 
-    def release_agent(self, agent_name: str) -> None:
+    def release_agent(self, agent_name: str, *, strict=False, revoke_agents=()) -> None:
         """Release all holder leases owned by agent_name, deleting objects with no remaining holders."""
         with self._lock:
             held = [cid for cid, holders in list(self._holders.items()) if agent_name in holders]
         for cid in held:
             try:
-                self.delete(cid, requester_agent=agent_name)
+                self.delete(cid, requester_agent=agent_name, revoke_agents=revoke_agents)
             except (PermissionError, OSError):
-                pass
+                if strict:
+                    raise
 
-    def delete(self, ctx_id: str, requester_agent: Optional[str] = None) -> bool:
+    def delete(self, ctx_id: str, requester_agent: Optional[str] = None, *, revoke_agents=()) -> bool:
         """Detach holder and physically delete only when no holders remain; atomic across SQLite and disk."""
         with self._lock:
             meta = self._meta.get(ctx_id)
@@ -416,7 +420,7 @@ class ContextStore:
                 if remaining_holders:
                     # Other active scopes/agents still reference this deduplicated/IPC-retained context: detach only.
                     updated_meta = {**meta, "holders": sorted(remaining_holders)}
-                    updated_acl = set(self._acls.get(ctx_id, set())) - {requester_agent}
+                    updated_acl = set(self._acls.get(ctx_id, set())) - {requester_agent, *revoke_agents}
                     with self._write_tx() as db:
                         db.execute(
                             "INSERT OR REPLACE INTO objects VALUES(?,?,?)",

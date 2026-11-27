@@ -1,328 +1,348 @@
-/**
- * Focused Playwright Browser E2E Acceptance Runner for AIOS Kernel Console.
- * Drives real Chromium clicks on `http://127.0.0.1:<port>/console/` (no direct API bypass).
- * Covers the 6 core OS demonstration flows:
- *   1. Multi-file `order_service` repair full loop + DAG/ACB/PID/cgroup/Token/ctx_ref + ZIP download SHA-256 verification
- *   2. Double-click idempotency protection (rapid double click creates only 1 job, 0 duplicate model calls)
- *   3. Page reload state recovery & frontend-backend snapshot consistency
- *   4. Single-branch fault isolation (`audit_agent` failure highlighted in red while main repair succeeds and delivers)
- *   5. Controlled budget exhaustion / error isolation (`modelCallsBudget=0` fails cleanly with explicit reason & zero leaked workers)
- *   6. Chat & attachment security smoke test (valid upload accepted, empty/oversized rejected)
- */
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+/** Browser acceptance. All writes go through the UI; API reads corroborate the rendered state. */
+const assert = require('node:assert/strict');
+const crypto = require('node:crypto');
+const fs = require('node:fs');
+const path = require('node:path');
+const { chromium, expect } = require('playwright/test');
 
-const npxPlaywrightPath = 'C:\\Users\\Tzddd\\AppData\\Local\\npm-cache\\_npx\\e41f203b7505f1fb\\node_modules\\playwright';
-const { chromium } = require(npxPlaywrightPath);
-const chromeExecutable = 'C:\\Users\\Tzddd\\AppData\\Local\\ms-playwright\\chromium-1223\\chrome-win64\\chrome.exe';
+const baseUrl = process.env.AIOS_BASE_URL;
+const outDir = process.env.AIOS_E2E_OUT_DIR;
+const terminal = ['succeeded', 'completed_with_failures', 'failed', 'interrupted', 'needs_reconciliation'];
+const sha256 = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
 
-const baseUrl = process.env.AIOS_BASE_URL || 'http://127.0.0.1:18895';
-const outDir = process.env.AIOS_E2E_OUT_DIR || path.resolve(__dirname, '..', 'reports', 'playwright_e2e');
-
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
-async function fetchJson(url) {
-  const res = await fetch(url, { headers: { Accept: 'application/json' } });
-  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
-  return res.json();
-}
-
-(async () => {
-  fs.mkdirSync(outDir, { recursive: true });
+async function main() {
+  if (!baseUrl || !outDir) throw new Error('Use tools/run_playwright_e2e_acceptance.py to start the suite');
   const browser = await chromium.launch({
-    executablePath: chromeExecutable,
+    executablePath: process.env.AIOS_E2E_CHROMIUM || undefined,
     headless: true,
   });
-  const context = await browser.newContext({
-    viewport: { width: 1440, height: 960 },
-    acceptDownloads: true,
-  });
+  const context = await browser.newContext({ viewport: { width: 1440, height: 960 }, acceptDownloads: true });
   const page = await context.newPage();
-
-  const consoleLogs = [];
-  const pageErrors = [];
-  page.on('console', (msg) => {
-    if (msg.type() === 'error') {
-      consoleLogs.push(`[console.error] ${msg.text()}`);
-    }
+  const summary = {
+    timestamp: new Date().toISOString(),
+    browser: `Chromium ${browser.version()} / Playwright ${require('playwright/package.json').version}`,
+    console_errors: [], page_errors: [], cases: [],
+  };
+  page.on('console', msg => {
+    if (msg.type() === 'error') summary.console_errors.push(msg.text());
   });
-  page.on('pageerror', (err) => {
-    pageErrors.push(`[pageerror] ${err.message}`);
-  });
+  page.on('pageerror', err => summary.page_errors.push(err.message));
 
-  const cases = [];
+  async function get(route) {
+    const response = await context.request.get(baseUrl + route);
+    assert.ok(response.ok(), `GET ${route} returned ${response.status()}`);
+    return response.json();
+  }
 
-  try {
-    // Navigate to Console UI
-    await page.goto(`${baseUrl}/console/`, { waitUntil: 'networkidle' });
-    await page.waitForSelector('#preset');
-
-    // =========================================================================
-    // Case 1: Multi-file `order_service` full loop + DAG/ACB/PID/cgroup/Token/ctx_ref + ZIP SHA-256
-    // =========================================================================
-    await page.selectOption('#preset', 'engineering');
-    await page.waitForSelector('#projectSelect', { state: 'visible' });
-    await page.selectOption('#projectSelect', 'order_service');
-    const includeAudit = await page.$('#includeAuditBranchChk');
-    if (includeAudit && !(await includeAudit.isChecked())) {
-      await includeAudit.click();
-    }
-    const simFail = await page.$('#simulateAuditFailureChk');
-    if (simFail && (await simFail.isChecked())) {
-      await simFail.click();
-    }
-
-    await page.click('#submitJobBtn');
-
-    // Poll UI until selectedJobStatus becomes succeeded
-    let job1Id = null;
-    for (let i = 0; i < 60; i++) {
-      await sleep(300);
-      const statusText = (await page.textContent('#selectedJobStatus')).trim();
-      const st = await fetchJson(`${baseUrl}/api/status`);
-      if (st.jobs && st.jobs.length > 0) {
-        job1Id = st.jobs[0].id;
-      }
-      if (statusText === 'succeeded') break;
-    }
-
-    // Force one UI refresh cycle and inspect UI tables
-    await sleep(600);
-    const status1 = (await page.textContent('#selectedJobStatus')).trim();
-    const dagTableHtml = await page.innerHTML('#dagTaskTableWrap');
-    const telemetryHtml = await page.innerHTML('#engAgentTelemetryWrap');
-    const verdictText = (await page.textContent('#engVerdictBadge')).trim();
-
-    // Click the actual Download ZIP button on the page
-    const downloadBtn = await page.$('#engDownloadZipBtn');
-    const isDlVisible = await downloadBtn.isVisible();
-    const [download] = await Promise.all([
-      page.waitForEvent('download'),
-      downloadBtn.click(),
-    ]);
-    const zipSavePath = path.join(outDir, `case1_${job1Id.slice(0, 10)}_delivery.zip`);
-    await download.saveAs(zipSavePath);
-    const zipBytes = fs.readFileSync(zipSavePath);
-    const zipSha256 = crypto.createHash('sha256').update(zipBytes).digest('hex');
-
-    const backendJob1 = await fetchJson(`${baseUrl}/api/jobs/${job1Id}`);
-    const expectedZipSha = backendJob1.engineering.artifact.zip_sha256;
-    const verifiedSourceSha = backendJob1.engineering.source_sha256;
-
-    const shot1 = path.join(outDir, '01_order_service_multifile_repair.png');
-    await page.screenshot({ path: shot1, fullPage: true });
-
-    const hasAllAgents = ['analyst_agent', 'patcher_agent', 'tester_agent', 'reviewer_agent', 'audit_agent'].every(
-      (ag) => telemetryHtml.includes(ag)
+  async function submit(status, action = () => page.locator('#submitJobBtn').click(), timeout = 20000) {
+    const response = page.waitForResponse(res =>
+      new URL(res.url()).pathname === '/api/jobs' && res.request().method() === 'POST'
     );
-    const hasCtxRef = dagTableHtml.includes('inspect(') && dagTableHtml.includes('plan(');
+    await action();
+    const accepted = await response;
+    assert.equal(accepted.status(), 202, await accepted.text());
+    const { id } = await accepted.json();
+    await expect(page.locator('#selectedJobTitle')).toContainText(id.slice(0, 10), { timeout: 15000 });
+    await expect(page.locator('#selectedJobStatus')).toHaveAttribute('data-status', new RegExp(`^(${terminal.join('|')})$`), { timeout });
+    const job = await get('/api/jobs/' + id);
+    assert.equal(await page.locator('#selectedJobStatus').getAttribute('data-status'), status, JSON.stringify(job.states));
+    assert.equal(job.status, status);
+    return job;
+  }
 
-    cases.push({
-      id: 'case_01_multifile_order_service_e2e',
-      title: '多文件 order_service 修复完整链路 + 多 Agent 系统级视图 + 产物 ZIP SHA-256 核验',
-      passed:
-        status1 === 'succeeded' &&
-        verdictText.includes('通过') &&
-        isDlVisible &&
-        hasAllAgents &&
-        hasCtxRef &&
-        zipSha256 === expectedZipSha &&
-        backendJob1.results.answer.public.passed === 3 &&
-        backendJob1.results.answer.heldout.passed === 2,
-      job_id: job1Id,
-      ui_status: status1,
-      backend_status: backendJob1.status,
-      verified_source_sha256: verifiedSourceSha,
-      downloaded_zip_sha256: zipSha256,
-      expected_zip_sha256: expectedZipSha,
-      agents_observed: Object.keys(backendJob1.agent_telemetry || {}),
-      tester_worker_pids: (backendJob1.agent_telemetry.tester_agent || {}).worker_pids || [],
-      screenshot: '01_order_service_multifile_repair.png',
-    });
+  async function configureEngineering(project, { audit = true, fault = false, calls = 32, interrupt = false } = {}) {
+    await page.locator('#preset').selectOption('engineering');
+    await page.locator('#projectSelect').selectOption(project);
+    await page.locator('#fixedModelChk').check();
+    await page.locator('#interruptVerificationChk').setChecked(interrupt);
+    const options = page.locator('#jobOptions');
+    const toggle = options.locator('summary');
+    if (!(await options.evaluate(element => element.open))) await toggle.click();
+    await page.locator('#includeAuditBranchChk').setChecked(audit);
+    await page.locator('#simulateAuditFailureChk').setChecked(fault);
+    await page.locator('#modelCallsBudget').fill(String(calls));
+    await toggle.click();
+  }
 
-    // =========================================================================
-    // Case 2: Rapid Double-Click Idempotency Protection
-    // =========================================================================
-    const beforeJobs = (await fetchJson(`${baseUrl}/api/jobs`)).jobs.length;
-    await page.selectOption('#preset', 'document');
-    await page.fill('#taskPrompt', 'Idempotency double click check on AIOS kernel');
+  async function download(job) {
+    await expect(page.locator('#engVerdictBadge')).toContainText('通过');
+    const [event] = await Promise.all([
+      page.waitForEvent('download'),
+      page.locator('#engDownloadZipBtn').click(),
+    ]);
+    const filename = `${job.engineering.project_id}-${job.id.slice(0, 10)}.zip`;
+    const destination = path.join(outDir, filename);
+    await event.saveAs(destination);
+    const digest = sha256(fs.readFileSync(destination));
+    assert.equal(digest, job.engineering.artifact.zip_sha256);
+    assert.equal(job.engineering.artifact.readback_verified, true);
+    return { zip: filename, zip_sha256: digest, source_sha256: job.engineering.source_sha256,
+      project: job.engineering.project_id, job_id: job.id, backend_status: job.status };
+  }
 
-    // Rapidly trigger two clicks within the same tick
-    await page.evaluate(() => {
-      const btn = document.getElementById('submitJobBtn');
-      btn.click();
-      btn.click();
-    });
-
-    await sleep(1200);
-    const afterJobsList = (await fetchJson(`${baseUrl}/api/jobs`)).jobs;
-    const jobsCreated = afterJobsList.length - beforeJobs;
-    const job2Id = afterJobsList[0].id;
-    const shot2 = path.join(outDir, '02_double_click_idempotency.png');
-    await page.screenshot({ path: shot2, fullPage: true });
-
-    cases.push({
-      id: 'case_02_double_click_idempotency',
-      title: '连续快速双击提交按钮幂等保护（仅创建 1 个有效工作流，无重复调用）',
-      passed: jobsCreated === 1 && afterJobsList[0].status === 'succeeded',
-      job_id: job2Id,
-      jobs_created_count: jobsCreated,
-      backend_status: afterJobsList[0].status,
-      screenshot: '02_double_click_idempotency.png',
-    });
-
-    // =========================================================================
-    // Case 3: Single-Branch Fault Isolation (Non-Cascading `audit_agent` failure)
-    // =========================================================================
-    await page.selectOption('#preset', 'engineering');
-    await page.waitForSelector('#projectSelect', { state: 'visible' });
-    await page.selectOption('#projectSelect', 'order_service');
-    const simFailChk = await page.$('#simulateAuditFailureChk');
-    if (simFailChk && !(await simFailChk.isChecked())) {
-      await simFailChk.click();
+  async function run(id, title, operation) {
+    const row = { id, title, passed: false, screenshot: id + '.png' };
+    summary.cases.push(row);
+    try {
+      Object.assign(row, await operation());
+      row.passed = true;
+    } catch (error) {
+      row.error = error.stack || String(error);
+    } finally {
+      await page.screenshot({ path: path.join(outDir, row.screenshot), fullPage: true });
     }
-    await page.click('#submitJobBtn');
+  }
 
-    let job3Id = null;
-    for (let i = 0; i < 60; i++) {
-      await sleep(300);
-      const stText = (await page.textContent('#selectedJobStatus')).trim();
-      const st = await fetchJson(`${baseUrl}/api/status`);
-      if (st.jobs && st.jobs.length > 0) job3Id = st.jobs[0].id;
-      if (stText === 'completed_with_failures') break;
-    }
-    await sleep(600);
-    const status3 = (await page.textContent('#selectedJobStatus')).trim();
-    const backendJob3 = await fetchJson(`${baseUrl}/api/jobs/${job3Id}`);
-    const dagHtml3 = await page.innerHTML('#dagTaskTableWrap');
-    const shot3 = path.join(outDir, '03_isolated_branch_fault.png');
-    await page.screenshot({ path: shot3, fullPage: true });
-
-    cases.push({
-      id: 'case_03_single_branch_fault_isolation',
-      title: '单分支故障隔离（无依赖 audit_agent 标红失败，主修复分支照常完成并交付产物）',
-      passed:
-        status3 === 'completed_with_failures' &&
-        backendJob3.states.static_audit === 'failed' &&
-        backendJob3.states.answer === 'succeeded' &&
-        dagHtml3.includes('AuditBranchFault') &&
-        Boolean(backendJob3.engineering && backendJob3.engineering.accepted),
-      job_id: job3Id,
-      ui_status: status3,
-      static_audit_state: backendJob3.states.static_audit,
-      main_answer_state: backendJob3.states.answer,
-      screenshot: '03_isolated_branch_fault.png',
+  let isolated;
+  try {
+    await page.goto(baseUrl + '/console/');
+    await run('01_order_service', '内置多文件修复、Agent 记录与浏览器下载', async () => {
+      await configureEngineering('order_service');
+      const job = await submit('succeeded');
+      for (const role of ['analyst', 'patcher', 'tester', 'reviewer', 'audit']) {
+        assert.ok(job.agent_telemetry[role + '_agent']);
+      }
+      assert.ok(job.agent_telemetry.tester_agent.worker_pids.length > 0);
+      assert.ok(job.context_refs.inspect && job.context_refs.plan);
+      assert.equal(job.results.answer.public.passed, 3);
+      assert.equal(job.results.answer.heldout.passed, 2);
+      await page.locator('#pinJobBtn').click();
+      await expect(page.locator('#pinJobBtn')).toHaveText('取消保留');
+      assert.equal((await get('/api/jobs/' + job.id)).pinned, true);
+      return { ...await download(job), worker_pids: job.agent_telemetry.tester_agent.worker_pids,
+        public_passed: 3, heldout_passed: 2 };
     });
 
-    // =========================================================================
-    // Case 4: Page Reload Recovery & Frontend-Backend Snapshot Consistency
-    // =========================================================================
-    await page.reload({ waitUntil: 'networkidle' });
-    await sleep(800);
-    const recoveredStatus = (await page.textContent('#selectedJobStatus')).trim();
-    const recoveredTitle = (await page.textContent('#selectedJobTitle')).trim();
-    const recoveredDlVisible = await (await page.$('#engDownloadZipBtn')).isVisible();
-    const shot4 = path.join(outDir, '04_reload_state_recovery.png');
-    await page.screenshot({ path: shot4, fullPage: true });
-
-    cases.push({
-      id: 'case_04_reload_recovery_consistency',
-      title: '页面刷新恢复与前后端快照强一致（DAG 状态、失败原因与产物下载入口完整恢复）',
-      passed:
-        recoveredStatus === backendJob3.status &&
-        recoveredTitle.includes(job3Id.slice(0, 10)) &&
-        recoveredDlVisible,
-      job_id: job3Id,
-      recovered_ui_status: recoveredStatus,
-      backend_status: backendJob3.status,
-      download_button_restored: recoveredDlVisible,
-      screenshot: '04_reload_state_recovery.png',
+    await run('02_double_click', '快速双击仅生成一个任务', async () => {
+      const before = (await get('/api/jobs')).jobs.length;
+      await page.locator('#preset').selectOption('document');
+      await page.locator('#taskPrompt').fill('Browser idempotency acceptance');
+      await page.locator('#workflowDeadline').fill('5000');
+      let submissions = 0;
+      const count = request => {
+        if (request.method() === 'POST' && new URL(request.url()).pathname === '/api/jobs') submissions++;
+      };
+      page.on('request', count);
+      try {
+        const job = await submit('succeeded', () => page.locator('#submitJobBtn').evaluate(button => {
+          button.click();
+          button.click();
+        }));
+        assert.equal(submissions, 1);
+        assert.equal(job.deadline_ms, 5000);
+        assert.equal(job.deadline_met, true);
+        await expect(page.locator('#dagTaskTableWrap')).toContainText('派发决策');
+        assert.equal((await get('/api/jobs')).jobs.length, before + 1);
+        return { job_id: job.id, backend_status: job.status, submissions };
+      } finally {
+        page.off('request', count);
+      }
     });
 
-    // =========================================================================
-    // Case 5: Controlled Budget Exhaustion & Resource Reclamation
-    // =========================================================================
-    await page.selectOption('#preset', 'engineering');
-    await page.selectOption('#projectSelect', 'order_service');
-    await page.fill('#modelCallsBudget', '0'); // 0 model calls allowed -> patcher_agent fails with budget exceeded
-    await page.click('#submitJobBtn');
-
-    let job5Id = null;
-    for (let i = 0; i < 40; i++) {
-      await sleep(250);
-      const st = await fetchJson(`${baseUrl}/api/status`);
-      if (st.jobs && st.jobs.length > 0) job5Id = st.jobs[0].id;
-      const det = await fetchJson(`${baseUrl}/api/jobs/${job5Id}`);
-      if (det.status !== 'running') break;
-    }
-    await sleep(500);
-    // Restore budget input to 32
-    await page.fill('#modelCallsBudget', '32');
-    const backendJob5 = await fetchJson(`${baseUrl}/api/jobs/${job5Id}`);
-    const kernelSnap5 = await fetchJson(`${baseUrl}/core/status`);
-    const shot5 = path.join(outDir, '05_budget_exhaustion_reclamation.png');
-    await page.screenshot({ path: shot5, fullPage: true });
-
-    cases.push({
-      id: 'case_05_budget_exhaustion_and_cleanup',
-      title: '受控预算耗尽与资源回收（modelCallsBudget=0 明确拦截、无静默重试、活跃 Worker 归零）',
-      passed:
-        backendJob5.status === 'failed' &&
-        backendJob5.states.patch === 'failed' &&
-        backendJob5.states.verify === 'isolated_skipped' &&
-        kernelSnap5.processes.active === 0 &&
-        kernelSnap5.drf_resources.used.cpu_milli === 0,
-      job_id: job5Id,
-      backend_status: backendJob5.status,
-      patch_state: backendJob5.states.patch,
-      verify_state: backendJob5.states.verify,
-      active_workers_after: kernelSnap5.processes.active,
-      drf_cpu_used_after: kernelSnap5.drf_resources.used.cpu_milli,
-      screenshot: '05_budget_exhaustion_reclamation.png',
+    await run('03_audit_fault', '审计分支故障隔离', async () => {
+      await page.locator('#workflowDeadline').fill('49');
+      await configureEngineering('order_service', { fault: true });
+      await expect(page.locator('#workflowDeadline')).toBeDisabled();
+      isolated = await submit('completed_with_failures');
+      assert.equal(isolated.states.static_audit, 'failed');
+      assert.equal(isolated.states.answer, 'succeeded');
+      await expect(page.locator('#dagTaskTableWrap')).toContainText('AuditBranchFault');
+      await expect(page.locator('#engDownloadZipBtn')).toBeVisible();
+      return { job_id: isolated.id, backend_status: isolated.status };
     });
 
-    // =========================================================================
-    // Case 6: ACB Lifecycle Tab & A-Mem / LSFS / LiteCUA / Syscall Queue Inspection
-    // =========================================================================
-    await page.click('[data-tab="agents"]');
-    await sleep(400);
-    const agentsHtml = await page.innerHTML('#agentCardsGrid');
-    const shot6 = path.join(outDir, '06_acb_lifecycle_and_queues.png');
-    await page.screenshot({ path: shot6, fullPage: true });
+    await run('04_reload', '刷新后恢复原任务状态和下载入口', async () => {
+      assert.ok(isolated);
+      await page.reload();
+      await expect(page.locator('#selectedJobTitle')).toContainText(isolated.id.slice(0, 10));
+      await expect(page.locator('#selectedJobStatus')).toHaveAttribute('data-status', isolated.status);
+      await expect(page.locator('#engDownloadZipBtn')).toBeVisible();
+      return { job_id: isolated.id, backend_status: isolated.status };
+    });
 
-    cases.push({
-      id: 'case_06_acb_lifecycle_panel',
-      title: '控制台 ACB 控制块面板与生命周期状态轨迹可视化核验',
-      passed:
-        agentsHtml.includes('analyst_agent') &&
-        agentsHtml.includes('patcher_agent') &&
-        agentsHtml.includes('tester_agent') &&
-        agentsHtml.includes('reviewer_agent'),
-      screenshot: '06_acb_lifecycle_and_queues.png',
+    await run('05_budget', '预算耗尽后隔离下游并归还资源', async () => {
+      await configureEngineering('order_service', { audit: false, calls: 0 });
+      const job = await submit('failed');
+      const snapshot = await get('/core/status');
+      assert.equal(job.states.patch, 'failed');
+      assert.equal(job.states.verify, 'isolated_skipped');
+      assert.equal(job.model_budget.calls, 0);
+      assert.equal(snapshot.processes.active, 0);
+      assert.deepEqual(snapshot.drf_resources.used, { cpu_milli: 0, memory_bytes: 0, pids: 0 });
+      await expect(page.locator('#dagTaskTableWrap')).toContainText('model budget exceeded');
+      return { job_id: job.id, backend_status: job.status, used_after: snapshot.drf_resources.used };
+    });
+
+    await run('06_acb', 'Agent 面板显示修复角色', async () => {
+      await page.locator('#kernelNav > summary').click();
+      await page.locator('#topTabs [data-tab="agents"]').click();
+      for (const role of ['analyst', 'patcher', 'tester', 'reviewer']) {
+        await expect(page.locator('#agentCardsGrid')).toContainText(role + '_agent');
+      }
+      await page.locator('#topTabs [data-tab="workflow"]').click();
+    });
+
+    await run('07_upstream_sample', '上游样本复现失败、修复并下载', async () => {
+      await configureEngineering('json_pointer', { audit: false });
+      const job = await submit('succeeded');
+      assert.equal(job.results.baseline.public.failures, 2);
+      assert.equal(job.results.answer.public.passed, 3);
+      assert.equal(job.results.answer.heldout.passed, 3);
+      assert.equal(job.results.answer.tests_intact, true);
+      assert.equal(job.engineering.provenance.release, 'v3.0.0');
+      assert.equal(job.engineering.model_mode, 'fixed_patch');
+      await expect(page.locator('#engRunDetails')).toContainText('固定补丁桩');
+      await expect(page.locator('#engProjectTitle')).toContainText('python-json-pointer');
+      return { ...await download(job), provenance: job.engineering.provenance,
+        baseline_public_failures: 2, public_passed: 3, heldout_passed: 3 };
+    });
+
+    await run('09_verified_recovery', '沿用原补丁恢复被终止的验证 Worker', async () => {
+      await configureEngineering('json_pointer', { audit: false, interrupt: true });
+      const stopped = await submit('interrupted');
+      assert.equal(stopped.states.patch, 'succeeded');
+      assert.equal(stopped.states.verify, 'interrupted');
+      assert.equal(stopped.model_budget.calls, 1);
+      const button = page.locator('#resumeJobBtn');
+      await expect(button).toBeVisible();
+      const [response] = await Promise.all([
+        page.waitForResponse(res => new URL(res.url()).pathname === `/api/jobs/${stopped.id}/resume`
+                            && res.request().method() === 'POST'),
+        button.click(),
+      ]);
+      assert.equal(response.status(), 202);
+      await expect(page.locator('#selectedJobStatus')).toHaveAttribute('data-status', 'succeeded', { timeout: 20000 });
+      await expect(page.locator('#engRecoveryDetails')).toContainText('新增模型调用 0 次');
+      const job = await get('/api/jobs/' + stopped.id);
+      const proof = job.engineering.execution_evidence;
+      assert.equal(job.context_refs.patch, stopped.context_refs.patch);
+      assert.equal(job.attempts.patch, 1);
+      assert.equal(job.attempts.verify, 2);
+      assert.equal(proof.model_calls_during_resume, 0);
+      assert.equal(proof.verified_source_sha256, proof.model.patch.candidate_sha256);
+      return { ...await download(job), execution_evidence: proof };
+    });
+
+    await run('10_cross_workflow_scheduling', '跨工作流调度三策略对照与逐轮结果', async () => {
+      await page.locator('#preset').selectOption('workflow_scheduling');
+      const job = await submit('succeeded', undefined, 100000);
+      const result = job.workflow_scheduling;
+      assert.equal(result.verified, true);
+      assert.equal(result.trials.length, 6);
+      for (const summary of Object.values(result.summaries)) assert.equal(summary.sample_size, 120);
+      assert.ok(result.trials.every(trial => trial.peak_active <= result.slots && trial.resources_released));
+      const panel = page.locator('#schedulingResult');
+      await expect(panel).toContainText('截止达成率');
+      await expect(panel).toContainText('关键路径 + 老化');
+      await panel.locator('summary').first().click();
+      await expect(panel.locator('details').first()).toHaveAttribute('open', '');
+      return { job_id: job.id, backend_status: job.status, summaries: result.summaries };
+    });
+
+    await run('08_attachments', '附件上传、边界提示与 LSFS 流式会话完成', async () => {
+      await page.goto(baseUrl + '/');
+      const form = page.locator('#chatForm');
+      const upload = form.locator('input[type=file]');
+      const feedback = form.getByRole('status');
+      const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGM0CKlgYGBgYmBgYGBgAAALsgEAK4hfYgAAAABJRU5ErkJggg==', 'base64');
+      await upload.setInputFiles({ name: 'image.png', mimeType: 'image/png', buffer: png });
+      await expect(feedback).toHaveText('已上传 1 个附件');
+      await upload.setInputFiles({ name: 'empty.txt', mimeType: 'text/plain', buffer: Buffer.alloc(0) });
+      await expect(feedback).toHaveText('附件不能为空');
+      await upload.setInputFiles({ name: 'large.txt', mimeType: 'text/plain', buffer: Buffer.alloc(8 * 1024 * 1024 + 1) });
+      await expect(feedback).toContainText('单文件最多 8 MiB');
+      await page.locator('#chatMode').selectOption('lsfs');
+      await page.locator('#chatPrompt').fill("write 'browser acceptance' to e2e.txt");
+      await page.locator('#sendChatBtn').click();
+      await expect(page.locator('#messagesBox')).toContainText('mapped_syscall');
+      await expect(page.locator('#messagesBox')).toContainText('文件操作 · 本地文件工具');
+    });
+    await run('11_theme_and_navigation', '四套主题换色、刷新保留与核心场景入口', async () => {
+      await page.goto(baseUrl + '/');
+      const themes = ['ink-classic', 'swiss-ikb', 'forest-ink', 'midnight-ink'];
+      const colors = [];
+      for (const theme of themes) {
+        await page.locator('#themeSwitcher').selectOption(theme);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+        colors.push(await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor));
+      }
+      assert.equal(new Set(colors).size, themes.length);
+      await page.reload();
+      await expect(page.locator('#themeSwitcher')).toHaveValue('midnight-ink');
+      await page.getByRole('link', { name: /断点恢复/ }).click();
+      await expect(page.locator('#themeSwitcher')).toHaveValue('midnight-ink');
+      assert.equal(await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor), colors[3]);
+      await expect(page.locator('#projectSelect')).toHaveValue('json_pointer');
+      await expect(page.locator('#fixedModelChk')).toBeChecked();
+      await expect(page.locator('#interruptVerificationChk')).toBeChecked();
+      await expect(page.locator('#jobOptions')).not.toHaveAttribute('open', '');
+      await page.getByRole('button', { name: /^调度对照/ }).click();
+      await expect(page.locator('#preset')).toHaveValue('workflow_scheduling');
+      await page.locator('#themeSwitcher').selectOption('forest-ink');
+      assert.equal(await page.locator('body').evaluate(body => getComputedStyle(body).backgroundColor), colors[2]);
+      await page.getByRole('link', { name: '对话', exact: true }).click();
+      await expect(page.locator('#themeSwitcher')).toHaveValue('forest-ink');
+      await page.getByRole('link', { name: '模型设置', exact: true }).click();
+      await expect(page.locator('#apiProfilesPanel')).toBeVisible();
+      await expect(page.locator('#jobForm')).toBeHidden();
+      return { themes, background_colors: colors };
+    });
+
+    await run('12_mobile_layout', '窄屏的核心入口、历史和输入区', async () => {
+      await page.setViewportSize({ width: 390, height: 844 });
+      const noOverflow = () => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth);
+      await page.goto(baseUrl + '/');
+      await expect(page.locator('#chatPrompt')).toBeVisible();
+      await expect(page.locator('#chatHistory')).not.toHaveAttribute('open', '');
+      assert.ok(await noOverflow());
+      await page.screenshot({ path: path.join(outDir, '12_mobile_chat.png'), fullPage: true });
+      await page.getByRole('link', { name: /调度对照/ }).click();
+      await expect(page.locator('#preset')).toHaveValue('workflow_scheduling');
+      await expect(page.locator('#submitJobBtn')).toBeVisible();
+      assert.ok(await noOverflow());
+    });
+
+    await run('13_model_settings_and_chat_modes', '对话模式、默认槽位和启用模型', async () => {
+      await page.setViewportSize({ width: 1440, height: 960 });
+      await page.goto(baseUrl + '/');
+      await expect(page.locator('#chatMode')).toHaveValue('llm');
+      await page.locator('#chatPrompt').fill('Which model would answer this?');
+      await page.locator('#sendChatBtn').click();
+      await expect(page.locator('#chatForm').getByRole('status')).toContainText('启用模型');
+      await page.getByRole('link', { name: '模型设置', exact: true }).first().click();
+      await expect(page.locator('#activeModelConnection')).toContainText('内置默认槽位未配置密钥');
+      await page.locator('#profileEditorLabel').click();
+      await expect(page.locator('#profModel')).toHaveValue('deepseek-flash');
+      await expect(page.locator('#profKey')).toBeVisible();
+      await expect(page.locator('#profId')).toBeHidden();
+      await page.locator('#profModel').fill('deepseek_chat');
+      await expect(page.locator('#profileModelHint')).toContainText('deepseek-flash');
+      await page.locator('#profModel').fill('deepseek-flash');
+      const key = 'synthetic-browser-profile-value';
+      await page.locator('#profKey').fill(key);
+      await page.getByRole('button', { name: '保存并启用' }).click();
+      await expect(page.locator('#activeModelSummary')).toHaveText('DeepSeek · deepseek-flash');
+      await expect(page.locator('#profKey')).toHaveValue('');
+      const profiles = await get('/api/model-profiles');
+      assert.match(profiles.selected, /^model_[a-z0-9-]{13}$/);
+      assert.ok(!JSON.stringify(profiles).includes(key));
+      await page.getByRole('link', { name: '对话', exact: true }).click();
+      await expect(page.locator('#chatModelBadge')).toContainText('deepseek-flash · 连接未验证');
+      await page.locator('#chatMode').selectOption('lsfs');
+      await expect(page.locator('#chatModelBadge')).toHaveText('本地文件工具');
+      await page.locator('#chatMode').selectOption('llm');
+      await expect(page.locator('#chatModelBadge')).toContainText('deepseek-flash');
     });
   } finally {
     await browser.close();
+    fs.writeFileSync(path.join(outDir, 'playwright_e2e_report.json'), JSON.stringify(summary, null, 2));
   }
-
-  const summary = {
-    timestamp: new Date().toISOString(),
-    base_url: baseUrl,
-    browser: 'Chromium Headless (Playwright 1.65.1)',
-    total_cases: cases.length,
-    passed_cases: cases.filter((c) => c.passed).length,
-    console_error_count: consoleLogs.length,
-    page_error_count: pageErrors.length,
-    console_errors: consoleLogs,
-    page_errors: pageErrors,
-    cases,
-  };
-
-  fs.writeFileSync(path.join(outDir, 'playwright_e2e_report.json'), JSON.stringify(summary, null, 2), 'utf-8');
-  console.log(JSON.stringify(summary, null, 2));
-  if (summary.passed_cases !== summary.total_cases || summary.page_error_count > 0) {
-    process.exit(1);
+  if (summary.cases.some(row => !row.passed) || summary.page_errors.length || summary.console_errors.length) {
+    process.exitCode = 1;
   }
-})();
+}
+
+main().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

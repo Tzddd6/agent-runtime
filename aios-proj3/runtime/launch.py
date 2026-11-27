@@ -24,6 +24,7 @@ from aios.memory.context_injector import ContextInjector
 from aios.os_kernel.cgroup_v2 import CgroupV2Manager
 from aios.os_kernel.process_service import ProcessService
 from aios.os_kernel.worker_supervisor import WorkerSupervisor
+from aios.scheduler.drf_admission import ModelBudgetExceeded
 from aios.scheduler.workflow_engine import WorkflowEngine
 from aios.syscall.syscall import SyscallExecutor
 
@@ -227,6 +228,9 @@ class AIOSKernelRuntime:
                 raise ValueError("max_new_tokens must be a positive integer")
             try:
                 self.scheduler.drf_controller.consume_model_budget(agent_name, calls=1, tokens=limit)
+            except ModelBudgetExceeded as exc:
+                return {"response": LLMResponse(error=str(exc), status_code=429,
+                                                error_code=f"{exc.scope}_model_budget")}
             except RuntimeError as exc:
                 return {"response": LLMResponse(error=str(exc), status_code=429)}
             out = self.syscall_executor.execute_request(agent_name, query)

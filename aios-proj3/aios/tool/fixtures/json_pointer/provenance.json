@@ -1,0 +1,9 @@
+{
+  "upstream": "python-json-pointer",
+  "release": "v3.0.0",
+  "revision": "f3643addecf9dc66cb7bd120532a8373f19b1e23",
+  "source_url": "https://github.com/stefankoegl/python-json-pointer/blob/f3643addecf9dc66cb7bd120532a8373f19b1e23/jsonpointer.py",
+  "license": "BSD-3-Clause",
+  "scope": "Selected escape/unescape functions with a local path wrapper and evaluator tests.",
+  "defects": "Injected in the exercise copy, in escape decoding order and empty-token handling."
+}

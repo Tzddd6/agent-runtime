@@ -4,6 +4,12 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 
 
+class ModelBudgetExceeded(RuntimeError):
+    def __init__(self, scope, message):
+        super().__init__(message)
+        self.scope = scope
+
+
 @dataclass
 class ResourceVector:
     cpu_milli: int = 250
@@ -144,6 +150,13 @@ class DRFAdmissionController:
                 acb.cgroup_slices.clear()
             return acb
 
+    def discard_idle_agent(self, agent_name: str) -> None:
+        """Forget a drained workflow agent while preserving kernel-wide charges."""
+        with self._lock:
+            acb = self.agents.get(agent_name)
+            if acb is not None and not acb.active_tasks and not acb.cgroup_slices:
+                self.agents.pop(agent_name)
+
     def consume_model_budget(self, agent_name: str, calls: int = 1, tokens: int = 0) -> None:
         with self._lock:
             acb = self.get_or_create_agent(agent_name)
@@ -152,13 +165,13 @@ class DRFAdmissionController:
             if type(calls) is not int or type(tokens) is not int or calls < 0 or tokens < 0:
                 raise ValueError("Budget charges must be nonnegative integers")
             if self.global_model_calls_used + calls > self.global_max_model_calls:
-                raise RuntimeError("Global kernel model call budget exceeded")
+                raise ModelBudgetExceeded("global", "Global kernel model call budget exceeded")
             if self.global_tokens_used + tokens > self.global_max_tokens:
-                raise RuntimeError("Global kernel output token budget exceeded")
+                raise ModelBudgetExceeded("global", "Global kernel output token budget exceeded")
             if acb.model_calls_used + calls > acb.max_model_calls:
-                raise RuntimeError(f"Agent '{agent_name}' model call budget ({acb.max_model_calls}) exceeded")
+                raise ModelBudgetExceeded("agent", f"Agent '{agent_name}' model call budget ({acb.max_model_calls}) exceeded")
             if acb.tokens_used + tokens > acb.max_tokens:
-                raise RuntimeError(f"Agent '{agent_name}' token budget ({acb.max_tokens}) exceeded")
+                raise ModelBudgetExceeded("agent", f"Agent '{agent_name}' token budget ({acb.max_tokens}) exceeded")
             self.global_model_calls_used += calls
             self.global_tokens_used += tokens
             acb.model_calls_used += calls

@@ -49,7 +49,7 @@ PLUGINS: Dict[str, str] = {
     "math.calculate": "计算有限的基础算术表达式",
     "python.syntax": "检查Python语法并提取函数和类名，不执行代码",
     "clock.now": "读取实际服务器时间，明确IANA时区与来源",
-    "project.inspect": "读取三个固定示例项目的只读源码",
+    "project.inspect": "读取已登记的受控工程源码",
     "project.test": "实际运行固定示例项目的不可修改测试",
     "project.patch_check": "验证固定项目补丁的AST并运行不可修改测试",
     "project.apply_edits": "编译受检AST补丁并执行原项目验证",

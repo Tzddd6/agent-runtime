@@ -27,12 +27,18 @@ class ProcessService:
         self.quarantined_agents = set()
         self.receipts = []
         self._receipt_captures = {}
+        self._interrupt_tests = set()
 
     def run(self, agent, operation, parameters, resources=None, timeout=10, receipt_observer=None):
         if operation not in self.OPERATIONS:
             raise ValueError('Operation is not in the isolated allowlist')
-        if not isinstance(parameters, dict) or len(json.dumps(parameters).encode()) > 512 * 1024:
+        if not isinstance(parameters, dict):
             raise ValueError('Invalid operation parameters')
+        encoded_parameters = json.dumps(parameters)
+        if len(encoded_parameters.encode()) > 512 * 1024:
+            raise ValueError('Invalid operation parameters')
+        parameters_sha256 = sha256(json.dumps(json.loads(encoded_parameters), sort_keys=True,
+                                              ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
         if not 0 < timeout <= 60:
             raise ValueError('Invalid Worker timeout')
         limits = {'cpu_milli': 250, 'memory_bytes': 64 * 1024 * 1024, 'pids': 4}
@@ -53,10 +59,15 @@ class ProcessService:
                     (group / name).write_text(str(value))
                 (group / 'cgroup.subtree_control').write_text('+cpu +memory +pids')
                 self.executor.agent_roots[agent] = group
+            injected = operation == 'project.patch_check' and agent in self._interrupt_tests
+            if injected:
+                self._interrupt_tests.remove(agent)
             handle = self.executor.launch({'id': identity, 'agent': agent, 'operation': operation,
-                                           'parameters': parameters, 'timeout': timeout}, directory, limits)
+                                           'parameters': parameters, 'timeout': timeout}, directory, limits,
+                                          **({'interrupt_before_start': True} if injected else {}))
             self.active[identity] = (agent, handle)
         pid = handle['proc'].pid
+        result_sha256 = None
         try:
             handle['proc'].wait(timeout=timeout + 6)
             if handle['expired'].is_set():
@@ -67,7 +78,10 @@ class ProcessService:
             result = json.loads(path.read_text(encoding='utf-8'))
             if result.get('task_id') != identity:
                 raise RuntimeError('Worker result identity mismatch')
-            return result['result']
+            value = result['result']
+            result_sha256 = sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                                               separators=(',', ':')).encode()).hexdigest()
+            return value
         finally:
             # Reservations must remain held until descendants have been reclaimed.
             try:
@@ -84,6 +98,10 @@ class ProcessService:
                 )
                 self.receipts.append({'id': identity, 'agent': agent, 'pid': pid,
                                       'operation': operation, 'reclaimed': True,
+                                      'parameters_sha256': parameters_sha256,
+                                      'result_sha256': result_sha256,
+                                      'returncode': handle['proc'].returncode,
+                                      'interrupted_before_start': bool(handle.get('interrupted_before_start')),
                                       'cgroup_path': cg_path,
                                       'enforcement': 'cgroup_v2' if handle['group'] else 'process_group',
                                       'usage': handle.get('_usage', {}), 'finished': time.time()})
@@ -92,6 +110,19 @@ class ProcessService:
                 if receipt_observer is not None:
                     receipt_observer(dict(self.receipts[-1]))
                 del self.receipts[:-100]
+
+    @contextmanager
+    def interrupt_next_patch_check(self, agent):
+        """Inject one failure into a controlled test Worker owned by this workflow."""
+        with self.lock:
+            if agent in self._interrupt_tests:
+                raise RuntimeError('A test interruption is already armed for this agent')
+            self._interrupt_tests.add(agent)
+        try:
+            yield
+        finally:
+            with self.lock:
+                self._interrupt_tests.discard(agent)
 
     @contextmanager
     def capture_receipts(self):

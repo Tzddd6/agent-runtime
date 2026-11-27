@@ -3,8 +3,11 @@ from concurrent.futures import ThreadPoolExecutor
 from multiprocessing import get_context
 from queue import Empty, Queue
 from threading import Lock, Thread
+from time import monotonic, time
 from uuid import uuid4
 
+from aios.llm_core.diagnostics import MESSAGES, check_model_list
+from aios.llm_core.profiles import connection_route, model_suggestion
 from cerebrum.llm.apis import LLMQuery, LLMResponse
 
 
@@ -24,10 +27,31 @@ def serve(connection):
             except (OSError, BrokenPipeError, EOFError):
                 pass
 
+    def test_connection(req_id, config):
+        try:
+            issue = check_model_list(config) if config else 'unconfigured'
+            result = {'ok': issue == 'available', 'code': issue, 'message': MESSAGES[issue],
+                      'model': config['name'] if config else None, 'checked_at': time()}
+            if config:
+                result.update(profile_id=config['profile_id'], endpoint=config['hostname'],
+                              transport=connection_route(config['hostname']),
+                              suggested_model=model_suggestion(config['backend'], config['name']))
+                broker.record_connection(config, result)
+            send_frame(req_id, 'result', result)
+        except Exception:
+            send_frame(req_id, 'error', 'Model service operation failed')
+
     def handle_complete(req_id, value):
         try:
-            if value.get('model') != 'mock-aios-core' and not broker.status()['configured']:
-                raise ValueError('Provider is not configured')
+            requested = value.get('model')
+            profile = None if requested == 'mock-aios-core' else broker.model_config()
+            if requested != 'mock-aios-core':
+                issue = 'unconfigured' if profile is None else 'model' if requested not in (None, profile['name']) else None
+                if issue:
+                    response = LLMResponse(status_code=503 if issue == 'unconfigured' else 400,
+                                           error=MESSAGES[issue], error_code=issue)
+                    send_frame(req_id, 'result', response.to_dict())
+                    return
             query = LLMQuery(**value)
             query.stream_observer = lambda event: send_frame(req_id, 'delta', event)
             # Use a lightweight per-request adapter view sharing the same RAM-only profile_broker
@@ -38,7 +62,10 @@ def serve(connection):
             )
             req_adapter.profile_broker = broker
             req_adapter.stream_observer = lambda event: send_frame(req_id, 'delta', event)
-            response = req_adapter.execute_llm_syscall(LLMSyscall('provider', query))
+            syscall = LLMSyscall('provider', query)
+            if profile is not None:
+                syscall.selected_model_config = profile
+            response = req_adapter.execute_llm_syscall(syscall)
             send_frame(req_id, 'result', response.to_dict())
         except Exception:
             send_frame(req_id, 'error', 'Model service operation failed')
@@ -50,12 +77,19 @@ def serve(connection):
                 return
             if operation == 'complete':
                 pool.submit(handle_complete, req_id, value)
+            elif operation == 'test_connection':
+                profile_id = value.get('id') if isinstance(value, dict) else None
+                if profile_id is not None and not isinstance(profile_id, str):
+                    send_frame(req_id, 'error', 'Invalid profile identifier')
+                    continue
+                pool.submit(test_connection, req_id, broker.model_config(profile_id))
             else:
                 try:
                     methods = {
                         'status': broker.status,
                         'profiles': broker.profiles_info,
                         'save': lambda: broker.save_profile(value),
+                        'save-and-select': lambda: broker.save_and_select(value),
                         'select': lambda: broker.select_profile(value['id']),
                         'remove': lambda: broker.remove_profile(value['id']),
                     }
@@ -74,10 +108,15 @@ def serve(connection):
             pass
 
 
+class ModelServiceUnavailable(RuntimeError):
+    pass
+
+
 class ModelService:
     """Concurrent multiplexed RAM-only key-holding provider process."""
 
-    def __init__(self):
+    def __init__(self, request_timeout=120.0):
+        self.request_timeout = request_timeout
         context = get_context('spawn')
         self.connection, child = context.Pipe()
         self.send_lock = Lock()
@@ -113,18 +152,23 @@ class ModelService:
         q = Queue()
         with self.state_lock:
             if self.closed or not self.process.is_alive():
-                raise RuntimeError('Model service unavailable')
+                raise ModelServiceUnavailable('Model service unavailable')
             self._pending[req_id] = q
         try:
-            with self.send_lock:
-                self.connection.send((req_id, operation, value))
-            deadline = 120.0
+            try:
+                with self.send_lock:
+                    self.connection.send((req_id, operation, value))
+            except (OSError, EOFError) as exc:
+                raise ModelServiceUnavailable('Model service connection lost') from exc
+            deadline = monotonic() + self.request_timeout
             while True:
                 try:
-                    kind, result = q.get(timeout=deadline)
+                    remaining = deadline - monotonic()
+                    if remaining <= 0:
+                        raise Empty
+                    kind, result = q.get(timeout=remaining)
                 except Empty:
-                    self.close()
-                    raise TimeoutError('Model service deadline exceeded; request was not replayed')
+                    raise TimeoutError('Model service deadline exceeded; request was not replayed') from None
                 if kind == 'delta':
                     if observer:
                         try:
@@ -134,7 +178,7 @@ class ModelService:
                 elif kind == 'result':
                     return result
                 elif kind == 'fatal':
-                    raise RuntimeError(result)
+                    raise ModelServiceUnavailable(result)
                 else:
                     raise ValueError('模型服务未确认操作，未自动重试')
         finally:
@@ -142,11 +186,16 @@ class ModelService:
                 self._pending.pop(req_id, None)
 
     def complete(self, query):
-        raw = self.request(
-            'complete',
-            {key: value for key, value in query.to_dict().items() if key in LLMQuery.__dataclass_fields__},
-            observer=getattr(query, 'stream_observer', None),
-        )
+        try:
+            raw = self.request(
+                'complete',
+                {key: value for key, value in query.to_dict().items() if key in LLMQuery.__dataclass_fields__},
+                observer=getattr(query, 'stream_observer', None),
+            )
+        except TimeoutError:
+            return LLMResponse(status_code=504, error=MESSAGES['request_timeout'], error_code='request_timeout')
+        except ModelServiceUnavailable:
+            return LLMResponse(status_code=503, error=MESSAGES['service_unavailable'], error_code='service_unavailable')
         return LLMResponse(**{key: value for key, value in raw.items() if key in LLMResponse.__dataclass_fields__})
 
     def close(self):
